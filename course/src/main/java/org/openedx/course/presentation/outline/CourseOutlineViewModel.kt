@@ -20,6 +20,7 @@ import org.openedx.core.domain.model.CourseComponentStatus
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseStructure
+import org.openedx.core.extension.getChapterBlocks
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.module.DownloadWorkerController
@@ -221,7 +222,8 @@ class CourseOutlineViewModel(
         initDownloadModelsStatus()
 
         val courseSectionsState =
-            (_uiState.value as? CourseOutlineUIState.CourseData)?.courseSectionsState.orEmpty()
+            (_uiState.value as? CourseOutlineUIState.CourseData)?.courseSectionsState
+                ?: blocks.getChapterBlocks().associate { it.id to !it.isCompleted() }
 
         _uiState.value = CourseOutlineUIState.CourseData(
             courseStructure = sortedStructure,

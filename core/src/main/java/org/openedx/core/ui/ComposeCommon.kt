@@ -983,7 +983,9 @@ fun OfflineModeDialog(
 
 @Composable
 fun OpenEdXButton(
-    modifier: Modifier = Modifier.fillMaxWidth(),
+    modifier: Modifier = Modifier
+        .fillMaxWidth()
+        .height(42.dp),
     text: String = "",
     onClick: () -> Unit,
     enabled: Boolean = true,
@@ -994,8 +996,7 @@ fun OpenEdXButton(
     Button(
         modifier = Modifier
             .testTag("btn_${text.tagId()}")
-            .then(modifier)
-            .height(42.dp),
+            .then(modifier),
         shape = MaterialTheme.appShapes.buttonShape,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = backgroundColor

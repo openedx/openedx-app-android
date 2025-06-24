@@ -83,6 +83,7 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
+import org.openedx.course.presentation.contenttab.ContentScreen
 import org.openedx.course.presentation.dates.CourseDatesScreen
 import org.openedx.course.presentation.handouts.HandoutsScreen
 import org.openedx.course.presentation.handouts.HandoutsType
@@ -265,7 +266,6 @@ fun CourseDashboard(
             val uiMessage by viewModel.uiMessage.collectAsState(null)
             val requiredTab = when (openTab.uppercase()) {
                 CourseContainerTab.HOME.name -> CourseContainerTab.HOME
-                CourseContainerTab.VIDEOS.name -> CourseContainerTab.VIDEOS
                 CourseContainerTab.DATES.name -> CourseContainerTab.DATES
                 CourseContainerTab.DISCUSSIONS.name -> CourseContainerTab.DISCUSSIONS
                 CourseContainerTab.PROGRESS.name -> CourseContainerTab.PROGRESS
@@ -365,8 +365,7 @@ fun CourseDashboard(
                                     )
                                 }
 
-                                else -> {
-                                }
+                                else -> {}
                             }
                         }
                     )
@@ -431,26 +430,7 @@ private fun DashboardPager(
     ) { page ->
         when (CourseContainerTab.entries[page]) {
             CourseContainerTab.HOME -> {
-                CourseOutlineScreen(
-                    windowSize = windowSize,
-                    viewModel = koinViewModel(
-                        parameters = { parametersOf(viewModel.courseId, viewModel.courseName) }
-                    ),
-                    fragmentManager = fragmentManager,
-                    onResetDatesClick = {
-                        viewModel.onRefresh(CourseContainerTab.DATES)
-                    }
-                )
-            }
 
-            CourseContainerTab.VIDEOS -> {
-                CourseVideosScreen(
-                    windowSize = windowSize,
-                    viewModel = koinViewModel(
-                        parameters = { parametersOf(viewModel.courseId, viewModel.courseName) }
-                    ),
-                    fragmentManager = fragmentManager
-                )
             }
 
             CourseContainerTab.DATES -> {
@@ -517,6 +497,15 @@ private fun DashboardPager(
                             HandoutsType.Announcements
                         )
                     }
+                )
+            }
+
+            CourseContainerTab.CONTENT -> {
+                ContentScreen(
+                    windowSize = windowSize,
+                    fragmentManager = fragmentManager,
+                    courseId = viewModel.courseId,
+                    courseName = viewModel.courseName
                 )
             }
         }

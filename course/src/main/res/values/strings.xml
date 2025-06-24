@@ -19,8 +19,6 @@
     <string name="course_explore_other_parts_on_web">Explore other parts of this course or view this on web.</string>
     <string name="course_open_in_browser">Open in browser</string>
     <string name="course_subtitles">Subtitles</string>
-    <string name="course_continue_with">Continue with:</string>
-    <string name="course_resume">Resume</string>
     <string name="course_to_proceed">To proceed with \"%s\" press \"Next section\".</string>
     <string name="course_gated_content_label">Some content in this part of the course is locked for upgraded users only.</string>
     <string name="course_change_quality_when_downloading">You cannot change the download video quality when all videos are downloading</string>
@@ -38,12 +36,16 @@
     <!-- Error Message when course dates are not available -->
 
     <string name="course_container_nav_home">Home</string>
-    <string name="course_container_nav_videos">Videos</string>
+    <string name="course_container_nav_content">Content</string>
     <string name="course_container_nav_discussions">Discussions</string>
     <string name="course_container_nav_more">More</string>
     <string name="course_container_nav_dates">Dates</string>
     <string name="course_container_nav_downloads">Downloads</string>
     <string name="course_container_nav_progress">Progress</string>
+
+    <string name="course_container_content_tab_all">All</string>
+    <string name="course_container_content_tab_video">Videos</string>
+    <string name="course_container_content_tab_assignment">Assignments</string>
 
     <!-- Accessibility -->
     <string name="course_accessibility_video_player">Video player</string>
@@ -54,14 +56,17 @@
     <string name="course_accessibility_section_uncompleted">Section uncompleted</string>
 
     <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
-        <item quantity="one">%1$s of %2$s  assignment complete</item>
-        <item quantity="other">%1$s of %2$s  assignments complete</item>
+        <item quantity="one">%1$s/%2$s Section Completed</item>
+        <item quantity="other">%1$s/%2$s Sections Completed</item>
     </plurals>
 
     <string name="course_label_back">Back</string>
     <string name="course_error_expired_not_upgradeable_title" formatted="false">Your free audit access to this course expired on %s.</string>
     <string name="course_error_not_started_title">This course will begin on %s. Come back then to start learning!</string>
     <string name="course_an_error_occurred">An error occurred while loading your course</string>
+    <string name="course_continue">Continue</string>
+    <string name="course_show_completed">Show Completed</string>
+    <string name="course_hide_completed">Hide Completed</string>
     <string name="course_completed">Completed</string>
     <string name="progress_earned_possible_assignment_problems">%1$s / %2$s Complete</string>
     <string name="progress_of_grade">of Grade</string>

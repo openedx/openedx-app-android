@@ -284,7 +284,7 @@ class CourseContainerViewModel(
                 updateData()
             }
 
-            CourseContainerTab.VIDEOS -> {
+            CourseContainerTab.CONTENT -> {
                 updateData()
             }
 
@@ -332,7 +332,8 @@ class CourseContainerViewModel(
     fun courseContainerTabClickedEvent(index: Int) {
         when (CourseContainerTab.entries[index]) {
             CourseContainerTab.HOME -> courseTabClickedEvent()
-            CourseContainerTab.VIDEOS -> videoTabClickedEvent()
+            CourseContainerTab.CONTENT -> { /* TODO log event */
+            }
             CourseContainerTab.DISCUSSIONS -> discussionTabClickedEvent()
             CourseContainerTab.DATES -> datesTabClickedEvent()
             CourseContainerTab.PROGRESS -> progressTabClickedEvent()

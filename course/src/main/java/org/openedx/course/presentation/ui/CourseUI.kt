@@ -67,6 +67,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -84,6 +85,7 @@ import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.domain.model.Progress
 import org.openedx.core.extension.safeDivBy
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
@@ -177,11 +179,12 @@ fun CourseSectionCard(
                     } else {
                         Icons.Outlined.CloudDownload
                     }
-                    val downloadIconDescription = if (downloadedState == DownloadedState.DOWNLOADED) {
-                        stringResource(id = R.string.course_accessibility_remove_course_section)
-                    } else {
-                        stringResource(id = R.string.course_accessibility_download_course_section)
-                    }
+                    val downloadIconDescription =
+                        if (downloadedState == DownloadedState.DOWNLOADED) {
+                            stringResource(id = R.string.course_accessibility_remove_course_section)
+                        } else {
+                            stringResource(id = R.string.course_accessibility_download_course_section)
+                        }
                     IconButton(
                         modifier = iconModifier,
                         onClick = { onDownloadClick(block) }
@@ -211,7 +214,7 @@ fun CourseSectionCard(
                             Icon(
                                 imageVector = Icons.Filled.Close,
                                 contentDescription =
-                                stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
+                                    stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
                                 tint = MaterialTheme.appColors.error
                             )
                         }
@@ -300,10 +303,11 @@ fun OfflineQueueCard(
 @Composable
 fun CardArrow(
     degrees: Float,
+    tint: Color = MaterialTheme.appColors.textDark,
 ) {
     Icon(
         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-        tint = MaterialTheme.appColors.textDark,
+        tint = tint,
         contentDescription = "Expandable Arrow",
         modifier = Modifier.rotate(degrees),
     )
@@ -633,17 +637,30 @@ fun CourseSection(
         else -> DownloadedState.NOT_DOWNLOADED
     }
 
+    // Section progress
+    val completedCount = courseSubSections?.count { it.isCompleted() } ?: 0
+    val totalCount = courseSubSections?.size ?: 0
+    val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
+
     Column(
         modifier = modifier
-            .clip(MaterialTheme.appShapes.cardShape)
+            .clip(MaterialTheme.appShapes.sectionCardShape)
             .noRippleClickable { onItemClick(block) }
             .background(MaterialTheme.appColors.cardViewBackground)
             .border(
                 1.dp,
                 MaterialTheme.appColors.cardViewBorder,
-                MaterialTheme.appShapes.cardShape
+                MaterialTheme.appShapes.sectionCardShape
             )
     ) {
+        LinearProgressIndicator(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp),
+            progress = progress,
+            color = MaterialTheme.appColors.progressBarColor,
+            backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
+        )
         CourseExpandableChapterCard(
             block = block,
             arrowDegrees = arrowRotation,
@@ -688,7 +705,8 @@ fun CourseExpandableChapterCard(
         if (block.isCompleted()) {
             val completedIconPainter = painterResource(R.drawable.course_ic_task_alt)
             val completedIconColor = MaterialTheme.appColors.successGreen
-            val completedIconDescription = stringResource(id = R.string.course_accessibility_section_completed)
+            val completedIconDescription =
+                stringResource(id = R.string.course_accessibility_section_completed)
 
             Icon(
                 painter = completedIconPainter,
@@ -789,9 +807,11 @@ fun CourseSubSectionItem(
         MaterialTheme.appColors.onSurface
     }
     val due by rememberSaveable {
-        mutableStateOf(block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) } ?: "")
+        mutableStateOf(block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) }
+            ?: "")
     }
-    val isAssignmentEnable = !block.isCompleted() && block.assignmentProgress != null && due.isNotEmpty()
+    val isAssignmentEnable =
+        !block.isCompleted() && block.assignmentProgress != null && due.isNotEmpty()
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -1208,6 +1228,78 @@ fun CourseMessage(
         Divider(
             color = MaterialTheme.appColors.divider
         )
+    }
+}
+
+@Composable
+fun CourseProgress(
+    modifier: Modifier = Modifier,
+    progress: Progress,
+    onVisibilityChanged: ((Boolean) -> Unit)? = null
+) {
+    var isCompletedShown by remember { mutableStateOf(false) }
+    val arrowRotation by animateFloatAsState(
+        targetValue = if (isCompletedShown) {
+            -90f
+        } else {
+            90f
+        },
+        label = ""
+    )
+    val buttonText = if (isCompletedShown) {
+        stringResource(R.string.course_show_completed)
+    } else {
+        stringResource(R.string.course_hide_completed)
+    }
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        LinearProgressIndicator(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .clip(CircleShape),
+            progress = progress.value,
+            color = MaterialTheme.appColors.progressBarColor,
+            backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = pluralStringResource(
+                    R.plurals.course_assignments_complete,
+                    progress.assignmentsCompleted,
+                    progress.assignmentsCompleted,
+                    progress.totalAssignmentsCount
+                ),
+                color = MaterialTheme.appColors.textDark,
+                style = MaterialTheme.appTypography.labelSmall
+            )
+            if (onVisibilityChanged != null) {
+                Row(
+                    modifier = Modifier.clickable {
+                        isCompletedShown = !isCompletedShown
+                        onVisibilityChanged(!isCompletedShown)
+                    },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = buttonText,
+                        color = MaterialTheme.appColors.textAccent,
+                        style = MaterialTheme.appTypography.labelMedium
+                    )
+                    CardArrow(
+                        degrees = arrowRotation,
+                        tint = MaterialTheme.appColors.textAccent,
+                    )
+                }
+            }
+        }
     }
 }
 

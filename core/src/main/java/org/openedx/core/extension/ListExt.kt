@@ -10,3 +10,7 @@ fun List<Block>.getVerticalBlocks(): List<Block> {
 fun List<Block>.getSequentialBlocks(): List<Block> {
     return this.filter { it.type == BlockType.SEQUENTIAL }
 }
+
+fun List<Block>.getChapterBlocks(): List<Block> {
+    return this.filter { it.type == BlockType.CHAPTER }
+}

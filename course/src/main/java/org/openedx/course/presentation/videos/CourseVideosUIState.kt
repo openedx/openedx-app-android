@@ -13,7 +13,8 @@ sealed class CourseVideosUIState {
         val courseSectionsState: Map<String, Boolean>,
         val subSectionsDownloadsCount: Map<String, Int>,
         val downloadModelsSize: DownloadModelsSize,
-        val useRelativeDates: Boolean
+        val useRelativeDates: Boolean,
+        val isCompletedSectionsShown: Boolean,
     ) : CourseVideosUIState()
 
     data object Empty : CourseVideosUIState()

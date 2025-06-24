@@ -4,7 +4,6 @@ import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,13 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -34,13 +28,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.AndroidUriHandler
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -70,6 +62,7 @@ import org.openedx.course.R
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseMessage
+import org.openedx.course.presentation.ui.CourseProgress
 import org.openedx.course.presentation.ui.CourseSection
 import org.openedx.foundation.extension.takeIfNotEmpty
 import org.openedx.foundation.presentation.UIMessage
@@ -79,7 +72,7 @@ import org.openedx.foundation.presentation.windowSizeValue
 import java.util.Date
 
 @Composable
-fun CourseOutlineScreen(
+fun CourseContentAllScreen(
     windowSize: WindowSize,
     viewModel: CourseOutlineViewModel,
     fragmentManager: FragmentManager,
@@ -283,7 +276,6 @@ private fun CourseOutlineUI(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .padding(
-                                                        top = 16.dp,
                                                         start = 24.dp,
                                                         end = 24.dp
                                                     ),
@@ -295,21 +287,12 @@ private fun CourseOutlineUI(
                                     if (uiState.resumeComponent != null) {
                                         item {
                                             Box(listPadding) {
-                                                if (windowSize.isTablet) {
-                                                    ResumeCourseTablet(
-                                                        modifier = Modifier.padding(vertical = 16.dp),
-                                                        block = uiState.resumeComponent,
-                                                        displayName = uiState.resumeUnitTitle,
-                                                        onResumeClick = onResumeClick
-                                                    )
-                                                } else {
-                                                    ResumeCourse(
-                                                        modifier = Modifier.padding(vertical = 16.dp),
-                                                        block = uiState.resumeComponent,
-                                                        displayName = uiState.resumeUnitTitle,
-                                                        onResumeClick = onResumeClick
-                                                    )
-                                                }
+                                                ResumeCourse(
+                                                    modifier = Modifier.padding(vertical = 16.dp),
+                                                    block = uiState.resumeComponent,
+                                                    displayName = uiState.resumeUnitTitle,
+                                                    onResumeClick = onResumeClick
+                                                )
                                             }
                                         }
                                     }
@@ -362,139 +345,35 @@ private fun ResumeCourse(
     displayName: String,
     onResumeClick: (String) -> Unit,
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = stringResource(id = R.string.course_continue_with),
-            style = MaterialTheme.appTypography.labelMedium,
-            color = MaterialTheme.appColors.textPrimaryVariant
-        )
-        Spacer(Modifier.height(6.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Icon(
-                modifier = Modifier.size(24.dp),
-                painter = painterResource(id = getUnitBlockIcon(block)),
-                contentDescription = null,
-                tint = MaterialTheme.appColors.textPrimary
-            )
-            Text(
-                text = displayName,
-                color = MaterialTheme.appColors.textPrimary,
-                style = MaterialTheme.appTypography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-        Spacer(Modifier.height(24.dp))
-        OpenEdXButton(
-            text = stringResource(id = R.string.course_resume),
-            onClick = {
-                onResumeClick(block.id)
-            },
-            content = {
-                TextIcon(
-                    text = stringResource(id = R.string.course_resume),
-                    icon = Icons.AutoMirrored.Filled.ArrowForward,
-                    color = MaterialTheme.appColors.primaryButtonText,
-                    textStyle = MaterialTheme.appTypography.labelLarge
-                )
-            }
-        )
-    }
-}
-
-@Composable
-private fun ResumeCourseTablet(
-    modifier: Modifier = Modifier,
-    block: Block,
-    displayName: String,
-    onResumeClick: (String) -> Unit,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(
-            Modifier
-                .weight(1f)
-                .padding(end = 35.dp)
-        ) {
-            Text(
-                text = stringResource(id = R.string.course_continue_with),
-                style = MaterialTheme.appTypography.labelMedium,
-                color = MaterialTheme.appColors.textPrimaryVariant
-            )
-            Spacer(Modifier.height(6.dp))
+    OpenEdXButton(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(54.dp),
+        onClick = {
+            onResumeClick(block.id)
+        },
+        content = {
             Row(
-                verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(
-                    modifier = Modifier.size(size = (MaterialTheme.appTypography.titleMedium.fontSize.value + 4).dp),
-                    painter = painterResource(id = getUnitBlockIcon(block)),
-                    contentDescription = null,
-                    tint = MaterialTheme.appColors.textPrimary
-                )
                 Text(
                     text = displayName,
-                    color = MaterialTheme.appColors.textPrimary,
+                    color = MaterialTheme.appColors.primaryButtonText,
                     style = MaterialTheme.appTypography.titleMedium,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 4
+                    fontWeight = FontWeight.W600
                 )
-            }
-        }
-        OpenEdXButton(
-            modifier = Modifier.width(210.dp),
-            text = stringResource(id = R.string.course_resume),
-            onClick = {
-                onResumeClick(block.id)
-            },
-            content = {
                 TextIcon(
-                    text = stringResource(id = R.string.course_resume),
+                    text = stringResource(id = R.string.course_continue),
                     icon = Icons.AutoMirrored.Filled.ArrowForward,
                     color = MaterialTheme.appColors.primaryButtonText,
                     textStyle = MaterialTheme.appTypography.labelLarge
                 )
             }
-        )
-    }
-}
 
-@Composable
-private fun CourseProgress(
-    modifier: Modifier = Modifier,
-    progress: Progress,
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        LinearProgressIndicator(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(10.dp)
-                .clip(CircleShape),
-            progress = progress.value,
-            color = MaterialTheme.appColors.progressBarColor,
-            backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
-        )
-        Text(
-            text = pluralStringResource(
-                R.plurals.course_assignments_complete,
-                progress.assignmentsCompleted,
-                progress.assignmentsCompleted,
-                progress.totalAssignmentsCount
-            ),
-            color = MaterialTheme.appColors.textDark,
-            style = MaterialTheme.appTypography.labelSmall
-        )
-    }
+        }
+    )
 }
 
 fun getUnitBlockIcon(block: Block): Int {

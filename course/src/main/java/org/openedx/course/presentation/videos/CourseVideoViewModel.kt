@@ -13,7 +13,6 @@ import org.openedx.core.BlockType
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
@@ -24,8 +23,6 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.core.system.notifier.VideoNotifier
-import org.openedx.core.system.notifier.VideoQualityChanged
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
@@ -43,7 +40,6 @@ class CourseVideoViewModel(
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val courseNotifier: CourseNotifier,
-    private val videoNotifier: VideoNotifier,
     private val analytics: CourseAnalytics,
     private val downloadDialogManager: DownloadDialogManager,
     private val fileUtil: FileUtil,
@@ -69,9 +65,6 @@ class CourseVideoViewModel(
     private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
-
-    private val _videoSettings = MutableStateFlow(VideoSettings.default)
-    val videoSettings = _videoSettings.asStateFlow()
 
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
@@ -101,23 +94,6 @@ class CourseVideoViewModel(
                 }
             }
         }
-
-        viewModelScope.launch {
-            videoNotifier.notifier.collect { event ->
-                if (event is VideoQualityChanged) {
-                    _videoSettings.value = preferencesManager.videoSettings
-
-                    if (_uiState.value is CourseVideosUIState.CourseData) {
-                        val state = _uiState.value as CourseVideosUIState.CourseData
-                        _uiState.value = state.copy(
-                            downloadModelsSize = getDownloadModelsSize()
-                        )
-                    }
-                }
-            }
-        }
-
-        _videoSettings.value = preferencesManager.videoSettings
 
         getVideos()
     }
@@ -170,6 +146,10 @@ class CourseVideoViewModel(
                     val courseSectionsState =
                         (_uiState.value as? CourseVideosUIState.CourseData)?.courseSectionsState.orEmpty()
 
+                    val isCompletedSectionsShown =
+                        (_uiState.value as? CourseVideosUIState.CourseData)?.isCompletedSectionsShown
+                            ?: false
+
                     _uiState.value =
                         CourseVideosUIState.CourseData(
                             courseStructure = courseStructure,
@@ -178,7 +158,8 @@ class CourseVideoViewModel(
                             courseSectionsState = courseSectionsState,
                             subSectionsDownloadsCount = subSectionsDownloadsCount,
                             downloadModelsSize = getDownloadModelsSize(),
-                            useRelativeDates = preferencesManager.isRelativeDatesEnabled
+                            useRelativeDates = preferencesManager.isRelativeDatesEnabled,
+                            isCompletedSectionsShown = isCompletedSectionsShown
                         )
                 }
                 courseNotifier.send(CourseLoading(false))
@@ -207,16 +188,6 @@ class CourseVideoViewModel(
                 courseTitle,
                 blockId,
                 blockName
-            )
-        }
-    }
-
-    fun onChangingVideoQualityWhileDownloading() {
-        viewModelScope.launch {
-            _uiMessage.emit(
-                UIMessage.SnackBarMessage(
-                    resourceManager.getString(R.string.course_change_quality_when_downloading)
-                )
             )
         }
     }
@@ -313,6 +284,14 @@ class CourseVideoViewModel(
                     }
                 )
             }
+        }
+    }
+
+    fun onCompletedSectionVisibilityChange(isVisible: Boolean) {
+        if (_uiState.value is CourseVideosUIState.CourseData) {
+            val state = _uiState.value as CourseVideosUIState.CourseData
+
+            _uiState.value = state.copy(isCompletedSectionsShown = isVisible)
         }
     }
 }
