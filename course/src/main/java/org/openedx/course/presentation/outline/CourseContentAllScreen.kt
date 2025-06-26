@@ -74,7 +74,7 @@ import java.util.Date
 @Composable
 fun CourseContentAllScreen(
     windowSize: WindowSize,
-    viewModel: CourseOutlineViewModel,
+    viewModel: CourseContentAllViewModel,
     fragmentManager: FragmentManager,
     onResetDatesClick: () -> Unit,
 ) {
@@ -89,7 +89,7 @@ fun CourseContentAllScreen(
         }
     }
 
-    CourseOutlineUI(
+    CourseContentAllUI(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
@@ -156,9 +156,9 @@ fun CourseContentAllScreen(
 }
 
 @Composable
-private fun CourseOutlineUI(
+private fun CourseContentAllUI(
     windowSize: WindowSize,
-    uiState: CourseOutlineUIState,
+    uiState: CourseContentAllUIState,
     uiMessage: UIMessage?,
     onExpandClick: (Block) -> Unit,
     onSubSectionClick: (Block) -> Unit,
@@ -217,7 +217,7 @@ private fun CourseOutlineUI(
             ) {
                 Box {
                     when (uiState) {
-                        is CourseOutlineUIState.CourseData -> {
+                        is CourseContentAllUIState.CourseData -> {
                             if (uiState.courseStructure.blockData.isEmpty()) {
                                 NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_OUTLINE)
                             } else {
@@ -312,7 +312,7 @@ private fun CourseOutlineUI(
                                                 block = section,
                                                 onItemClick = onExpandClick,
                                                 useRelativeDates = uiState.useRelativeDates,
-                                                courseSectionsState = courseSectionsState,
+                                                isSectionVisible = courseSectionsState,
                                                 courseSubSections = courseSubSections,
                                                 downloadedStateMap = uiState.downloadedState,
                                                 onSubSectionClick = onSubSectionClick,
@@ -324,11 +324,11 @@ private fun CourseOutlineUI(
                             }
                         }
 
-                        CourseOutlineUIState.Error -> {
+                        CourseContentAllUIState.Error -> {
                             NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_OUTLINE)
                         }
 
-                        CourseOutlineUIState.Loading -> {
+                        CourseContentAllUIState.Loading -> {
                             CircularProgress()
                         }
                     }
@@ -390,9 +390,9 @@ fun getUnitBlockIcon(block: Block): Int {
 @Composable
 private fun CourseOutlineScreenPreview() {
     OpenEdXTheme {
-        CourseOutlineUI(
+        CourseContentAllUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = CourseOutlineUIState.CourseData(
+            uiState = CourseContentAllUIState.CourseData(
                 mockCourseStructure,
                 mapOf(),
                 mockChapterBlock,
@@ -423,11 +423,11 @@ private fun CourseOutlineScreenPreview() {
 @Preview(uiMode = UI_MODE_NIGHT_NO, device = Devices.NEXUS_9)
 @Preview(uiMode = UI_MODE_NIGHT_YES, device = Devices.NEXUS_9)
 @Composable
-private fun CourseOutlineScreenTabletPreview() {
+private fun CourseContentAllScreenTabletPreview() {
     OpenEdXTheme {
-        CourseOutlineUI(
+        CourseContentAllUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = CourseOutlineUIState.CourseData(
+            uiState = CourseContentAllUIState.CourseData(
                 mockCourseStructure,
                 mapOf(),
                 mockChapterBlock,

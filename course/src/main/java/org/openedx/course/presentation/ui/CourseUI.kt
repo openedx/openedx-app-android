@@ -14,12 +14,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -27,6 +30,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
@@ -62,8 +67,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -79,6 +86,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import org.jsoup.Jsoup
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.AssignmentProgress
@@ -155,15 +164,6 @@ fun CourseSectionCard(
                 painter = completedIconPainter,
                 contentDescription = completedIconDescription,
                 tint = completedIconColor
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                modifier = Modifier.weight(1f),
-                text = block.displayName,
-                style = MaterialTheme.appTypography.titleSmall,
-                color = MaterialTheme.appColors.textPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.width(16.dp))
             Row(
@@ -609,19 +609,290 @@ fun VideoSubtitles(
 }
 
 @Composable
+fun CourseVideoSection(
+    block: Block,
+    videoBlocks: List<Block>,
+    preview: Map<String, Any?>,
+    downloadedStateMap: Map<String, DownloadedState>,
+    onVideoClick: (Block) -> Unit,
+    onDownloadClick: (blocksIds: List<String>) -> Unit,
+) {
+    val subSectionIds = videoBlocks.map { it.id }
+    val filteredStatuses = downloadedStateMap.filterKeys { it in subSectionIds }.values
+    val downloadedState = when {
+        filteredStatuses.isEmpty() -> null
+        filteredStatuses.all { it.isDownloaded } -> DownloadedState.DOWNLOADED
+        filteredStatuses.any { it.isWaitingOrDownloading } -> DownloadedState.DOWNLOADING
+        else -> DownloadedState.NOT_DOWNLOADED
+    }
+
+    Column(
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
+        CourseVideoSectionHeader(
+            block = block,
+            downloadedState = downloadedState,
+            videoBlocks = videoBlocks,
+            onDownloadClick = {
+                onDownloadClick(block.descendants)
+            }
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(
+                top = 8.dp,
+                bottom = 16.dp,
+                start = 16.dp,
+                end = 16.dp,
+            )
+        ) {
+            items(videoBlocks) { block ->
+                CourseVideoItem(
+                    videoBlock = block,
+                    preview = preview[block.id],
+                    onClick = {
+                        onVideoClick(block)
+                    }
+                )
+            }
+        }
+        Divider(modifier = Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
+fun CourseVideoItem(
+    videoBlock: Block,
+    progress: Float = 0.0f,
+    isCompleted: Boolean = false,
+    preview: Any?,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .width(192.dp)
+            .height(108.dp)
+            .clip(MaterialTheme.appShapes.videoPreviewShape)
+            .let {
+                if (progress == 1f) {
+                    it.border(
+                        width = 3.dp,
+                        color = MaterialTheme.appColors.successGreen,
+                        shape = MaterialTheme.appShapes.videoPreviewShape
+                    )
+                } else {
+                    it
+                }
+            }
+            .clickable { onClick() }
+    ) {
+        AsyncImage(
+            modifier = Modifier
+                .fillMaxSize(),
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(preview)
+                .error(coreR.drawable.core_no_image_course)
+                .placeholder(coreR.drawable.core_no_image_course)
+                .build(),
+            contentDescription = null,
+            contentScale = ContentScale.Crop
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Black.copy(alpha = 0.6f),
+                            Color.Transparent,
+                        ),
+                        startY = 0f,
+                        endY = Float.POSITIVE_INFINITY
+                    )
+                )
+        )
+
+        Image(
+            modifier = Modifier
+                .size(32.dp)
+                .align(Alignment.Center),
+            painter = painterResource(id = R.drawable.course_video_play_button),
+            contentDescription = null,
+        )
+
+        // Title (top-left)
+        Text(
+            text = videoBlock.displayName,
+            color = MaterialTheme.appColors.onPrimary,
+            style = MaterialTheme.appTypography.bodySmall,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(8.dp),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // Progress bar (bottom)
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+                .height(8.dp)
+                .background(Color.Transparent)
+                .padding(bottom = 8.dp, start = 8.dp, end = 8.dp)
+        ) {
+            LinearProgressIndicator(
+                progress = progress,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(CircleShape),
+                color = MaterialTheme.appColors.primary,
+                backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
+            )
+            if (isCompleted) {
+                Icon(
+                    painter = painterResource(id = coreR.drawable.ic_core_check),
+                    contentDescription = stringResource(R.string.course_accessibility_video_watched),
+                    tint = MaterialTheme.appColors.successGreen,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .size(24.dp)
+                        .offset(x = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CourseVideoSectionHeader(
+    modifier: Modifier = Modifier,
+    block: Block,
+    videoBlocks: List<Block>?,
+    downloadedState: DownloadedState?,
+    onDownloadClick: () -> Unit,
+) {
+    Row(
+        modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+        ) {
+            Text(
+                text = block.displayName,
+                style = MaterialTheme.appTypography.titleSmall,
+                color = MaterialTheme.appColors.textPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = stringResource(
+                    R.string.course_video_watched,
+                    videoBlocks?.mapNotNull { !it.isCompleted() }?.size ?: 0,
+                    videoBlocks?.size ?: 0
+                ),
+                style = MaterialTheme.appTypography.bodySmall,
+                color = MaterialTheme.appColors.textPrimary,
+            )
+        }
+        DownloadIcon(
+            downloadedState = downloadedState,
+            onDownloadClick = onDownloadClick
+        )
+    }
+}
+
+@Composable
+fun DownloadIcon(
+    downloadedState: DownloadedState?,
+    onDownloadClick: () -> Unit,
+) {
+    val iconModifier = Modifier.size(24.dp)
+    Box(
+        modifier = Modifier.fillMaxHeight(),
+        contentAlignment = Alignment.Center
+    ) {
+        if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
+            val downloadIcon = if (downloadedState == DownloadedState.DOWNLOADED) {
+                Icons.Default.CloudDone
+            } else {
+                Icons.Outlined.CloudDownload
+            }
+            val downloadIconDescription = if (downloadedState == DownloadedState.DOWNLOADED) {
+                stringResource(id = R.string.course_accessibility_remove_course_section)
+            } else {
+                stringResource(id = R.string.course_accessibility_download_course_section)
+            }
+            val downloadIconTint = if (downloadedState == DownloadedState.DOWNLOADED) {
+                MaterialTheme.appColors.successGreen
+            } else {
+                MaterialTheme.appColors.textAccent
+            }
+            IconButton(
+                modifier = iconModifier,
+                onClick = { onDownloadClick() }
+            ) {
+                Icon(
+                    imageVector = downloadIcon,
+                    contentDescription = downloadIconDescription,
+                    tint = downloadIconTint
+                )
+            }
+        } else if (downloadedState != null) {
+            Box(contentAlignment = Alignment.Center) {
+                if (downloadedState == DownloadedState.DOWNLOADING) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(28.dp),
+                        backgroundColor = Color.LightGray,
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.appColors.primary
+                    )
+                } else if (downloadedState == DownloadedState.WAITING) {
+                    Icon(
+                        painter = painterResource(id = coreR.drawable.core_download_waiting),
+                        contentDescription = stringResource(
+                            id = R.string.course_accessibility_stop_downloading_course_section
+                        ),
+                        tint = MaterialTheme.appColors.error
+                    )
+                }
+                IconButton(
+                    modifier = iconModifier.padding(2.dp),
+                    onClick = { onDownloadClick() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = stringResource(
+                            id = R.string.course_accessibility_stop_downloading_course_section
+                        ),
+                        tint = MaterialTheme.appColors.error
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun CourseSection(
     modifier: Modifier = Modifier,
     block: Block,
     useRelativeDates: Boolean,
     onItemClick: (Block) -> Unit,
-    courseSectionsState: Boolean?,
+    isSectionVisible: Boolean?,
     courseSubSections: List<Block>?,
     downloadedStateMap: Map<String, DownloadedState>,
     onSubSectionClick: (Block) -> Unit,
     onDownloadClick: (blocksIds: List<String>) -> Unit,
 ) {
     val arrowRotation by animateFloatAsState(
-        targetValue = if (courseSectionsState == true) {
+        targetValue = if (isSectionVisible == true) {
             -90f
         } else {
             90f
@@ -671,7 +942,7 @@ fun CourseSection(
         )
         courseSubSections?.forEach { subSectionBlock ->
             AnimatedVisibility(
-                visible = courseSectionsState == true
+                visible = isSectionVisible == true
             ) {
                 CourseSubSectionItem(
                     block = subSectionBlock,
@@ -691,7 +962,6 @@ fun CourseExpandableChapterCard(
     downloadedState: DownloadedState?,
     onDownloadClick: () -> Unit,
 ) {
-    val iconModifier = Modifier.size(24.dp)
     Row(
         modifier
             .fillMaxWidth()
@@ -722,69 +992,10 @@ fun CourseExpandableChapterCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        Row(
-            modifier = Modifier.fillMaxHeight(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
-                val downloadIcon = if (downloadedState == DownloadedState.DOWNLOADED) {
-                    Icons.Default.CloudDone
-                } else {
-                    Icons.Outlined.CloudDownload
-                }
-                val downloadIconDescription = if (downloadedState == DownloadedState.DOWNLOADED) {
-                    stringResource(id = R.string.course_accessibility_remove_course_section)
-                } else {
-                    stringResource(id = R.string.course_accessibility_download_course_section)
-                }
-                val downloadIconTint = if (downloadedState == DownloadedState.DOWNLOADED) {
-                    MaterialTheme.appColors.successGreen
-                } else {
-                    MaterialTheme.appColors.textAccent
-                }
-                IconButton(
-                    modifier = iconModifier,
-                    onClick = { onDownloadClick() }
-                ) {
-                    Icon(
-                        imageVector = downloadIcon,
-                        contentDescription = downloadIconDescription,
-                        tint = downloadIconTint
-                    )
-                }
-            } else if (downloadedState != null) {
-                Box(contentAlignment = Alignment.Center) {
-                    if (downloadedState == DownloadedState.DOWNLOADING) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(28.dp),
-                            backgroundColor = Color.LightGray,
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.appColors.primary
-                        )
-                    } else if (downloadedState == DownloadedState.WAITING) {
-                        Icon(
-                            painter = painterResource(id = coreR.drawable.core_download_waiting),
-                            contentDescription = stringResource(
-                                id = R.string.course_accessibility_stop_downloading_course_section
-                            ),
-                            tint = MaterialTheme.appColors.error
-                        )
-                    }
-                    IconButton(
-                        modifier = iconModifier.padding(2.dp),
-                        onClick = { onDownloadClick() }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = stringResource(
-                                id = R.string.course_accessibility_stop_downloading_course_section
-                            ),
-                            tint = MaterialTheme.appColors.error
-                        )
-                    }
-                }
-            }
-        }
+        DownloadIcon(
+            downloadedState = downloadedState,
+            onDownloadClick = onDownloadClick
+        )
     }
 }
 

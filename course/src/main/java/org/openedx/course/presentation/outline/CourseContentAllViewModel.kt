@@ -48,7 +48,7 @@ import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 import org.openedx.course.R as courseR
 
-class CourseOutlineViewModel(
+class CourseContentAllViewModel(
     val courseId: String,
     private val courseTitle: String,
     private val config: Config,
@@ -74,8 +74,9 @@ class CourseOutlineViewModel(
 ) {
     val isCourseDropdownNavigationEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
-    private val _uiState = MutableStateFlow<CourseOutlineUIState>(CourseOutlineUIState.Loading)
-    val uiState: StateFlow<CourseOutlineUIState>
+    private val _uiState =
+        MutableStateFlow<CourseContentAllUIState>(CourseContentAllUIState.Loading)
+    val uiState: StateFlow<CourseContentAllUIState>
         get() = _uiState.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
@@ -116,9 +117,9 @@ class CourseOutlineViewModel(
 
         viewModelScope.launch {
             downloadModelsStatusFlow.collect {
-                if (_uiState.value is CourseOutlineUIState.CourseData) {
-                    val state = _uiState.value as CourseOutlineUIState.CourseData
-                    _uiState.value = CourseOutlineUIState.CourseData(
+                if (_uiState.value is CourseContentAllUIState.CourseData) {
+                    val state = _uiState.value as CourseContentAllUIState.CourseData
+                    _uiState.value = CourseContentAllUIState.CourseData(
                         courseStructure = state.courseStructure,
                         downloadedState = it.toMap(),
                         resumeComponent = state.resumeComponent,
@@ -159,12 +160,12 @@ class CourseOutlineViewModel(
     }
 
     fun switchCourseSections(blockId: String): Boolean {
-        return if (_uiState.value is CourseOutlineUIState.CourseData) {
-            val state = _uiState.value as CourseOutlineUIState.CourseData
+        return if (_uiState.value is CourseContentAllUIState.CourseData) {
+            val state = _uiState.value as CourseContentAllUIState.CourseData
             val courseSectionsState = state.courseSectionsState.toMutableMap()
             courseSectionsState[blockId] = !(state.courseSectionsState[blockId] ?: false)
 
-            _uiState.value = CourseOutlineUIState.CourseData(
+            _uiState.value = CourseContentAllUIState.CourseData(
                 courseStructure = state.courseStructure,
                 downloadedState = state.downloadedState,
                 resumeComponent = state.resumeComponent,
@@ -222,10 +223,10 @@ class CourseOutlineViewModel(
         initDownloadModelsStatus()
 
         val courseSectionsState =
-            (_uiState.value as? CourseOutlineUIState.CourseData)?.courseSectionsState
+            (_uiState.value as? CourseContentAllUIState.CourseData)?.courseSectionsState
                 ?: blocks.getChapterBlocks().associate { it.id to !it.isCompleted() }
 
-        _uiState.value = CourseOutlineUIState.CourseData(
+        _uiState.value = CourseContentAllUIState.CourseData(
             courseStructure = sortedStructure,
             downloadedState = getDownloadModelsStatus(),
             resumeComponent = getResumeBlock(blocks, courseStatus.lastVisitedBlockId),
@@ -239,7 +240,7 @@ class CourseOutlineViewModel(
     }
 
     private suspend fun handleCourseDataError(e: Throwable?) {
-        _uiState.value = CourseOutlineUIState.Error
+        _uiState.value = CourseContentAllUIState.Error
         val errorMessage = when {
             e?.isInternetError() == true -> R.string.core_error_no_connection
             else -> R.string.core_error_unknown_error
@@ -361,7 +362,7 @@ class CourseOutlineViewModel(
 
     private fun resumeCourseTappedEvent(blockId: String) {
         val currentState = uiState.value
-        if (currentState is CourseOutlineUIState.CourseData) {
+        if (currentState is CourseContentAllUIState.CourseData) {
             analytics.logEvent(
                 CourseAnalyticsEvent.RESUME_COURSE_CLICKED.eventName,
                 buildMap {
@@ -379,7 +380,7 @@ class CourseOutlineViewModel(
 
     fun sequentialClickedEvent(blockId: String, blockName: String) {
         val currentState = uiState.value
-        if (currentState is CourseOutlineUIState.CourseData) {
+        if (currentState is CourseContentAllUIState.CourseData) {
             analytics.sequentialClickedEvent(
                 courseId,
                 currentState.courseStructure.name,
@@ -391,7 +392,7 @@ class CourseOutlineViewModel(
 
     fun logUnitDetailViewedEvent(blockId: String, blockName: String) {
         val currentState = uiState.value
-        if (currentState is CourseOutlineUIState.CourseData) {
+        if (currentState is CourseContentAllUIState.CourseData) {
             analytics.logEvent(
                 CourseAnalyticsEvent.UNIT_DETAIL.eventName,
                 buildMap {
@@ -419,7 +420,7 @@ class CourseOutlineViewModel(
 
     fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager) {
         viewModelScope.launch {
-            val courseData = _uiState.value as? CourseOutlineUIState.CourseData ?: return@launch
+            val courseData = _uiState.value as? CourseContentAllUIState.CourseData ?: return@launch
 
             val subSectionsBlocks =
                 courseData.courseSubSections.values.flatten().filter { it.id in blocksIds }

@@ -50,10 +50,8 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
@@ -71,8 +69,6 @@ class CourseVideoViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<CourseInteractor>()
     private val courseNotifier = spyk<CourseNotifier>()
-    private val videoNotifier = spyk<VideoNotifier>()
-    private val analytics = mockk<CourseAnalytics>()
     private val coreAnalytics = mockk<CoreAnalytics>()
     private val preferencesManager = mockk<CorePreferences>()
     private val networkConnection = mockk<NetworkConnection>()
@@ -228,15 +224,12 @@ class CourseVideoViewModelTest {
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",
-            "",
             config,
             interactor,
             resourceManager,
             networkConnection,
             preferencesManager,
             courseNotifier,
-            videoNotifier,
-            analytics,
             downloadDialogManager,
             fileUtil,
             courseRouter,
@@ -251,7 +244,7 @@ class CourseVideoViewModelTest {
 
         coVerify(exactly = 2) { interactor.getCourseStructureForVideos(any()) }
 
-        assert(viewModel.uiState.value is CourseVideosUIState.Empty)
+        assert(viewModel.uiState.value is CourseVideoUIState.Empty)
     }
 
     @Test
@@ -263,15 +256,12 @@ class CourseVideoViewModelTest {
 
         val viewModel = CourseVideoViewModel(
             "",
-            "",
             config,
             interactor,
             resourceManager,
             networkConnection,
             preferencesManager,
             courseNotifier,
-            videoNotifier,
-            analytics,
             downloadDialogManager,
             fileUtil,
             courseRouter,
@@ -286,7 +276,7 @@ class CourseVideoViewModelTest {
 
         coVerify(exactly = 2) { interactor.getCourseStructureForVideos(any()) }
 
-        assert(viewModel.uiState.value is CourseVideosUIState.CourseData)
+        assert(viewModel.uiState.value is CourseVideoUIState.CourseData)
     }
 
     @Test
@@ -305,15 +295,12 @@ class CourseVideoViewModelTest {
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",
-            "",
             config,
             interactor,
             resourceManager,
             networkConnection,
             preferencesManager,
             courseNotifier,
-            videoNotifier,
-            analytics,
             downloadDialogManager,
             fileUtil,
             courseRouter,
@@ -332,7 +319,7 @@ class CourseVideoViewModelTest {
 
         coVerify(exactly = 2) { interactor.getCourseStructureForVideos(any()) }
 
-        assert(viewModel.uiState.value is CourseVideosUIState.CourseData)
+        assert(viewModel.uiState.value is CourseVideoUIState.CourseData)
     }
 
     @Test
@@ -350,15 +337,12 @@ class CourseVideoViewModelTest {
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",
-            "",
             config,
             interactor,
             resourceManager,
             networkConnection,
             preferencesManager,
             courseNotifier,
-            videoNotifier,
-            analytics,
             downloadDialogManager,
             fileUtil,
             courseRouter,
@@ -391,15 +375,12 @@ class CourseVideoViewModelTest {
             every { preferencesManager.videoSettings } returns VideoSettings.default
             val viewModel = CourseVideoViewModel(
                 "",
-                "",
                 config,
                 interactor,
                 resourceManager,
                 networkConnection,
                 preferencesManager,
                 courseNotifier,
-                videoNotifier,
-                analytics,
                 downloadDialogManager,
                 fileUtil,
                 courseRouter,
@@ -436,15 +417,12 @@ class CourseVideoViewModelTest {
             every { preferencesManager.videoSettings } returns VideoSettings.default
             val viewModel = CourseVideoViewModel(
                 "",
-                "",
                 config,
                 interactor,
                 resourceManager,
                 networkConnection,
                 preferencesManager,
                 courseNotifier,
-                videoNotifier,
-                analytics,
                 downloadDialogManager,
                 fileUtil,
                 courseRouter,

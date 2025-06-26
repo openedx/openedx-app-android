@@ -7,8 +7,8 @@ import kotlinx.parcelize.RawValue
 import org.openedx.core.AppDataConstants
 import org.openedx.core.BlockType
 import org.openedx.core.module.db.DownloadModel
-import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
+import org.openedx.core.utils.PreviewHelper
 import org.openedx.core.utils.VideoUtil
 import java.util.Date
 
@@ -51,13 +51,6 @@ data class Block(
             null
         }
 
-    fun isDownloading(): Boolean {
-        return downloadModel?.downloadedState == DownloadedState.DOWNLOADING ||
-                downloadModel?.downloadedState == DownloadedState.WAITING
-    }
-
-    fun isDownloaded() = downloadModel?.downloadedState == DownloadedState.DOWNLOADED
-
     fun isGated() = containsGatedContent
 
     fun isCompleted() = completion == 1.0
@@ -86,6 +79,26 @@ data class Block(
             type == BlockType.VIDEO -> downloadModel?.size ?: 0L
             isxBlock -> offlineDownload?.fileSize ?: 0L
             else -> 0L
+        }
+    }
+
+    fun getVideoPreview(isOnline: Boolean, offlineUrl: String?): Any? {
+        return if (studentViewData?.encodedVideos?.hasYoutubeUrl == true) {
+            PreviewHelper.getYouTubeThumbnailUrl(
+                studentViewData.encodedVideos.youtube?.url ?: ""
+            )
+        } else if (studentViewData?.encodedVideos?.hasVideoUrl == true) {
+            val videoUrl = if (studentViewData.encodedVideos.videoUrl.isNotEmpty() && isOnline) {
+                studentViewData.encodedVideos.videoUrl
+            } else {
+                offlineUrl ?: ""
+            }
+            PreviewHelper.getVideoFrameBitmap(
+                isOnline = isOnline,
+                videoUrl = videoUrl
+            )
+        } else {
+            null
         }
     }
 
@@ -169,7 +182,10 @@ data class EncodedVideos(
             isPreferredVideoInfo(mobileHigh) -> mobileHigh
             isPreferredVideoInfo(desktopMp4) -> desktopMp4
             fallback != null && isPreferredVideoInfo(fallback) &&
-                    !VideoUtil.videoHasFormat(fallback!!.url, AppDataConstants.VIDEO_FORMAT_M3U8) -> fallback
+                    !VideoUtil.videoHasFormat(
+                        fallback!!.url,
+                        AppDataConstants.VIDEO_FORMAT_M3U8
+                    ) -> fallback
 
             hls != null && isPreferredVideoInfo(hls) -> hls
             else -> null

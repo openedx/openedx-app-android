@@ -1,4 +1,4 @@
-package org.openedx.course.presentation.ui
+package org.openedx.course.presentation.videos
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
@@ -9,29 +9,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
-import org.koin.compose.koinInject
 import org.openedx.core.BlockType
 import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.AssignmentProgress
@@ -48,15 +41,13 @@ import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.course.presentation.videos.CourseVideoViewModel
-import org.openedx.course.presentation.videos.CourseVideosUIState
+import org.openedx.course.presentation.ui.CourseProgress
+import org.openedx.course.presentation.ui.CourseVideoSection
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
-import org.openedx.foundation.utils.FileUtil
 import java.util.Date
-import org.openedx.core.R as coreR
 
 @Composable
 fun CourseContentVideoScreen(
@@ -64,60 +55,26 @@ fun CourseContentVideoScreen(
     viewModel: CourseVideoViewModel,
     fragmentManager: FragmentManager
 ) {
-    val uiState by viewModel.uiState.collectAsState(CourseVideosUIState.Loading)
+    val uiState by viewModel.uiState.collectAsState(CourseVideoUIState.Loading)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
-    val fileUtil: FileUtil = koinInject()
 
     CourseVideosUI(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
-        courseTitle = viewModel.courseTitle,
-        onExpandClick = { block ->
-            viewModel.switchCourseSections(block.id)
-        },
-        onSubSectionClick = { subSectionBlock ->
-            if (viewModel.isCourseDropdownNavigationEnabled) {
-                viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
-                    viewModel.courseRouter.navigateToCourseContainer(
-                        fragmentManager,
-                        courseId = viewModel.courseId,
-                        unitId = unit.id,
-                        mode = CourseViewMode.VIDEOS
-                    )
-                }
-            } else {
-                viewModel.sequentialClickedEvent(
-                    subSectionBlock.blockId,
-                    subSectionBlock.displayName
-                )
-                viewModel.courseRouter.navigateToCourseSubsections(
-                    fm = fragmentManager,
-                    courseId = viewModel.courseId,
-                    subSectionId = subSectionBlock.id,
-                    mode = CourseViewMode.VIDEOS
-                )
-            }
+        onVideoClick = { videoBlock ->
+            viewModel.courseRouter.navigateToCourseContainer(
+                fragmentManager,
+                courseId = viewModel.courseId,
+                unitId = viewModel.getBlockParent(videoBlock.id)?.id ?: return@CourseVideosUI,
+                mode = CourseViewMode.VIDEOS
+            )
         },
         onDownloadClick = { blocksIds ->
             viewModel.downloadBlocks(
                 blocksIds = blocksIds,
                 fragmentManager = fragmentManager,
             )
-        },
-        onDownloadAllClick = { isAllBlocksDownloadedOrDownloading ->
-            viewModel.logBulkDownloadToggleEvent(
-                !isAllBlocksDownloadedOrDownloading,
-                viewModel.courseId
-            )
-            if (isAllBlocksDownloadedOrDownloading) {
-                viewModel.removeAllDownloadModels()
-            } else {
-                viewModel.saveAllDownloadModels(
-                    fileUtil.getExternalAppDir().path,
-                    viewModel.courseId
-                )
-            }
         },
         onCompletedSectionVisibilityChange = {
             viewModel.onCompletedSectionVisibilityChange(it)
@@ -128,13 +85,10 @@ fun CourseContentVideoScreen(
 @Composable
 private fun CourseVideosUI(
     windowSize: WindowSize,
-    uiState: CourseVideosUIState,
+    uiState: CourseVideoUIState,
     uiMessage: UIMessage?,
-    courseTitle: String,
-    onExpandClick: (Block) -> Unit,
-    onSubSectionClick: (Block) -> Unit,
+    onVideoClick: (Block) -> Unit,
     onDownloadClick: (blocksIds: List<String>) -> Unit,
-    onDownloadAllClick: (Boolean) -> Unit,
     onCompletedSectionVisibilityChange: (Boolean) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -162,18 +116,6 @@ private fun CourseVideosUI(
             )
         }
 
-        var isDownloadConfirmationShowed by rememberSaveable {
-            mutableStateOf(false)
-        }
-
-        var isDeleteDownloadsConfirmationShowed by rememberSaveable {
-            mutableStateOf(false)
-        }
-
-        var deleteDownloadBlock by rememberSaveable {
-            mutableStateOf<Block?>(null)
-        }
-
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
         Box(
@@ -192,11 +134,11 @@ private fun CourseVideosUI(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         when (uiState) {
-                            is CourseVideosUIState.Empty -> {
+                            is CourseVideoUIState.Empty -> {
                                 NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_VIDEOS)
                             }
 
-                            is CourseVideosUIState.CourseData -> {
+                            is CourseVideoUIState.CourseData -> {
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = listBottomPadding
@@ -221,168 +163,30 @@ private fun CourseVideosUI(
                                     }
 
                                     uiState.courseStructure.blockData.forEach { section ->
-                                        val courseSubSections =
-                                            uiState.courseSubSections[section.id]
-                                        val courseSectionsState =
-                                            uiState.courseSectionsState[section.id]
+                                        val sectionVideos =
+                                            uiState.courseVideos[section.id] ?: emptyList()
 
                                         item {
-                                            CourseSection(
-                                                modifier = Modifier.padding(vertical = 4.dp),
+                                            CourseVideoSection(
                                                 block = section,
-                                                onItemClick = onExpandClick,
-                                                courseSectionsState = courseSectionsState,
-                                                courseSubSections = courseSubSections,
+                                                videoBlocks = sectionVideos,
                                                 downloadedStateMap = uiState.downloadedState,
-                                                useRelativeDates = uiState.useRelativeDates,
-                                                onSubSectionClick = onSubSectionClick,
-                                                onDownloadClick = onDownloadClick
+                                                onVideoClick = onVideoClick,
+                                                onDownloadClick = onDownloadClick,
+                                                preview = uiState.videoPreview
                                             )
                                         }
                                     }
                                 }
                             }
 
-                            CourseVideosUIState.Loading -> {
+                            CourseVideoUIState.Loading -> {
                                 CircularProgress()
                             }
                         }
                     }
                 }
             }
-        }
-
-        if (isDownloadConfirmationShowed) {
-            AlertDialog(
-                title = {
-                    Text(
-                        text = stringResource(id = coreR.string.core_download_big_files_confirmation_title)
-                    )
-                },
-                text = {
-                    Text(
-                        text = stringResource(id = coreR.string.core_download_big_files_confirmation_text)
-                    )
-                },
-                onDismissRequest = {
-                    isDownloadConfirmationShowed = false
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            isDownloadConfirmationShowed = false
-                            onDownloadAllClick(false)
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(id = coreR.string.core_confirm)
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            isDownloadConfirmationShowed = false
-                        }
-                    ) {
-                        Text(text = stringResource(id = coreR.string.core_dismiss))
-                    }
-                }
-            )
-        }
-
-        if (isDeleteDownloadsConfirmationShowed) {
-            val downloadModelsSize =
-                (uiState as? CourseVideosUIState.CourseData)?.downloadModelsSize
-            val isDownloadedAllVideos =
-                downloadModelsSize?.isAllBlocksDownloadedOrDownloading == true &&
-                        downloadModelsSize.remainingCount == 0
-            val dialogTextId = if (isDownloadedAllVideos) {
-                coreR.string.core_delete_confirmation
-            } else {
-                coreR.string.core_delete_in_process_confirmation
-            }
-
-            AlertDialog(
-                title = {
-                    Text(
-                        text = stringResource(id = coreR.string.core_warning)
-                    )
-                },
-                text = {
-                    Text(
-                        text = stringResource(id = dialogTextId, courseTitle)
-                    )
-                },
-                onDismissRequest = {
-                    isDeleteDownloadsConfirmationShowed = false
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            isDeleteDownloadsConfirmationShowed = false
-                            onDownloadAllClick(true)
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(id = coreR.string.core_delete)
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            isDeleteDownloadsConfirmationShowed = false
-                        }
-                    ) {
-                        Text(text = stringResource(id = coreR.string.core_cancel))
-                    }
-                }
-            )
-        }
-
-        if (deleteDownloadBlock != null) {
-            AlertDialog(
-                title = {
-                    Text(
-                        text = stringResource(id = coreR.string.core_warning)
-                    )
-                },
-                text = {
-                    Text(
-                        text = stringResource(
-                            id = coreR.string.core_delete_download_confirmation_text,
-                            deleteDownloadBlock?.displayName ?: ""
-                        )
-                    )
-                },
-                onDismissRequest = {
-                    deleteDownloadBlock = null
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            deleteDownloadBlock?.let { block ->
-                                onDownloadClick(listOf(block.id))
-                            }
-                            deleteDownloadBlock = null
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(id = coreR.string.core_delete)
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            deleteDownloadBlock = null
-                        }
-                    ) {
-                        Text(text = stringResource(id = coreR.string.core_cancel))
-                    }
-                }
-            )
         }
     }
 }
@@ -395,10 +199,9 @@ private fun CourseVideosScreenPreview() {
         CourseVideosUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiMessage = null,
-            uiState = CourseVideosUIState.CourseData(
+            uiState = CourseVideoUIState.CourseData(
                 mockCourseStructure,
                 emptyMap(),
-                mapOf(),
                 mapOf(),
                 mapOf(),
                 DownloadModelsSize(
@@ -408,14 +211,11 @@ private fun CourseVideosScreenPreview() {
                     allCount = 1,
                     allSize = 0
                 ),
-                useRelativeDates = true,
-                isCompletedSectionsShown = false
+                isCompletedSectionsShown = false,
+                videoPreview = mapOf()
             ),
-            courseTitle = "",
-            onExpandClick = { },
-            onSubSectionClick = { },
+            onVideoClick = { },
             onDownloadClick = {},
-            onDownloadAllClick = {},
             onCompletedSectionVisibilityChange = {}
         )
     }
@@ -429,12 +229,9 @@ private fun CourseVideosScreenEmptyPreview() {
         CourseVideosUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiMessage = null,
-            uiState = CourseVideosUIState.Empty,
-            courseTitle = "",
-            onExpandClick = { },
-            onSubSectionClick = { },
+            uiState = CourseVideoUIState.Empty,
+            onVideoClick = { },
             onDownloadClick = {},
-            onDownloadAllClick = {},
             onCompletedSectionVisibilityChange = {}
         )
     }
@@ -448,10 +245,9 @@ private fun CourseVideosScreenTabletPreview() {
         CourseVideosUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiMessage = null,
-            uiState = CourseVideosUIState.CourseData(
+            uiState = CourseVideoUIState.CourseData(
                 mockCourseStructure,
                 emptyMap(),
-                mapOf(),
                 mapOf(),
                 mapOf(),
                 DownloadModelsSize(
@@ -461,14 +257,11 @@ private fun CourseVideosScreenTabletPreview() {
                     allCount = 0,
                     allSize = 0
                 ),
-                useRelativeDates = true,
-                isCompletedSectionsShown = true
+                isCompletedSectionsShown = true,
+                videoPreview = mapOf()
             ),
-            courseTitle = "",
-            onExpandClick = { },
-            onSubSectionClick = { },
+            onVideoClick = { },
             onDownloadClick = {},
-            onDownloadAllClick = {},
             onCompletedSectionVisibilityChange = {}
         )
     }

@@ -359,7 +359,6 @@ fun CourseDashboard(
                                         windowSize = windowSize,
                                         viewModel = viewModel,
                                         pagerState = pagerState,
-                                        isNavigationEnabled = isNavigationEnabled,
                                         isResumed = isResumed,
                                         fragmentManager = fragmentManager,
                                     )
@@ -419,13 +418,12 @@ private fun DashboardPager(
     windowSize: WindowSize,
     viewModel: CourseContainerViewModel,
     pagerState: PagerState,
-    isNavigationEnabled: Boolean,
     isResumed: Boolean,
     fragmentManager: FragmentManager,
 ) {
     HorizontalPager(
         state = pagerState,
-        userScrollEnabled = isNavigationEnabled,
+        userScrollEnabled = false,
         beyondViewportPageCount = CourseContainerTab.entries.size
     ) { page ->
         when (CourseContainerTab.entries[page]) {

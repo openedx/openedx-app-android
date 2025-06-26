@@ -5,7 +5,7 @@ import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.module.db.DownloadedState
 
-sealed class CourseOutlineUIState {
+sealed class CourseContentAllUIState {
     data class CourseData(
         val courseStructure: CourseStructure,
         val downloadedState: Map<String, DownloadedState>,
@@ -16,8 +16,8 @@ sealed class CourseOutlineUIState {
         val subSectionsDownloadsCount: Map<String, Int>,
         val datesBannerInfo: CourseDatesBannerInfo,
         val useRelativeDates: Boolean,
-    ) : CourseOutlineUIState()
+    ) : CourseContentAllUIState()
 
-    data object Error : CourseOutlineUIState()
-    data object Loading : CourseOutlineUIState()
+    data object Error : CourseContentAllUIState()
+    data object Loading : CourseContentAllUIState()
 }

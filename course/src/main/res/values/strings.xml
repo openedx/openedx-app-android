@@ -54,6 +54,7 @@
     <string name="course_accessibility_stop_downloading_course_section">Stop downloading course section</string>
     <string name="course_accessibility_section_completed">Section completed</string>
     <string name="course_accessibility_section_uncompleted">Section uncompleted</string>
+    <string name="course_accessibility_video_watched">Video watched</string>
 
     <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
         <item quantity="one">%1$s/%2$s Section Completed</item>
@@ -72,4 +73,5 @@
     <string name="progress_of_grade">of Grade</string>
     <string name="progress_current_and_max_weighted_graded_percent">%1$s / %2$s%%</string>
     <string name="course_progress_no_assignments">This course does not contain graded assignments.</string>
+    <string name="course_video_watched">%1$s/%2$s Watched</string>
 </resources>

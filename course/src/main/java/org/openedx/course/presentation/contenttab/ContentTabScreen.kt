@@ -20,7 +20,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,7 +34,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.course.presentation.container.CourseContentTab
 import org.openedx.course.presentation.outline.CourseContentAllScreen
-import org.openedx.course.presentation.ui.CourseContentVideoScreen
+import org.openedx.course.presentation.videos.CourseContentVideoScreen
 import org.openedx.foundation.presentation.WindowSize
 
 @Composable
@@ -44,7 +44,7 @@ fun ContentScreen(
     courseId: String,
     courseName: String
 ) {
-    var selectedTab by remember { mutableStateOf(CourseContentTab.ALL) }
+    var selectedTab by rememberSaveable { mutableStateOf(CourseContentTab.ALL) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
     ) {
