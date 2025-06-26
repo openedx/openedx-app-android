@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -134,10 +135,15 @@ private fun CourseProgressContent(
                     item {
                         GradeDetailsHeaderView()
                     }
-                    items(uiState.progress.gradingPolicy.assignmentPolicies) { policy ->
+                    itemsIndexed(uiState.progress.gradingPolicy.assignmentPolicies) { index, policy ->
                         AssignmentTypeRow(
                             progress = uiState.progress,
-                            policy = policy
+                            policy = policy,
+                            color = if (uiState.progress.assignmentColors.isNotEmpty()) {
+                                uiState.progress.assignmentColors[index % uiState.progress.assignmentColors.size]
+                            } else {
+                                MaterialTheme.appColors.primary
+                            }
                         )
                         Divider(
                             modifier = Modifier
@@ -200,7 +206,7 @@ private fun GradeDetailsFooterView(
             color = MaterialTheme.appColors.textDark,
         )
         Text(
-            text = "${progress.getTotalWeightPercent()}%",
+            text = "${progress.getTotalWeightPercent().toInt()}%",
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.primary,
             fontWeight = FontWeight.SemiBold
@@ -235,7 +241,7 @@ private fun OverallGradeView(
                 color = MaterialTheme.appColors.textDark,
             )
             Text(
-                text = "${progress.getTotalWeightPercent()}%",
+                text = "${progress.getTotalWeightPercent().toInt()}%",
                 style = MaterialTheme.appTypography.labelMedium,
                 color = MaterialTheme.appColors.primary,
                 fontWeight = FontWeight.SemiBold
@@ -255,8 +261,14 @@ private fun OverallGradeView(
                     )
             ) {
                 progress.gradingPolicy.assignmentPolicies.forEach { assignmentPolicy ->
-                    // No color mapping in new model, use default
-                    val color = MaterialTheme.appColors.primary
+                    val assignmentColors = progress.assignmentColors
+                    val color = if (assignmentColors.isNotEmpty()) {
+                        assignmentColors[progress.gradingPolicy.assignmentPolicies.indexOf(
+                            assignmentPolicy
+                        ) % assignmentColors.size]
+                    } else {
+                        MaterialTheme.appColors.primary
+                    }
                     val weightedPercent =
                         progress.getAssignmentWeightedGradedPercent(assignmentPolicy)
                     if (weightedPercent > 0f) {
@@ -393,7 +405,8 @@ private fun CourseCompletionView(
 @Composable
 private fun AssignmentTypeRow(
     progress: CourseProgress,
-    policy: CourseProgress.GradingPolicy.AssignmentPolicy
+    policy: CourseProgress.GradingPolicy.AssignmentPolicy,
+    color: Color
 ) {
     val earned = progress.getEarnedAssignmentProblems(policy)
     val possible = progress.getPossibleAssignmentProblems(policy)
@@ -415,7 +428,7 @@ private fun AssignmentTypeRow(
                     .fillMaxHeight()
                     .width(7.dp)
                     .background(
-                        color = MaterialTheme.appColors.primary,
+                        color = color,
                         shape = CircleShape
                     )
             )
@@ -448,7 +461,7 @@ private fun AssignmentTypeRow(
             Text(
                 stringResource(
                     R.string.progress_current_and_max_weighted_graded_percent,
-                    progress.getAssignmentWeightedGradedPercent(policy),
+                    progress.getAssignmentWeightedGradedPercent(policy).toInt(),
                     (policy.weight * 100).toInt()
                 ),
                 style = MaterialTheme.appTypography.bodyLarge,

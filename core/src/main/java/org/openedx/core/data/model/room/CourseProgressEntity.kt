@@ -1,5 +1,7 @@
 package org.openedx.core.data.model.room
 
+import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.toColorInt
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -42,7 +44,9 @@ data class CourseProgressEntity(
     @Embedded(prefix = "verification_")
     val verificationData: VerificationDataDb,
     @ColumnInfo("disableProgressGraph")
-    val disableProgressGraph: Boolean
+    val disableProgressGraph: Boolean,
+    @ColumnInfo("assignment_colors")
+    val assignmentColors: List<String>?
 ) {
     fun mapToDomain(): CourseProgress {
         return CourseProgress(
@@ -115,7 +119,10 @@ data class CourseProgressEntity(
                 status = verificationData.status,
                 statusDate = verificationData.statusDate
             ),
-            disableProgressGraph = disableProgressGraph
+            disableProgressGraph = disableProgressGraph,
+            assignmentColors = assignmentColors?.map { colorString ->
+                Color(colorString.toColorInt())
+            } ?: listOf()
         )
     }
 }
@@ -189,9 +196,9 @@ data class SectionScoreDb(
         @ColumnInfo("learnerHasAccess")
         val learnerHasAccess: Boolean,
         @ColumnInfo("numPointsEarned")
-        val numPointsEarned: Int,
+        val numPointsEarned: Float,
         @ColumnInfo("numPointsPossible")
-        val numPointsPossible: Int,
+        val numPointsPossible: Float,
         @ColumnInfo("percentGraded")
         val percentGraded: Double,
         @ColumnInfo("problemScores")
@@ -205,9 +212,9 @@ data class SectionScoreDb(
     ) {
         data class ProblemScoreDb(
             @ColumnInfo("earned")
-            val earned: Int,
+            val earned: Double,
             @ColumnInfo("possible")
-            val possible: Int
+            val possible: Double
         )
     }
 }

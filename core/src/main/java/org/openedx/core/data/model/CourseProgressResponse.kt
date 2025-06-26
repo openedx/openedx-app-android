@@ -1,5 +1,7 @@
 package org.openedx.core.data.model
 
+import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.toColorInt
 import com.google.gson.annotations.SerializedName
 import org.openedx.core.data.model.room.CertificateDataDb
 import org.openedx.core.data.model.room.CompletionSummaryDb
@@ -25,7 +27,8 @@ data class CourseProgressResponse(
     @SerializedName("username") val username: String?,
     @SerializedName("user_has_passing_grade") val userHasPassingGrade: Boolean?,
     @SerializedName("verification_data") val verificationData: VerificationData?,
-    @SerializedName("disable_progress_graph") val disableProgressGraph: Boolean?
+    @SerializedName("disable_progress_graph") val disableProgressGraph: Boolean?,
+    @SerializedName("assignment_colors") val assignmentColors: List<String>?
 ) {
     data class CertificateData(
         @SerializedName("cert_status") val certStatus: String?,
@@ -70,8 +73,8 @@ data class CourseProgressResponse(
             @SerializedName("has_graded_assignment") val hasGradedAssignment: Boolean?,
             @SerializedName("override") val override: String?,
             @SerializedName("learner_has_access") val learnerHasAccess: Boolean?,
-            @SerializedName("num_points_earned") val numPointsEarned: Int?,
-            @SerializedName("num_points_possible") val numPointsPossible: Int?,
+            @SerializedName("num_points_earned") val numPointsEarned: Float?,
+            @SerializedName("num_points_possible") val numPointsPossible: Float?,
             @SerializedName("percent_graded") val percentGraded: Double?,
             @SerializedName("problem_scores") val problemScores: List<ProblemScore>?,
             @SerializedName("show_correctness") val showCorrectness: String?,
@@ -79,8 +82,8 @@ data class CourseProgressResponse(
             @SerializedName("url") val url: String?
         ) {
             data class ProblemScore(
-                @SerializedName("earned") val earned: Int?,
-                @SerializedName("possible") val possible: Int?
+                @SerializedName("earned") val earned: Double?,
+                @SerializedName("possible") val possible: Double?
             )
         }
     }
@@ -138,13 +141,13 @@ data class CourseProgressResponse(
                             hasGradedAssignment = subsection.hasGradedAssignment ?: false,
                             override = subsection.override ?: "",
                             learnerHasAccess = subsection.learnerHasAccess ?: false,
-                            numPointsEarned = subsection.numPointsEarned ?: 0,
-                            numPointsPossible = subsection.numPointsPossible ?: 0,
+                            numPointsEarned = subsection.numPointsEarned ?: 0f,
+                            numPointsPossible = subsection.numPointsPossible ?: 0f,
                             percentGraded = subsection.percentGraded ?: 0.0,
                             problemScores = subsection.problemScores?.map { problemScore ->
                                 CourseProgress.SectionScore.Subsection.ProblemScore(
-                                    earned = problemScore.earned ?: 0,
-                                    possible = problemScore.possible ?: 0
+                                    earned = problemScore.earned ?: 0.0,
+                                    possible = problemScore.possible ?: 0.0
                                 )
                             } ?: emptyList(),
                             showCorrectness = subsection.showCorrectness ?: "",
@@ -162,7 +165,10 @@ data class CourseProgressResponse(
                 status = verificationData?.status ?: "",
                 statusDate = verificationData?.statusDate ?: ""
             ),
-            disableProgressGraph = disableProgressGraph ?: false
+            disableProgressGraph = disableProgressGraph ?: false,
+            assignmentColors = assignmentColors?.map { colorString ->
+                Color(colorString.toColorInt())
+            } ?: listOf()
         )
     }
 
@@ -214,13 +220,13 @@ data class CourseProgressResponse(
                             hasGradedAssignment = subsection.hasGradedAssignment ?: false,
                             override = subsection.override ?: "",
                             learnerHasAccess = subsection.learnerHasAccess ?: false,
-                            numPointsEarned = subsection.numPointsEarned ?: 0,
-                            numPointsPossible = subsection.numPointsPossible ?: 0,
+                            numPointsEarned = subsection.numPointsEarned ?: 0f,
+                            numPointsPossible = subsection.numPointsPossible ?: 0f,
                             percentGraded = subsection.percentGraded ?: 0.0,
                             problemScores = subsection.problemScores?.map { problemScore ->
                                 SectionScoreDb.SubsectionDb.ProblemScoreDb(
-                                    earned = problemScore.earned ?: 0,
-                                    possible = problemScore.possible ?: 0
+                                    earned = problemScore.earned ?: 0.0,
+                                    possible = problemScore.possible ?: 0.0
                                 )
                             } ?: emptyList(),
                             showCorrectness = subsection.showCorrectness ?: "",
@@ -238,7 +244,8 @@ data class CourseProgressResponse(
                 status = verificationData?.status ?: "",
                 statusDate = verificationData?.statusDate ?: ""
             ),
-            disableProgressGraph = disableProgressGraph ?: false
+            disableProgressGraph = disableProgressGraph ?: false,
+            assignmentColors = assignmentColors,
         )
     }
 }

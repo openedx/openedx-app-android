@@ -1,8 +1,11 @@
 package org.openedx.core.domain.model
 
+import androidx.compose.ui.graphics.Color
+
 data class CourseProgress(
     val verifiedMode: String,
     val accessExpiration: String,
+    val assignmentColors: List<Color>,
     val certificateData: CertificateData,
     val completionSummary: CompletionSummary,
     val courseGrade: CourseGrade,
@@ -108,8 +111,8 @@ data class CourseProgress(
             val hasGradedAssignment: Boolean,
             val override: String,
             val learnerHasAccess: Boolean,
-            val numPointsEarned: Int,
-            val numPointsPossible: Int,
+            val numPointsEarned: Float,
+            val numPointsPossible: Float,
             val percentGraded: Double,
             val problemScores: List<ProblemScore>,
             val showCorrectness: String,
@@ -117,8 +120,8 @@ data class CourseProgress(
             val url: String
         ) {
             data class ProblemScore(
-                val earned: Int,
-                val possible: Int
+                val earned: Double,
+                val possible: Double
             )
         }
     }
