@@ -74,4 +74,5 @@
     <string name="progress_current_and_max_weighted_graded_percent">%1$s / %2$s%%</string>
     <string name="course_progress_no_assignments">This course does not contain graded assignments.</string>
     <string name="course_video_watched">%1$s/%2$s Watched</string>
+    <string name="course_completed">%1$s/%2$s Completed</string>
 </resources>

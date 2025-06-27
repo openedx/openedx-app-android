@@ -145,7 +145,7 @@ class CourseVideoViewModel(
                         )
                     }
                     val isCompletedSectionsShown =
-                        (_uiState.value as? CourseVideoUIState.CourseData)?.isCompletedSectionsShown == true
+                        (_uiState.value as? CourseVideoUIState.CourseData)?.isCompletedSectionsShown == false
 
                     _uiState.value =
                         CourseVideoUIState.CourseData(
@@ -270,11 +270,11 @@ class CourseVideoViewModel(
         }
     }
 
-    fun onCompletedSectionVisibilityChange(isVisible: Boolean) {
+    fun onCompletedSectionVisibilityChange() {
         if (_uiState.value is CourseVideoUIState.CourseData) {
             val state = _uiState.value as CourseVideoUIState.CourseData
 
-            _uiState.value = state.copy(isCompletedSectionsShown = isVisible)
+            _uiState.value = state.copy(isCompletedSectionsShown = !state.isCompletedSectionsShown)
         }
     }
 

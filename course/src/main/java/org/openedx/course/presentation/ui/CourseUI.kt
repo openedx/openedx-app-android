@@ -74,7 +74,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -308,7 +307,7 @@ fun CardArrow(
     Icon(
         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
         tint = tint,
-        contentDescription = "Expandable Arrow",
+        contentDescription = null,
         modifier = Modifier.rotate(degrees),
     )
 }
@@ -663,8 +662,6 @@ fun CourseVideoSection(
 @Composable
 fun CourseVideoItem(
     videoBlock: Block,
-    progress: Float = 0.0f,
-    isCompleted: Boolean = false,
     preview: Any?,
     onClick: () -> Unit
 ) {
@@ -674,7 +671,7 @@ fun CourseVideoItem(
             .height(108.dp)
             .clip(MaterialTheme.appShapes.videoPreviewShape)
             .let {
-                if (progress == 1f) {
+                if (videoBlock.isCompleted()) {
                     it.border(
                         width = 3.dp,
                         color = MaterialTheme.appColors.successGreen,
@@ -734,33 +731,38 @@ fun CourseVideoItem(
         )
 
         // Progress bar (bottom)
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .fillMaxWidth()
-                .height(8.dp)
-                .background(Color.Transparent)
-                .padding(bottom = 8.dp, start = 8.dp, end = 8.dp)
-        ) {
-            LinearProgressIndicator(
-                progress = progress,
+        if (videoBlock.completion > 0.0f) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(CircleShape),
-                color = MaterialTheme.appColors.primary,
-                backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
-            )
-            if (isCompleted) {
-                Icon(
-                    painter = painterResource(id = coreR.drawable.ic_core_check),
-                    contentDescription = stringResource(R.string.course_accessibility_video_watched),
-                    tint = MaterialTheme.appColors.successGreen,
+                    .padding(bottom = 4.dp)
+                    .height(16.dp)
+                    .align(Alignment.BottomCenter),
+                contentAlignment = Alignment.Center
+            ) {
+                LinearProgressIndicator(
                     modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .size(24.dp)
-                        .offset(x = 8.dp)
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .padding(horizontal = 8.dp)
+                        .clip(CircleShape),
+                    progress = videoBlock.completion.toFloat(),
+                    color = if (videoBlock.isCompleted()) {
+                        MaterialTheme.appColors.progressBarColor
+                    } else {
+                        MaterialTheme.appColors.primary
+                    },
+                    backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
                 )
+                if (videoBlock.isCompleted()) {
+                    Image(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(16.dp)
+                            .offset(x = (-4).dp),
+                        painter = painterResource(id = coreR.drawable.ic_core_check),
+                        contentDescription = stringResource(R.string.course_accessibility_video_watched),
+                    )
+                }
             }
         }
     }
@@ -794,7 +796,7 @@ fun CourseVideoSectionHeader(
             Text(
                 text = stringResource(
                     R.string.course_video_watched,
-                    videoBlocks?.mapNotNull { !it.isCompleted() }?.size ?: 0,
+                    videoBlocks?.filter { it.isCompleted() }?.size ?: 0,
                     videoBlocks?.size ?: 0
                 ),
                 style = MaterialTheme.appTypography.bodySmall,
@@ -1018,8 +1020,8 @@ fun CourseSubSectionItem(
         MaterialTheme.appColors.onSurface
     }
     val due by rememberSaveable {
-        mutableStateOf(block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) }
-            ?: "")
+        mutableStateOf(
+            block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) } ?: "")
     }
     val isAssignmentEnable =
         !block.isCompleted() && block.assignmentProgress != null && due.isNotEmpty()
@@ -1446,9 +1448,10 @@ fun CourseMessage(
 fun CourseProgress(
     modifier: Modifier = Modifier,
     progress: Progress,
-    onVisibilityChanged: ((Boolean) -> Unit)? = null
+    description: String,
+    isCompletedShown: Boolean = false,
+    onVisibilityChanged: (() -> Unit)? = null
 ) {
-    var isCompletedShown by remember { mutableStateOf(false) }
     val arrowRotation by animateFloatAsState(
         targetValue = if (isCompletedShown) {
             -90f
@@ -1458,13 +1461,12 @@ fun CourseProgress(
         label = ""
     )
     val buttonText = if (isCompletedShown) {
-        stringResource(R.string.course_show_completed)
-    } else {
         stringResource(R.string.course_hide_completed)
+    } else {
+        stringResource(R.string.course_show_completed)
     }
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         LinearProgressIndicator(
             modifier = Modifier
@@ -1476,25 +1478,21 @@ fun CourseProgress(
             backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
         )
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(24.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = pluralStringResource(
-                    R.plurals.course_assignments_complete,
-                    progress.assignmentsCompleted,
-                    progress.assignmentsCompleted,
-                    progress.totalAssignmentsCount
-                ),
+                text = description,
                 color = MaterialTheme.appColors.textDark,
                 style = MaterialTheme.appTypography.labelSmall
             )
             if (onVisibilityChanged != null) {
                 Row(
                     modifier = Modifier.clickable {
-                        isCompletedShown = !isCompletedShown
-                        onVisibilityChanged(!isCompletedShown)
+                        onVisibilityChanged()
                     },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)

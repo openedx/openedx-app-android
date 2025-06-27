@@ -7,12 +7,12 @@ import org.openedx.core.extension.safeDivBy
 
 @Parcelize
 data class Progress(
-    val assignmentsCompleted: Int,
-    val totalAssignmentsCount: Int,
+    val completed: Int,
+    val total: Int,
 ) : Parcelable {
 
     @IgnoredOnParcel
-    val value: Float = assignmentsCompleted.toFloat().safeDivBy(totalAssignmentsCount.toFloat())
+    val value: Float = completed.toFloat().safeDivBy(total.toFloat())
 
     companion object {
         val DEFAULT_PROGRESS = Progress(0, 0)

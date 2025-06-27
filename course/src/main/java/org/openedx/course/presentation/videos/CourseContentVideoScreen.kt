@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -41,6 +42,7 @@ import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.course.R
 import org.openedx.course.presentation.ui.CourseProgress
 import org.openedx.course.presentation.ui.CourseVideoSection
 import org.openedx.foundation.presentation.UIMessage
@@ -77,7 +79,7 @@ fun CourseContentVideoScreen(
             )
         },
         onCompletedSectionVisibilityChange = {
-            viewModel.onCompletedSectionVisibilityChange(it)
+            viewModel.onCompletedSectionVisibilityChange()
         }
     )
 }
@@ -89,7 +91,7 @@ private fun CourseVideosUI(
     uiMessage: UIMessage?,
     onVideoClick: (Block) -> Unit,
     onDownloadClick: (blocksIds: List<String>) -> Unit,
-    onCompletedSectionVisibilityChange: (Boolean) -> Unit,
+    onCompletedSectionVisibilityChange: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -143,38 +145,50 @@ private fun CourseVideosUI(
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = listBottomPadding
                                 ) {
-                                    val progress = uiState.courseStructure.progress
-                                    if (progress != null && progress.totalAssignmentsCount > 0) {
-                                        item {
-                                            CourseProgress(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(
-                                                        bottom = 8.dp,
-                                                        start = 24.dp,
-                                                        end = 24.dp,
-                                                    ),
-                                                progress = progress,
-                                                onVisibilityChanged = {
-                                                    onCompletedSectionVisibilityChange(it)
-                                                }
+                                    val allVideos = uiState.courseVideos.values.flatten()
+                                    val progress = Progress(
+                                        completed = allVideos.filter { it.isCompleted() }.size,
+                                        total = allVideos.size,
+                                    )
+                                    item {
+                                        CourseProgress(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(
+                                                    bottom = 8.dp,
+                                                    start = 24.dp,
+                                                    end = 24.dp,
+                                                ),
+                                            progress = progress,
+                                            isCompletedShown = uiState.isCompletedSectionsShown,
+                                            onVisibilityChanged = if (progress.completed != 0) {
+                                                { onCompletedSectionVisibilityChange() }
+                                            } else {
+                                                null
+                                            },
+                                            description = stringResource(
+                                                R.string.course_completed,
+                                                progress.completed,
+                                                progress.total
                                             )
-                                        }
+                                        )
                                     }
 
                                     uiState.courseStructure.blockData.forEach { section ->
                                         val sectionVideos =
                                             uiState.courseVideos[section.id] ?: emptyList()
 
-                                        item {
-                                            CourseVideoSection(
-                                                block = section,
-                                                videoBlocks = sectionVideos,
-                                                downloadedStateMap = uiState.downloadedState,
-                                                onVideoClick = onVideoClick,
-                                                onDownloadClick = onDownloadClick,
-                                                preview = uiState.videoPreview
-                                            )
+                                        if (sectionVideos.any { !it.isCompleted() } || uiState.isCompletedSectionsShown) {
+                                            item {
+                                                CourseVideoSection(
+                                                    block = section,
+                                                    videoBlocks = sectionVideos,
+                                                    downloadedStateMap = uiState.downloadedState,
+                                                    onVideoClick = onVideoClick,
+                                                    onDownloadClick = onDownloadClick,
+                                                    preview = uiState.videoPreview
+                                                )
+                                            }
                                         }
                                     }
                                 }
