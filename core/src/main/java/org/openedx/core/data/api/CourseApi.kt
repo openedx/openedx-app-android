@@ -108,7 +108,6 @@ interface CourseApi {
         @Path("username") username: String
     ): List<DownloadCoursePreview>
 
-
     @GET("/api/course_home/progress/{course_id}")
     suspend fun getCourseProgress(
         @Path("course_id") courseId: String,

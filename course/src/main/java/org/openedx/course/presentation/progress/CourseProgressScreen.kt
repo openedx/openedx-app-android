@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -28,6 +29,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -60,6 +64,8 @@ import org.openedx.course.R
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.windowSizeValue
+
+const val EMPTY_STATE_VIEW_HEIGHT = 0.4f
 
 @Composable
 fun CourseProgressScreen(
@@ -103,30 +109,27 @@ private fun CourseProgressContent(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
-
         Box(
-            modifier = Modifier
+            modifier = screenWidth
                 .fillMaxSize()
+                .background(MaterialTheme.appColors.background)
                 .padding(it)
                 .displayCutoutForLandscape(),
             contentAlignment = Alignment.TopCenter
         ) {
-            Surface(
-                modifier = screenWidth,
-                color = MaterialTheme.appColors.background
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(vertical = 16.dp)
             ) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item {
-                        CourseCompletionView(
-                            progress = uiState.progress
-                        )
-                    }
+                item {
+                    CourseCompletionView(
+                        progress = uiState.progress
+                    )
+                }
+                if (uiState.progress.gradingPolicy.assignmentPolicies.isNotEmpty()) {
                     item {
                         OverallGradeView(
                             progress = uiState.progress,
@@ -156,12 +159,45 @@ private fun CourseProgressContent(
                             progress = uiState.progress
                         )
                     }
+                } else {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillParentMaxHeight(EMPTY_STATE_VIEW_HEIGHT)
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            NoGradesView()
+                        }
+                    }
                 }
             }
         }
+
+        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
     }
 }
 
+@Composable
+private fun NoGradesView() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            modifier = Modifier.size(60.dp),
+            imageVector = Icons.AutoMirrored.Outlined.InsertDriveFile,
+            contentDescription = null,
+            tint = MaterialTheme.appColors.divider
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = stringResource(R.string.course_progress_no_assignments),
+            style = MaterialTheme.appTypography.titleMedium,
+            color = MaterialTheme.appColors.textDark,
+            textAlign = TextAlign.Center
+        )
+    }
+}
 
 @Composable
 private fun GradeDetailsHeaderView() {
@@ -263,9 +299,11 @@ private fun OverallGradeView(
                 progress.gradingPolicy.assignmentPolicies.forEach { assignmentPolicy ->
                     val assignmentColors = progress.assignmentColors
                     val color = if (assignmentColors.isNotEmpty()) {
-                        assignmentColors[progress.gradingPolicy.assignmentPolicies.indexOf(
-                            assignmentPolicy
-                        ) % assignmentColors.size]
+                        assignmentColors[
+                            progress.gradingPolicy.assignmentPolicies.indexOf(
+                                assignmentPolicy
+                            ) % assignmentColors.size
+                        ]
                     } else {
                         MaterialTheme.appColors.primary
                     }
@@ -440,8 +478,8 @@ private fun AssignmentTypeRow(
                 Text(
                     text = stringResource(
                         R.string.progress_earned_possible_assignment_problems,
-                        earned,
-                        possible
+                        earned.toInt(),
+                        possible.toInt()
                     ),
                     style = MaterialTheme.appTypography.bodySmall,
                     color = MaterialTheme.appColors.textDark,

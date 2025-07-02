@@ -94,6 +94,7 @@ data class CourseProgressResponse(
         @SerializedName("status_date") val statusDate: String?
     )
 
+    @Suppress("LongMethod")
     fun mapToDomain(): CourseProgress {
         return CourseProgress(
             verifiedMode = verifiedMode ?: "",
@@ -172,6 +173,7 @@ data class CourseProgressResponse(
         )
     }
 
+    @Suppress("LongMethod, CyclomaticComplexMethod")
     fun mapToRoomEntity(courseId: String): CourseProgressEntity {
         return CourseProgressEntity(
             courseId = courseId,

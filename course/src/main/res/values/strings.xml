@@ -80,4 +80,5 @@
     <string name="progress_earned_possible_assignment_problems">%1$s / %2$s Complete</string>
     <string name="progress_of_grade">of Grade</string>
     <string name="progress_current_and_max_weighted_graded_percent">%1$s / %2$s%%</string>
+    <string name="course_progress_no_assignments">This course does not contain graded assignments.</string>
 </resources>

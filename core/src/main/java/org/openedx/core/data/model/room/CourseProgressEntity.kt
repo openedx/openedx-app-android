@@ -48,6 +48,7 @@ data class CourseProgressEntity(
     @ColumnInfo("assignment_colors")
     val assignmentColors: List<String>?
 ) {
+    @Suppress("LongMethod")
     fun mapToDomain(): CourseProgress {
         return CourseProgress(
             verifiedMode = verifiedMode,
