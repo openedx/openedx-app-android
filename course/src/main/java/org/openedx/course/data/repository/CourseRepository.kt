@@ -7,6 +7,7 @@ import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.model.room.OfflineXBlockProgress
+import org.openedx.core.data.model.room.VideoProgressEntity
 import org.openedx.core.data.model.room.XBlockProgressData
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.CourseDao
@@ -252,4 +253,14 @@ class CourseRepository(
             courseDao.insertCourseProgressEntity(response.mapToRoomEntity(courseId))
             trySend(response.mapToDomain())
         }
+
+    suspend fun saveVideoProgress(videoUrl: String, videoTime: Long, duration: Long) {
+        val videoProgressEntity = VideoProgressEntity(videoUrl, videoTime, duration)
+        courseDao.insertVideoProgressEntity(videoProgressEntity)
+    }
+
+    suspend fun getVideoProgress(videoUrl: String): VideoProgressEntity {
+        return courseDao.getVideoProgressByVideoUrl(videoUrl)
+            ?: VideoProgressEntity(videoUrl, 0L, 0L)
+    }
 }

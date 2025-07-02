@@ -8,6 +8,7 @@ import androidx.room.Transaction
 import org.openedx.core.data.model.room.CourseEnrollmentDetailsEntity
 import org.openedx.core.data.model.room.CourseProgressEntity
 import org.openedx.core.data.model.room.CourseStructureEntity
+import org.openedx.core.data.model.room.VideoProgressEntity
 
 @Dao
 interface CourseDao {
@@ -39,6 +40,13 @@ interface CourseDao {
 
     @Query("SELECT * FROM course_enrollment_details_table WHERE id=:id")
     suspend fun getCourseEnrollmentDetailsById(id: String): CourseEnrollmentDetailsEntity?
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertVideoProgressEntity(vararg videoProgressEntity: VideoProgressEntity)
+
+    @Query("SELECT * FROM video_progress_table WHERE video_url=:videoUrl")
+    suspend fun getVideoProgressByVideoUrl(videoUrl: String): VideoProgressEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCourseProgressEntity(vararg courseProgressEntity: CourseProgressEntity)

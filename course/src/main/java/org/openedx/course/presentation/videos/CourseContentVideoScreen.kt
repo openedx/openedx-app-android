@@ -186,7 +186,8 @@ private fun CourseVideosUI(
                                                     downloadedStateMap = uiState.downloadedState,
                                                     onVideoClick = onVideoClick,
                                                     onDownloadClick = onDownloadClick,
-                                                    preview = uiState.videoPreview
+                                                    preview = uiState.videoPreview,
+                                                    progress = uiState.videoProgress,
                                                 )
                                             }
                                         }
@@ -226,7 +227,8 @@ private fun CourseVideosScreenPreview() {
                     allSize = 0
                 ),
                 isCompletedSectionsShown = false,
-                videoPreview = mapOf()
+                videoPreview = mapOf(),
+                videoProgress = mapOf(),
             ),
             onVideoClick = { },
             onDownloadClick = {},
@@ -272,7 +274,8 @@ private fun CourseVideosScreenTabletPreview() {
                     allSize = 0
                 ),
                 isCompletedSectionsShown = true,
-                videoPreview = mapOf()
+                videoPreview = mapOf(),
+                videoProgress = mapOf(),
             ),
             onVideoClick = { },
             onDownloadClick = {},

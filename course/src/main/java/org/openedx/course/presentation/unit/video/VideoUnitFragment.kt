@@ -255,6 +255,12 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         }
     }
 
+    override fun onDestroyView() {
+        viewModel.duration = viewModel.exoPlayer?.duration ?: 0L
+        viewModel.saveVideoProgress()
+        super.onDestroyView()
+    }
+
     @UnstableApi
     override fun onDestroy() {
         if (!requireActivity().isChangingConfigurations) {

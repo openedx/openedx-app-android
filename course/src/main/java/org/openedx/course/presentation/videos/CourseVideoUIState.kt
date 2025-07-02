@@ -14,6 +14,7 @@ sealed class CourseVideoUIState {
         val downloadModelsSize: DownloadModelsSize,
         val isCompletedSectionsShown: Boolean,
         val videoPreview: Map<String, Any?>,
+        val videoProgress: Map<String, Float>,
     ) : CourseVideoUIState()
 
     data object Empty : CourseVideoUIState()

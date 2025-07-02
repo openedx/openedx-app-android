@@ -102,6 +102,13 @@ data class Block(
         }
     }
 
+    val videoUrl: String?
+        get() = if (studentViewData?.encodedVideos?.hasVideoUrl == true) {
+            studentViewData.encodedVideos.videoUrl
+        } else {
+            studentViewData?.encodedVideos?.youtube?.url
+        }
+
     val isVideoBlock get() = type == BlockType.VIDEO
     val isDiscussionBlock get() = type == BlockType.DISCUSSION
     val isHTMLBlock get() = type == BlockType.HTML

@@ -144,8 +144,14 @@ class CourseVideoViewModel(
                             downloadingModels.find { block.id == it.id }?.path
                         )
                     }
+                    val videoProgress = courseVideos.values.flatten().associate { block ->
+                        val videoUrl = block.videoUrl ?: return@launch
+                        val videoProgressEntity = interactor.getVideoProgress(videoUrl)
+                        videoUrl to videoProgressEntity.videoTime.toFloat() / videoProgressEntity.duration
+                    }
                     val isCompletedSectionsShown =
-                        (_uiState.value as? CourseVideoUIState.CourseData)?.isCompletedSectionsShown == false
+                        (_uiState.value as? CourseVideoUIState.CourseData)?.isCompletedSectionsShown
+                            ?: false
 
                     _uiState.value =
                         CourseVideoUIState.CourseData(
@@ -155,7 +161,8 @@ class CourseVideoViewModel(
                             subSectionsDownloadsCount = subSectionsDownloadsCount,
                             downloadModelsSize = getDownloadModelsSize(),
                             isCompletedSectionsShown = isCompletedSectionsShown,
-                            videoPreview = videoPreview
+                            videoPreview = videoPreview,
+                            videoProgress = videoProgress,
                         )
                 }
                 courseNotifier.send(CourseLoading(false))

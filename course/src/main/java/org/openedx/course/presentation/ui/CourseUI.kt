@@ -612,6 +612,7 @@ fun CourseVideoSection(
     block: Block,
     videoBlocks: List<Block>,
     preview: Map<String, Any?>,
+    progress: Map<String, Float>,
     downloadedStateMap: Map<String, DownloadedState>,
     onVideoClick: (Block) -> Unit,
     onDownloadClick: (blocksIds: List<String>) -> Unit,
@@ -649,6 +650,7 @@ fun CourseVideoSection(
                 CourseVideoItem(
                     videoBlock = block,
                     preview = preview[block.id],
+                    progress = progress[block.videoUrl] ?: 0f,
                     onClick = {
                         onVideoClick(block)
                     }
@@ -663,6 +665,7 @@ fun CourseVideoSection(
 fun CourseVideoItem(
     videoBlock: Block,
     preview: Any?,
+    progress: Float,
     onClick: () -> Unit
 ) {
     Box(
@@ -731,7 +734,7 @@ fun CourseVideoItem(
         )
 
         // Progress bar (bottom)
-        if (videoBlock.completion > 0.0f) {
+        if (progress > 0.0f || videoBlock.isCompleted()) {
             Box(
                 modifier = Modifier
                     .padding(bottom = 4.dp)
@@ -745,7 +748,11 @@ fun CourseVideoItem(
                         .height(4.dp)
                         .padding(horizontal = 8.dp)
                         .clip(CircleShape),
-                    progress = videoBlock.completion.toFloat(),
+                    progress = if (videoBlock.isCompleted()) {
+                        1f
+                    } else {
+                        progress
+                    },
                     color = if (videoBlock.isCompleted()) {
                         MaterialTheme.appColors.progressBarColor
                     } else {

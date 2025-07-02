@@ -220,6 +220,11 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                     CourseAnalyticsKey.YOUTUBE.key
                 )
             }
+
+            override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
+                viewModel.duration = (duration * 1000).toLong()
+                super.onVideoDuration(youTubePlayer, duration)
+            }
         }
 
         if (!isPlayerInitialized) {
@@ -234,6 +239,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
     }
 
     override fun onDestroyView() {
+        viewModel.saveVideoProgress()
         isPlayerInitialized = false
         _youTubePlayer = null
         super.onDestroyView()

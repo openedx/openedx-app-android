@@ -40,6 +40,8 @@ open class VideoUnitViewModel(
     val currentVideoTime: LiveData<Long>
         get() = _currentVideoTime
 
+    var duration = 0L
+
     protected val isUpdatedMutable = MutableLiveData(true)
     val isUpdated: LiveData<Boolean>
         get() = isUpdatedMutable
@@ -65,6 +67,7 @@ open class VideoUnitViewModel(
                 if (it is CourseVideoPositionChanged && videoUrl == it.videoUrl) {
                     isUpdatedMutable.value = false
                     _currentVideoTime.value = it.videoTime
+                    saveVideoProgress()
                     isUpdatedMutable.value = true
                     isPlaying = it.isPlaying
                 } else if (it is CourseSubtitleLanguageChanged) {
@@ -73,6 +76,12 @@ open class VideoUnitViewModel(
                     downloadSubtitles()
                 }
             }
+        }
+    }
+
+    fun saveVideoProgress() {
+        viewModelScope.launch {
+            courseRepository.saveVideoProgress(videoUrl, _currentVideoTime.value ?: 0L, duration)
         }
     }
 
