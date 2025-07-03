@@ -33,8 +33,6 @@
     <string name="course_progress_assignment_type">Assignment Type</string>
     <string name="course_progress_current_max">Current / Max %</string>
 
-    <!-- Error Message when course dates are not available -->
-
     <string name="course_container_nav_home">Home</string>
     <string name="course_container_nav_content">Content</string>
     <string name="course_container_nav_discussions">Discussions</string>
@@ -56,7 +54,7 @@
     <string name="course_accessibility_section_uncompleted">Section uncompleted</string>
     <string name="course_accessibility_video_watched">Video watched</string>
 
-    <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
+    <plurals name="course_sections_complete" tools:ignore="MissingTranslation">
         <item quantity="one">%1$s/%2$s Section Completed</item>
         <item quantity="other">%1$s/%2$s Sections Completed</item>
     </plurals>
@@ -66,7 +64,7 @@
     <string name="course_error_not_started_title">This course will begin on %s. Come back then to start learning!</string>
     <string name="course_an_error_occurred">An error occurred while loading your course</string>
     <string name="course_continue">Continue</string>
-    <string name="course_show_completed">Show Completed</string>
+    <string name="course_view_completed">View Completed</string>
     <string name="course_hide_completed">Hide Completed</string>
     <string name="course_completed">Completed</string>
     <string name="progress_earned_possible_assignment_problems">%1$s / %2$s Complete</string>

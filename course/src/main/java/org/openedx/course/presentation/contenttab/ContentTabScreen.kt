@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -20,12 +21,14 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import org.koin.androidx.compose.koinViewModel
@@ -36,6 +39,7 @@ import org.openedx.course.presentation.container.CourseContentTab
 import org.openedx.course.presentation.outline.CourseContentAllScreen
 import org.openedx.course.presentation.videos.CourseContentVideoScreen
 import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 
 @Composable
 fun ContentScreen(
@@ -44,6 +48,15 @@ fun ContentScreen(
     courseId: String,
     courseName: String
 ) {
+    val tabsWidth by remember(key1 = windowSize) {
+        mutableStateOf(
+            windowSize.windowSizeValue(
+                expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
+                compact = Modifier.fillMaxWidth()
+            )
+        )
+    }
+
     var selectedTab by rememberSaveable { mutableStateOf(CourseContentTab.ALL) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -52,11 +65,12 @@ fun ContentScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
                 modifier = Modifier
                     .padding(16.dp)
-                    .fillMaxWidth()
+                    .then(tabsWidth)
                     .height(40.dp)
                     .clip(MaterialTheme.appShapes.buttonShape)
                     .border(
@@ -75,7 +89,7 @@ fun ContentScreen(
                                 if (isSelected) {
                                     MaterialTheme.appColors.primary
                                 } else {
-                                    MaterialTheme.appColors.primaryButtonText
+                                    MaterialTheme.appColors.background
                                 }
                             )
                             .weight(1f)

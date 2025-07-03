@@ -174,24 +174,32 @@ private fun CourseVideosUI(
                                         )
                                     }
 
-                                    uiState.courseStructure.blockData.forEach { section ->
-                                        val sectionVideos =
-                                            uiState.courseVideos[section.id] ?: emptyList()
-
-                                        if (sectionVideos.any { !it.isCompleted() } || uiState.isCompletedSectionsShown) {
-                                            item {
-                                                CourseVideoSection(
-                                                    block = section,
-                                                    videoBlocks = sectionVideos,
-                                                    downloadedStateMap = uiState.downloadedState,
-                                                    onVideoClick = onVideoClick,
-                                                    onDownloadClick = onDownloadClick,
-                                                    preview = uiState.videoPreview,
-                                                    progress = uiState.videoProgress,
-                                                )
+                                    uiState.courseStructure.blockData
+                                        .let { list ->
+                                            if (uiState.isCompletedSectionsShown) {
+                                                list.sortedBy { uiState.courseVideos[it.id]?.any { !it.isCompleted() } }
+                                            } else {
+                                                list
                                             }
                                         }
-                                    }
+                                        .forEach { section ->
+                                            val sectionVideos =
+                                                uiState.courseVideos[section.id] ?: emptyList()
+
+                                            if (sectionVideos.any { !it.isCompleted() } || uiState.isCompletedSectionsShown) {
+                                                item {
+                                                    CourseVideoSection(
+                                                        block = section,
+                                                        videoBlocks = sectionVideos,
+                                                        downloadedStateMap = uiState.downloadedState,
+                                                        onVideoClick = onVideoClick,
+                                                        onDownloadClick = onDownloadClick,
+                                                        preview = uiState.videoPreview,
+                                                        progress = uiState.videoProgress,
+                                                    )
+                                                }
+                                            }
+                                        }
                                 }
                             }
 

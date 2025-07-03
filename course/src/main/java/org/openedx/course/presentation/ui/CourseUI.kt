@@ -33,6 +33,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -617,6 +618,7 @@ fun CourseVideoSection(
     onVideoClick: (Block) -> Unit,
     onDownloadClick: (blocksIds: List<String>) -> Unit,
 ) {
+    val state = rememberLazyListState()
     val subSectionIds = videoBlocks.map { it.id }
     val filteredStatuses = downloadedStateMap.filterKeys { it in subSectionIds }.values
     val downloadedState = when {
@@ -624,6 +626,15 @@ fun CourseVideoSection(
         filteredStatuses.all { it.isDownloaded } -> DownloadedState.DOWNLOADED
         filteredStatuses.any { it.isWaitingOrDownloading } -> DownloadedState.DOWNLOADING
         else -> DownloadedState.NOT_DOWNLOADED
+    }
+
+    LaunchedEffect(Unit) {
+        try {
+            val uncompletedBlockIndex = videoBlocks.indexOf(videoBlocks.find { !it.isCompleted() })
+            state.scrollToItem(uncompletedBlockIndex)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     Column(
@@ -638,6 +649,7 @@ fun CourseVideoSection(
             }
         )
         LazyRow(
+            state = state,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(
                 top = 8.dp,
@@ -694,7 +706,7 @@ fun CourseVideoItem(
                 .error(coreR.drawable.core_no_image_course)
                 .placeholder(coreR.drawable.core_no_image_course)
                 .build(),
-            contentDescription = null,
+            contentDescription = stringResource(R.string.course_accessibility_video_player),
             contentScale = ContentScale.Crop
         )
 
@@ -724,7 +736,7 @@ fun CourseVideoItem(
         // Title (top-left)
         Text(
             text = videoBlock.displayName,
-            color = MaterialTheme.appColors.onPrimary,
+            color = Color.White,
             style = MaterialTheme.appTypography.bodySmall,
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -1470,7 +1482,7 @@ fun CourseProgress(
     val buttonText = if (isCompletedShown) {
         stringResource(R.string.course_hide_completed)
     } else {
-        stringResource(R.string.course_show_completed)
+        stringResource(R.string.course_view_completed)
     }
     Column(
         modifier = modifier,

@@ -49,6 +49,7 @@ import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.OfflineDownload
 import org.openedx.core.domain.model.Progress
+import org.openedx.core.extension.getChapterBlocks
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
@@ -270,25 +271,28 @@ private fun CourseContentAllUI(
                                         }
                                     }
 
-                                    val progress = uiState.courseStructure.progress
-                                    if (progress != null && progress.total > 0) {
-                                        item {
-                                            CourseProgress(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(
-                                                        start = 24.dp,
-                                                        end = 24.dp
-                                                    ),
-                                                progress = progress,
-                                                description = pluralStringResource(
-                                                    R.plurals.course_assignments_complete,
-                                                    progress.completed,
-                                                    progress.completed,
-                                                    progress.total
-                                                )
+                                    val sections =
+                                        uiState.courseStructure.blockData.getChapterBlocks()
+                                    val progress = Progress(
+                                        total = sections.size,
+                                        completed = sections.filter { it.isCompleted() }.size
+                                    )
+                                    item {
+                                        CourseProgress(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(
+                                                    start = 24.dp,
+                                                    end = 24.dp
+                                                ),
+                                            progress = progress,
+                                            description = pluralStringResource(
+                                                R.plurals.course_sections_complete,
+                                                progress.completed,
+                                                progress.completed,
+                                                progress.total
                                             )
-                                        }
+                                        )
                                     }
 
                                     if (uiState.resumeComponent != null) {
