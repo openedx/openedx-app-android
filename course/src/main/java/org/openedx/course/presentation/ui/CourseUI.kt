@@ -1695,7 +1695,7 @@ private val mockChapterBlock = Block(
     descendantsType = BlockType.CHAPTER,
     completion = 0.0,
     containsGatedContent = false,
-    assignmentProgress = AssignmentProgress("", 1f, 2f),
+    assignmentProgress = AssignmentProgress("", 1f, 2f, "HM1"),
     due = Date(),
     offlineDownload = null
 )

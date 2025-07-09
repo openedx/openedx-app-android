@@ -35,6 +35,7 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
+import org.openedx.course.presentation.assignments.CourseContentAssignmentScreen
 import org.openedx.course.presentation.container.CourseContentTab
 import org.openedx.course.presentation.outline.CourseContentAllScreen
 import org.openedx.course.presentation.videos.CourseContentVideoScreen
@@ -141,12 +142,11 @@ fun ContentScreen(
                     fragmentManager = fragmentManager
                 )
 
-                CourseContentTab.ASSIGNMENTS -> Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Assignments screen coming soon", color = MaterialTheme.appColors.primary)
-                }
+                CourseContentTab.ASSIGNMENTS -> CourseContentAssignmentScreen(
+                    windowSize = windowSize,
+                    viewModel = koinViewModel(parameters = { parametersOf(courseId, courseName) }),
+                    fragmentManager = fragmentManager
+                )
             }
         }
     }

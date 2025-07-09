@@ -11,16 +11,19 @@ data class AssignmentProgress(
     val numPointsEarned: Float?,
     @SerializedName("num_points_possible")
     val numPointsPossible: Float?,
+    val label: String?
 ) {
     fun mapToDomain() = AssignmentProgress(
         assignmentType = assignmentType ?: "",
         numPointsEarned = numPointsEarned ?: 0f,
-        numPointsPossible = numPointsPossible ?: 0f
+        numPointsPossible = numPointsPossible ?: 0f,
+        label = label ?: ""
     )
 
     fun mapToRoomEntity() = AssignmentProgressDb(
         assignmentType = assignmentType,
         numPointsEarned = numPointsEarned,
-        numPointsPossible = numPointsPossible
+        numPointsPossible = numPointsPossible,
+        label = label
     )
 }

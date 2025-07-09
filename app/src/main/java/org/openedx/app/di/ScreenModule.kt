@@ -536,4 +536,11 @@ val screenModule = module {
             router = get()
         )
     }
+    viewModel { (courseId: String, courseName: String) ->
+        org.openedx.course.presentation.assignments.CourseAssignmentViewModel(
+            courseId = courseId,
+            courseName = courseName,
+            interactor = get()
+        )
+    }
 }
