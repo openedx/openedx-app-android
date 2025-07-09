@@ -6,29 +6,27 @@ data class CourseProgress(
     val verifiedMode: String,
     val accessExpiration: String,
     val assignmentColors: List<Color>,
-    val certificateData: CertificateData,
-    val completionSummary: CompletionSummary,
-    val courseGrade: CourseGrade,
+    val certificateData: CertificateData?,
+    val completionSummary: CompletionSummary?,
+    val courseGrade: CourseGrade?,
     val creditCourseRequirements: String,
     val end: String,
     val enrollmentMode: String,
-    val gradingPolicy: GradingPolicy,
+    val gradingPolicy: GradingPolicy?,
     val hasScheduledContent: Boolean,
     val sectionScores: List<SectionScore>,
     val studioUrl: String,
     val username: String,
     val userHasPassingGrade: Boolean,
-    val verificationData: VerificationData,
+    val verificationData: VerificationData?,
     val disableProgressGraph: Boolean,
 ) {
     val completion = with(completionSummary) {
-        val total = completeCount + incompleteCount
-        if (total > 0f) completeCount.toFloat() / total else 0f
+        val total = (this?.completeCount ?: 0) + (this?.incompleteCount ?: 0)
+        if (total > 0f) (this?.completeCount ?: 0).toFloat() / total else 0f
     }
     val completionPercent = (completion * 100f).toInt()
-    val currentGrade = courseGrade.percent
-    val currentGradePercent = (currentGrade * 100f).toInt() // ???
-    val requiredGrade = gradingPolicy.gradeRange.values.firstOrNull() ?: 0f
+    val requiredGrade = gradingPolicy?.gradeRange?.values?.firstOrNull() ?: 0f
     val requiredGradePercent = (requiredGrade * 100f).toInt()
 
     fun getEarnedAssignmentProblems(
@@ -59,8 +57,8 @@ data class CourseProgress(
     }
 
     fun getTotalWeightPercent() =
-        gradingPolicy.assignmentPolicies.sumOf { getAssignmentWeightedGradedPercent(it).toDouble() }
-            .toFloat()
+        gradingPolicy?.assignmentPolicies?.sumOf { getAssignmentWeightedGradedPercent(it).toDouble() }
+            ?.toFloat() ?: 0f
 
     fun getNotCompletedWeightedGradePercent(): Float {
         val totalWeightedPercent = getTotalWeightPercent()

@@ -44,7 +44,7 @@
     <string name="course_progress_required_grade_percent">A weighted grade of %1$d%% is required to pass this course</string>
     <string name="course_progress_grade_details">Grade Details</string>
     <string name="course_progress_assignment_type">Assignment Type</string>
-    <string name="course_progress_current_max">Current /  Max %</string>
+    <string name="course_progress_current_max">Current / Max %</string>
 
     <!-- Error Message when course dates are not available -->
     <string name="course_dates_unavailable_message" tools:ignore="MissingTranslation">Course dates are not currently available.</string>
@@ -64,7 +64,6 @@
     <string name="course_accessibility_stop_downloading_course_section">Stop downloading course section</string>
     <string name="course_accessibility_section_completed">Section completed</string>
     <string name="course_accessibility_section_uncompleted">Section uncompleted</string>
-
 
     <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
         <item quantity="one">%1$s of %2$s  assignment complete</item>

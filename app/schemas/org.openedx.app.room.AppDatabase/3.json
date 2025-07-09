@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "b4e899be0df5caa15bb6c52c6a16c3eb",
+    "identityHash": "d6028101c7598e8d1c5dedfcfc73d304",
     "entities": [
       {
         "tableName": "course_discovery_table",
@@ -1008,7 +1008,7 @@
       },
       {
         "tableName": "course_progress_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`courseId` TEXT NOT NULL, `verifiedMode` TEXT NOT NULL, `accessExpiration` TEXT NOT NULL, `creditCourseRequirements` TEXT NOT NULL, `end` TEXT NOT NULL, `enrollmentMode` TEXT NOT NULL, `hasScheduledContent` INTEGER NOT NULL, `sectionScores` TEXT NOT NULL, `studioUrl` TEXT NOT NULL, `username` TEXT NOT NULL, `userHasPassingGrade` INTEGER NOT NULL, `disableProgressGraph` INTEGER NOT NULL, `assignment_colors` TEXT, `certificate_certStatus` TEXT NOT NULL, `certificate_certWebViewUrl` TEXT NOT NULL, `certificate_downloadUrl` TEXT NOT NULL, `certificate_certificateAvailableDate` TEXT NOT NULL, `completion_completeCount` INTEGER NOT NULL, `completion_incompleteCount` INTEGER NOT NULL, `completion_lockedCount` INTEGER NOT NULL, `grade_letterGrade` TEXT NOT NULL, `grade_percent` REAL NOT NULL, `grade_isPassing` INTEGER NOT NULL, `grading_assignmentPolicies` TEXT NOT NULL, `grading_gradeRange` TEXT NOT NULL, `verification_link` TEXT NOT NULL, `verification_status` TEXT NOT NULL, `verification_statusDate` TEXT NOT NULL, PRIMARY KEY(`courseId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`courseId` TEXT NOT NULL, `verifiedMode` TEXT NOT NULL, `accessExpiration` TEXT NOT NULL, `creditCourseRequirements` TEXT NOT NULL, `end` TEXT NOT NULL, `enrollmentMode` TEXT NOT NULL, `hasScheduledContent` INTEGER NOT NULL, `sectionScores` TEXT NOT NULL, `studioUrl` TEXT NOT NULL, `username` TEXT NOT NULL, `userHasPassingGrade` INTEGER NOT NULL, `disableProgressGraph` INTEGER NOT NULL, `assignment_colors` TEXT, `certificate_certStatus` TEXT, `certificate_certWebViewUrl` TEXT, `certificate_downloadUrl` TEXT, `certificate_certificateAvailableDate` TEXT, `completion_completeCount` INTEGER, `completion_incompleteCount` INTEGER, `completion_lockedCount` INTEGER, `grade_letterGrade` TEXT, `grade_percent` REAL, `grade_isPassing` INTEGER, `grading_assignmentPolicies` TEXT, `grading_gradeRange` TEXT, `verification_link` TEXT, `verification_status` TEXT, `verification_statusDate` TEXT, PRIMARY KEY(`courseId`))",
         "fields": [
           {
             "fieldPath": "courseId",
@@ -1092,91 +1092,91 @@
             "fieldPath": "certificateData.certStatus",
             "columnName": "certificate_certStatus",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "certificateData.certWebViewUrl",
             "columnName": "certificate_certWebViewUrl",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "certificateData.downloadUrl",
             "columnName": "certificate_downloadUrl",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "certificateData.certificateAvailableDate",
             "columnName": "certificate_certificateAvailableDate",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "completionSummary.completeCount",
             "columnName": "completion_completeCount",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "completionSummary.incompleteCount",
             "columnName": "completion_incompleteCount",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "completionSummary.lockedCount",
             "columnName": "completion_lockedCount",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "courseGrade.letterGrade",
             "columnName": "grade_letterGrade",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "courseGrade.percent",
             "columnName": "grade_percent",
             "affinity": "REAL",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "courseGrade.isPassing",
             "columnName": "grade_isPassing",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "gradingPolicy.assignmentPolicies",
             "columnName": "grading_assignmentPolicies",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "gradingPolicy.gradeRange",
             "columnName": "grading_gradeRange",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "verificationData.link",
             "columnName": "verification_link",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "verificationData.status",
             "columnName": "verification_status",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "verificationData.statusDate",
             "columnName": "verification_statusDate",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -1192,7 +1192,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b4e899be0df5caa15bb6c52c6a16c3eb')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd6028101c7598e8d1c5dedfcfc73d304')"
     ]
   }
 }

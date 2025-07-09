@@ -18,11 +18,11 @@ data class CourseProgressEntity(
     @ColumnInfo("accessExpiration")
     val accessExpiration: String,
     @Embedded(prefix = "certificate_")
-    val certificateData: CertificateDataDb,
+    val certificateData: CertificateDataDb?,
     @Embedded(prefix = "completion_")
-    val completionSummary: CompletionSummaryDb,
+    val completionSummary: CompletionSummaryDb?,
     @Embedded(prefix = "grade_")
-    val courseGrade: CourseGradeDb,
+    val courseGrade: CourseGradeDb?,
     @ColumnInfo("creditCourseRequirements")
     val creditCourseRequirements: String,
     @ColumnInfo("end")
@@ -30,7 +30,7 @@ data class CourseProgressEntity(
     @ColumnInfo("enrollmentMode")
     val enrollmentMode: String,
     @Embedded(prefix = "grading_")
-    val gradingPolicy: GradingPolicyDb,
+    val gradingPolicy: GradingPolicyDb?,
     @ColumnInfo("hasScheduledContent")
     val hasScheduledContent: Boolean,
     @ColumnInfo("sectionScores")
@@ -42,84 +42,29 @@ data class CourseProgressEntity(
     @ColumnInfo("userHasPassingGrade")
     val userHasPassingGrade: Boolean,
     @Embedded(prefix = "verification_")
-    val verificationData: VerificationDataDb,
+    val verificationData: VerificationDataDb?,
     @ColumnInfo("disableProgressGraph")
     val disableProgressGraph: Boolean,
     @ColumnInfo("assignment_colors")
     val assignmentColors: List<String>?
 ) {
-    @Suppress("LongMethod")
     fun mapToDomain(): CourseProgress {
         return CourseProgress(
             verifiedMode = verifiedMode,
             accessExpiration = accessExpiration,
-            certificateData = CourseProgress.CertificateData(
-                certStatus = certificateData.certStatus,
-                certWebViewUrl = certificateData.certWebViewUrl,
-                downloadUrl = certificateData.downloadUrl,
-                certificateAvailableDate = certificateData.certificateAvailableDate
-            ),
-            completionSummary = CourseProgress.CompletionSummary(
-                completeCount = completionSummary.completeCount,
-                incompleteCount = completionSummary.incompleteCount,
-                lockedCount = completionSummary.lockedCount
-            ),
-            courseGrade = CourseProgress.CourseGrade(
-                letterGrade = courseGrade.letterGrade,
-                percent = courseGrade.percent,
-                isPassing = courseGrade.isPassing
-            ),
+            certificateData = certificateData?.mapToDomain(),
+            completionSummary = completionSummary?.mapToDomain(),
+            courseGrade = courseGrade?.mapToDomain(),
             creditCourseRequirements = creditCourseRequirements,
             end = end,
             enrollmentMode = enrollmentMode,
-            gradingPolicy = CourseProgress.GradingPolicy(
-                assignmentPolicies = gradingPolicy.assignmentPolicies.map {
-                    CourseProgress.GradingPolicy.AssignmentPolicy(
-                        numDroppable = it.numDroppable,
-                        numTotal = it.numTotal,
-                        shortLabel = it.shortLabel,
-                        type = it.type,
-                        weight = it.weight
-                    )
-                },
-                gradeRange = gradingPolicy.gradeRange
-            ),
+            gradingPolicy = gradingPolicy?.mapToDomain(),
             hasScheduledContent = hasScheduledContent,
-            sectionScores = sectionScores.map { section ->
-                CourseProgress.SectionScore(
-                    displayName = section.displayName,
-                    subsections = section.subsections.map { subsection ->
-                        CourseProgress.SectionScore.Subsection(
-                            assignmentType = subsection.assignmentType,
-                            blockKey = subsection.blockKey,
-                            displayName = subsection.displayName,
-                            hasGradedAssignment = subsection.hasGradedAssignment,
-                            override = subsection.override,
-                            learnerHasAccess = subsection.learnerHasAccess,
-                            numPointsEarned = subsection.numPointsEarned,
-                            numPointsPossible = subsection.numPointsPossible,
-                            percentGraded = subsection.percentGraded,
-                            problemScores = subsection.problemScores.map { problemScore ->
-                                CourseProgress.SectionScore.Subsection.ProblemScore(
-                                    earned = problemScore.earned,
-                                    possible = problemScore.possible
-                                )
-                            },
-                            showCorrectness = subsection.showCorrectness,
-                            showGrades = subsection.showGrades,
-                            url = subsection.url
-                        )
-                    }
-                )
-            },
+            sectionScores = sectionScores.map { it.mapToDomain() },
             studioUrl = studioUrl,
             username = username,
             userHasPassingGrade = userHasPassingGrade,
-            verificationData = CourseProgress.VerificationData(
-                link = verificationData.link,
-                status = verificationData.status,
-                statusDate = verificationData.statusDate
-            ),
+            verificationData = verificationData?.mapToDomain(),
             disableProgressGraph = disableProgressGraph,
             assignmentColors = assignmentColors?.map { colorString ->
                 Color(colorString.toColorInt())
@@ -137,7 +82,14 @@ data class CertificateDataDb(
     val downloadUrl: String,
     @ColumnInfo("certificateAvailableDate")
     val certificateAvailableDate: String
-)
+) {
+    fun mapToDomain() = CourseProgress.CertificateData(
+        certStatus = certStatus,
+        certWebViewUrl = certWebViewUrl,
+        downloadUrl = downloadUrl,
+        certificateAvailableDate = certificateAvailableDate
+    )
+}
 
 data class CompletionSummaryDb(
     @ColumnInfo("completeCount")
@@ -146,7 +98,13 @@ data class CompletionSummaryDb(
     val incompleteCount: Int,
     @ColumnInfo("lockedCount")
     val lockedCount: Int
-)
+) {
+    fun mapToDomain() = CourseProgress.CompletionSummary(
+        completeCount = completeCount,
+        incompleteCount = incompleteCount,
+        lockedCount = lockedCount
+    )
+}
 
 data class CourseGradeDb(
     @ColumnInfo("letterGrade")
@@ -155,7 +113,13 @@ data class CourseGradeDb(
     val percent: Double,
     @ColumnInfo("isPassing")
     val isPassing: Boolean
-)
+) {
+    fun mapToDomain() = CourseProgress.CourseGrade(
+        letterGrade = letterGrade,
+        percent = percent,
+        isPassing = isPassing
+    )
+}
 
 data class GradingPolicyDb(
     @ColumnInfo("assignmentPolicies")
@@ -163,6 +127,10 @@ data class GradingPolicyDb(
     @ColumnInfo("gradeRange")
     val gradeRange: Map<String, Float>
 ) {
+    fun mapToDomain() = CourseProgress.GradingPolicy(
+        assignmentPolicies = assignmentPolicies.map { it.mapToDomain() },
+        gradeRange = gradeRange
+    )
     data class AssignmentPolicyDb(
         @ColumnInfo("numDroppable")
         val numDroppable: Int,
@@ -174,7 +142,15 @@ data class GradingPolicyDb(
         val type: String,
         @ColumnInfo("weight")
         val weight: Double
-    )
+    ) {
+        fun mapToDomain() = CourseProgress.GradingPolicy.AssignmentPolicy(
+            numDroppable = numDroppable,
+            numTotal = numTotal,
+            shortLabel = shortLabel,
+            type = type,
+            weight = weight
+        )
+    }
 }
 
 data class SectionScoreDb(
@@ -183,6 +159,10 @@ data class SectionScoreDb(
     @ColumnInfo("subsections")
     val subsections: List<SubsectionDb>
 ) {
+    fun mapToDomain() = CourseProgress.SectionScore(
+        displayName = displayName,
+        subsections = subsections.map { it.mapToDomain() }
+    )
     data class SubsectionDb(
         @ColumnInfo("assignmentType")
         val assignmentType: String,
@@ -211,12 +191,32 @@ data class SectionScoreDb(
         @ColumnInfo("url")
         val url: String
     ) {
+        fun mapToDomain() = CourseProgress.SectionScore.Subsection(
+            assignmentType = assignmentType,
+            blockKey = blockKey,
+            displayName = displayName,
+            hasGradedAssignment = hasGradedAssignment,
+            override = override,
+            learnerHasAccess = learnerHasAccess,
+            numPointsEarned = numPointsEarned,
+            numPointsPossible = numPointsPossible,
+            percentGraded = percentGraded,
+            problemScores = problemScores.map { it.mapToDomain() },
+            showCorrectness = showCorrectness,
+            showGrades = showGrades,
+            url = url
+        )
         data class ProblemScoreDb(
             @ColumnInfo("earned")
             val earned: Double,
             @ColumnInfo("possible")
             val possible: Double
-        )
+        ) {
+            fun mapToDomain() = CourseProgress.SectionScore.Subsection.ProblemScore(
+                earned = earned,
+                possible = possible
+            )
+        }
     }
 }
 
@@ -227,4 +227,10 @@ data class VerificationDataDb(
     val status: String,
     @ColumnInfo("statusDate")
     val statusDate: String
-)
+) {
+    fun mapToDomain() = CourseProgress.VerificationData(
+        link = link,
+        status = status,
+        statusDate = statusDate
+    )
+}

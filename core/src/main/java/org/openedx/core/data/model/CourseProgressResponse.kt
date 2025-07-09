@@ -9,6 +9,7 @@ import org.openedx.core.data.model.room.CourseGradeDb
 import org.openedx.core.data.model.room.CourseProgressEntity
 import org.openedx.core.data.model.room.GradingPolicyDb
 import org.openedx.core.data.model.room.SectionScoreDb
+import org.openedx.core.data.model.room.VerificationDataDb
 import org.openedx.core.domain.model.CourseProgress
 
 data class CourseProgressResponse(
@@ -35,37 +36,109 @@ data class CourseProgressResponse(
         @SerializedName("cert_web_view_url") val certWebViewUrl: String?,
         @SerializedName("download_url") val downloadUrl: String?,
         @SerializedName("certificate_available_date") val certificateAvailableDate: String?
-    )
+    ) {
+        fun mapToRoomEntity() = CertificateDataDb(
+            certStatus = certStatus.orEmpty(),
+            certWebViewUrl = certWebViewUrl.orEmpty(),
+            downloadUrl = downloadUrl.orEmpty(),
+            certificateAvailableDate = certificateAvailableDate.orEmpty()
+        )
+
+        fun mapToDomain() = CourseProgress.CertificateData(
+            certStatus = certStatus ?: "",
+            certWebViewUrl = certWebViewUrl ?: "",
+            downloadUrl = downloadUrl ?: "",
+            certificateAvailableDate = certificateAvailableDate ?: ""
+        )
+    }
 
     data class CompletionSummary(
         @SerializedName("complete_count") val completeCount: Int?,
         @SerializedName("incomplete_count") val incompleteCount: Int?,
         @SerializedName("locked_count") val lockedCount: Int?
-    )
+    ) {
+        fun mapToRoomEntity() = CompletionSummaryDb(
+            completeCount = completeCount ?: 0,
+            incompleteCount = incompleteCount ?: 0,
+            lockedCount = lockedCount ?: 0
+        )
+
+        fun mapToDomain() = CourseProgress.CompletionSummary(
+            completeCount = completeCount ?: 0,
+            incompleteCount = incompleteCount ?: 0,
+            lockedCount = lockedCount ?: 0
+        )
+    }
 
     data class CourseGrade(
         @SerializedName("letter_grade") val letterGrade: String?,
         @SerializedName("percent") val percent: Double?,
         @SerializedName("is_passing") val isPassing: Boolean?
-    )
+    ) {
+        fun mapToRoomEntity() = CourseGradeDb(
+            letterGrade = letterGrade.orEmpty(),
+            percent = percent ?: 0.0,
+            isPassing = isPassing ?: false
+        )
+
+        fun mapToDomain() = CourseProgress.CourseGrade(
+            letterGrade = letterGrade ?: "",
+            percent = percent ?: 0.0,
+            isPassing = isPassing ?: false
+        )
+    }
 
     data class GradingPolicy(
         @SerializedName("assignment_policies") val assignmentPolicies: List<AssignmentPolicy>?,
         @SerializedName("grade_range") val gradeRange: Map<String, Float>?
     ) {
+        fun mapToRoomEntity() = GradingPolicyDb(
+            assignmentPolicies = assignmentPolicies?.map { it.mapToRoomEntity() } ?: emptyList(),
+            gradeRange = gradeRange ?: emptyMap()
+        )
+
+        fun mapToDomain() = CourseProgress.GradingPolicy(
+            assignmentPolicies = assignmentPolicies?.map { it.mapToDomain() } ?: emptyList(),
+            gradeRange = gradeRange ?: emptyMap()
+        )
         data class AssignmentPolicy(
             @SerializedName("num_droppable") val numDroppable: Int?,
             @SerializedName("num_total") val numTotal: Int?,
             @SerializedName("short_label") val shortLabel: String?,
             @SerializedName("type") val type: String?,
             @SerializedName("weight") val weight: Double?
-        )
+        ) {
+            fun mapToRoomEntity() = GradingPolicyDb.AssignmentPolicyDb(
+                numDroppable = numDroppable ?: 0,
+                numTotal = numTotal ?: 0,
+                shortLabel = shortLabel.orEmpty(),
+                type = type.orEmpty(),
+                weight = weight ?: 0.0
+            )
+
+            fun mapToDomain() = CourseProgress.GradingPolicy.AssignmentPolicy(
+                numDroppable = numDroppable ?: 0,
+                numTotal = numTotal ?: 0,
+                shortLabel = shortLabel ?: "",
+                type = type ?: "",
+                weight = weight ?: 0.0
+            )
+        }
     }
 
     data class SectionScore(
         @SerializedName("display_name") val displayName: String?,
         @SerializedName("subsections") val subsections: List<Subsection>?
     ) {
+        fun mapToRoomEntity() = SectionScoreDb(
+            displayName = displayName.orEmpty(),
+            subsections = subsections?.map { it.mapToRoomEntity() } ?: emptyList()
+        )
+
+        fun mapToDomain() = CourseProgress.SectionScore(
+            displayName = displayName ?: "",
+            subsections = subsections?.map { it.mapToDomain() } ?: emptyList()
+        )
         data class Subsection(
             @SerializedName("assignment_type") val assignmentType: String?,
             @SerializedName("block_key") val blockKey: String?,
@@ -81,10 +154,51 @@ data class CourseProgressResponse(
             @SerializedName("show_grades") val showGrades: Boolean?,
             @SerializedName("url") val url: String?
         ) {
+            fun mapToRoomEntity() = SectionScoreDb.SubsectionDb(
+                assignmentType = assignmentType.orEmpty(),
+                blockKey = blockKey.orEmpty(),
+                displayName = displayName.orEmpty(),
+                hasGradedAssignment = hasGradedAssignment ?: false,
+                override = override.orEmpty(),
+                learnerHasAccess = learnerHasAccess ?: false,
+                numPointsEarned = numPointsEarned ?: 0f,
+                numPointsPossible = numPointsPossible ?: 0f,
+                percentGraded = percentGraded ?: 0.0,
+                problemScores = problemScores?.map { it.mapToRoomEntity() } ?: emptyList(),
+                showCorrectness = showCorrectness.orEmpty(),
+                showGrades = showGrades ?: false,
+                url = url.orEmpty()
+            )
+
+            fun mapToDomain() = CourseProgress.SectionScore.Subsection(
+                assignmentType = assignmentType ?: "",
+                blockKey = blockKey ?: "",
+                displayName = displayName ?: "",
+                hasGradedAssignment = hasGradedAssignment ?: false,
+                override = override ?: "",
+                learnerHasAccess = learnerHasAccess ?: false,
+                numPointsEarned = numPointsEarned ?: 0f,
+                numPointsPossible = numPointsPossible ?: 0f,
+                percentGraded = percentGraded ?: 0.0,
+                problemScores = problemScores?.map { it.mapToDomain() } ?: emptyList(),
+                showCorrectness = showCorrectness ?: "",
+                showGrades = showGrades ?: false,
+                url = url ?: ""
+            )
             data class ProblemScore(
                 @SerializedName("earned") val earned: Double?,
                 @SerializedName("possible") val possible: Double?
-            )
+            ) {
+                fun mapToRoomEntity() = SectionScoreDb.SubsectionDb.ProblemScoreDb(
+                    earned = earned ?: 0.0,
+                    possible = possible ?: 0.0
+                )
+
+                fun mapToDomain() = CourseProgress.SectionScore.Subsection.ProblemScore(
+                    earned = earned ?: 0.0,
+                    possible = possible ?: 0.0
+                )
+            }
         }
     }
 
@@ -92,80 +206,37 @@ data class CourseProgressResponse(
         @SerializedName("link") val link: String?,
         @SerializedName("status") val status: String?,
         @SerializedName("status_date") val statusDate: String?
-    )
+    ) {
+        fun mapToRoomEntity() = VerificationDataDb(
+            link = link.orEmpty(),
+            status = status.orEmpty(),
+            statusDate = statusDate.orEmpty()
+        )
 
-    @Suppress("LongMethod")
+        fun mapToDomain() = CourseProgress.VerificationData(
+            link = link ?: "",
+            status = status ?: "",
+            statusDate = statusDate ?: ""
+        )
+    }
+
     fun mapToDomain(): CourseProgress {
         return CourseProgress(
             verifiedMode = verifiedMode ?: "",
             accessExpiration = accessExpiration ?: "",
-            certificateData = CourseProgress.CertificateData(
-                certStatus = certificateData?.certStatus ?: "",
-                certWebViewUrl = certificateData?.certWebViewUrl ?: "",
-                downloadUrl = certificateData?.downloadUrl ?: "",
-                certificateAvailableDate = certificateData?.certificateAvailableDate ?: ""
-            ),
-            completionSummary = CourseProgress.CompletionSummary(
-                completeCount = completionSummary?.completeCount ?: 0,
-                incompleteCount = completionSummary?.incompleteCount ?: 0,
-                lockedCount = completionSummary?.lockedCount ?: 0
-            ),
-            courseGrade = CourseProgress.CourseGrade(
-                letterGrade = courseGrade?.letterGrade ?: "",
-                percent = courseGrade?.percent ?: 0.0,
-                isPassing = courseGrade?.isPassing ?: false
-            ),
+            certificateData = certificateData?.mapToDomain(),
+            completionSummary = completionSummary?.mapToDomain(),
+            courseGrade = courseGrade?.mapToDomain(),
             creditCourseRequirements = creditCourseRequirements ?: "",
             end = end ?: "",
             enrollmentMode = enrollmentMode ?: "",
-            gradingPolicy = CourseProgress.GradingPolicy(
-                assignmentPolicies = gradingPolicy?.assignmentPolicies?.map {
-                    CourseProgress.GradingPolicy.AssignmentPolicy(
-                        numDroppable = it.numDroppable ?: 0,
-                        numTotal = it.numTotal ?: 0,
-                        shortLabel = it.shortLabel ?: "",
-                        type = it.type ?: "",
-                        weight = it.weight ?: 0.0
-                    )
-                } ?: emptyList(),
-                gradeRange = gradingPolicy?.gradeRange ?: emptyMap()
-            ),
+            gradingPolicy = gradingPolicy?.mapToDomain(),
             hasScheduledContent = hasScheduledContent ?: false,
-            sectionScores = sectionScores?.map { section ->
-                CourseProgress.SectionScore(
-                    displayName = section.displayName ?: "",
-                    subsections = section.subsections?.map { subsection ->
-                        CourseProgress.SectionScore.Subsection(
-                            assignmentType = subsection.assignmentType ?: "",
-                            blockKey = subsection.blockKey ?: "",
-                            displayName = subsection.displayName ?: "",
-                            hasGradedAssignment = subsection.hasGradedAssignment ?: false,
-                            override = subsection.override ?: "",
-                            learnerHasAccess = subsection.learnerHasAccess ?: false,
-                            numPointsEarned = subsection.numPointsEarned ?: 0f,
-                            numPointsPossible = subsection.numPointsPossible ?: 0f,
-                            percentGraded = subsection.percentGraded ?: 0.0,
-                            problemScores = subsection.problemScores?.map { problemScore ->
-                                CourseProgress.SectionScore.Subsection.ProblemScore(
-                                    earned = problemScore.earned ?: 0.0,
-                                    possible = problemScore.possible ?: 0.0
-                                )
-                            } ?: emptyList(),
-                            showCorrectness = subsection.showCorrectness ?: "",
-                            showGrades = subsection.showGrades ?: false,
-                            url = subsection.url ?: ""
-                        )
-                    } ?: emptyList()
-                )
-            } ?: emptyList(),
+            sectionScores = sectionScores?.map { it.mapToDomain() } ?: emptyList(),
             studioUrl = studioUrl ?: "",
             username = username ?: "",
             userHasPassingGrade = userHasPassingGrade ?: false,
-            verificationData = CourseProgress.VerificationData(
-                link = verificationData?.link ?: "",
-                status = verificationData?.status ?: "",
-                statusDate = verificationData?.statusDate ?: ""
-            ),
+            verificationData = verificationData?.mapToDomain(),
             disableProgressGraph = disableProgressGraph ?: false,
             assignmentColors = assignmentColors?.map { colorString ->
                 Color(colorString.toColorInt())
@@ -173,79 +244,24 @@ data class CourseProgressResponse(
         )
     }
 
-    @Suppress("LongMethod, CyclomaticComplexMethod")
     fun mapToRoomEntity(courseId: String): CourseProgressEntity {
         return CourseProgressEntity(
             courseId = courseId,
-            verifiedMode = verifiedMode ?: "",
-            accessExpiration = accessExpiration ?: "",
-            certificateData = CertificateDataDb(
-                certStatus = certificateData?.certStatus ?: "",
-                certWebViewUrl = certificateData?.certWebViewUrl ?: "",
-                downloadUrl = certificateData?.downloadUrl ?: "",
-                certificateAvailableDate = certificateData?.certificateAvailableDate ?: ""
-            ),
-            completionSummary = CompletionSummaryDb(
-                completeCount = completionSummary?.completeCount ?: 0,
-                incompleteCount = completionSummary?.incompleteCount ?: 0,
-                lockedCount = completionSummary?.lockedCount ?: 0
-            ),
-            courseGrade = CourseGradeDb(
-                letterGrade = courseGrade?.letterGrade ?: "",
-                percent = courseGrade?.percent ?: 0.0,
-                isPassing = courseGrade?.isPassing ?: false
-            ),
-            creditCourseRequirements = creditCourseRequirements ?: "",
-            end = end ?: "",
-            enrollmentMode = enrollmentMode ?: "",
-            gradingPolicy = GradingPolicyDb(
-                assignmentPolicies = gradingPolicy?.assignmentPolicies?.map {
-                    GradingPolicyDb.AssignmentPolicyDb(
-                        numDroppable = it.numDroppable ?: 0,
-                        numTotal = it.numTotal ?: 0,
-                        shortLabel = it.shortLabel ?: "",
-                        type = it.type ?: "",
-                        weight = it.weight ?: 0.0
-                    )
-                } ?: emptyList(),
-                gradeRange = gradingPolicy?.gradeRange ?: emptyMap()
-            ),
+            verifiedMode = verifiedMode.orEmpty(),
+            accessExpiration = accessExpiration.orEmpty(),
+            certificateData = certificateData?.mapToRoomEntity(),
+            completionSummary = completionSummary?.mapToRoomEntity(),
+            courseGrade = courseGrade?.mapToRoomEntity(),
+            creditCourseRequirements = creditCourseRequirements.orEmpty(),
+            end = end.orEmpty(),
+            enrollmentMode = enrollmentMode.orEmpty(),
+            gradingPolicy = gradingPolicy?.mapToRoomEntity(),
             hasScheduledContent = hasScheduledContent ?: false,
-            sectionScores = sectionScores?.map { section ->
-                SectionScoreDb(
-                    displayName = section.displayName ?: "",
-                    subsections = section.subsections?.map { subsection ->
-                        SectionScoreDb.SubsectionDb(
-                            assignmentType = subsection.assignmentType ?: "",
-                            blockKey = subsection.blockKey ?: "",
-                            displayName = subsection.displayName ?: "",
-                            hasGradedAssignment = subsection.hasGradedAssignment ?: false,
-                            override = subsection.override ?: "",
-                            learnerHasAccess = subsection.learnerHasAccess ?: false,
-                            numPointsEarned = subsection.numPointsEarned ?: 0f,
-                            numPointsPossible = subsection.numPointsPossible ?: 0f,
-                            percentGraded = subsection.percentGraded ?: 0.0,
-                            problemScores = subsection.problemScores?.map { problemScore ->
-                                SectionScoreDb.SubsectionDb.ProblemScoreDb(
-                                    earned = problemScore.earned ?: 0.0,
-                                    possible = problemScore.possible ?: 0.0
-                                )
-                            } ?: emptyList(),
-                            showCorrectness = subsection.showCorrectness ?: "",
-                            showGrades = subsection.showGrades ?: false,
-                            url = subsection.url ?: ""
-                        )
-                    } ?: emptyList()
-                )
-            } ?: emptyList(),
-            studioUrl = studioUrl ?: "",
-            username = username ?: "",
+            sectionScores = sectionScores?.map { it.mapToRoomEntity() } ?: emptyList(),
+            studioUrl = studioUrl.orEmpty(),
+            username = username.orEmpty(),
             userHasPassingGrade = userHasPassingGrade ?: false,
-            verificationData = org.openedx.core.data.model.room.VerificationDataDb(
-                link = verificationData?.link ?: "",
-                status = verificationData?.status ?: "",
-                statusDate = verificationData?.statusDate ?: ""
-            ),
+            verificationData = verificationData?.mapToRoomEntity(),
             disableProgressGraph = disableProgressGraph ?: false,
             assignmentColors = assignmentColors,
         )

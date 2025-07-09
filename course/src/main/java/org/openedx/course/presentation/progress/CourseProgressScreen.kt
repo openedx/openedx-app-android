@@ -44,6 +44,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -93,6 +95,7 @@ private fun CourseProgressContent(
     windowSize: WindowSize
 ) {
     val scaffoldState = rememberScaffoldState()
+    val gradingPolicy = uiState.progress.gradingPolicy
 
     Scaffold(
         modifier = Modifier
@@ -110,71 +113,76 @@ private fun CourseProgressContent(
         }
 
         Box(
-            modifier = screenWidth
+            modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.appColors.background)
                 .padding(it)
                 .displayCutoutForLandscape(),
             contentAlignment = Alignment.TopCenter
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(vertical = 16.dp)
+            Surface(
+                modifier = screenWidth,
+                color = MaterialTheme.appColors.background,
             ) {
-                item {
-                    CourseCompletionView(
-                        progress = uiState.progress
-                    )
-                }
-                if (uiState.progress.gradingPolicy.assignmentPolicies.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(vertical = 16.dp)
+                ) {
                     item {
-                        OverallGradeView(
-                            progress = uiState.progress,
-                        )
-                    }
-                    item {
-                        GradeDetailsHeaderView()
-                    }
-                    itemsIndexed(uiState.progress.gradingPolicy.assignmentPolicies) { index, policy ->
-                        AssignmentTypeRow(
-                            progress = uiState.progress,
-                            policy = policy,
-                            color = if (uiState.progress.assignmentColors.isNotEmpty()) {
-                                uiState.progress.assignmentColors[index % uiState.progress.assignmentColors.size]
-                            } else {
-                                MaterialTheme.appColors.primary
-                            }
-                        )
-                        Divider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp)
-                        )
-                    }
-                    item {
-                        GradeDetailsFooterView(
+                        CourseCompletionView(
                             progress = uiState.progress
                         )
                     }
-                } else {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillParentMaxHeight(EMPTY_STATE_VIEW_HEIGHT)
-                                .fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            NoGradesView()
+                    if (gradingPolicy == null) return@LazyColumn
+                    if (gradingPolicy.assignmentPolicies.isNotEmpty()) {
+                        item {
+                            OverallGradeView(
+                                progress = uiState.progress,
+                            )
+                        }
+                        item {
+                            GradeDetailsHeaderView()
+                        }
+                        itemsIndexed(gradingPolicy.assignmentPolicies) { index, policy ->
+                            AssignmentTypeRow(
+                                progress = uiState.progress,
+                                policy = policy,
+                                color = if (uiState.progress.assignmentColors.isNotEmpty()) {
+                                    uiState.progress.assignmentColors[index % uiState.progress.assignmentColors.size]
+                                } else {
+                                    MaterialTheme.appColors.primary
+                                }
+                            )
+                            Divider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp)
+                            )
+                        }
+                        item {
+                            GradeDetailsFooterView(
+                                progress = uiState.progress
+                            )
+                        }
+                    } else {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillParentMaxHeight(EMPTY_STATE_VIEW_HEIGHT)
+                                    .fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                NoGradesView()
+                            }
                         }
                     }
                 }
             }
-        }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+            HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        }
     }
 }
 
@@ -254,6 +262,9 @@ private fun GradeDetailsFooterView(
 private fun OverallGradeView(
     progress: CourseProgress,
 ) {
+    val gradingPolicy = progress.gradingPolicy
+    if (gradingPolicy == null) return
+    val notCompletedWeightedGradePercent = progress.getNotCompletedWeightedGradePercent()
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -267,22 +278,31 @@ private fun OverallGradeView(
             style = MaterialTheme.appTypography.labelMedium,
             color = MaterialTheme.appColors.textDark,
         )
-        Row(
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.course_progress_current_overall),
-                style = MaterialTheme.appTypography.labelMedium,
-                color = MaterialTheme.appColors.textDark,
-            )
-            Text(
-                text = "${progress.getTotalWeightPercent().toInt()}%",
-                style = MaterialTheme.appTypography.labelMedium,
-                color = MaterialTheme.appColors.primary,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
+        Text(
+            text = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        color = MaterialTheme.appColors.textDark,
+                        fontSize = MaterialTheme.appTypography.labelMedium.fontSize,
+                        fontFamily = MaterialTheme.appTypography.labelMedium.fontFamily,
+                        fontWeight = MaterialTheme.appTypography.labelMedium.fontWeight
+                    )
+                ) {
+                    append(stringResource(R.string.course_progress_current_overall) + " ")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        color = MaterialTheme.appColors.primary,
+                        fontSize = MaterialTheme.appTypography.labelMedium.fontSize,
+                        fontFamily = MaterialTheme.appTypography.labelMedium.fontFamily,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                ) {
+                    append("${progress.getTotalWeightPercent().toInt()}%")
+                }
+            },
+            style = MaterialTheme.appTypography.labelMedium,
+        )
 
         Column {
             Row(
@@ -296,11 +316,11 @@ private fun OverallGradeView(
                         shape = CircleShape
                     )
             ) {
-                progress.gradingPolicy.assignmentPolicies.forEach { assignmentPolicy ->
+                gradingPolicy.assignmentPolicies.forEach { assignmentPolicy ->
                     val assignmentColors = progress.assignmentColors
                     val color = if (assignmentColors.isNotEmpty()) {
                         assignmentColors[
-                            progress.gradingPolicy.assignmentPolicies.indexOf(
+                            gradingPolicy.assignmentPolicies.indexOf(
                                 assignmentPolicy
                             ) % assignmentColors.size
                         ]
@@ -318,11 +338,13 @@ private fun OverallGradeView(
                         )
                     }
                 }
-                Box(
-                    modifier = Modifier
-                        .weight(progress.getNotCompletedWeightedGradePercent())
-                        .fillMaxHeight()
-                )
+                if (notCompletedWeightedGradePercent > 0f) {
+                    Box(
+                        modifier = Modifier
+                            .weight(notCompletedWeightedGradePercent)
+                            .fillMaxHeight()
+                    )
+                }
             }
             Box(
                 modifier = Modifier
@@ -334,12 +356,14 @@ private fun OverallGradeView(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.course_ic_marker),
+                        painter = painterResource(id = R.drawable.ic_course_marker),
                         tint = MaterialTheme.appColors.warning,
                         contentDescription = null
                     )
                     Text(
-                        modifier = Modifier.offset(y = 2.dp),
+                        modifier = Modifier
+                            .offset(y = 2.dp)
+                            .clearAndSetSemantics { },
                         text = "${progress.requiredGradePercent}%",
                         style = MaterialTheme.appTypography.labelMedium,
                         color = MaterialTheme.appColors.textDark,
@@ -405,6 +429,7 @@ private fun CourseCompletionView(
         Box(
             modifier = Modifier
                 .align(Alignment.CenterVertically)
+                .semantics(mergeDescendants = true) {}
         ) {
             CircularProgressIndicator(
                 modifier = Modifier
@@ -448,7 +473,10 @@ private fun AssignmentTypeRow(
 ) {
     val earned = progress.getEarnedAssignmentProblems(policy)
     val possible = progress.getPossibleAssignmentProblems(policy)
-    Column {
+    Column(
+        modifier = Modifier
+            .semantics(mergeDescendants = true) {}
+    ) {
         Text(
             text = policy.type,
             style = MaterialTheme.appTypography.labelLarge,
