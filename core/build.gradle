@@ -117,7 +117,7 @@ dependencies {
     api "net.lingala.zip4j:zip4j:$zip_version"
 
     //  OpenEdx libs
-    api("com.github.openedx:openedx-app-foundation-android:1.0.0")
+    api("com.github.openedx:openedx-app-foundation-android:1.0.1")
 
     // Preview
     debugApi "androidx.compose.ui:ui-tooling:$compose_ui_tooling"
