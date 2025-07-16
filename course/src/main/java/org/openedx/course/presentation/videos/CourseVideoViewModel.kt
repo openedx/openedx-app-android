@@ -2,6 +2,7 @@ package org.openedx.course.presentation.videos
 
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.openedx.core.BlockType
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
@@ -138,11 +140,13 @@ class CourseVideoViewModel(
                     courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
                     initDownloadModelsStatus()
                     val downloadingModels = getDownloadModelList()
-                    val videoPreview = courseVideos.values.flatten().associate { block ->
-                        block.id to block.getVideoPreview(
-                            networkConnection.isOnline(),
-                            downloadingModels.find { block.id == it.id }?.path
-                        )
+                    val videoPreview = withContext(Dispatchers.IO) {
+                        courseVideos.values.flatten().associate { block ->
+                            block.id to block.getVideoPreview(
+                                networkConnection.isOnline(),
+                                downloadingModels.find { block.id == it.id }?.path
+                            )
+                        }
                     }
                     val videoProgress = courseVideos.values.flatten().associate { block ->
                         val videoUrl = block.videoUrl ?: return@launch

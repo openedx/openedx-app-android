@@ -152,13 +152,13 @@
     <string name="core_message_calendar_out_of_date" tools:ignore="MissingTranslation">Your course dates have been shifted and your course calendar is no longer up to date with your new schedule.</string>
     <string name="core_label_update_now" tools:ignore="MissingTranslation">Update Now</string>
     <string name="core_label_remove_course_calendar" tools:ignore="MissingTranslation">Remove Course Calendar</string>
-
     <!-- endregion -->
 
     <string name="core_no_course_content">No course content is currently available.</string>
     <string name="core_no_videos">No videos available for this course.</string>
     <string name="core_no_dates">Course dates are currently not available.</string>
     <string name="core_no_progress">This course does not contain exams or graded assignments.</string>
+    <string name="core_no_assignments">Course assignment are currently not available.</string>
     <string name="core_no_discussion">Unable to load discussions.\n Please try again later.</string>
     <string name="core_no_handouts">There are currently no handouts for this course.</string>
     <string name="core_no_announcements">There are currently no announcements for this course.</string>
@@ -213,7 +213,6 @@
     <string name="core_explore_other_parts_when_reconnect">Explore other parts of this course or view this when you reconnect.</string>
     <string name="core_not_downloaded">This component is not downloaded</string>
     <string name="core_explore_other_parts_when_reconnect_or_download">Explore other parts of this course or download this when you reconnect.</string>
-
     <string name="core_authorization">Authorization</string>
     <string name="core_authorization_request">Please enter the system to continue with course enrollment.</string>
 </resources>

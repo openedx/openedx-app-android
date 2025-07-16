@@ -16,6 +16,10 @@ enum class NoContentScreenType(
         iconResId = R.drawable.core_ic_no_content,
         messageResId = R.string.core_no_dates
     ),
+    COURSE_ASSIGNMENT(
+        iconResId = R.drawable.core_ic_no_content,
+        messageResId = R.string.core_no_assignments
+    ),
     COURSE_DISCUSSIONS(
         iconResId = R.drawable.core_ic_no_content,
         messageResId = R.string.core_no_discussion

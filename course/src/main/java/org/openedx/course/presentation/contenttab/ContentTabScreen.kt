@@ -19,6 +19,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,7 +48,8 @@ fun ContentScreen(
     windowSize: WindowSize,
     fragmentManager: FragmentManager,
     courseId: String,
-    courseName: String
+    courseName: String,
+    onTabSelected: (CourseContentTab) -> Unit = {},
 ) {
     val tabsWidth by remember(key1 = windowSize) {
         mutableStateOf(
@@ -59,6 +61,11 @@ fun ContentScreen(
     }
 
     var selectedTab by rememberSaveable { mutableStateOf(CourseContentTab.ALL) }
+
+    LaunchedEffect(selectedTab) {
+        onTabSelected(selectedTab)
+    }
+    
     Scaffold(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -145,7 +152,7 @@ fun ContentScreen(
                 CourseContentTab.ASSIGNMENTS -> CourseContentAssignmentScreen(
                     windowSize = windowSize,
                     viewModel = koinViewModel(parameters = { parametersOf(courseId, courseName) }),
-                    fragmentManager = fragmentManager
+                    fragmentManager = fragmentManager,
                 )
             }
         }

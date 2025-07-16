@@ -44,11 +44,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
+import org.openedx.core.BlockType
+import org.openedx.core.NoContentScreenType
+import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
+import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.Progress
+import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.ui.NoContentScreen
+import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
@@ -56,6 +66,7 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
 import org.openedx.course.presentation.ui.CourseProgress
 import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
 import java.util.Date
 import org.openedx.core.R as coreR
@@ -64,12 +75,20 @@ import org.openedx.core.R as coreR
 fun CourseContentAssignmentScreen(
     windowSize: WindowSize,
     viewModel: CourseAssignmentViewModel,
-    fragmentManager: FragmentManager
+    fragmentManager: FragmentManager,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     CourseContentAssignmentScreen(
         uiState = uiState,
-        windowSize = windowSize
+        windowSize = windowSize,
+        onAssignmentClick = { subSectionBlock ->
+            viewModel.courseRouter.navigateToCourseSubsections(
+                fm = fragmentManager,
+                courseId = viewModel.courseId,
+                subSectionId = subSectionBlock.id,
+                mode = CourseViewMode.FULL
+            )
+        },
     )
 }
 
@@ -77,6 +96,7 @@ fun CourseContentAssignmentScreen(
 private fun CourseContentAssignmentScreen(
     uiState: CourseAssignmentUIState,
     windowSize: WindowSize,
+    onAssignmentClick: (Block) -> Unit,
 ) {
     val screenWidth by remember(key1 = windowSize) {
         mutableStateOf(
@@ -94,14 +114,12 @@ private fun CourseContentAssignmentScreen(
             }
         }
 
-        is CourseAssignmentUIState.Error -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Error loading assignments", color = Color.Red)
-            }
+        is CourseAssignmentUIState.Empty -> {
+            NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_ASSIGNMENT)
         }
 
         is CourseAssignmentUIState.CourseData -> {
-            Column(modifier = screenWidth) {
+            Box(modifier = screenWidth) {
                 val progress = uiState.progress
                 val description = stringResource(
                     id = R.string.course_completed,
@@ -130,7 +148,8 @@ private fun CourseContentAssignmentScreen(
                         item {
                             AssignmentGroupSection(
                                 label = type,
-                                assignments = blocks
+                                assignments = blocks,
+                                onAssignmentClick = onAssignmentClick,
                             )
                         }
                     }
@@ -143,7 +162,8 @@ private fun CourseContentAssignmentScreen(
 @Composable
 private fun AssignmentGroupSection(
     label: String,
-    assignments: List<Block>
+    assignments: List<Block>,
+    onAssignmentClick: (Block) -> Unit,
 ) {
     val progress = Progress(
         total = assignments.size,
@@ -157,6 +177,7 @@ private fun AssignmentGroupSection(
     val percentOfGrade = -1 // Mocked
     val firstUncompletedId = assignments.firstOrNull { !it.isCompleted() }?.id
     var selectedId by rememberSaveable(label) { mutableStateOf(firstUncompletedId) }
+    var isCompletedShown by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -195,34 +216,55 @@ private fun AssignmentGroupSection(
             modifier = Modifier
                 .padding(horizontal = 24.dp),
             progress = progress,
-            description = description
+            description = description,
+            isCompletedShown = isCompletedShown,
+            onVisibilityChanged = if (progress.value == 1f) {
+                { isCompletedShown = !isCompletedShown }
+            } else {
+                null
+            },
         )
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(vertical = 8.dp),
-            contentPadding = PaddingValues(horizontal = 24.dp)
-        ) {
-            items(assignments) { assignment ->
-                AssignmentButton(
-                    assignment = assignment,
-                    isSelected = assignment.id == selectedId,
-                    onClick = {
-                        selectedId = if (selectedId == assignment.id) {
-                            null
-                        } else {
-                            assignment.id
-                        }
+        if (isCompletedShown || progress.value != 1f) {
+            if (assignments.size > 1) {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp)
+                ) {
+                    items(assignments) { assignment ->
+                        AssignmentButton(
+                            assignment = assignment,
+                            isSelected = assignment.id == selectedId,
+                            onClick = {
+                                selectedId = if (selectedId == assignment.id) {
+                                    null
+                                } else {
+                                    assignment.id
+                                }
+                            }
+                        )
                     }
+                }
+            }
+            if (assignments.size > 1) {
+                // Show details for selected assignment in this group
+                assignments.find { it.id == selectedId }?.let { assignment ->
+                    AssignmentDetails(
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp),
+                        assignment = assignment,
+                        onAssignmentClick = onAssignmentClick
+                    )
+                }
+            } else {
+                AssignmentDetails(
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .padding(top = 8.dp),
+                    assignment = assignments.firstOrNull() ?: return@Column,
+                    onAssignmentClick = onAssignmentClick
                 )
             }
-        }
-        // Show details for selected assignment in this group
-        assignments.find { it.id == selectedId }?.let { assignment ->
-            AssignmentDetails(
-                modifier = Modifier
-                    .padding(horizontal = 24.dp),
-                assignment = assignment,
-            )
         }
         Divider(
             modifier = Modifier.padding(vertical = 12.dp),
@@ -264,7 +306,7 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            contentAlignment = Alignment.TopCenter
+            contentAlignment = Alignment.TopCenter,
         ) {
             Card(
                 modifier = Modifier
@@ -281,12 +323,18 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
                 ),
                 elevation = 0.dp,
             ) {
-                Text(
-                    text = label,
-                    color = MaterialTheme.appColors.textDark,
-                    style = MaterialTheme.appTypography.bodyMedium,
-
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Text(
+                        modifier = Modifier.align(Alignment.Center),
+                        text = label,
+                        color = MaterialTheme.appColors.textDark,
+                        style = MaterialTheme.appTypography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Clip
                     )
+                }
             }
             if (icon != null) {
                 Image(
@@ -321,7 +369,8 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
 @Composable
 private fun AssignmentDetails(
     modifier: Modifier = Modifier,
-    assignment: Block
+    assignment: Block,
+    onAssignmentClick: (Block) -> Unit,
 ) {
     val dueDate =
         assignment.due?.let { TimeUtils.formatToString(LocalContext.current, it, true) } ?: ""
@@ -335,7 +384,7 @@ private fun AssignmentDetails(
         modifier = modifier
             .fillMaxWidth()
             .clickable {
-
+                onAssignmentClick(assignment)
             },
         backgroundColor = MaterialTheme.appColors.cardViewBackground,
         shape = MaterialTheme.appShapes.material.small,
@@ -352,7 +401,7 @@ private fun AssignmentDetails(
                     .height(6.dp),
                 progress = progress,
                 color = MaterialTheme.appColors.progressBarColor,
-                backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
+                backgroundColor = color
             )
             Row(
                 modifier = Modifier
@@ -390,3 +439,99 @@ private fun AssignmentDetails(
         }
     }
 }
+
+@Preview
+@Composable
+private fun CourseContentAssignmentScreenPreview() {
+    OpenEdXTheme {
+        CourseContentAssignmentScreen(
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            uiState = CourseAssignmentUIState.CourseData(
+                progress = Progress(1, 3),
+                groupedAssignments = mapOf(
+                    "Homework" to listOf(mockChapterBlock, mockSequentialBlock)
+                )
+            ),
+            onAssignmentClick = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun CourseContentAssignmentScreenEmptyPreview() {
+    OpenEdXTheme {
+        CourseContentAssignmentScreen(
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            uiState = CourseAssignmentUIState.Empty,
+            onAssignmentClick = {},
+        )
+    }
+}
+
+@Preview(device = Devices.NEXUS_9)
+@Composable
+private fun CourseContentAssignmentScreenTabletPreview() {
+    OpenEdXTheme {
+        CourseContentAssignmentScreen(
+            windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
+            uiState = CourseAssignmentUIState.CourseData(
+                progress = Progress(2, 3),
+                groupedAssignments = mapOf(
+                    "Homework" to listOf(mockChapterBlock),
+                    "Quiz" to listOf(mockSequentialBlock)
+                )
+            ),
+            onAssignmentClick = {},
+        )
+    }
+}
+
+private val mockAssignmentProgress = AssignmentProgress(
+    assignmentType = "Home",
+    numPointsEarned = 1f,
+    numPointsPossible = 3f,
+    label = "HM1"
+)
+
+private val mockChapterBlock = Block(
+    id = "id",
+    blockId = "blockId",
+    lmsWebUrl = "lmsWebUrl",
+    legacyWebUrl = "legacyWebUrl",
+    studentViewUrl = "studentViewUrl",
+    type = BlockType.CHAPTER,
+    displayName = "Chapter",
+    graded = false,
+    studentViewData = null,
+    studentViewMultiDevice = false,
+    blockCounts = BlockCounts(1),
+    descendants = emptyList(),
+    descendantsType = BlockType.CHAPTER,
+    completion = 0.0,
+    containsGatedContent = false,
+    assignmentProgress = mockAssignmentProgress,
+    due = Date(),
+    offlineDownload = null
+)
+
+private val mockSequentialBlock = Block(
+    id = "id",
+    blockId = "blockId",
+    lmsWebUrl = "lmsWebUrl",
+    legacyWebUrl = "legacyWebUrl",
+    studentViewUrl = "studentViewUrl",
+    type = BlockType.SEQUENTIAL,
+    displayName = "Sequential",
+    graded = false,
+    studentViewData = null,
+    studentViewMultiDevice = false,
+    blockCounts = BlockCounts(1),
+    descendants = emptyList(),
+    descendantsType = BlockType.SEQUENTIAL,
+    completion = 0.0,
+    containsGatedContent = false,
+    assignmentProgress = mockAssignmentProgress,
+    due = Date(),
+    offlineDownload = null
+)

@@ -77,4 +77,5 @@
     <string name="course_completed">%1$s/%2$s Completed</string>
     <string name="course_assignment_due">%1$s Due %2$s</string>
     <string name="course_of_grade">%1$s %% of Grade</string>
+    <string name="course_review_grading_policy">Review Course Grading Policy</string>
 </resources>

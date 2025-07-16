@@ -30,10 +30,17 @@ object PreviewHelper {
                 retriever.setDataSource(videoUrl, HashMap())
             }
             return retriever.getFrameAtTime(0)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            // Log the exception for debugging but don't crash
+            e.printStackTrace()
             return null
         } finally {
-            retriever.release()
+            try {
+                retriever.release()
+            } catch (e: Exception) {
+                // Ignore release exceptions
+                e.printStackTrace()
+            }
         }
     }
 

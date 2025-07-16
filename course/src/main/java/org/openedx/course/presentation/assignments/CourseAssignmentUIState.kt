@@ -8,7 +8,6 @@ sealed class CourseAssignmentUIState {
         val groupedAssignments: Map<String, List<Block>>,
         val progress: Progress
     ) : CourseAssignmentUIState()
-
-    data object Error : CourseAssignmentUIState()
+    data object Empty : CourseAssignmentUIState()
     data object Loading : CourseAssignmentUIState()
-} 
+}

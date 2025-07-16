@@ -18,6 +18,7 @@ import org.openedx.core.presentation.settings.video.VideoQualityViewModel
 import org.openedx.core.repository.CalendarRepository
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.assignments.CourseAssignmentViewModel
 import org.openedx.course.presentation.container.CourseContainerViewModel
 import org.openedx.course.presentation.dates.CourseDatesViewModel
 import org.openedx.course.presentation.handouts.HandoutsViewModel
@@ -537,10 +538,11 @@ val screenModule = module {
         )
     }
     viewModel { (courseId: String, courseName: String) ->
-        org.openedx.course.presentation.assignments.CourseAssignmentViewModel(
+        CourseAssignmentViewModel(
             courseId = courseId,
             courseName = courseName,
-            interactor = get()
+            interactor = get(),
+            courseRouter = get()
         )
     }
 }

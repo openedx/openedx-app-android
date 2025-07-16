@@ -65,7 +65,7 @@ data class Block(
             blockCounts = blockCounts?.mapToDomain()!!,
             completion = completion ?: 0.0,
             containsGatedContent = containsGatedContent ?: false,
-            assignmentProgress = assignmentProgress?.mapToDomain(),
+            assignmentProgress = assignmentProgress?.mapToDomain(displayName.orEmpty()),
             due = TimeUtils.iso8601ToDate(due.orEmpty()),
             offlineDownload = offlineDownload?.mapToDomain()
         )
