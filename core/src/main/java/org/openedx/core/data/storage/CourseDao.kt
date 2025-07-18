@@ -42,6 +42,9 @@ interface CourseDao {
     suspend fun getCourseEnrollmentDetailsById(id: String): CourseEnrollmentDetailsEntity?
 
 
+    @Query("DELETE FROM course_progress_table")
+    suspend fun clearCourseProgressData()
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVideoProgressEntity(vararg videoProgressEntity: VideoProgressEntity)
 

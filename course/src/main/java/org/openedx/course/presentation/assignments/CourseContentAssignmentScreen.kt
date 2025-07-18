@@ -55,6 +55,7 @@ import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
+import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.NoContentScreen
@@ -70,6 +71,15 @@ import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
 import java.util.Date
 import org.openedx.core.R as coreR
+
+private const val ICON_SIZE_DP = 20
+private const val POINTER_ICON_SIZE_DP = 10
+private const val POINTER_ICON_PADDING_TOP_DP = 4
+private const val PROGRESS_HEIGHT_DP = 6
+private const val ASSIGNMENT_BUTTON_CARD_BACKGROUND_ALPHA = 0.5f
+private const val COMPLETED_ASSIGNMENTS_COUNT = 1
+private const val COMPLETED_ASSIGNMENTS_COUNT_TABLET = 2
+private const val TOTAL_ASSIGNMENTS_COUNT = 3
 
 @Composable
 fun CourseContentAssignmentScreen(
@@ -119,6 +129,8 @@ private fun CourseContentAssignmentScreen(
         }
 
         is CourseAssignmentUIState.CourseData -> {
+            val gradingPolicy = uiState.courseProgress.gradingPolicy
+            val defaultGradeColor = MaterialTheme.appColors.primary
             Box(modifier = screenWidth) {
                 val progress = uiState.progress
                 val description = stringResource(
@@ -144,10 +156,22 @@ private fun CourseContentAssignmentScreen(
                             Spacer(modifier = Modifier.padding(vertical = 4.dp))
                         }
                     }
-                    uiState.groupedAssignments.forEach { (type, blocks) ->
+                    uiState.groupedAssignments.onEachIndexed { index, (type, blocks) ->
+                        val percentOfGrade = gradingPolicy?.assignmentPolicies
+                            ?.find { it.type == type }
+                            ?.weight?.times(100)
+                            ?.toInt() ?: 0
+                        val gradeColor =
+                            if (gradingPolicy?.assignmentColors?.isNotEmpty() == true) {
+                                gradingPolicy.assignmentColors[index % gradingPolicy.assignmentColors.size]
+                            } else {
+                                defaultGradeColor
+                            }
                         item {
                             AssignmentGroupSection(
                                 label = type,
+                                percentOfGrade = percentOfGrade,
+                                gradeColor = gradeColor,
                                 assignments = blocks,
                                 onAssignmentClick = onAssignmentClick,
                             )
@@ -163,6 +187,8 @@ private fun CourseContentAssignmentScreen(
 private fun AssignmentGroupSection(
     label: String,
     assignments: List<Block>,
+    percentOfGrade: Int,
+    gradeColor: Color,
     onAssignmentClick: (Block) -> Unit,
 ) {
     val progress = Progress(
@@ -174,7 +200,6 @@ private fun AssignmentGroupSection(
         progress.completed,
         progress.total
     )
-    val percentOfGrade = -1 // Mocked
     val firstUncompletedId = assignments.firstOrNull { !it.isCompleted() }?.id
     var selectedId by rememberSaveable(label) { mutableStateOf(firstUncompletedId) }
     var isCompletedShown by rememberSaveable { mutableStateOf(false) }
@@ -198,9 +223,9 @@ private fun AssignmentGroupSection(
             )
             Surface(
                 modifier = Modifier.padding(start = 8.dp),
-                color = Color.Transparent,
-                border = BorderStroke(1.dp, Color.Gray),
-                shape = MaterialTheme.shapes.small
+                color = gradeColor.copy(alpha = 0.1f),
+                border = BorderStroke(1.dp, gradeColor),
+                shape = MaterialTheme.appShapes.material.small
             ) {
                 Text(
                     modifier = Modifier.padding(4.dp),
@@ -275,7 +300,9 @@ private fun AssignmentGroupSection(
 
 @Composable
 private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: () -> Unit) {
-    val label = assignment.assignmentProgress?.label ?: ""
+    val label = assignment.assignmentProgress?.label?.split(" ").let {
+        it?.first()?.take(3) + it?.last()
+    }
     val isDuePast = assignment.due != null && assignment.due!! > Date()
     val cardBorderColor = when {
         isSelected -> MaterialTheme.appColors.primary
@@ -298,8 +325,11 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
         else -> 1.dp
     }
     val cardBackground = when {
-        assignment.isCompleted() -> MaterialTheme.appColors.successGreen.copy(0.5f)
-        isDuePast -> MaterialTheme.appColors.warning.copy(0.5f)
+        assignment.isCompleted() -> MaterialTheme.appColors.successGreen.copy(
+            ASSIGNMENT_BUTTON_CARD_BACKGROUND_ALPHA
+        )
+
+        isDuePast -> MaterialTheme.appColors.warning.copy(ASSIGNMENT_BUTTON_CARD_BACKGROUND_ALPHA)
         else -> MaterialTheme.appColors.cardViewBackground
     }
     Column(
@@ -324,7 +354,9 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
                 elevation = 0.dp,
             ) {
                 Box(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(2.dp)
                 ) {
                     Text(
                         modifier = Modifier.align(Alignment.Center),
@@ -332,7 +364,7 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
                         color = MaterialTheme.appColors.textDark,
                         style = MaterialTheme.appTypography.bodyMedium,
                         maxLines = 1,
-                        overflow = TextOverflow.Clip
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -345,13 +377,12 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
                     contentDescription = iconDescription,
                 )
             }
-
         }
         if (isSelected) {
             Icon(
                 modifier = Modifier
-                    .size(10.dp)
-                    .padding(top = 4.dp),
+                    .size(POINTER_ICON_SIZE_DP.dp)
+                    .padding(top = POINTER_ICON_PADDING_TOP_DP.dp),
                 painter = painterResource(id = coreR.drawable.ic_core_pointer),
                 tint = MaterialTheme.appColors.primary,
                 contentDescription = null
@@ -359,8 +390,8 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
         } else {
             Box(
                 modifier = Modifier
-                    .size(10.dp)
-                    .padding(top = 4.dp)
+                    .size(POINTER_ICON_SIZE_DP.dp)
+                    .padding(top = POINTER_ICON_PADDING_TOP_DP.dp)
             )
         }
     }
@@ -373,12 +404,32 @@ private fun AssignmentDetails(
     onAssignmentClick: (Block) -> Unit,
 ) {
     val dueDate =
-        assignment.due?.let { TimeUtils.formatToString(LocalContext.current, it, true) } ?: ""
+        assignment.due?.let { TimeUtils.formatToDueInString(LocalContext.current, it) } ?: ""
     val progress = assignment.completion.toFloat()
     val color = when {
         assignment.isCompleted() -> MaterialTheme.appColors.successGreen
         assignment.due != null && assignment.due!! > Date() -> MaterialTheme.appColors.warning
         else -> MaterialTheme.appColors.cardViewBorder
+    }
+    val label = assignment.assignmentProgress?.label
+    val description = when {
+        assignment.isCompleted() -> {
+            "$label " + stringResource(
+                R.string.course_complete_points,
+                assignment.assignmentProgress?.toString() ?: ""
+            )
+        }
+
+        assignment.due != null && assignment.due!! > Date() -> {
+            "$label " + stringResource(
+                R.string.course_past_due,
+                assignment.assignmentProgress?.toString() ?: ""
+            )
+        }
+
+        else -> {
+            "$label $dueDate"
+        }
     }
     Card(
         modifier = modifier
@@ -398,7 +449,7 @@ private fun AssignmentDetails(
             LinearProgressIndicator(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(6.dp),
+                    .height(PROGRESS_HEIGHT_DP.dp),
                 progress = progress,
                 color = MaterialTheme.appColors.progressBarColor,
                 backgroundColor = color
@@ -416,13 +467,9 @@ private fun AssignmentDetails(
                         style = MaterialTheme.appTypography.bodyLarge,
                         color = MaterialTheme.appColors.textDark
                     )
-                    if (dueDate.isNotEmpty()) {
+                    if (description.isNotEmpty()) {
                         Text(
-                            text = stringResource(
-                                R.string.course_assignment_due,
-                                assignment.assignmentProgress?.label ?: "",
-                                dueDate
-                            ),
+                            text = description,
                             style = MaterialTheme.appTypography.bodySmall,
                             color = MaterialTheme.appColors.textDark
                         )
@@ -430,7 +477,7 @@ private fun AssignmentDetails(
                 }
                 Icon(
                     modifier = Modifier
-                        .size(20.dp),
+                        .size(ICON_SIZE_DP.dp),
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
                     tint = MaterialTheme.appColors.primary
@@ -447,10 +494,11 @@ private fun CourseContentAssignmentScreenPreview() {
         CourseContentAssignmentScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseAssignmentUIState.CourseData(
-                progress = Progress(1, 3),
+                progress = Progress(COMPLETED_ASSIGNMENTS_COUNT, TOTAL_ASSIGNMENTS_COUNT),
                 groupedAssignments = mapOf(
                     "Homework" to listOf(mockChapterBlock, mockSequentialBlock)
-                )
+                ),
+                courseProgress = mockCourseProgress
             ),
             onAssignmentClick = {},
         )
@@ -476,16 +524,103 @@ private fun CourseContentAssignmentScreenTabletPreview() {
         CourseContentAssignmentScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseAssignmentUIState.CourseData(
-                progress = Progress(2, 3),
+                progress = Progress(COMPLETED_ASSIGNMENTS_COUNT_TABLET, TOTAL_ASSIGNMENTS_COUNT),
                 groupedAssignments = mapOf(
                     "Homework" to listOf(mockChapterBlock),
                     "Quiz" to listOf(mockSequentialBlock)
-                )
+                ),
+                courseProgress = mockCourseProgress
             ),
             onAssignmentClick = {},
         )
     }
 }
+
+private val mockCourseProgress = CourseProgress(
+    verifiedMode = "verified",
+    accessExpiration = "2024-12-31",
+    certificateData = CourseProgress.CertificateData(
+        certStatus = "downloadable",
+        certWebViewUrl = "https://example.com/cert",
+        downloadUrl = "https://example.com/cert.pdf",
+        certificateAvailableDate = "2024-06-01"
+    ),
+    completionSummary = CourseProgress.CompletionSummary(
+        completeCount = 5,
+        incompleteCount = 3,
+        lockedCount = 1
+    ),
+    courseGrade = CourseProgress.CourseGrade(
+        letterGrade = "B+",
+        percent = 85.5,
+        isPassing = true
+    ),
+    creditCourseRequirements = "Complete all assignments",
+    end = "2024-12-31",
+    enrollmentMode = "verified",
+    gradingPolicy = CourseProgress.GradingPolicy(
+        assignmentPolicies = listOf(
+            CourseProgress.GradingPolicy.AssignmentPolicy(
+                numDroppable = 1,
+                numTotal = 5,
+                shortLabel = "HW",
+                type = "Homework",
+                weight = 0.4
+            ),
+            CourseProgress.GradingPolicy.AssignmentPolicy(
+                numDroppable = 0,
+                numTotal = 3,
+                shortLabel = "Quiz",
+                type = "Quiz",
+                weight = 0.6
+            )
+        ),
+        gradeRange = mapOf(
+            "A" to 0.9f,
+            "B" to 0.8f,
+            "C" to 0.7f,
+            "D" to 0.6f
+        ),
+        assignmentColors = listOf(Color(0xFF2196F3), Color(0xFF4CAF50))
+    ),
+    hasScheduledContent = false,
+    sectionScores = listOf(
+        CourseProgress.SectionScore(
+            displayName = "Week 1",
+            subsections = listOf(
+                CourseProgress.SectionScore.Subsection(
+                    assignmentType = "Homework",
+                    blockKey = "block1",
+                    displayName = "Homework 1",
+                    hasGradedAssignment = true,
+                    override = "",
+                    learnerHasAccess = true,
+                    numPointsEarned = 8f,
+                    numPointsPossible = 10f,
+                    percentGraded = 80.0,
+                    problemScores = listOf(
+                        CourseProgress.SectionScore.Subsection.ProblemScore(
+                            earned = 8.0,
+                            possible = 10.0
+                        )
+                    ),
+                    showCorrectness = "always",
+                    showGrades = true,
+                    url = "https://example.com/hw1"
+                )
+            )
+        )
+    ),
+    studioUrl = "https://studio.example.com",
+    username = "testuser",
+    userHasPassingGrade = true,
+    verificationData = CourseProgress.VerificationData(
+        link = "https://example.com/verify",
+        status = "approved",
+        statusDate = "2024-01-15"
+    ),
+    disableProgressGraph = false
+)
 
 private val mockAssignmentProgress = AssignmentProgress(
     assignmentType = "Home",

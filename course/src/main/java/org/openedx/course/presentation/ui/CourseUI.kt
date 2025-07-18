@@ -1040,7 +1040,8 @@ fun CourseSubSectionItem(
     }
     val due by rememberSaveable {
         mutableStateOf(
-            block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) } ?: "")
+            block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) } ?: ""
+        )
     }
     val isAssignmentEnable =
         !block.isCompleted() && block.assignmentProgress != null && due.isNotEmpty()
@@ -1079,14 +1080,16 @@ fun CourseSubSectionItem(
         }
 
         if (isAssignmentEnable) {
-            val assignmentString =
+            val assignmentString = stringResource(
+                coreR.string.core_subsection_assignment_info,
+                block.assignmentProgress?.assignmentType ?: "",
                 stringResource(
-                    coreR.string.core_subsection_assignment_info,
-                    block.assignmentProgress?.assignmentType ?: "",
-                    stringResource(id = coreR.string.core_date_format_assignment_due, due),
-                    block.assignmentProgress?.numPointsEarned?.toInt() ?: 0,
-                    block.assignmentProgress?.numPointsPossible?.toInt() ?: 0
-                )
+                    id = coreR.string.core_date_format_assignment_due,
+                    due
+                ),
+                block.assignmentProgress?.numPointsEarned?.toInt() ?: 0,
+                block.assignmentProgress?.numPointsPossible?.toInt() ?: 0
+            )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = assignmentString,

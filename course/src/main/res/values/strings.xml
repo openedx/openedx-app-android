@@ -75,7 +75,8 @@
     <string name="course_progress_no_assignments">This course does not contain graded assignments.</string>
     <string name="course_video_watched">%1$s/%2$s Watched</string>
     <string name="course_completed">%1$s/%2$s Completed</string>
-    <string name="course_assignment_due">%1$s Due %2$s</string>
+    <string name="course_complete_points">Complete - %1$s points</string>
+    <string name="course_past_due">Past Due - %1$s points</string>
     <string name="course_of_grade">%1$s %% of Grade</string>
     <string name="course_review_grading_policy">Review Course Grading Policy</string>
 </resources>

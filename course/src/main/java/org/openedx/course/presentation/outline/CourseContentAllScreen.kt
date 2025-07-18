@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -78,7 +79,6 @@ fun CourseContentAllScreen(
     windowSize: WindowSize,
     viewModel: CourseContentAllViewModel,
     fragmentManager: FragmentManager,
-    onResetDatesClick: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val uiMessage by viewModel.uiMessage.collectAsState(null)
@@ -143,11 +143,7 @@ fun CourseContentAllScreen(
             )
         },
         onResetDatesClick = {
-            viewModel.resetCourseDatesBanner(
-                onResetDates = {
-                    onResetDatesClick()
-                }
-            )
+            viewModel.resetCourseDatesBanner()
         },
         onCertificateClick = {
             viewModel.viewCertificateTappedEvent()
@@ -359,7 +355,7 @@ private fun ResumeCourse(
     OpenEdXButton(
         modifier = modifier
             .fillMaxWidth()
-            .height(54.dp),
+            .defaultMinSize(minHeight = 54.dp),
         onClick = {
             onResumeClick(block.id)
         },
@@ -370,6 +366,7 @@ private fun ResumeCourse(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
+                    modifier = Modifier.weight(1f),
                     text = displayName,
                     color = MaterialTheme.appColors.primaryButtonText,
                     style = MaterialTheme.appTypography.titleMedium,
@@ -382,7 +379,6 @@ private fun ResumeCourse(
                     textStyle = MaterialTheme.appTypography.labelLarge
                 )
             }
-
         }
     )
 }

@@ -289,13 +289,12 @@ class CourseContentAllViewModel(
         return resumeBlock
     }
 
-    fun resetCourseDatesBanner(onResetDates: (Boolean) -> Unit) {
+    fun resetCourseDatesBanner() {
         viewModelScope.launch {
             try {
                 interactor.resetCourseDates(courseId = courseId)
                 getCourseData()
                 courseNotifier.send(CourseDatesShifted)
-                onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.emit(
@@ -310,7 +309,6 @@ class CourseContentAllViewModel(
                         )
                     )
                 }
-                onResetDates(false)
             }
         }
     }

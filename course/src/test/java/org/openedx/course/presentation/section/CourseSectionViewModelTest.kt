@@ -73,7 +73,8 @@ class CourseSectionViewModelTest {
     private val assignmentProgress = AssignmentProgress(
         assignmentType = "Homework",
         numPointsEarned = 1f,
-        numPointsPossible = 3f
+        numPointsPossible = 3f,
+        label = "HW1",
     )
 
     private val blocks = listOf(

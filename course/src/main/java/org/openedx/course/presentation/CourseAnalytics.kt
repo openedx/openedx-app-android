@@ -150,6 +150,10 @@ enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
         "Dates:CalendarSync Snackbar",
         "edx.bi.app.dates.calendar_sync.snackbar"
     ),
+    ASSIGNMENT_CLICKED(
+        "Course:Assignment Tab.Assignment Clicked",
+        "edx.bi.app.course.assignment_tab.assignment.clicked"
+    ),
 }
 
 enum class CourseAnalyticsKey(val key: String) {

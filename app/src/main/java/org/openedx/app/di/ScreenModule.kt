@@ -542,7 +542,9 @@ val screenModule = module {
             courseId = courseId,
             courseName = courseName,
             interactor = get(),
-            courseRouter = get()
+            courseRouter = get(),
+            courseNotifier = get(),
+            analytics = get()
         )
     }
 }

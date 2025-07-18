@@ -14,5 +14,9 @@ data class AssignmentProgress(
 ) : Parcelable {
 
     @IgnoredOnParcel
-    val value: Float = numPointsEarned.toFloat().safeDivBy(numPointsPossible.toFloat())
+    val value: Float = numPointsEarned.safeDivBy(numPointsPossible)
+
+    override fun toString(): String {
+        return "${numPointsEarned.toInt()}/${numPointsPossible.toInt()}"
+    }
 }

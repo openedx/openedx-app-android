@@ -34,7 +34,6 @@ abstract class BaseDownloadViewModel(
     private val _downloadModelsStatusFlow = MutableSharedFlow<HashMap<String, DownloadedState>>()
     protected val downloadModelsStatusFlow = _downloadModelsStatusFlow.asSharedFlow()
 
-    private var downloadingModelsList = listOf<DownloadModel>()
     private val _downloadingModelsFlow = MutableSharedFlow<List<DownloadModel>>()
     protected val downloadingModelsFlow = _downloadingModelsFlow.asSharedFlow()
 

@@ -461,7 +461,7 @@ private fun DashboardPager(
     ) { page ->
         when (CourseContainerTab.entries[page]) {
             CourseContainerTab.HOME -> {
-
+                // Home tab content will be implemented later
             }
 
             CourseContainerTab.DATES -> {

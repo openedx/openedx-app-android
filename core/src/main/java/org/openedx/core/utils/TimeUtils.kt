@@ -77,6 +77,25 @@ object TimeUtils {
             }
         }
     }
+    fun formatToDueInString(context: Context, date: Date): String {
+        val now = Calendar.getInstance()
+        val dueDate = Calendar.getInstance().apply { time = date }
+        now.set(Calendar.HOUR_OF_DAY, 0)
+        now.set(Calendar.MINUTE, 0)
+        now.set(Calendar.SECOND, 0)
+        now.set(Calendar.MILLISECOND, 0)
+        dueDate.set(Calendar.HOUR_OF_DAY, 0)
+        dueDate.set(Calendar.MINUTE, 0)
+        dueDate.set(Calendar.SECOND, 0)
+        dueDate.set(Calendar.MILLISECOND, 0)
+        val daysDifference =
+            ((dueDate.timeInMillis - now.timeInMillis) / (24 * 60 * 60 * 1000)).toInt()
+        return when {
+            daysDifference < 0 -> context.getString(R.string.core_date_type_past_due)
+            daysDifference == 0 -> context.getString(R.string.core_date_type_today)
+            else -> context.getString(R.string.core_date_format_due_in_days, daysDifference)
+        }
+    }
 
     fun getCurrentTime(): Long {
         return Calendar.getInstance().timeInMillis

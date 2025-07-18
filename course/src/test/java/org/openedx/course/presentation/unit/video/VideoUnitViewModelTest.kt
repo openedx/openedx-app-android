@@ -147,10 +147,12 @@ class VideoUnitViewModelTest {
                 CourseVideoPositionChanged(
                     "",
                     10,
-                    false
+                    10000L,
+                    false,
                 )
             )
         }
+        coEvery { courseRepository.saveVideoProgress(any(), any(), any()) } returns Unit
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
         lifecycleRegistry.addObserver(viewModel)

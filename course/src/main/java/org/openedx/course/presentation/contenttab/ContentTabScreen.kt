@@ -65,7 +65,7 @@ fun ContentScreen(
     LaunchedEffect(selectedTab) {
         onTabSelected(selectedTab)
     }
-    
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -140,7 +140,6 @@ fun ContentScreen(
                     windowSize = windowSize,
                     viewModel = koinViewModel(parameters = { parametersOf(courseId, courseName) }),
                     fragmentManager = fragmentManager,
-                    onResetDatesClick = {}
                 )
 
                 CourseContentTab.VIDEOS -> CourseContentVideoScreen(

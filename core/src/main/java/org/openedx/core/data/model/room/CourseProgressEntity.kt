@@ -131,6 +131,7 @@ data class GradingPolicyDb(
             Color(colorString.toColorInt())
         }
     )
+
     data class AssignmentPolicyDb(
         @ColumnInfo("numDroppable")
         val numDroppable: Int,
@@ -163,6 +164,7 @@ data class SectionScoreDb(
         displayName = displayName,
         subsections = subsections.map { it.mapToDomain() }
     )
+
     data class SubsectionDb(
         @ColumnInfo("assignmentType")
         val assignmentType: String,
@@ -206,6 +208,7 @@ data class SectionScoreDb(
             showGrades = showGrades,
             url = url
         )
+
         data class ProblemScoreDb(
             @ColumnInfo("earned")
             val earned: Double,

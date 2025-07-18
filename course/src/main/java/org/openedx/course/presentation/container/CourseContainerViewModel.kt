@@ -332,13 +332,11 @@ class CourseContainerViewModel(
     fun courseContainerTabClickedEvent(index: Int) {
         when (CourseContainerTab.entries[index]) {
             CourseContainerTab.HOME -> courseTabClickedEvent()
-            CourseContainerTab.CONTENT -> { /* TODO log event */
-            }
             CourseContainerTab.DISCUSSIONS -> discussionTabClickedEvent()
             CourseContainerTab.DATES -> datesTabClickedEvent()
             CourseContainerTab.PROGRESS -> progressTabClickedEvent()
             CourseContainerTab.MORE -> moreTabClickedEvent()
-            CourseContainerTab.OFFLINE -> {}
+            CourseContainerTab.OFFLINE, CourseContainerTab.CONTENT -> {}
         }
     }
 
@@ -372,10 +370,6 @@ class CourseContainerViewModel(
 
     private fun courseTabClickedEvent() {
         logCourseContainerEvent(CourseAnalyticsEvent.HOME_TAB)
-    }
-
-    private fun videoTabClickedEvent() {
-        logCourseContainerEvent(CourseAnalyticsEvent.VIDEOS_TAB)
     }
 
     private fun discussionTabClickedEvent() {

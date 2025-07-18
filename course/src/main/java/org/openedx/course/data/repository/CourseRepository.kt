@@ -263,4 +263,17 @@ class CourseRepository(
         return courseDao.getVideoProgressByVideoUrl(videoUrl)
             ?: VideoProgressEntity(videoUrl, 0L, 0L)
     }
+
+    fun getCourseProgress(courseId: String, isRefresh: Boolean): Flow<CourseProgress> =
+        channelFlowWithAwait {
+            if (!isRefresh) {
+                val cached = courseDao.getCourseProgressById(courseId)
+                if (cached != null) {
+                    trySend(cached.mapToDomain())
+                }
+            }
+            val response = api.getCourseProgress(courseId)
+            courseDao.insertCourseProgressEntity(response.mapToRoomEntity(courseId))
+            trySend(response.mapToDomain())
+        }
 }

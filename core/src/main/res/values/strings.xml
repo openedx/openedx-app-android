@@ -87,11 +87,13 @@
     <string name="core_date_type_completed" tools:ignore="MissingTranslation">Completed</string>
     <string name="core_date_type_past_due" tools:ignore="MissingTranslation">Past Due</string>
     <string name="core_date_type_today" tools:ignore="MissingTranslation">Today</string>
+    <string name="core_date_type_tomorrow" tools:ignore="MissingTranslation">Due Tomorrow</string>
     <string name="core_date_type_this_week" tools:ignore="MissingTranslation">This Week</string>
     <string name="core_date_type_next_week" tools:ignore="MissingTranslation">Next Week</string>
     <string name="core_date_type_upcoming" tools:ignore="MissingTranslation">Upcoming</string>
     <string name="core_date_type_none" tools:ignore="MissingTranslation">None</string>
     <string name="core_date_format_assignment_due" tools:ignore="MissingTranslation">Due %1$s</string>
+    <string name="core_date_format_due_in_days" tools:ignore="MissingTranslation">Due in %1$d days</string>
     <plurals name="core_date_items_hidden" tools:ignore="MissingTranslation">
         <item quantity="one">%d Item Hidden</item>
         <item quantity="other">%d Items Hidden</item>

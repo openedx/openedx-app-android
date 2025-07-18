@@ -177,7 +177,9 @@ private fun CourseVideosUI(
                                     uiState.courseStructure.blockData
                                         .let { list ->
                                             if (uiState.isCompletedSectionsShown) {
-                                                list.sortedBy { uiState.courseVideos[it.id]?.any { !it.isCompleted() } }
+                                                list.sortedBy { section ->
+                                                    uiState.courseVideos[section.id]?.any { !it.isCompleted() }
+                                                }
                                             } else {
                                                 list
                                             }
@@ -186,7 +188,10 @@ private fun CourseVideosUI(
                                             val sectionVideos =
                                                 uiState.courseVideos[section.id] ?: emptyList()
 
-                                            if (sectionVideos.any { !it.isCompleted() } || uiState.isCompletedSectionsShown) {
+                                            val shouldShowSection =
+                                                sectionVideos.any { !it.isCompleted() } ||
+                                                        uiState.isCompletedSectionsShown
+                                            if (shouldShowSection) {
                                                 item {
                                                     CourseVideoSection(
                                                         block = section,

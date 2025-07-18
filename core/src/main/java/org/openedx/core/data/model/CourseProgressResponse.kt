@@ -157,6 +157,7 @@ data class CourseProgressResponse(
             displayName = displayName ?: "",
             subsections = subsections?.map { it.mapToDomain() } ?: emptyList()
         )
+
         data class Subsection(
             @SerializedName("assignment_type") val assignmentType: String?,
             @SerializedName("block_key") val blockKey: String?,
@@ -203,6 +204,7 @@ data class CourseProgressResponse(
                 showGrades = showGrades ?: false,
                 url = url ?: ""
             )
+
             data class ProblemScore(
                 @SerializedName("earned") val earned: Double?,
                 @SerializedName("possible") val possible: Double?
