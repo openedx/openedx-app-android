@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "d6028101c7598e8d1c5dedfcfc73d304",
+    "identityHash": "bcf7a22441e12e4c8b6fb332754827bf",
     "entities": [
       {
         "tableName": "course_discovery_table",
@@ -1008,7 +1008,7 @@
       },
       {
         "tableName": "course_progress_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`courseId` TEXT NOT NULL, `verifiedMode` TEXT NOT NULL, `accessExpiration` TEXT NOT NULL, `creditCourseRequirements` TEXT NOT NULL, `end` TEXT NOT NULL, `enrollmentMode` TEXT NOT NULL, `hasScheduledContent` INTEGER NOT NULL, `sectionScores` TEXT NOT NULL, `studioUrl` TEXT NOT NULL, `username` TEXT NOT NULL, `userHasPassingGrade` INTEGER NOT NULL, `disableProgressGraph` INTEGER NOT NULL, `assignment_colors` TEXT, `certificate_certStatus` TEXT, `certificate_certWebViewUrl` TEXT, `certificate_downloadUrl` TEXT, `certificate_certificateAvailableDate` TEXT, `completion_completeCount` INTEGER, `completion_incompleteCount` INTEGER, `completion_lockedCount` INTEGER, `grade_letterGrade` TEXT, `grade_percent` REAL, `grade_isPassing` INTEGER, `grading_assignmentPolicies` TEXT, `grading_gradeRange` TEXT, `verification_link` TEXT, `verification_status` TEXT, `verification_statusDate` TEXT, PRIMARY KEY(`courseId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`courseId` TEXT NOT NULL, `verifiedMode` TEXT NOT NULL, `accessExpiration` TEXT NOT NULL, `creditCourseRequirements` TEXT NOT NULL, `end` TEXT NOT NULL, `enrollmentMode` TEXT NOT NULL, `hasScheduledContent` INTEGER NOT NULL, `sectionScores` TEXT NOT NULL, `studioUrl` TEXT NOT NULL, `username` TEXT NOT NULL, `userHasPassingGrade` INTEGER NOT NULL, `disableProgressGraph` INTEGER NOT NULL, `certificate_certStatus` TEXT, `certificate_certWebViewUrl` TEXT, `certificate_downloadUrl` TEXT, `certificate_certificateAvailableDate` TEXT, `completion_completeCount` INTEGER, `completion_incompleteCount` INTEGER, `completion_lockedCount` INTEGER, `grade_letterGrade` TEXT, `grade_percent` REAL, `grade_isPassing` INTEGER, `grading_assignmentPolicies` TEXT, `grading_gradeRange` TEXT, `grading_assignmentColors` TEXT, `verification_link` TEXT, `verification_status` TEXT, `verification_statusDate` TEXT, PRIMARY KEY(`courseId`))",
         "fields": [
           {
             "fieldPath": "courseId",
@@ -1083,12 +1083,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "assignmentColors",
-            "columnName": "assignment_colors",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
             "fieldPath": "certificateData.certStatus",
             "columnName": "certificate_certStatus",
             "affinity": "TEXT",
@@ -1161,6 +1155,12 @@
             "notNull": false
           },
           {
+            "fieldPath": "gradingPolicy.assignmentColors",
+            "columnName": "grading_assignmentColors",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
             "fieldPath": "verificationData.link",
             "columnName": "verification_link",
             "affinity": "TEXT",
@@ -1192,7 +1192,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd6028101c7598e8d1c5dedfcfc73d304')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bcf7a22441e12e4c8b6fb332754827bf')"
     ]
   }
 }

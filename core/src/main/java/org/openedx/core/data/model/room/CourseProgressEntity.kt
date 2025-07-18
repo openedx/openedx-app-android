@@ -45,8 +45,6 @@ data class CourseProgressEntity(
     val verificationData: VerificationDataDb?,
     @ColumnInfo("disableProgressGraph")
     val disableProgressGraph: Boolean,
-    @ColumnInfo("assignment_colors")
-    val assignmentColors: List<String>?
 ) {
     fun mapToDomain(): CourseProgress {
         return CourseProgress(
@@ -66,9 +64,6 @@ data class CourseProgressEntity(
             userHasPassingGrade = userHasPassingGrade,
             verificationData = verificationData?.mapToDomain(),
             disableProgressGraph = disableProgressGraph,
-            assignmentColors = assignmentColors?.map { colorString ->
-                Color(colorString.toColorInt())
-            } ?: listOf()
         )
     }
 }
@@ -125,11 +120,16 @@ data class GradingPolicyDb(
     @ColumnInfo("assignmentPolicies")
     val assignmentPolicies: List<AssignmentPolicyDb>,
     @ColumnInfo("gradeRange")
-    val gradeRange: Map<String, Float>
+    val gradeRange: Map<String, Float>,
+    @ColumnInfo("assignmentColors")
+    val assignmentColors: List<String>
 ) {
     fun mapToDomain() = CourseProgress.GradingPolicy(
         assignmentPolicies = assignmentPolicies.map { it.mapToDomain() },
-        gradeRange = gradeRange
+        gradeRange = gradeRange,
+        assignmentColors = assignmentColors.map { colorString ->
+            Color(colorString.toColorInt())
+        }
     )
     data class AssignmentPolicyDb(
         @ColumnInfo("numDroppable")

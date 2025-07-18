@@ -5,7 +5,6 @@ import androidx.compose.ui.graphics.Color
 data class CourseProgress(
     val verifiedMode: String,
     val accessExpiration: String,
-    val assignmentColors: List<Color>,
     val certificateData: CertificateData?,
     val completionSummary: CompletionSummary?,
     val courseGrade: CourseGrade?,
@@ -47,13 +46,15 @@ data class CourseProgress(
             subsection.problemScores.sumOf { it.possible }
         }
 
-    fun getAssignmentGradedPercent(type: String) = sectionScores
-        .flatMap { it.subsections }
-        .filter { it.assignmentType == type }
-        .sumOf { it.percentGraded }
+    fun getAssignmentGradedPercent(type: String): Float {
+        val assignmentSections = sectionScores
+            .flatMap { it.subsections }
+            .filter { it.assignmentType == type }
+        return assignmentSections.sumOf { it.percentGraded }.toFloat() / assignmentSections.size
+    }
 
     fun getAssignmentWeightedGradedPercent(assignmentPolicy: GradingPolicy.AssignmentPolicy): Float {
-        return (assignmentPolicy.weight * getAssignmentGradedPercent(assignmentPolicy.type) * 100.0).toFloat()
+        return (assignmentPolicy.weight * getAssignmentGradedPercent(assignmentPolicy.type) * 100f).toFloat()
     }
 
     fun getTotalWeightPercent() =
@@ -87,7 +88,8 @@ data class CourseProgress(
 
     data class GradingPolicy(
         val assignmentPolicies: List<AssignmentPolicy>,
-        val gradeRange: Map<String, Float>
+        val gradeRange: Map<String, Float>,
+        val assignmentColors: List<Color>,
     ) {
         data class AssignmentPolicy(
             val numDroppable: Int,

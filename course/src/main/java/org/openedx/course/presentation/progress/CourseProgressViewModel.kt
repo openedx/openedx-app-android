@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.openedx.core.system.notifier.CourseCompletionSet
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.RefreshProgress
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.foundation.presentation.BaseViewModel
@@ -64,7 +64,7 @@ class CourseProgressViewModel(
         viewModelScope.launch {
             courseNotifier.notifier.collect { event ->
                 when (event) {
-                    is RefreshProgress, is CourseCompletionSet -> loadCourseProgress(true)
+                    is RefreshProgress, is CourseStructureUpdated -> loadCourseProgress(true)
                 }
             }
         }

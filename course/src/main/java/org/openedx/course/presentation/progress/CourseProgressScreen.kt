@@ -67,8 +67,6 @@ import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 
-const val EMPTY_STATE_VIEW_HEIGHT = 0.4f
-
 @Composable
 fun CourseProgressScreen(
     windowSize: WindowSize,
@@ -149,8 +147,8 @@ private fun CourseProgressContent(
                             AssignmentTypeRow(
                                 progress = uiState.progress,
                                 policy = policy,
-                                color = if (uiState.progress.assignmentColors.isNotEmpty()) {
-                                    uiState.progress.assignmentColors[index % uiState.progress.assignmentColors.size]
+                                color = if (gradingPolicy.assignmentColors.isNotEmpty()) {
+                                    gradingPolicy.assignmentColors[index % gradingPolicy.assignmentColors.size]
                                 } else {
                                     MaterialTheme.appColors.primary
                                 }
@@ -170,8 +168,8 @@ private fun CourseProgressContent(
                         item {
                             Box(
                                 modifier = Modifier
-                                    .fillParentMaxHeight(EMPTY_STATE_VIEW_HEIGHT)
-                                    .fillMaxWidth(),
+                                    .fillMaxSize()
+                                    .padding(top = 60.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 NoGradesView()
@@ -317,7 +315,7 @@ private fun OverallGradeView(
                     )
             ) {
                 gradingPolicy.assignmentPolicies.forEach { assignmentPolicy ->
-                    val assignmentColors = progress.assignmentColors
+                    val assignmentColors = gradingPolicy.assignmentColors
                     val color = if (assignmentColors.isNotEmpty()) {
                         assignmentColors[
                             gradingPolicy.assignmentPolicies.indexOf(
@@ -394,7 +392,7 @@ private fun OverallGradeView(
                 Text(
                     text = stringResource(
                         R.string.course_progress_required_grade_percent,
-                        progress.requiredGradePercent
+                        progress.requiredGradePercent.toString()
                     ),
                     style = MaterialTheme.appTypography.labelLarge,
                     color = MaterialTheme.appColors.textDark,

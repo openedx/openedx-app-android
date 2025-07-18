@@ -29,7 +29,6 @@ data class CourseProgressResponse(
     @SerializedName("user_has_passing_grade") val userHasPassingGrade: Boolean?,
     @SerializedName("verification_data") val verificationData: VerificationData?,
     @SerializedName("disable_progress_graph") val disableProgressGraph: Boolean?,
-    @SerializedName("assignment_colors") val assignmentColors: List<String>?
 ) {
     data class CertificateData(
         @SerializedName("cert_status") val certStatus: String?,
@@ -90,17 +89,26 @@ data class CourseProgressResponse(
 
     data class GradingPolicy(
         @SerializedName("assignment_policies") val assignmentPolicies: List<AssignmentPolicy>?,
-        @SerializedName("grade_range") val gradeRange: Map<String, Float>?
+        @SerializedName("grade_range") val gradeRange: Map<String, Float>?,
+        @SerializedName("assignment_colors") val assignmentColors: List<String>?
     ) {
+        // Temporary solution. Backend will returns color list later
+        val defaultColors = listOf("#fe553a", "#32c0ff", "#a3ff7b", "#ff30ee")
+
         fun mapToRoomEntity() = GradingPolicyDb(
             assignmentPolicies = assignmentPolicies?.map { it.mapToRoomEntity() } ?: emptyList(),
-            gradeRange = gradeRange ?: emptyMap()
+            gradeRange = gradeRange ?: emptyMap(),
+            assignmentColors = assignmentColors ?: defaultColors
         )
 
         fun mapToDomain() = CourseProgress.GradingPolicy(
             assignmentPolicies = assignmentPolicies?.map { it.mapToDomain() } ?: emptyList(),
-            gradeRange = gradeRange ?: emptyMap()
+            gradeRange = gradeRange ?: emptyMap(),
+            assignmentColors = assignmentColors?.map { colorString ->
+                Color(colorString.toColorInt())
+            } ?: defaultColors.map { Color(it.toColorInt()) }
         )
+
         data class AssignmentPolicy(
             @SerializedName("num_droppable") val numDroppable: Int?,
             @SerializedName("num_total") val numTotal: Int?,
@@ -238,9 +246,6 @@ data class CourseProgressResponse(
             userHasPassingGrade = userHasPassingGrade ?: false,
             verificationData = verificationData?.mapToDomain(),
             disableProgressGraph = disableProgressGraph ?: false,
-            assignmentColors = assignmentColors?.map { colorString ->
-                Color(colorString.toColorInt())
-            } ?: listOf()
         )
     }
 
@@ -263,7 +268,6 @@ data class CourseProgressResponse(
             userHasPassingGrade = userHasPassingGrade ?: false,
             verificationData = verificationData?.mapToRoomEntity(),
             disableProgressGraph = disableProgressGraph ?: false,
-            assignmentColors = assignmentColors,
         )
     }
 }
