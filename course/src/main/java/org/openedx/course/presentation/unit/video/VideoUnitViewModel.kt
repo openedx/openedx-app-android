@@ -21,6 +21,7 @@ import subtitleFile.TimedTextObject
 
 open class VideoUnitViewModel(
     val courseId: String,
+    val videoUrl: String,
     private val courseRepository: CourseRepository,
     private val notifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
@@ -28,7 +29,6 @@ open class VideoUnitViewModel(
     courseAnalytics: CourseAnalytics,
 ) : BaseVideoViewModel(courseId, courseAnalytics) {
 
-    var videoUrl = ""
     var transcripts = emptyMap<String, String>()
     var isPlaying = true
     var transcriptLanguage = AppDataConstants.defaultLocale.language ?: "en"
@@ -59,6 +59,10 @@ open class VideoUnitViewModel(
         get() = networkConnection.isOnline()
 
     private var isBlockAlreadyCompleted = false
+
+    init {
+        initVideoProgress()
+    }
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -140,4 +144,15 @@ open class VideoUnitViewModel(
     }
 
     fun getCurrentVideoTime() = currentVideoTime.value ?: 0
+
+    private fun initVideoProgress() {
+        viewModelScope.launch {
+            try {
+                val videoProgress = courseRepository.getVideoProgress(videoUrl)
+                _currentVideoTime.value = videoProgress.videoTime
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 }

@@ -39,7 +39,10 @@ import org.openedx.foundation.presentation.WindowSize
 class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) {
 
     private val viewModel by viewModel<VideoUnitViewModel> {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_VIDEO_URL, "")
+        )
     }
     private val router by inject<CourseRouter>()
     private val appReviewManager by inject<AppReviewManager> { parametersOf(requireActivity()) }
@@ -61,7 +64,6 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         windowSize = computeWindowSizeClasses()
         lifecycle.addObserver(viewModel)
         requireArguments().apply {
-            viewModel.videoUrl = getString(ARG_VIDEO_URL, "")
             viewModel.transcripts = stringToObject<Map<String, String>>(
                 getString(ARG_TRANSCRIPT_URL, "")
             ) ?: emptyMap()

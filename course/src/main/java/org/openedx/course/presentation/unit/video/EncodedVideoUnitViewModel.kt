@@ -32,6 +32,7 @@ import java.util.concurrent.Executors
 @SuppressLint("StaticFieldLeak")
 class EncodedVideoUnitViewModel(
     courseId: String,
+    videoUrl: String,
     val blockId: String,
     private val context: Context,
     private val preferencesManager: CorePreferences,
@@ -42,6 +43,7 @@ class EncodedVideoUnitViewModel(
     courseAnalytics: CourseAnalytics,
 ) : VideoUnitViewModel(
     courseId,
+    videoUrl,
     courseRepository,
     notifier,
     networkConnection,
