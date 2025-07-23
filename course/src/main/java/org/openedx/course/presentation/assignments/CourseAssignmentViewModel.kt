@@ -39,11 +39,8 @@ class CourseAssignmentViewModel(
 
     private fun collectData() {
         viewModelScope.launch {
-            val courseProgressFlow = interactor.getCourseProgress(courseId, true)
+            val courseProgressFlow = interactor.getCourseProgress(courseId, false)
             val courseStructureFlow = interactor.getCourseStructureFlow(courseId)
-                .catch {
-                    _uiState.value = CourseAssignmentUIState.Empty
-                }
 
             combine(
                 courseProgressFlow,
@@ -51,7 +48,9 @@ class CourseAssignmentViewModel(
             ) { courseProgress, courseStructure ->
                 courseProgress to courseStructure
             }.catch {
-                _uiState.value = CourseAssignmentUIState.Empty
+                if (_uiState.value !is CourseAssignmentUIState.CourseData) {
+                    _uiState.value = CourseAssignmentUIState.Empty
+                }
             }.collect { (courseProgress, courseStructure) ->
                 if (courseStructure != null) {
                     updateAssignments(courseStructure, courseProgress)

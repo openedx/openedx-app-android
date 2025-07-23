@@ -58,6 +58,7 @@ class VideoUnitViewModelTest {
     fun `markBlockCompleted exception`() = runTest {
         val viewModel = VideoUnitViewModel(
             "",
+            "",
             courseRepository,
             notifier,
             networkConnection,
@@ -97,6 +98,7 @@ class VideoUnitViewModelTest {
     fun `markBlockCompleted success`() = runTest {
         val viewModel = VideoUnitViewModel(
             "",
+            "",
             courseRepository,
             notifier,
             networkConnection,
@@ -135,6 +137,7 @@ class VideoUnitViewModelTest {
     @Test
     fun `CourseVideoPositionChanged notifier test`() = runTest {
         val viewModel = VideoUnitViewModel(
+            "",
             "",
             courseRepository,
             notifier,

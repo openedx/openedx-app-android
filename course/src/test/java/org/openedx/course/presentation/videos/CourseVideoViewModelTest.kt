@@ -252,9 +252,13 @@ class CourseVideoViewModelTest {
     fun `getVideos success`() = runTest {
         every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
-        every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
+        every { downloadDao.getAllDataFlow() } returns flow {
+            repeat(5) {
+                delay(10000)
+                emit(emptyList())
+            }
+        }
         every { preferencesManager.videoSettings } returns VideoSettings.default
-
         val viewModel = CourseVideoViewModel(
             "",
             config,
@@ -272,10 +276,14 @@ class CourseVideoViewModelTest {
             downloadHelper,
         )
 
-        viewModel.getVideos()
+        val mockLifeCycleOwner: LifecycleOwner = mockk()
+        val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
+        lifecycleRegistry.addObserver(viewModel)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+
         advanceUntilIdle()
 
-        coVerify(exactly = 2) { interactor.getCourseStructureForVideos(any()) }
+        coVerify(exactly = 1) { interactor.getCourseStructureForVideos(any()) }
 
         assert(viewModel.uiState.value is CourseVideoUIState.CourseData)
     }

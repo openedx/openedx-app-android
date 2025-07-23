@@ -289,26 +289,45 @@ fun CourseDashboard(
             scaffoldState = scaffoldState,
             backgroundColor = MaterialTheme.appColors.background,
             bottomBar = {
-                if (CourseContainerTab.entries[pagerState.currentPage] == CourseContainerTab.CONTENT &&
-                    selectedContentTab == CourseContentTab.ASSIGNMENTS
-                ) {
-                    Column(
-                        modifier = Modifier.background(MaterialTheme.appColors.background),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                Box {
+                    if (CourseContainerTab.entries[pagerState.currentPage] == CourseContainerTab.CONTENT &&
+                        selectedContentTab == CourseContentTab.ASSIGNMENTS
                     ) {
-                        Divider(modifier = Modifier.fillMaxWidth())
-                        TextButton(
-                            onClick = {
-                                scrollToProgress(scope, pagerState)
-                            }
+                        Column(
+                            modifier = Modifier.background(MaterialTheme.appColors.background),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            IconText(
-                                text = stringResource(R.string.course_review_grading_policy),
-                                painter = painterResource(id = coreR.drawable.core_ic_assignment),
-                                color = MaterialTheme.appColors.primary,
-                                textStyle = MaterialTheme.appTypography.labelLarge
-                            )
+                            Divider(modifier = Modifier.fillMaxWidth())
+                            TextButton(
+                                onClick = {
+                                    scrollToProgress(scope, pagerState)
+                                }
+                            ) {
+                                IconText(
+                                    text = stringResource(R.string.course_review_grading_policy),
+                                    painter = painterResource(id = coreR.drawable.core_ic_assignment),
+                                    color = MaterialTheme.appColors.primary,
+                                    textStyle = MaterialTheme.appTypography.labelLarge
+                                )
+                            }
                         }
+                    }
+                    var isInternetConnectionShown by rememberSaveable {
+                        mutableStateOf(false)
+                    }
+                    if (!isInternetConnectionShown && !viewModel.hasInternetConnection) {
+                        OfflineModeDialog(
+                            Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.BottomCenter),
+                            onDismissCLick = {
+                                isInternetConnectionShown = true
+                            },
+                            onReloadClick = {
+                                isInternetConnectionShown = viewModel.hasInternetConnection
+                                onRefresh(pagerState.currentPage)
+                            }
+                        )
                     }
                 }
             }
@@ -405,24 +424,6 @@ fun CourseDashboard(
                         pullRefreshState,
                         Modifier.align(Alignment.TopCenter)
                     )
-
-                    var isInternetConnectionShown by rememberSaveable {
-                        mutableStateOf(false)
-                    }
-                    if (!isInternetConnectionShown && !viewModel.hasInternetConnection) {
-                        OfflineModeDialog(
-                            Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
-                            onDismissCLick = {
-                                isInternetConnectionShown = true
-                            },
-                            onReloadClick = {
-                                isInternetConnectionShown = viewModel.hasInternetConnection
-                                onRefresh(pagerState.currentPage)
-                            }
-                        )
-                    }
 
                     SnackbarHost(
                         modifier = Modifier.align(Alignment.BottomStart),

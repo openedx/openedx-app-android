@@ -80,6 +80,7 @@ private const val ASSIGNMENT_BUTTON_CARD_BACKGROUND_ALPHA = 0.5f
 private const val COMPLETED_ASSIGNMENTS_COUNT = 1
 private const val COMPLETED_ASSIGNMENTS_COUNT_TABLET = 2
 private const val TOTAL_ASSIGNMENTS_COUNT = 3
+private const val SHORT_LABEL_PREFIX_SIZE = 3
 
 @Composable
 fun CourseContentAssignmentScreen(
@@ -119,7 +120,10 @@ private fun CourseContentAssignmentScreen(
 
     when (uiState) {
         is CourseAssignmentUIState.Loading -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
                 CircularProgressIndicator()
             }
         }
@@ -301,9 +305,9 @@ private fun AssignmentGroupSection(
 @Composable
 private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: () -> Unit) {
     val label = assignment.assignmentProgress?.label?.split(" ").let {
-        it?.first()?.take(3) + it?.last()
+        it?.first()?.take(SHORT_LABEL_PREFIX_SIZE) + it?.last()
     }
-    val isDuePast = assignment.due != null && assignment.due!! > Date()
+    val isDuePast = assignment.due != null && assignment.due!! < Date()
     val cardBorderColor = when {
         isSelected -> MaterialTheme.appColors.primary
         assignment.isCompleted() -> MaterialTheme.appColors.successGreen
