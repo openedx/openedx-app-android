@@ -90,6 +90,7 @@ import org.openedx.course.presentation.contenttab.ContentTabScreen
 import org.openedx.course.presentation.dates.CourseDatesScreen
 import org.openedx.course.presentation.handouts.HandoutsScreen
 import org.openedx.course.presentation.handouts.HandoutsType
+import org.openedx.course.presentation.home.CourseHomeScreen
 import org.openedx.course.presentation.offline.CourseOfflineScreen
 import org.openedx.course.presentation.progress.CourseProgressScreen
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
@@ -469,7 +470,16 @@ private fun DashboardPager(
     ) { page ->
         when (CourseContainerTab.entries[page]) {
             CourseContainerTab.HOME -> {
-                // Home tab content will be implemented later
+                CourseHomeScreen(
+                    windowSize = windowSize,
+                    viewModel = koinViewModel(
+                        parameters = { parametersOf(viewModel.courseId, viewModel.courseName) }
+                    ),
+                    fragmentManager = fragmentManager,
+                    onResetDatesClick = {
+                        viewModel.onRefresh(CourseContainerTab.DATES)
+                    }
+                )
             }
 
             CourseContainerTab.DATES -> {

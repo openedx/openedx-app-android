@@ -56,6 +56,7 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.ui.PageIndicator
 import org.openedx.core.ui.calculateCurrentOffsetForPage
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -67,7 +68,6 @@ import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.whatsnew.domain.model.WhatsNewItem
 import org.openedx.whatsnew.domain.model.WhatsNewMessage
 import org.openedx.whatsnew.presentation.ui.NavigationUnitsButtons
-import org.openedx.whatsnew.presentation.ui.PageIndicator
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment.Companion.BASE_ALPHA_VALUE
 
 class WhatsNewFragment : Fragment() {

@@ -1,0 +1,541 @@
+package org.openedx.course.presentation.home
+
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.AndroidUriHandler
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentManager
+import kotlinx.coroutines.launch
+import org.openedx.core.BlockType
+import org.openedx.core.NoContentScreenType
+import org.openedx.core.domain.model.AssignmentProgress
+import org.openedx.core.domain.model.Block
+import org.openedx.core.domain.model.BlockCounts
+import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.domain.model.CourseStructure
+import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.OfflineDownload
+import org.openedx.core.domain.model.Progress
+import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.ui.CircularProgress
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.NoContentScreen
+import org.openedx.core.ui.PageIndicator
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
+import org.openedx.course.R
+import org.openedx.course.presentation.ui.CourseDatesBanner
+import org.openedx.course.presentation.ui.CourseDatesBannerTablet
+import org.openedx.course.presentation.ui.CourseMessage
+import org.openedx.foundation.extension.takeIfNotEmpty
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.windowSizeValue
+import java.util.Date
+import org.openedx.core.R as coreR
+
+@Composable
+fun CourseHomeScreen(
+    windowSize: WindowSize,
+    viewModel: CourseHomeViewModel,
+    fragmentManager: FragmentManager,
+    onResetDatesClick: () -> Unit,
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val uiMessage by viewModel.uiMessage.collectAsState(null)
+    val resumeBlockId by viewModel.resumeBlockId.collectAsState("")
+    val context = LocalContext.current
+
+    LaunchedEffect(resumeBlockId) {
+        if (resumeBlockId.isNotEmpty()) {
+            viewModel.openBlock(fragmentManager, resumeBlockId)
+        }
+    }
+
+    CourseHomeUI(
+        windowSize = windowSize,
+        uiState = uiState,
+        uiMessage = uiMessage,
+        onExpandClick = { block ->
+            if (viewModel.switchCourseSections(block.id)) {
+                viewModel.sequentialClickedEvent(
+                    block.blockId,
+                    block.displayName
+                )
+            }
+        },
+        onSubSectionClick = { subSectionBlock ->
+            if (viewModel.isCourseDropdownNavigationEnabled) {
+                viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                    viewModel.logUnitDetailViewedEvent(
+                        unit.blockId,
+                        unit.displayName
+                    )
+                    viewModel.courseRouter.navigateToCourseContainer(
+                        fragmentManager,
+                        courseId = viewModel.courseId,
+                        unitId = unit.id,
+                        mode = CourseViewMode.FULL
+                    )
+                }
+            } else {
+                viewModel.sequentialClickedEvent(
+                    subSectionBlock.blockId,
+                    subSectionBlock.displayName
+                )
+                viewModel.courseRouter.navigateToCourseSubsections(
+                    fm = fragmentManager,
+                    courseId = viewModel.courseId,
+                    subSectionId = subSectionBlock.id,
+                    mode = CourseViewMode.FULL
+                )
+            }
+        },
+        onResumeClick = { componentId ->
+            viewModel.openBlock(
+                fragmentManager,
+                componentId
+            )
+        },
+        onDownloadClick = { blocksIds ->
+            viewModel.downloadBlocks(
+                blocksIds = blocksIds,
+                fragmentManager = fragmentManager,
+            )
+        },
+        onResetDatesClick = {
+            viewModel.resetCourseDatesBanner(
+                onResetDates = {
+                    onResetDatesClick()
+                }
+            )
+        },
+        onCertificateClick = {
+            viewModel.viewCertificateTappedEvent()
+            it.takeIfNotEmpty()
+                ?.let { url -> AndroidUriHandler(context).openUri(url) }
+        }
+    )
+}
+
+@Composable
+private fun CourseHomeUI(
+    windowSize: WindowSize,
+    uiState: CourseHomeUIState,
+    uiMessage: UIMessage?,
+    onExpandClick: (Block) -> Unit,
+    onSubSectionClick: (Block) -> Unit,
+    onResumeClick: (String) -> Unit,
+    onDownloadClick: (blockIds: List<String>) -> Unit,
+    onResetDatesClick: () -> Unit,
+    onCertificateClick: (String) -> Unit,
+) {
+    val scaffoldState = rememberScaffoldState()
+
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize(),
+        scaffoldState = scaffoldState,
+        backgroundColor = MaterialTheme.appColors.background
+    ) {
+        val screenWidth by remember(key1 = windowSize) {
+            mutableStateOf(
+                windowSize.windowSizeValue(
+                    expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
+                    compact = Modifier.fillMaxWidth()
+                )
+            )
+        }
+
+        val bottomPadding by remember(key1 = windowSize) {
+            mutableStateOf(
+                windowSize.windowSizeValue(
+                    expanded = PaddingValues(bottom = 24.dp),
+                    compact = PaddingValues(bottom = 24.dp)
+                )
+            )
+        }
+
+        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .displayCutoutForLandscape(),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            Surface(
+                modifier = screenWidth,
+                color = MaterialTheme.appColors.background
+            ) {
+                Box {
+                    when (uiState) {
+                        is CourseHomeUIState.CourseData -> {
+                            if (uiState.courseStructure.blockData.isEmpty()) {
+                                NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_OUTLINE)
+                            } else {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(bottomPadding)
+                                        .verticalScroll(rememberScrollState()),
+                                ) {
+                                    if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
+                                        Box(
+                                            modifier = Modifier
+                                                .padding(all = 8.dp)
+                                        ) {
+                                            if (windowSize.isTablet) {
+                                                CourseDatesBannerTablet(
+                                                    banner = uiState.datesBannerInfo,
+                                                    resetDates = onResetDatesClick,
+                                                )
+                                            } else {
+                                                CourseDatesBanner(
+                                                    banner = uiState.datesBannerInfo,
+                                                    resetDates = onResetDatesClick,
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    val certificate = uiState.courseStructure.certificate
+                                    if (certificate?.isCertificateEarned() == true) {
+                                        CourseMessage(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(
+                                                    vertical = 12.dp,
+                                                    horizontal = 24.dp
+                                                ),
+                                            icon = painterResource(R.drawable.course_ic_certificate),
+                                            message = stringResource(
+                                                R.string.course_you_earned_certificate,
+                                                uiState.courseStructure.name
+                                            ),
+                                            action = stringResource(R.string.course_view_certificate),
+                                            onActionClick = {
+                                                onCertificateClick(
+                                                    certificate.certificateURL ?: ""
+                                                )
+                                            }
+                                        )
+                                    }
+
+                                    if (uiState.resumeComponent != null) {
+                                        // Add button with onResumeClick
+                                    }
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    CourseHomePager(
+                                        modifier = Modifier.fillMaxSize(),
+                                        pages = CourseHomePagerTab.entries
+                                    ) { tab ->
+                                        Card(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            backgroundColor = MaterialTheme.appColors.cardViewBackground,
+                                            border = BorderStroke(
+                                                1.dp,
+                                                MaterialTheme.appColors.cardViewBorder
+                                            ),
+                                            shape = MaterialTheme.appShapes.cardShape,
+                                            elevation = 0.dp,
+                                        ) {
+                                            when (tab) {
+                                                CourseHomePagerTab.COURSE_COMPLETION -> {
+                                                    Text(tab.name)
+                                                }
+
+                                                else -> {
+                                                    Text(tab.name)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        CourseHomeUIState.Error -> {
+                            NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_OUTLINE)
+                        }
+
+                        CourseHomeUIState.Loading -> {
+                            CircularProgress()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun <T> CourseHomePager(
+    modifier: Modifier = Modifier,
+    pages: List<T>,
+    pageContent: @Composable (T) -> Unit
+) {
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { pages.size }
+    )
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
+        HorizontalPager(
+            modifier = Modifier.fillMaxWidth(),
+            state = pagerState,
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            pageSpacing = 8.dp
+        ) { page ->
+            pageContent(pages[page])
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val isPreviousPageEnabled = pagerState.currentPage > 0
+            IconButton(
+                enabled = pagerState.currentPage > 0,
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                    }
+                }
+            ) {
+                Icon(
+                    modifier = Modifier.size(12.dp),
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
+                    contentDescription = stringResource(coreR.string.core_previous),
+                    tint = if (isPreviousPageEnabled) {
+                        MaterialTheme.appColors.textDark
+                    } else {
+                        MaterialTheme.appColors.textFieldHint
+                    }
+                )
+            }
+            PageIndicator(
+                modifier = Modifier.padding(vertical = 16.dp),
+                numberOfPages = pages.size,
+                selectedPage = pagerState.currentPage,
+                defaultRadius = 8.dp,
+                space = 8.dp,
+                selectedLength = 24.dp,
+            )
+            val isNextPageEnabled = pagerState.currentPage < pages.size - 1
+            IconButton(
+                enabled = isNextPageEnabled,
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    }
+                }
+            ) {
+                Icon(
+                    modifier = Modifier.size(12.dp),
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                    contentDescription = stringResource(coreR.string.core_next),
+                    tint = if (isNextPageEnabled) {
+                        MaterialTheme.appColors.textDark
+                    } else {
+                        MaterialTheme.appColors.textFieldHint
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Preview(uiMode = UI_MODE_NIGHT_NO)
+@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun CourseHomeScreenPreview() {
+    OpenEdXTheme {
+        CourseHomeUI(
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            uiState = CourseHomeUIState.CourseData(
+                mockCourseStructure,
+                mapOf(),
+                mockChapterBlock,
+                "Resumed Unit",
+                mapOf(),
+                mapOf(),
+                mapOf(),
+                CourseDatesBannerInfo(
+                    missedDeadlines = false,
+                    missedGatedContent = false,
+                    verifiedUpgradeLink = "",
+                    contentTypeGatingEnabled = false,
+                    hasEnded = false
+                ),
+                true
+            ),
+            uiMessage = null,
+            onExpandClick = {},
+            onSubSectionClick = {},
+            onResumeClick = {},
+            onDownloadClick = {},
+            onResetDatesClick = {},
+            onCertificateClick = {},
+        )
+    }
+}
+
+@Preview(uiMode = UI_MODE_NIGHT_NO, device = Devices.NEXUS_9)
+@Preview(uiMode = UI_MODE_NIGHT_YES, device = Devices.NEXUS_9)
+@Composable
+private fun CourseHomeScreenTabletPreview() {
+    OpenEdXTheme {
+        CourseHomeUI(
+            windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
+            uiState = CourseHomeUIState.CourseData(
+                mockCourseStructure,
+                mapOf(),
+                mockChapterBlock,
+                "Resumed Unit",
+                mapOf(),
+                mapOf(),
+                mapOf(),
+                CourseDatesBannerInfo(
+                    missedDeadlines = false,
+                    missedGatedContent = false,
+                    verifiedUpgradeLink = "",
+                    contentTypeGatingEnabled = false,
+                    hasEnded = false
+                ),
+                true
+            ),
+            uiMessage = null,
+            onExpandClick = {},
+            onSubSectionClick = {},
+            onResumeClick = {},
+            onDownloadClick = {},
+            onResetDatesClick = {},
+            onCertificateClick = {},
+        )
+    }
+}
+
+private val mockAssignmentProgress = AssignmentProgress(
+    assignmentType = "Home",
+    numPointsEarned = 1f,
+    numPointsPossible = 3f,
+    shortLabel = "HM"
+)
+private val mockChapterBlock = Block(
+    id = "id",
+    blockId = "blockId",
+    lmsWebUrl = "lmsWebUrl",
+    legacyWebUrl = "legacyWebUrl",
+    studentViewUrl = "studentViewUrl",
+    type = BlockType.CHAPTER,
+    displayName = "Chapter",
+    graded = false,
+    studentViewData = null,
+    studentViewMultiDevice = false,
+    blockCounts = BlockCounts(1),
+    descendants = emptyList(),
+    descendantsType = BlockType.CHAPTER,
+    completion = 0.0,
+    containsGatedContent = false,
+    assignmentProgress = mockAssignmentProgress,
+    due = Date(),
+    offlineDownload = null
+)
+private val mockSequentialBlock = Block(
+    id = "id",
+    blockId = "blockId",
+    lmsWebUrl = "lmsWebUrl",
+    legacyWebUrl = "legacyWebUrl",
+    studentViewUrl = "studentViewUrl",
+    type = BlockType.SEQUENTIAL,
+    displayName = "Sequential",
+    graded = false,
+    studentViewData = null,
+    studentViewMultiDevice = false,
+    blockCounts = BlockCounts(1),
+    descendants = emptyList(),
+    descendantsType = BlockType.CHAPTER,
+    completion = 0.0,
+    containsGatedContent = false,
+    assignmentProgress = mockAssignmentProgress,
+    due = Date(),
+    offlineDownload = OfflineDownload("fileUrl", "", 1),
+)
+
+private val mockCourseStructure = CourseStructure(
+    root = "",
+    blockData = listOf(mockSequentialBlock, mockSequentialBlock),
+    id = "id",
+    name = "Course name",
+    number = "",
+    org = "Org",
+    start = Date(),
+    startDisplay = "",
+    startType = "",
+    end = Date(),
+    coursewareAccess = CoursewareAccess(
+        true,
+        "",
+        "",
+        "",
+        "",
+        ""
+    ),
+    media = null,
+    certificate = null,
+    isSelfPaced = false,
+    progress = Progress(1, 3),
+)
