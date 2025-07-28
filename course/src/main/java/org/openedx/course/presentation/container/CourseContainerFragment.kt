@@ -86,7 +86,7 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
-import org.openedx.course.presentation.contenttab.ContentScreen
+import org.openedx.course.presentation.contenttab.ContentTabScreen
 import org.openedx.course.presentation.dates.CourseDatesScreen
 import org.openedx.course.presentation.handouts.HandoutsScreen
 import org.openedx.course.presentation.handouts.HandoutsType
@@ -269,6 +269,10 @@ fun CourseDashboard(
         initialPage = CourseContainerTab.entries.indexOf(requiredTab),
         pageCount = { CourseContainerTab.entries.size }
     )
+    val contentTabPagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { CourseContentTab.entries.size }
+    )
     val accessStatus = viewModel.courseAccessStatus.observeAsState()
     val tabState = rememberLazyListState()
     val snackState = remember { SnackbarHostState() }
@@ -407,6 +411,7 @@ fun CourseDashboard(
                                         windowSize = windowSize,
                                         viewModel = viewModel,
                                         pagerState = pagerState,
+                                        contentTabPagerState = contentTabPagerState,
                                         isResumed = isResumed,
                                         fragmentManager = fragmentManager,
                                         onContentTabSelected = { tab ->
@@ -451,6 +456,7 @@ private fun DashboardPager(
     windowSize: WindowSize,
     viewModel: CourseContainerViewModel,
     pagerState: PagerState,
+    contentTabPagerState: PagerState,
     isResumed: Boolean,
     fragmentManager: FragmentManager,
     onContentTabSelected: (CourseContentTab) -> Unit,
@@ -533,11 +539,12 @@ private fun DashboardPager(
             }
 
             CourseContainerTab.CONTENT -> {
-                ContentScreen(
+                ContentTabScreen(
                     windowSize = windowSize,
                     fragmentManager = fragmentManager,
                     courseId = viewModel.courseId,
                     courseName = viewModel.courseName,
+                    pagerState = contentTabPagerState,
                     onTabSelected = onContentTabSelected
                 )
             }

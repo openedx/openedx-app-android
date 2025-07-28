@@ -22,6 +22,7 @@ import subtitleFile.TimedTextObject
 open class VideoUnitViewModel(
     val courseId: String,
     val videoUrl: String,
+    val blockId: String,
     private val courseRepository: CourseRepository,
     private val notifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
@@ -83,9 +84,19 @@ open class VideoUnitViewModel(
         }
     }
 
-    fun saveVideoProgress() {
+    override fun onPause(owner: LifecycleOwner) {
+        saveVideoProgress()
+        super.onPause(owner)
+    }
+
+    private fun saveVideoProgress() {
         viewModelScope.launch {
-            courseRepository.saveVideoProgress(videoUrl, _currentVideoTime.value ?: 0L, duration)
+            courseRepository.saveVideoProgress(
+                blockId,
+                videoUrl,
+                _currentVideoTime.value ?: 0L,
+                duration
+            )
         }
     }
 
@@ -148,7 +159,7 @@ open class VideoUnitViewModel(
     private fun initVideoProgress() {
         viewModelScope.launch {
             try {
-                val videoProgress = courseRepository.getVideoProgress(videoUrl)
+                val videoProgress = courseRepository.getVideoProgress(blockId)
                 _currentVideoTime.value = videoProgress.videoTime
             } catch (e: Exception) {
                 e.printStackTrace()

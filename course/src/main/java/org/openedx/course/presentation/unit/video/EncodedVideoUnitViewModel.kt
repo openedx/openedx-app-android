@@ -33,7 +33,7 @@ import java.util.concurrent.Executors
 class EncodedVideoUnitViewModel(
     courseId: String,
     videoUrl: String,
-    val blockId: String,
+    blockId: String,
     private val context: Context,
     private val preferencesManager: CorePreferences,
     courseRepository: CourseRepository,
@@ -44,6 +44,7 @@ class EncodedVideoUnitViewModel(
 ) : VideoUnitViewModel(
     courseId,
     videoUrl,
+    blockId,
     courseRepository,
     notifier,
     networkConnection,
@@ -67,6 +68,11 @@ class EncodedVideoUnitViewModel(
     var isPlayerSetUp = false
 
     private val exoPlayerListener = object : Player.Listener {
+        override fun onRenderedFirstFrame() {
+            duration = exoPlayer?.duration ?: 0L
+            super.onRenderedFirstFrame()
+        }
+
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
             super.onPlayWhenReadyChanged(playWhenReady, reason)
             isPlaying = playWhenReady

@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.videos
 
+import android.content.Context
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +16,7 @@ import org.openedx.core.BlockType
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
+import org.openedx.core.extension.safeDivBy
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
@@ -42,6 +44,7 @@ class CourseVideoViewModel(
     private val courseNotifier: CourseNotifier,
     private val downloadDialogManager: DownloadDialogManager,
     private val fileUtil: FileUtil,
+    private val context: Context,
     val courseRouter: CourseRouter,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
@@ -143,6 +146,7 @@ class CourseVideoViewModel(
                     val videoPreview = withContext(Dispatchers.IO) {
                         courseVideos.values.flatten().associate { block ->
                             block.id to block.getVideoPreview(
+                                context,
                                 networkConnection.isOnline(),
                                 downloadingModels.find { block.id == it.id }?.path
                             )
@@ -150,8 +154,9 @@ class CourseVideoViewModel(
                     }
                     val videoProgress = courseVideos.values.flatten().associate { block ->
                         val videoUrl = block.videoUrl ?: return@launch
-                        val videoProgressEntity = interactor.getVideoProgress(videoUrl)
-                        videoUrl to videoProgressEntity.videoTime.toFloat() / videoProgressEntity.duration
+                        val videoProgressEntity = interactor.getVideoProgress(block.id)
+                        videoUrl to videoProgressEntity.videoTime.toFloat()
+                            .safeDivBy(videoProgressEntity.duration.toFloat())
                     }
                     val isCompletedSectionsShown =
                         (_uiState.value as? CourseVideoUIState.CourseData)?.isCompletedSectionsShown

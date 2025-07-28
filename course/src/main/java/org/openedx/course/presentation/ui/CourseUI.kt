@@ -110,6 +110,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
+import org.openedx.core.utils.VideoPreview
 import org.openedx.course.R
 import org.openedx.course.presentation.dates.mockedCourseBannerInfo
 import org.openedx.course.presentation.outline.getUnitBlockIcon
@@ -612,7 +613,7 @@ fun VideoSubtitles(
 fun CourseVideoSection(
     block: Block,
     videoBlocks: List<Block>,
-    preview: Map<String, Any?>,
+    preview: Map<String, VideoPreview?>,
     progress: Map<String, Float>,
     downloadedStateMap: Map<String, DownloadedState>,
     onVideoClick: (Block) -> Unit,
@@ -676,7 +677,7 @@ fun CourseVideoSection(
 @Composable
 fun CourseVideoItem(
     videoBlock: Block,
-    preview: Any?,
+    preview: VideoPreview?,
     progress: Float,
     onClick: () -> Unit
 ) {
@@ -702,7 +703,7 @@ fun CourseVideoItem(
             modifier = Modifier
                 .fillMaxSize(),
             model = ImageRequest.Builder(LocalContext.current)
-                .data(preview)
+                .data(preview?.link ?: preview?.bitmap)
                 .error(coreR.drawable.core_no_image_course)
                 .placeholder(coreR.drawable.core_no_image_course)
                 .build(),

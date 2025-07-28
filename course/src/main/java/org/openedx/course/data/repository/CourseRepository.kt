@@ -254,14 +254,19 @@ class CourseRepository(
             trySend(response.mapToDomain())
         }
 
-    suspend fun saveVideoProgress(videoUrl: String, videoTime: Long, duration: Long) {
-        val videoProgressEntity = VideoProgressEntity(videoUrl, videoTime, duration)
+    suspend fun saveVideoProgress(
+        blockId: String,
+        videoUrl: String,
+        videoTime: Long,
+        duration: Long
+    ) {
+        val videoProgressEntity = VideoProgressEntity(blockId, videoUrl, videoTime, duration)
         courseDao.insertVideoProgressEntity(videoProgressEntity)
     }
 
-    suspend fun getVideoProgress(videoUrl: String): VideoProgressEntity {
-        return courseDao.getVideoProgressByVideoUrl(videoUrl)
-            ?: VideoProgressEntity(videoUrl, 0L, 0L)
+    suspend fun getVideoProgress(blockId: String): VideoProgressEntity {
+        return courseDao.getVideoProgressByBlockId(blockId)
+            ?: VideoProgressEntity(blockId, "", 0L, 0L)
     }
 
     fun getCourseProgress(courseId: String, isRefresh: Boolean): Flow<CourseProgress> =

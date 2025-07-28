@@ -59,6 +59,7 @@ class VideoUnitViewModelTest {
         val viewModel = VideoUnitViewModel(
             "",
             "",
+            "",
             courseRepository,
             notifier,
             networkConnection,
@@ -97,6 +98,7 @@ class VideoUnitViewModelTest {
     @Test
     fun `markBlockCompleted success`() = runTest {
         val viewModel = VideoUnitViewModel(
+            "",
             "",
             "",
             courseRepository,
@@ -139,6 +141,7 @@ class VideoUnitViewModelTest {
         val viewModel = VideoUnitViewModel(
             "",
             "",
+            "",
             courseRepository,
             notifier,
             networkConnection,
@@ -155,7 +158,7 @@ class VideoUnitViewModelTest {
                 )
             )
         }
-        coEvery { courseRepository.saveVideoProgress(any(), any(), any()) } returns Unit
+        coEvery { courseRepository.saveVideoProgress(any(), any(), any(), any()) } returns Unit
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
         lifecycleRegistry.addObserver(viewModel)

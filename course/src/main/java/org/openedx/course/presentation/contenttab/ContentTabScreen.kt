@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -23,8 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.ui.theme.appColors
@@ -44,11 +46,12 @@ import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 
 @Composable
-fun ContentScreen(
+fun ContentTabScreen(
     windowSize: WindowSize,
     fragmentManager: FragmentManager,
     courseId: String,
     courseName: String,
+    pagerState: PagerState,
     onTabSelected: (CourseContentTab) -> Unit = {},
 ) {
     val tabsWidth by remember(key1 = windowSize) {
@@ -59,10 +62,10 @@ fun ContentScreen(
             )
         )
     }
+    val scope = rememberCoroutineScope()
 
-    var selectedTab by rememberSaveable { mutableStateOf(CourseContentTab.ALL) }
-
-    LaunchedEffect(selectedTab) {
+    LaunchedEffect(pagerState.currentPage) {
+        val selectedTab = CourseContentTab.entries[pagerState.currentPage]
         onTabSelected(selectedTab)
     }
 
@@ -89,7 +92,7 @@ fun ContentScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 CourseContentTab.entries.forEachIndexed { index, tab ->
-                    val isSelected = selectedTab == tab
+                    val isSelected = pagerState.currentPage == index
                     val isEdgeItem = index == 0 || index == CourseContentTab.entries.size - 1
                     Box(
                         modifier = Modifier
@@ -102,7 +105,11 @@ fun ContentScreen(
                             )
                             .weight(1f)
                             .fillMaxHeight()
-                            .clickable { selectedTab = tab },
+                            .clickable {
+                                scope.launch {
+                                    pagerState.scrollToPage(index)
+                                }
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         if (!isEdgeItem) {
@@ -135,24 +142,41 @@ fun ContentScreen(
                     }
                 }
             }
-            when (selectedTab) {
-                CourseContentTab.ALL -> CourseContentAllScreen(
-                    windowSize = windowSize,
-                    viewModel = koinViewModel(parameters = { parametersOf(courseId, courseName) }),
-                    fragmentManager = fragmentManager,
-                )
 
-                CourseContentTab.VIDEOS -> CourseContentVideoScreen(
-                    windowSize = windowSize,
-                    viewModel = koinViewModel(parameters = { parametersOf(courseId, courseName) }),
-                    fragmentManager = fragmentManager
-                )
+            HorizontalPager(
+                state = pagerState,
+                userScrollEnabled = false,
+                beyondViewportPageCount = CourseContentTab.entries.size
+            ) { page ->
+                when (CourseContentTab.entries[page]) {
+                    CourseContentTab.ALL -> CourseContentAllScreen(
+                        windowSize = windowSize,
+                        viewModel = koinViewModel(parameters = {
+                            parametersOf(
+                                courseId,
+                                courseName
+                            )
+                        }),
+                        fragmentManager = fragmentManager,
+                    )
 
-                CourseContentTab.ASSIGNMENTS -> CourseContentAssignmentScreen(
-                    windowSize = windowSize,
-                    viewModel = koinViewModel(parameters = { parametersOf(courseId, courseName) }),
-                    fragmentManager = fragmentManager,
-                )
+                    CourseContentTab.VIDEOS -> CourseContentVideoScreen(
+                        windowSize = windowSize,
+                        viewModel = koinViewModel(parameters = {
+                            parametersOf(
+                                courseId,
+                                courseName
+                            )
+                        }),
+                        fragmentManager = fragmentManager
+                    )
+
+                    CourseContentTab.ASSIGNMENTS -> CourseContentAssignmentScreen(
+                        windowSize = windowSize,
+                        viewModel = koinViewModel(parameters = { parametersOf(courseId) }),
+                        fragmentManager = fragmentManager,
+                    )
+                }
             }
         }
     }

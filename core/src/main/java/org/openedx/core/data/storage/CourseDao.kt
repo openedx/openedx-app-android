@@ -48,8 +48,8 @@ interface CourseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVideoProgressEntity(vararg videoProgressEntity: VideoProgressEntity)
 
-    @Query("SELECT * FROM video_progress_table WHERE video_url=:videoUrl")
-    suspend fun getVideoProgressByVideoUrl(videoUrl: String): VideoProgressEntity?
+    @Query("SELECT * FROM video_progress_table WHERE block_id=:blockId")
+    suspend fun getVideoProgressByBlockId(blockId: String): VideoProgressEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCourseProgressEntity(vararg courseProgressEntity: CourseProgressEntity)

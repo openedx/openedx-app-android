@@ -1,7 +1,27 @@
 package org.openedx.core.utils
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
+import java.io.File
+import java.io.FileOutputStream
+import java.security.MessageDigest
+
+data class VideoPreview(
+    val link: String? = null,
+    val bitmap: Bitmap? = null
+) {
+    companion object {
+        fun createYoutubePreview(link: String): VideoPreview {
+            return VideoPreview(link = link)
+        }
+
+        fun createEncodedVideoPreview(bitmap: Bitmap): VideoPreview {
+            return VideoPreview(bitmap = bitmap)
+        }
+    }
+}
 
 object PreviewHelper {
 
@@ -20,23 +40,44 @@ object PreviewHelper {
         return matchResult?.groups?.get(1)?.value ?: ""
     }
 
-    fun getVideoFrameBitmap(isOnline: Boolean, videoUrl: String): Bitmap? {
-        if (!isOnline && !isLocalFile(videoUrl)) {
-            return null
+    fun getVideoFrameBitmap(context: Context, isOnline: Boolean, videoUrl: String): Bitmap? {
+        var result: Bitmap? = null
+        if (isOnline || isLocalFile(videoUrl)) {
+            // Check cache first
+            val cacheFile = getCacheFile(context, videoUrl)
+            if (cacheFile.exists()) {
+                try {
+                    result = BitmapFactory.decodeFile(cacheFile.absolutePath)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            } else {
+                result = extractBitmapFromVideo(videoUrl, context)
+            }
         }
+        return result
+    }
 
+    private fun extractBitmapFromVideo(videoUrl: String, context: Context): Bitmap? {
         val retriever = MediaMetadataRetriever()
-        return try {
+        try {
             if (isLocalFile(videoUrl)) {
                 retriever.setDataSource(videoUrl)
             } else {
                 retriever.setDataSource(videoUrl, HashMap())
             }
-            retriever.getFrameAtTime(0)
+            val bitmap = retriever.getFrameAtTime(0)
+
+            // Save bitmap to cache if it was successfully retrieved
+            bitmap?.let {
+                saveBitmapToCache(context, videoUrl, it)
+            }
+
+            return bitmap
         } catch (e: Exception) {
             // Log the exception for debugging but don't crash
             e.printStackTrace()
-            null
+            return null
         } finally {
             try {
                 retriever.release()
@@ -49,5 +90,58 @@ object PreviewHelper {
 
     private fun isLocalFile(url: String): Boolean {
         return url.startsWith("/") || url.startsWith("file://")
+    }
+
+    private fun getCacheFile(context: Context, videoUrl: String): File {
+        val cacheDir = context.cacheDir
+        val fileName = generateFileName(videoUrl)
+        return File(cacheDir, "video_thumbnails/$fileName")
+    }
+
+    private fun generateFileName(videoUrl: String): String {
+        val md = MessageDigest.getInstance("MD5")
+        val digest = md.digest(videoUrl.toByteArray())
+        return digest.joinToString("") { "%02x".format(it) } + ".jpg"
+    }
+
+    private fun saveBitmapToCache(context: Context, videoUrl: String, bitmap: Bitmap) {
+        try {
+            val cacheFile = getCacheFile(context, videoUrl)
+            cacheFile.parentFile?.mkdirs() // Create directories if they don't exist
+
+            FileOutputStream(cacheFile).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Clear the bitmap cache to free storage
+     */
+    fun clearCache(context: Context) {
+        try {
+            val cacheDir = File(context.cacheDir, "video_thumbnails")
+            if (cacheDir.exists()) {
+                cacheDir.deleteRecursively()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Remove a specific bitmap from cache
+     */
+    fun removeFromCache(context: Context, videoUrl: String) {
+        try {
+            val cacheFile = getCacheFile(context, videoUrl)
+            if (cacheFile.exists()) {
+                cacheFile.delete()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

@@ -1,5 +1,6 @@
 package org.openedx.core.domain.model
 
+import android.content.Context
 import android.os.Parcelable
 import android.webkit.URLUtil
 import kotlinx.parcelize.Parcelize
@@ -9,6 +10,7 @@ import org.openedx.core.BlockType
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.FileType
 import org.openedx.core.utils.PreviewHelper
+import org.openedx.core.utils.VideoPreview
 import org.openedx.core.utils.VideoUtil
 import java.util.Date
 
@@ -82,10 +84,11 @@ data class Block(
         }
     }
 
-    fun getVideoPreview(isOnline: Boolean, offlineUrl: String?): Any? {
+    fun getVideoPreview(context: Context, isOnline: Boolean, offlineUrl: String?): VideoPreview? {
         return if (studentViewData?.encodedVideos?.hasYoutubeUrl == true) {
-            PreviewHelper.getYouTubeThumbnailUrl(
-                studentViewData.encodedVideos.youtube?.url ?: ""
+            val youtubeUrl = studentViewData.encodedVideos.youtube?.url ?: ""
+            VideoPreview.createYoutubePreview(
+                PreviewHelper.getYouTubeThumbnailUrl(youtubeUrl)
             )
         } else if (studentViewData?.encodedVideos?.hasVideoUrl == true) {
             val videoUrl = if (studentViewData.encodedVideos.videoUrl.isNotEmpty() && isOnline) {
@@ -93,10 +96,12 @@ data class Block(
             } else {
                 offlineUrl ?: ""
             }
-            PreviewHelper.getVideoFrameBitmap(
+            val bitmap = PreviewHelper.getVideoFrameBitmap(
+                context = context,
                 isOnline = isOnline,
                 videoUrl = videoUrl
             )
+            bitmap?.let { VideoPreview.createEncodedVideoPreview(it) }
         } else {
             null
         }

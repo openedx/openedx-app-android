@@ -41,7 +41,8 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
     private val viewModel by viewModel<VideoUnitViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
-            requireArguments().getString(ARG_VIDEO_URL, "")
+            requireArguments().getString(ARG_VIDEO_URL, ""),
+            requireArguments().getString(ARG_BLOCK_ID, ""),
         )
     }
     private val router by inject<CourseRouter>()
@@ -241,7 +242,6 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
     }
 
     override fun onDestroyView() {
-        viewModel.saveVideoProgress()
         isPlayerInitialized = false
         _youTubePlayer = null
         super.onDestroyView()

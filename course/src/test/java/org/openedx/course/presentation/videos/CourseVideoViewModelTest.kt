@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.videos
 
+import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -65,6 +66,7 @@ class CourseVideoViewModelTest {
 
     private val dispatcher = StandardTestDispatcher()
 
+    private val context = mockk<Context>()
     private val config = mockk<Config>()
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<CourseInteractor>()
@@ -233,6 +235,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             downloadDialogManager,
             fileUtil,
+            context,
             courseRouter,
             coreAnalytics,
             downloadDao,
@@ -269,6 +272,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             downloadDialogManager,
             fileUtil,
+            context,
             courseRouter,
             coreAnalytics,
             downloadDao,
@@ -312,6 +316,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             downloadDialogManager,
             fileUtil,
+            context,
             courseRouter,
             coreAnalytics,
             downloadDao,
@@ -354,6 +359,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             downloadDialogManager,
             fileUtil,
+            context,
             courseRouter,
             coreAnalytics,
             downloadDao,
@@ -392,6 +398,7 @@ class CourseVideoViewModelTest {
                 courseNotifier,
                 downloadDialogManager,
                 fileUtil,
+                context,
                 courseRouter,
                 coreAnalytics,
                 downloadDao,
@@ -434,6 +441,7 @@ class CourseVideoViewModelTest {
                 courseNotifier,
                 downloadDialogManager,
                 fileUtil,
+                context,
                 courseRouter,
                 coreAnalytics,
                 downloadDao,
