@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.BlockType
-import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
@@ -38,11 +37,11 @@ import org.openedx.core.module.download.DownloadModelsSize
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.course.R
+import org.openedx.course.presentation.contenttab.CourseContentVideoEmptyState
 import org.openedx.course.presentation.ui.CourseProgress
 import org.openedx.course.presentation.ui.CourseVideoSection
 import org.openedx.foundation.presentation.UIMessage
@@ -55,7 +54,8 @@ import java.util.Date
 fun CourseContentVideoScreen(
     windowSize: WindowSize,
     viewModel: CourseVideoViewModel,
-    fragmentManager: FragmentManager
+    fragmentManager: FragmentManager,
+    onNavigateToHome: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState(CourseVideoUIState.Loading)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
@@ -64,6 +64,7 @@ fun CourseContentVideoScreen(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
+        onNavigateToHome = onNavigateToHome,
         onVideoClick = { videoBlock ->
             viewModel.courseRouter.navigateToCourseContainer(
                 fragmentManager,
@@ -89,6 +90,7 @@ private fun CourseVideosUI(
     windowSize: WindowSize,
     uiState: CourseVideoUIState,
     uiMessage: UIMessage?,
+    onNavigateToHome: () -> Unit,
     onVideoClick: (Block) -> Unit,
     onDownloadClick: (blocksIds: List<String>) -> Unit,
     onCompletedSectionVisibilityChange: () -> Unit,
@@ -137,7 +139,9 @@ private fun CourseVideosUI(
                     ) {
                         when (uiState) {
                             is CourseVideoUIState.Empty -> {
-                                NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_VIDEOS)
+                                CourseContentVideoEmptyState(
+                                    onReturnToCourseClick = onNavigateToHome
+                                )
                             }
 
                             is CourseVideoUIState.CourseData -> {
@@ -245,7 +249,8 @@ private fun CourseVideosScreenPreview() {
             ),
             onVideoClick = { },
             onDownloadClick = {},
-            onCompletedSectionVisibilityChange = {}
+            onCompletedSectionVisibilityChange = {},
+            onNavigateToHome = {},
         )
     }
 }
@@ -261,7 +266,8 @@ private fun CourseVideosScreenEmptyPreview() {
             uiState = CourseVideoUIState.Empty,
             onVideoClick = { },
             onDownloadClick = {},
-            onCompletedSectionVisibilityChange = {}
+            onCompletedSectionVisibilityChange = {},
+            onNavigateToHome = {},
         )
     }
 }
@@ -292,7 +298,8 @@ private fun CourseVideosScreenTabletPreview() {
             ),
             onVideoClick = { },
             onDownloadClick = {},
-            onCompletedSectionVisibilityChange = {}
+            onCompletedSectionVisibilityChange = {},
+            onNavigateToHome = {},
         )
     }
 }

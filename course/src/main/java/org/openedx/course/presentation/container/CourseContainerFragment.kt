@@ -461,6 +461,8 @@ private fun DashboardPager(
     fragmentManager: FragmentManager,
     onContentTabSelected: (CourseContentTab) -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
+
     HorizontalPager(
         state = pagerState,
         userScrollEnabled = false,
@@ -545,7 +547,16 @@ private fun DashboardPager(
                     courseId = viewModel.courseId,
                     courseName = viewModel.courseName,
                     pagerState = contentTabPagerState,
-                    onTabSelected = onContentTabSelected
+                    onTabSelected = onContentTabSelected,
+                    onNavigateToHome = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(
+                                CourseContainerTab.entries.indexOf(
+                                    CourseContainerTab.HOME
+                                )
+                            )
+                        }
+                    }
                 )
             }
         }

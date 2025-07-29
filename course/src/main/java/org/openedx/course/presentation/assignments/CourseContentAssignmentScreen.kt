@@ -51,20 +51,19 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.BlockType
-import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.presentation.course.CourseViewMode
-import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
+import org.openedx.course.presentation.contenttab.CourseContentAssignmentEmptyState
 import org.openedx.course.presentation.ui.CourseProgress
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
@@ -87,11 +86,13 @@ fun CourseContentAssignmentScreen(
     windowSize: WindowSize,
     viewModel: CourseAssignmentViewModel,
     fragmentManager: FragmentManager,
+    onNavigateToHome: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     CourseContentAssignmentScreen(
         uiState = uiState,
         windowSize = windowSize,
+        onNavigateToHome = onNavigateToHome,
         onAssignmentClick = { subSectionBlock ->
             viewModel.courseRouter.navigateToCourseSubsections(
                 fm = fragmentManager,
@@ -107,6 +108,7 @@ fun CourseContentAssignmentScreen(
 private fun CourseContentAssignmentScreen(
     uiState: CourseAssignmentUIState,
     windowSize: WindowSize,
+    onNavigateToHome: () -> Unit,
     onAssignmentClick: (Block) -> Unit,
 ) {
     val screenWidth by remember(key1 = windowSize) {
@@ -129,7 +131,9 @@ private fun CourseContentAssignmentScreen(
         }
 
         is CourseAssignmentUIState.Empty -> {
-            NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_ASSIGNMENT)
+            CourseContentAssignmentEmptyState(
+                onReturnToCourseClick = onNavigateToHome
+            )
         }
 
         is CourseAssignmentUIState.CourseData -> {
@@ -505,6 +509,7 @@ private fun CourseContentAssignmentScreenPreview() {
                 courseProgress = mockCourseProgress
             ),
             onAssignmentClick = {},
+            onNavigateToHome = {},
         )
     }
 }
@@ -517,6 +522,7 @@ private fun CourseContentAssignmentScreenEmptyPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseAssignmentUIState.Empty,
             onAssignmentClick = {},
+            onNavigateToHome = {},
         )
     }
 }
@@ -536,6 +542,7 @@ private fun CourseContentAssignmentScreenTabletPreview() {
                 courseProgress = mockCourseProgress
             ),
             onAssignmentClick = {},
+            onNavigateToHome = {},
         )
     }
 }

@@ -53,6 +53,7 @@ fun ContentTabScreen(
     courseName: String,
     pagerState: PagerState,
     onTabSelected: (CourseContentTab) -> Unit = {},
+    onNavigateToHome: () -> Unit = {},
 ) {
     val tabsWidth by remember(key1 = windowSize) {
         mutableStateOf(
@@ -158,6 +159,7 @@ fun ContentTabScreen(
                             )
                         }),
                         fragmentManager = fragmentManager,
+                        onNavigateToHome = onNavigateToHome
                     )
 
                     CourseContentTab.VIDEOS -> CourseContentVideoScreen(
@@ -168,13 +170,15 @@ fun ContentTabScreen(
                                 courseName
                             )
                         }),
-                        fragmentManager = fragmentManager
+                        fragmentManager = fragmentManager,
+                        onNavigateToHome = onNavigateToHome
                     )
 
                     CourseContentTab.ASSIGNMENTS -> CourseContentAssignmentScreen(
                         windowSize = windowSize,
                         viewModel = koinViewModel(parameters = { parametersOf(courseId) }),
                         fragmentManager = fragmentManager,
+                        onNavigateToHome = onNavigateToHome
                     )
                 }
             }

@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.BlockType
-import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
@@ -54,7 +53,6 @@ import org.openedx.core.extension.getChapterBlocks
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.TextIcon
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -62,6 +60,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
+import org.openedx.course.presentation.contenttab.CourseContentAllEmptyState
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseMessage
@@ -79,6 +78,7 @@ fun CourseContentAllScreen(
     windowSize: WindowSize,
     viewModel: CourseContentAllViewModel,
     fragmentManager: FragmentManager,
+    onNavigateToHome: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val uiMessage by viewModel.uiMessage.collectAsState(null)
@@ -95,6 +95,7 @@ fun CourseContentAllScreen(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
+        onNavigateToHome = onNavigateToHome,
         onExpandClick = { block ->
             if (viewModel.switchCourseSections(block.id)) {
                 viewModel.sequentialClickedEvent(
@@ -158,6 +159,7 @@ private fun CourseContentAllUI(
     windowSize: WindowSize,
     uiState: CourseContentAllUIState,
     uiMessage: UIMessage?,
+    onNavigateToHome: () -> Unit,
     onExpandClick: (Block) -> Unit,
     onSubSectionClick: (Block) -> Unit,
     onResumeClick: (String) -> Unit,
@@ -217,7 +219,9 @@ private fun CourseContentAllUI(
                     when (uiState) {
                         is CourseContentAllUIState.CourseData -> {
                             if (uiState.courseStructure.blockData.isEmpty()) {
-                                NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_OUTLINE)
+                                CourseContentAllEmptyState(
+                                    onReturnToCourseClick = onNavigateToHome
+                                )
                             } else {
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
@@ -332,7 +336,9 @@ private fun CourseContentAllUI(
                         }
 
                         CourseContentAllUIState.Error -> {
-                            NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_OUTLINE)
+                            CourseContentAllEmptyState(
+                                onReturnToCourseClick = onNavigateToHome
+                            )
                         }
 
                         CourseContentAllUIState.Loading -> {
@@ -423,6 +429,7 @@ private fun CourseOutlineScreenPreview() {
             onDownloadClick = {},
             onResetDatesClick = {},
             onCertificateClick = {},
+            onNavigateToHome = {},
         )
     }
 }
@@ -458,6 +465,7 @@ private fun CourseContentAllScreenTabletPreview() {
             onDownloadClick = {},
             onResetDatesClick = {},
             onCertificateClick = {},
+            onNavigateToHome = {},
         )
     }
 }

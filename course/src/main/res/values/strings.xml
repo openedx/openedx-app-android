@@ -79,4 +79,5 @@
     <string name="course_past_due">Past Due - %1$s points</string>
     <string name="course_of_grade">%1$s %% of Grade</string>
     <string name="course_review_grading_policy">Review Course Grading Policy</string>
+    <string name="course_return_to_course_home">Return to Course Home</string>
 </resources>
