@@ -45,14 +45,14 @@ object PreviewHelper {
         if (isOnline || isLocalFile(videoUrl)) {
             // Check cache first
             val cacheFile = getCacheFile(context, videoUrl)
-            if (cacheFile.exists()) {
+            result = if (cacheFile.exists()) {
                 try {
-                    result = BitmapFactory.decodeFile(cacheFile.absolutePath)
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                    BitmapFactory.decodeFile(cacheFile.absolutePath)
+                } catch (_: Exception) {
+                    extractBitmapFromVideo(videoUrl, context)
                 }
             } else {
-                result = extractBitmapFromVideo(videoUrl, context)
+                extractBitmapFromVideo(videoUrl, context)
             }
         }
         return result
