@@ -1,16 +1,16 @@
 package org.openedx.core.ui
 
 import android.content.res.Configuration
-import android.graphics.Rect
-import android.view.ViewTreeObserver
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
@@ -34,7 +34,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -156,25 +155,16 @@ fun <T : Any> rememberSaveableMap(init: () -> MutableMap<String, T?>): MutableMa
 }
 
 @Composable
-fun isImeVisibleState(): State<Boolean> {
-    val keyboardState = remember { mutableStateOf(false) }
-    val view = LocalView.current
-    DisposableEffect(view) {
-        val onGlobalListener = ViewTreeObserver.OnGlobalLayoutListener {
-            val rect = Rect()
-            view.getWindowVisibleDisplayFrame(rect)
-            val screenHeight = view.rootView.height
-            val keypadHeight = screenHeight - rect.bottom
-            keyboardState.value = keypadHeight > screenHeight * KEYBOARD_VISIBILITY_THRESHOLD
-        }
-        view.viewTreeObserver.addOnGlobalLayoutListener(onGlobalListener)
+fun isImeVisibleState(threshold: Int = 0): State<Boolean> {
+    val imeInsets = WindowInsets.ime
+    val imeBottom = imeInsets.getBottom(LocalDensity.current)
+    val isOpen = remember(imeBottom) { mutableStateOf(false) }
 
-        onDispose {
-            view.viewTreeObserver.removeOnGlobalLayoutListener(onGlobalListener)
-        }
+    LaunchedEffect(imeBottom) {
+        isOpen.value = imeBottom > threshold
     }
 
-    return keyboardState
+    return isOpen
 }
 
 fun PagerState.calculateCurrentOffsetForPage(page: Int): Float {
