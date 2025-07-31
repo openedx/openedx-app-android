@@ -310,11 +310,11 @@ private fun OverallGradeView(
                     .clip(CircleShape)
                     .border(
                         width = 1.dp,
-                        color = MaterialTheme.appColors.cardViewBackground,
+                        color = MaterialTheme.appColors.gradeProgressBarBorder,
                         shape = CircleShape
                     )
             ) {
-                gradingPolicy.assignmentPolicies.forEach { assignmentPolicy ->
+                gradingPolicy.assignmentPolicies.forEachIndexed { index, assignmentPolicy ->
                     val assignmentColors = gradingPolicy.assignmentColors
                     val color = if (assignmentColors.isNotEmpty()) {
                         assignmentColors[
@@ -334,6 +334,16 @@ private fun OverallGradeView(
                                 .background(color)
                                 .fillMaxHeight()
                         )
+
+                        // Add black separator between assignment policies (except after the last one)
+                        if (index < gradingPolicy.assignmentPolicies.size - 1) {
+                            Box(
+                                modifier = Modifier
+                                    .width(1.dp)
+                                    .background(Color.Black)
+                                    .fillMaxHeight()
+                            )
+                        }
                     }
                 }
                 if (notCompletedWeightedGradePercent > 0f) {

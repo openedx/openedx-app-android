@@ -50,6 +50,7 @@ data class CourseProgress(
         val assignmentSections = sectionScores
             .flatMap { it.subsections }
             .filter { it.assignmentType == type }
+        if (assignmentSections.isEmpty()) return 0f
         return assignmentSections.sumOf { it.percentGraded }.toFloat() / assignmentSections.size
     }
 
