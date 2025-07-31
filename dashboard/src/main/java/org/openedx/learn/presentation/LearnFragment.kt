@@ -91,8 +91,8 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
         binding.viewPager.offscreenPageLimit = 2
 
         adapter = NavigationFragmentAdapter(this).apply {
-            addFragment(viewModel.getDashboardFragment)
-            addFragment(viewModel.getProgramFragment)
+            addFragment { viewModel.getDashboardFragment }
+            addFragment { viewModel.getProgramFragment }
         }
         binding.viewPager.adapter = adapter
         binding.viewPager.setUserInputEnabled(false)
