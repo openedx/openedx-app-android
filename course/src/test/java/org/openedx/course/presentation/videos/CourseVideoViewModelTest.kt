@@ -87,7 +87,7 @@ class CourseVideoViewModelTest {
         assignmentType = "Homework",
         numPointsEarned = 1f,
         numPointsPossible = 3f,
-        label = "HW1",
+        shortLabel = "HW1",
     )
 
     private val blocks = listOf(

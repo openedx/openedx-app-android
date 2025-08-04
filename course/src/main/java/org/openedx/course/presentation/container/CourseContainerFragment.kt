@@ -309,7 +309,7 @@ fun CourseDashboard(
                             ) {
                                 IconText(
                                     text = stringResource(R.string.course_review_grading_policy),
-                                    painter = painterResource(id = coreR.drawable.core_ic_assignment),
+                                    painter = painterResource(id = coreR.drawable.core_ic_mountains),
                                     color = MaterialTheme.appColors.primary,
                                     textStyle = MaterialTheme.appTypography.labelLarge
                                 )

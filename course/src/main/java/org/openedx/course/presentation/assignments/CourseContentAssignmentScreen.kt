@@ -79,7 +79,6 @@ private const val ASSIGNMENT_BUTTON_CARD_BACKGROUND_ALPHA = 0.5f
 private const val COMPLETED_ASSIGNMENTS_COUNT = 1
 private const val COMPLETED_ASSIGNMENTS_COUNT_TABLET = 2
 private const val TOTAL_ASSIGNMENTS_COUNT = 3
-private const val SHORT_LABEL_PREFIX_SIZE = 3
 
 @Composable
 fun CourseContentAssignmentScreen(
@@ -139,7 +138,10 @@ private fun CourseContentAssignmentScreen(
         is CourseAssignmentUIState.CourseData -> {
             val gradingPolicy = uiState.courseProgress.gradingPolicy
             val defaultGradeColor = MaterialTheme.appColors.primary
-            Box(modifier = screenWidth) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.TopCenter
+            ) {
                 val progress = uiState.progress
                 val description = stringResource(
                     id = R.string.course_completed,
@@ -147,7 +149,7 @@ private fun CourseContentAssignmentScreen(
                     progress.total
                 )
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = screenWidth,
                     contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
                     item {
@@ -308,9 +310,6 @@ private fun AssignmentGroupSection(
 
 @Composable
 private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: () -> Unit) {
-    val label = assignment.assignmentProgress?.label?.split(" ").let {
-        it?.first()?.take(SHORT_LABEL_PREFIX_SIZE) + it?.last()
-    }
     val isDuePast = assignment.due != null && assignment.due!! < Date()
     val cardBorderColor = when {
         isSelected -> MaterialTheme.appColors.primary
@@ -368,7 +367,7 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
                 ) {
                     Text(
                         modifier = Modifier.align(Alignment.Center),
-                        text = label,
+                        text = assignment.assignmentProgress?.label ?: "",
                         color = MaterialTheme.appColors.textDark,
                         style = MaterialTheme.appTypography.bodyMedium,
                         maxLines = 1,
@@ -412,11 +411,14 @@ private fun AssignmentDetails(
     onAssignmentClick: (Block) -> Unit,
 ) {
     val dueDate =
-        assignment.due?.let { TimeUtils.formatToDueInString(LocalContext.current, it) } ?: ""
+        assignment.due?.let {
+            TimeUtils.formatToDueInString(LocalContext.current, it)
+        } ?: ""
+    val isDuePast = assignment.due != null && assignment.due!! < Date()
     val progress = assignment.completion.toFloat()
     val color = when {
         assignment.isCompleted() -> MaterialTheme.appColors.successGreen
-        assignment.due != null && assignment.due!! > Date() -> MaterialTheme.appColors.warning
+        isDuePast -> MaterialTheme.appColors.warning
         else -> MaterialTheme.appColors.cardViewBorder
     }
     val label = assignment.assignmentProgress?.label
@@ -428,11 +430,15 @@ private fun AssignmentDetails(
             )
         }
 
-        assignment.due != null && assignment.due!! > Date() -> {
+        isDuePast -> {
             "$label " + stringResource(
                 R.string.course_past_due,
                 assignment.assignmentProgress?.toString() ?: ""
             )
+        }
+
+        assignment.due == null -> {
+            "$label - ${assignment.assignmentProgress}"
         }
 
         else -> {
@@ -637,7 +643,7 @@ private val mockAssignmentProgress = AssignmentProgress(
     assignmentType = "Home",
     numPointsEarned = 1f,
     numPointsPossible = 3f,
-    label = "HM1"
+    shortLabel = "HM1"
 )
 
 private val mockChapterBlock = Block(

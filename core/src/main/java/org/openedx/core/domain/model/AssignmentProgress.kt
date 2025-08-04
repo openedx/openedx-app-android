@@ -10,7 +10,7 @@ data class AssignmentProgress(
     val assignmentType: String,
     val numPointsEarned: Float,
     val numPointsPossible: Float,
-    val label: String
+    val shortLabel: String
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -19,4 +19,9 @@ data class AssignmentProgress(
     override fun toString(): String {
         return "${numPointsEarned.toInt()}/${numPointsPossible.toInt()}"
     }
+
+    @IgnoredOnParcel
+    val label = shortLabel
+        .replace(" ", "")
+        .replaceFirst(Regex("^(\\D+)(0*)(\\d+)$"), "$1$3")
 }
