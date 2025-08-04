@@ -335,7 +335,7 @@ class CourseContainerViewModel(
             CourseContainerTab.VIDEOS -> videoTabClickedEvent()
             CourseContainerTab.DISCUSSIONS -> discussionTabClickedEvent()
             CourseContainerTab.DATES -> datesTabClickedEvent()
-            CourseContainerTab.PROGRESS -> {}
+            CourseContainerTab.PROGRESS -> progressTabClickedEvent()
             CourseContainerTab.MORE -> moreTabClickedEvent()
             CourseContainerTab.OFFLINE -> {}
         }
@@ -387,6 +387,10 @@ class CourseContainerViewModel(
 
     private fun moreTabClickedEvent() {
         logCourseContainerEvent(CourseAnalyticsEvent.MORE_TAB)
+    }
+
+    private fun progressTabClickedEvent() {
+        logCourseContainerEvent(CourseAnalyticsEvent.PROGRESS_TAB)
     }
 
     private fun logCourseContainerEvent(event: CourseAnalyticsEvent) {

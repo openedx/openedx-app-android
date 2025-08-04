@@ -66,6 +66,10 @@ enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
         "Course:Handouts Tab",
         "edx.bi.app.course.handouts_tab"
     ),
+    PROGRESS_TAB(
+        "Course:Progress Tab",
+        "edx.bi.app.course.progress_tab"
+    ),
     ANNOUNCEMENTS(
         "Course:Announcements",
         "edx.bi.app.course.announcements"
