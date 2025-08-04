@@ -336,7 +336,8 @@ class CourseContainerViewModel(
             CourseContainerTab.DATES -> datesTabClickedEvent()
             CourseContainerTab.PROGRESS -> progressTabClickedEvent()
             CourseContainerTab.MORE -> moreTabClickedEvent()
-            CourseContainerTab.OFFLINE, CourseContainerTab.CONTENT -> {}
+            CourseContainerTab.OFFLINE -> offlineTabClickedEvent()
+            CourseContainerTab.CONTENT -> contentTabClickedEvent()
         }
     }
 
@@ -387,6 +388,15 @@ class CourseContainerViewModel(
     private fun progressTabClickedEvent() {
         logCourseContainerEvent(CourseAnalyticsEvent.PROGRESS_TAB)
     }
+
+    private fun offlineTabClickedEvent() {
+        logCourseContainerEvent(CourseAnalyticsEvent.OFFLINE_TAB)
+    }
+
+    private fun contentTabClickedEvent() {
+        logCourseContainerEvent(CourseAnalyticsEvent.CONTENT_TAB)
+    }
+
 
     private fun logCourseContainerEvent(event: CourseAnalyticsEvent) {
         courseAnalytics.logScreenEvent(

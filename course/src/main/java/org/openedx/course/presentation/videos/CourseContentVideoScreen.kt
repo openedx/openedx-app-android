@@ -72,6 +72,7 @@ fun CourseContentVideoScreen(
                 unitId = viewModel.getBlockParent(videoBlock.id)?.id ?: return@CourseVideosUI,
                 mode = CourseViewMode.VIDEOS
             )
+            viewModel.logVideoClick(videoBlock.id)
         },
         onDownloadClick = { blocksIds ->
             viewModel.downloadBlocks(
@@ -81,7 +82,7 @@ fun CourseContentVideoScreen(
         },
         onCompletedSectionVisibilityChange = {
             viewModel.onCompletedSectionVisibilityChange()
-        }
+        },
     )
 }
 

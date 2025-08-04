@@ -47,6 +47,7 @@ import org.openedx.foundation.presentation.windowSizeValue
 
 @Composable
 fun ContentTabScreen(
+    viewModel: ContentTabViewModel,
     windowSize: WindowSize,
     fragmentManager: FragmentManager,
     courseId: String,
@@ -110,6 +111,7 @@ fun ContentTabScreen(
                                 scope.launch {
                                     pagerState.scrollToPage(index)
                                 }
+                                viewModel.logTabClickEvent(CourseContentTab.entries[index])
                             },
                         contentAlignment = Alignment.Center
                     ) {

@@ -99,6 +99,7 @@ fun CourseContentAssignmentScreen(
                 subSectionId = subSectionBlock.id,
                 mode = CourseViewMode.FULL
             )
+            viewModel.logAssignmentClick(subSectionBlock.id)
         },
     )
 }

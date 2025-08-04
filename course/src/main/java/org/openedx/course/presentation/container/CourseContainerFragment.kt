@@ -542,6 +542,9 @@ private fun DashboardPager(
 
             CourseContainerTab.CONTENT -> {
                 ContentTabScreen(
+                    viewModel = koinViewModel(
+                        parameters = { parametersOf(viewModel.courseId, viewModel.courseName) }
+                    ),
                     windowSize = windowSize,
                     fragmentManager = fragmentManager,
                     courseId = viewModel.courseId,

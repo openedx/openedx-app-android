@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.videos
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
@@ -29,13 +30,18 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 
+@SuppressLint("StaticFieldLeak")
 class CourseVideoViewModel(
     val courseId: String,
+    private val context: Context,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
@@ -44,8 +50,8 @@ class CourseVideoViewModel(
     private val courseNotifier: CourseNotifier,
     private val downloadDialogManager: DownloadDialogManager,
     private val fileUtil: FileUtil,
-    private val context: Context,
     val courseRouter: CourseRouter,
+    private val analytics: CourseAnalytics,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
@@ -289,8 +295,36 @@ class CourseVideoViewModel(
     fun onCompletedSectionVisibilityChange() {
         if (_uiState.value is CourseVideoUIState.CourseData) {
             val state = _uiState.value as CourseVideoUIState.CourseData
-
             _uiState.value = state.copy(isCompletedSectionsShown = !state.isCompletedSectionsShown)
+
+            analytics.logEvent(
+                CourseAnalyticsEvent.VIDEO_SHOW_COMPLETED.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.VIDEO_SHOW_COMPLETED.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                }
+            )
+        }
+    }
+
+    fun logVideoClick(blockId: String) {
+        if (_uiState.value is CourseVideoUIState.CourseData) {
+            val state = _uiState.value as CourseVideoUIState.CourseData
+            _uiState.value = state.copy(isCompletedSectionsShown = !state.isCompletedSectionsShown)
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_CONTENT_VIDEO_CLICK.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.COURSE_CONTENT_VIDEO_CLICK.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                }
+            )
         }
     }
 

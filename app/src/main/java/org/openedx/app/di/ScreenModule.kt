@@ -20,6 +20,7 @@ import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.assignments.CourseAssignmentViewModel
 import org.openedx.course.presentation.container.CourseContainerViewModel
+import org.openedx.course.presentation.contenttab.ContentTabViewModel
 import org.openedx.course.presentation.dates.CourseDatesViewModel
 import org.openedx.course.presentation.handouts.HandoutsViewModel
 import org.openedx.course.presentation.offline.CourseOfflineViewModel
@@ -302,6 +303,13 @@ val screenModule = module {
             get(),
         )
     }
+    viewModel { (courseId: String, courseTitle: String) ->
+        ContentTabViewModel(
+            courseId,
+            courseTitle,
+            get(),
+        )
+    }
     viewModel { (courseId: String) ->
         CourseSectionViewModel(
             courseId,
@@ -325,6 +333,7 @@ val screenModule = module {
     viewModel { (courseId: String) ->
         CourseVideoViewModel(
             courseId,
+            get(),
             get(),
             get(),
             get(),
@@ -547,6 +556,7 @@ val screenModule = module {
             interactor = get(),
             courseRouter = get(),
             courseNotifier = get(),
+            analytics = get()
         )
     }
 }
