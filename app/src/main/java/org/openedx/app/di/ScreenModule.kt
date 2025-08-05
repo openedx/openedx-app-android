@@ -25,7 +25,6 @@ import org.openedx.course.presentation.dates.CourseDatesViewModel
 import org.openedx.course.presentation.handouts.HandoutsViewModel
 import org.openedx.course.presentation.offline.CourseOfflineViewModel
 import org.openedx.course.presentation.outline.CourseContentAllViewModel
-import org.openedx.course.presentation.outline.CourseOutlineViewModel
 import org.openedx.course.presentation.progress.CourseProgressViewModel
 import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel

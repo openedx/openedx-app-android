@@ -136,7 +136,9 @@ data class VideoInfo(
     var fileSize: Long?
 ) {
     fun mapToDomain() = DomainVideoInfo(
-        url = url.orEmpty(),
+        url = url
+            .orEmpty()
+            .trim(),
         fileSize = fileSize ?: 0
     )
 }

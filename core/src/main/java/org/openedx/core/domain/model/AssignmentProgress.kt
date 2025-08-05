@@ -7,7 +7,7 @@ import org.openedx.core.extension.safeDivBy
 
 @Parcelize
 data class AssignmentProgress(
-    val assignmentType: String,
+    val assignmentType: String?,
     val numPointsEarned: Float,
     val numPointsPossible: Float,
     val shortLabel: String
@@ -16,8 +16,8 @@ data class AssignmentProgress(
     @IgnoredOnParcel
     val value: Float = numPointsEarned.safeDivBy(numPointsPossible)
 
-    override fun toString(): String {
-        return "${numPointsEarned.toInt()}/${numPointsPossible.toInt()}"
+    fun toPointString(separator: String = ""): String {
+        return "${numPointsEarned.toInt()}$separator/$separator${numPointsPossible.toInt()}"
     }
 
     @IgnoredOnParcel

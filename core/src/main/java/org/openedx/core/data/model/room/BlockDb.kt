@@ -203,7 +203,9 @@ data class VideoInfoDb(
         fun createFrom(videoInfo: VideoInfo?): VideoInfoDb? {
             if (videoInfo == null) return null
             return VideoInfoDb(
-                videoInfo.url ?: "",
+                videoInfo.url
+                    .orEmpty()
+                    .trim(),
                 videoInfo.fileSize ?: 0,
             )
         }
@@ -233,7 +235,7 @@ data class AssignmentProgressDb(
     val shortLabel: String?
 ) {
     fun mapToDomain() = DomainAssignmentProgress(
-        assignmentType = assignmentType ?: "",
+        assignmentType = assignmentType,
         numPointsEarned = numPointsEarned ?: 0f,
         numPointsPossible = numPointsPossible ?: 0f,
         shortLabel = shortLabel ?: ""

@@ -184,6 +184,7 @@ private fun CourseContentAssignmentScreen(
                                 percentOfGrade = percentOfGrade,
                                 gradeColor = gradeColor,
                                 assignments = blocks,
+                                sectionNames = uiState.sectionNames,
                                 onAssignmentClick = onAssignmentClick,
                             )
                         }
@@ -198,6 +199,7 @@ private fun CourseContentAssignmentScreen(
 private fun AssignmentGroupSection(
     label: String,
     assignments: List<Block>,
+    sectionNames: Map<String, String>,
     percentOfGrade: Int,
     gradeColor: Color,
     onAssignmentClick: (Block) -> Unit,
@@ -289,15 +291,18 @@ private fun AssignmentGroupSection(
                         modifier = Modifier
                             .padding(horizontal = 24.dp),
                         assignment = assignment,
+                        sectionName = sectionNames[assignment.id] ?: "",
                         onAssignmentClick = onAssignmentClick
                     )
                 }
             } else {
+                val assignment = assignments.firstOrNull() ?: return@Column
                 AssignmentDetails(
                     modifier = Modifier
                         .padding(horizontal = 24.dp)
                         .padding(top = 8.dp),
-                    assignment = assignments.firstOrNull() ?: return@Column,
+                    assignment = assignment,
+                    sectionName = sectionNames[assignment.id] ?: "",
                     onAssignmentClick = onAssignmentClick
                 )
             }
@@ -409,6 +414,7 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
 private fun AssignmentDetails(
     modifier: Modifier = Modifier,
     assignment: Block,
+    sectionName: String,
     onAssignmentClick: (Block) -> Unit,
 ) {
     val dueDate =
@@ -427,19 +433,22 @@ private fun AssignmentDetails(
         assignment.isCompleted() -> {
             "$label " + stringResource(
                 R.string.course_complete_points,
-                assignment.assignmentProgress?.toString() ?: ""
+                assignment.assignmentProgress?.toPointString() ?: ""
             )
         }
 
         isDuePast -> {
             "$label " + stringResource(
                 R.string.course_past_due,
-                assignment.assignmentProgress?.toString() ?: ""
+                assignment.assignmentProgress?.toPointString() ?: ""
             )
         }
 
-        assignment.due == null -> {
-            "$label - ${assignment.assignmentProgress}"
+        progress < 1f && assignment.due == null -> {
+            "$label " + stringResource(
+                R.string.course_in_progress,
+                assignment.assignmentProgress?.toPointString() ?: ""
+            )
         }
 
         else -> {
@@ -478,6 +487,11 @@ private fun AssignmentDetails(
             ) {
                 Column {
                     Text(
+                        text = sectionName,
+                        style = MaterialTheme.appTypography.bodySmall,
+                        color = MaterialTheme.appColors.textDark
+                    )
+                    Text(
                         text = assignment.displayName,
                         style = MaterialTheme.appTypography.bodyLarge,
                         color = MaterialTheme.appColors.textDark
@@ -513,7 +527,8 @@ private fun CourseContentAssignmentScreenPreview() {
                 groupedAssignments = mapOf(
                     "Homework" to listOf(mockChapterBlock, mockSequentialBlock)
                 ),
-                courseProgress = mockCourseProgress
+                courseProgress = mockCourseProgress,
+                sectionNames = mapOf()
             ),
             onAssignmentClick = {},
             onNavigateToHome = {},
@@ -546,7 +561,8 @@ private fun CourseContentAssignmentScreenTabletPreview() {
                     "Homework" to listOf(mockChapterBlock),
                     "Quiz" to listOf(mockSequentialBlock)
                 ),
-                courseProgress = mockCourseProgress
+                courseProgress = mockCourseProgress,
+                sectionNames = mapOf()
             ),
             onAssignmentClick = {},
             onNavigateToHome = {},

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.Progress
@@ -81,10 +82,13 @@ class CourseAssignmentViewModel(
             val completed = assignments.count { it.isCompleted() }
             val total = assignments.size
             val progress = Progress(completed, total)
+            val sectionName =
+                createAssignmentToChapterMapping(courseStructure.blockData, assignments)
             _uiState.value = CourseAssignmentUIState.CourseData(
                 groupedAssignments = grouped,
                 courseProgress = courseProgress,
-                progress = progress
+                progress = progress,
+                sectionNames = sectionName
             )
         }
     }
@@ -111,5 +115,24 @@ class CourseAssignmentViewModel(
                 put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
             }
         )
+    }
+
+    private fun createAssignmentToChapterMapping(
+        allBlocks: List<Block>,
+        assignments: List<Block>
+    ): Map<String, String> {
+        val assignmentToChapterMap = mutableMapOf<String, String>()
+        assignments.forEach { assignment ->
+            val chapterBlock = findChapterForAssignment(assignment.id, allBlocks)
+            if (chapterBlock != null) {
+                assignmentToChapterMap[assignment.id] = chapterBlock.displayName
+            }
+        }
+
+        return assignmentToChapterMap
+    }
+
+    private fun findChapterForAssignment(assignmentId: String, blocks: List<Block>): Block? {
+        return blocks.firstOrNull { it.descendants.contains(assignmentId) }
     }
 }

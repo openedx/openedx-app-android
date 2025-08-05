@@ -663,7 +663,7 @@ fun CourseVideoSection(
                 CourseVideoItem(
                     videoBlock = block,
                     preview = preview[block.id],
-                    progress = progress[block.videoUrl] ?: 0f,
+                    progress = progress[block.id] ?: 0f,
                     onClick = {
                         onVideoClick(block)
                     }
@@ -747,7 +747,7 @@ fun CourseVideoItem(
         )
 
         // Progress bar (bottom)
-        if (progress > 0.0f || videoBlock.isCompleted()) {
+        if (progress > 0.0f) {
             Box(
                 modifier = Modifier
                     .padding(bottom = 4.dp)
@@ -761,12 +761,8 @@ fun CourseVideoItem(
                         .height(4.dp)
                         .padding(horizontal = 8.dp)
                         .clip(CircleShape),
-                    progress = if (videoBlock.isCompleted()) {
-                        1f
-                    } else {
-                        progress
-                    },
-                    color = if (videoBlock.isCompleted()) {
+                    progress = progress,
+                    color = if (videoBlock.isCompleted() && progress > 0.95f) {
                         MaterialTheme.appColors.progressBarColor
                     } else {
                         MaterialTheme.appColors.primary
@@ -1041,11 +1037,9 @@ fun CourseSubSectionItem(
     }
     val due by rememberSaveable {
         mutableStateOf(
-            block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) } ?: ""
+            block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) }
         )
     }
-    val isAssignmentEnable =
-        !block.isCompleted() && block.assignmentProgress != null && due.isNotEmpty()
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -1071,7 +1065,7 @@ fun CourseSubSectionItem(
                 maxLines = 1
             )
             Spacer(modifier = Modifier.width(16.dp))
-            if (isAssignmentEnable) {
+            if (due != null) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     tint = MaterialTheme.appColors.onSurface,
@@ -1079,18 +1073,27 @@ fun CourseSubSectionItem(
                 )
             }
         }
-
-        if (isAssignmentEnable) {
-            val assignmentString = stringResource(
-                coreR.string.core_subsection_assignment_info,
-                block.assignmentProgress?.assignmentType ?: "",
+        val strings = listOf(
+            block.assignmentProgress?.assignmentType,
+            due?.let {
                 stringResource(
                     id = coreR.string.core_date_format_assignment_due,
-                    due
-                ),
-                block.assignmentProgress?.numPointsEarned?.toInt() ?: 0,
-                block.assignmentProgress?.numPointsPossible?.toInt() ?: 0
-            )
+                    it
+                )
+            },
+            block.assignmentProgress?.numPointsPossible?.let {
+                if (it > 0) {
+                    block.assignmentProgress?.toPointString(" ")
+                } else {
+                    null
+                }
+            }
+        )
+        val assignmentString = strings
+            .filter { !it.isNullOrEmpty() }
+            .joinToString(" - ")
+
+        if (assignmentString.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = assignmentString,

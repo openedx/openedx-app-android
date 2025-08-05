@@ -159,10 +159,10 @@ class CourseVideoViewModel(
                         }
                     }
                     val videoProgress = courseVideos.values.flatten().associate { block ->
-                        val videoUrl = block.videoUrl ?: return@launch
                         val videoProgressEntity = interactor.getVideoProgress(block.id)
-                        videoUrl to videoProgressEntity.videoTime.toFloat()
+                        val progress = videoProgressEntity.videoTime.toFloat()
                             .safeDivBy(videoProgressEntity.duration.toFloat())
+                        block.id to progress
                     }
                     val isCompletedSectionsShown =
                         (_uiState.value as? CourseVideoUIState.CourseData)?.isCompletedSectionsShown
@@ -312,8 +312,6 @@ class CourseVideoViewModel(
 
     fun logVideoClick(blockId: String) {
         if (_uiState.value is CourseVideoUIState.CourseData) {
-            val state = _uiState.value as CourseVideoUIState.CourseData
-            _uiState.value = state.copy(isCompletedSectionsShown = !state.isCompletedSectionsShown)
             analytics.logEvent(
                 CourseAnalyticsEvent.COURSE_CONTENT_VIDEO_CLICK.eventName,
                 buildMap {

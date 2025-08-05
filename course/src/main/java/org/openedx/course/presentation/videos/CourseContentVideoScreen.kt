@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -151,6 +152,12 @@ private fun CourseVideosUI(
                                     contentPadding = listBottomPadding
                                 ) {
                                     val allVideos = uiState.courseVideos.values.flatten()
+                                    val hasCompletedSection =
+                                        uiState.courseVideos.values.any { sectionVideos ->
+                                            sectionVideos.all { video ->
+                                                video.isCompleted()
+                                            }
+                                        }
                                     val progress = Progress(
                                         completed = allVideos.filter { it.isCompleted() }.size,
                                         total = allVideos.size,
@@ -166,7 +173,7 @@ private fun CourseVideosUI(
                                                 ),
                                             progress = progress,
                                             isCompletedShown = uiState.isCompletedSectionsShown,
-                                            onVisibilityChanged = if (progress.completed != 0) {
+                                            onVisibilityChanged = if (hasCompletedSection) {
                                                 { onCompletedSectionVisibilityChange() }
                                             } else {
                                                 null
@@ -177,6 +184,9 @@ private fun CourseVideosUI(
                                                 progress.total
                                             )
                                         )
+                                    }
+                                    item {
+                                        Divider(modifier = Modifier.fillMaxWidth())
                                     }
 
                                     uiState.courseStructure.blockData

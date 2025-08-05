@@ -131,7 +131,7 @@ enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
         "edx.bi.app.course.content.show_completed_subsection.clicked"
     ),
     COURSE_CONTENT_VIDEO_CLICK(
-        "Course:Video click",
+        "Course:Video Clicked",
         "edx.bi.app.course.content.video.clicked"
     ),
     COURSE_CONTENT_ASSIGNMENT_CLICK(

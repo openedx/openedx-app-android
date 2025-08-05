@@ -91,9 +91,7 @@ import org.openedx.course.presentation.dates.CourseDatesScreen
 import org.openedx.course.presentation.handouts.HandoutsScreen
 import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.offline.CourseOfflineScreen
-import org.openedx.course.presentation.outline.CourseOutlineScreen
 import org.openedx.course.presentation.progress.CourseProgressScreen
-import org.openedx.course.presentation.ui.CourseVideosScreen
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import org.openedx.discussion.presentation.topics.DiscussionTopicsScreen
 import org.openedx.foundation.extension.takeIfNotEmpty
@@ -261,7 +259,8 @@ fun CourseDashboard(
         CourseContainerTab.HOME.name -> CourseContainerTab.HOME
         CourseContainerTab.DATES.name -> CourseContainerTab.DATES
         CourseContainerTab.DISCUSSIONS.name -> CourseContainerTab.DISCUSSIONS
-        CourseContainerTab.PROGRESS.name -> CourseContainerTab.PROGRESSCourseContainerTab.MORE.name -> CourseContainerTab.MORE
+        CourseContainerTab.PROGRESS.name -> CourseContainerTab.PROGRESS
+        CourseContainerTab.MORE.name -> CourseContainerTab.MORE
         else -> CourseContainerTab.HOME
     }
 
@@ -689,7 +688,6 @@ private fun scrollToDates(scope: CoroutineScope, pagerState: PagerState) {
 @OptIn(ExperimentalFoundationApi::class)
 private fun scrollToProgress(scope: CoroutineScope, pagerState: PagerState) {
     scope.launch {
-        // TODO Change to progress tab
-        pagerState.animateScrollToPage(CourseContainerTab.entries.indexOf(CourseContainerTab.DATES))
+        pagerState.animateScrollToPage(CourseContainerTab.entries.indexOf(CourseContainerTab.PROGRESS))
     }
 }

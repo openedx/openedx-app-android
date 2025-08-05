@@ -26,6 +26,7 @@ import org.openedx.discovery.data.storage.DiscoveryDao
 const val DATABASE_VERSION = 4
 const val DATABASE_NAME = "OpenEdX_db"
 
+@Suppress("MagicNumber")
 @Database(
     entities = [
         CourseEntity::class,

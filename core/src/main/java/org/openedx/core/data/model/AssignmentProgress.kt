@@ -17,7 +17,7 @@ data class AssignmentProgress(
     val shortLabel: String?
 ) {
     fun mapToDomain(displayName: String) = AssignmentProgress(
-        assignmentType = assignmentType ?: "",
+        assignmentType = assignmentType,
         numPointsEarned = numPointsEarned ?: 0f,
         numPointsPossible = numPointsPossible ?: 0f,
         shortLabel = shortLabel ?: displayName.take(DEFAULT_LABEL_LENGTH)

@@ -449,7 +449,7 @@ private fun CourseCompletionView(
                     )
                     .padding(3.dp),
                 progress = progress.completion,
-                color = MaterialTheme.appColors.progressBarColor,
+                color = MaterialTheme.appColors.primary,
                 backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor,
                 strokeWidth = 10.dp,
                 strokeCap = StrokeCap.Round
@@ -513,7 +513,7 @@ private fun AssignmentTypeRow(
             ) {
                 Text(
                     text = stringResource(
-                        R.string.progress_earned_possible_assignment_problems,
+                        R.string.course_progress_earned_possible_assignment_problems,
                         earned.toInt(),
                         possible.toInt()
                     ),
@@ -526,7 +526,7 @@ private fun AssignmentTypeRow(
                             append("${(policy.weight * 100).toInt()}%")
                         }
                         append(" ")
-                        append(stringResource(R.string.progress_of_grade))
+                        append(stringResource(R.string.course_progress_of_grade))
                     },
                     style = MaterialTheme.appTypography.bodySmall,
                     color = MaterialTheme.appColors.textDark,
@@ -534,7 +534,7 @@ private fun AssignmentTypeRow(
             }
             Text(
                 stringResource(
-                    R.string.progress_current_and_max_weighted_graded_percent,
+                    R.string.course_progress_current_and_max_weighted_graded_percent,
                     progress.getAssignmentWeightedGradedPercent(policy).toInt(),
                     (policy.weight * 100).toInt()
                 ),

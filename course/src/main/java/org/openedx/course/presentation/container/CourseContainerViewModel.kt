@@ -396,8 +396,6 @@ class CourseContainerViewModel(
     private fun contentTabClickedEvent() {
         logCourseContainerEvent(CourseAnalyticsEvent.CONTENT_TAB)
     }
-
-
     private fun logCourseContainerEvent(event: CourseAnalyticsEvent) {
         courseAnalytics.logScreenEvent(
             screenName = event.eventName,

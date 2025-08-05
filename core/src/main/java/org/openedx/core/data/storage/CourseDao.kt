@@ -20,30 +20,30 @@ interface CourseDao {
     suspend fun insertCourseStructureEntity(vararg courseStructureEntity: CourseStructureEntity)
 
     @Transaction
-    suspend fun clearCourseData() {
-        clearCourseStructureData()
-        clearCourseProgressData()
+    suspend fun clearCachedData() {
+        clearCourseStructure()
+        clearVideoProgress()
         clearEnrollmentCachedData()
+        clearCourseProgressData()
     }
 
     @Query("DELETE FROM course_structure_table")
-    suspend fun clearCourseStructureData()
+    suspend fun clearCourseStructure()
 
-    @Query("DELETE FROM course_progress_table")
-    suspend fun clearCourseProgressData()
+    @Query("DELETE FROM video_progress_table")
+    suspend fun clearVideoProgress()
 
     @Query("DELETE FROM course_enrollment_details_table")
     suspend fun clearEnrollmentCachedData()
+
+    @Query("DELETE FROM course_progress_table")
+    suspend fun clearCourseProgressData()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCourseEnrollmentDetailsEntity(vararg courseEnrollmentDetailsEntity: CourseEnrollmentDetailsEntity)
 
     @Query("SELECT * FROM course_enrollment_details_table WHERE id=:id")
     suspend fun getCourseEnrollmentDetailsById(id: String): CourseEnrollmentDetailsEntity?
-
-
-    @Query("DELETE FROM course_progress_table")
-    suspend fun clearCourseProgressData()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVideoProgressEntity(vararg videoProgressEntity: VideoProgressEntity)
