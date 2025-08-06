@@ -7,7 +7,7 @@
 
         <!-- Use windowSplashScreenAnimatedIcon to add either a drawable or an
              animated drawable. One of these is required. -->
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_inset</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/app_splash_inset</item>
         <!-- Required for animated icons -->
 
         <item name="windowSplashScreenAnimationDuration">300</item>

@@ -4,7 +4,6 @@
     <string name="pre_auth_search_title" tools:ignore="ExtraTranslation">What do you want to learn?</string>
     <string name="pre_auth_search_hint" tools:ignore="ExtraTranslation">Search our 3000+ courses</string>
     <string name="pre_auth_explore_all_courses" tools:ignore="ExtraTranslation">Explore all courses</string>
-    <string name="auth_sign_up">Sign up</string>
     <string name="auth_forgot_password">Forgot password?</string>
     <string name="auth_email">Email</string>
     <string name="auth_invalid_email">Invalid email</string>

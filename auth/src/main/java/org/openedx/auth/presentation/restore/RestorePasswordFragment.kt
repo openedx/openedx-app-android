@@ -186,7 +186,7 @@ private fun RestorePasswordScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp),
-            painter = painterResource(id = org.openedx.core.R.drawable.core_top_header),
+            painter = painterResource(id = R.drawable.core_top_header),
             contentScale = ContentScale.FillBounds,
             contentDescription = null
         )
@@ -324,7 +324,7 @@ private fun RestorePasswordScreen(
                             ) {
                                 Icon(
                                     modifier = Modifier.size(100.dp),
-                                    painter = painterResource(id = authR.drawable.auth_ic_email),
+                                    painter = painterResource(id = authR.drawable.ic_auth_email),
                                     contentDescription = null,
                                     tint = MaterialTheme.appColors.textPrimary
                                 )

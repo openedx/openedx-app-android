@@ -331,7 +331,7 @@ private fun CourseVideosUI(
                         }
                     ) {
                         Text(
-                            text = stringResource(id = org.openedx.core.R.string.core_confirm)
+                            text = stringResource(id = coreR.string.core_confirm)
                         )
                     }
                 },
@@ -341,7 +341,7 @@ private fun CourseVideosUI(
                             isDownloadConfirmationShowed = false
                         }
                     ) {
-                        Text(text = stringResource(id = org.openedx.core.R.string.core_dismiss))
+                        Text(text = stringResource(id = coreR.string.core_dismiss))
                     }
                 }
             )
@@ -362,7 +362,7 @@ private fun CourseVideosUI(
             AlertDialog(
                 title = {
                     Text(
-                        text = stringResource(id = org.openedx.core.R.string.core_warning)
+                        text = stringResource(id = coreR.string.core_warning)
                     )
                 },
                 text = {
@@ -381,7 +381,7 @@ private fun CourseVideosUI(
                         }
                     ) {
                         Text(
-                            text = stringResource(id = org.openedx.core.R.string.core_delete)
+                            text = stringResource(id = coreR.string.core_delete)
                         )
                     }
                 },
@@ -391,7 +391,7 @@ private fun CourseVideosUI(
                             isDeleteDownloadsConfirmationShowed = false
                         }
                     ) {
-                        Text(text = stringResource(id = org.openedx.core.R.string.core_cancel))
+                        Text(text = stringResource(id = coreR.string.core_cancel))
                     }
                 }
             )
@@ -401,7 +401,7 @@ private fun CourseVideosUI(
             AlertDialog(
                 title = {
                     Text(
-                        text = stringResource(id = org.openedx.core.R.string.core_warning)
+                        text = stringResource(id = coreR.string.core_warning)
                     )
                 },
                 text = {
@@ -425,7 +425,7 @@ private fun CourseVideosUI(
                         }
                     ) {
                         Text(
-                            text = stringResource(id = org.openedx.core.R.string.core_delete)
+                            text = stringResource(id = coreR.string.core_delete)
                         )
                     }
                 },
@@ -435,7 +435,7 @@ private fun CourseVideosUI(
                             deleteDownloadBlock = null
                         }
                     ) {
-                        Text(text = stringResource(id = org.openedx.core.R.string.core_cancel))
+                        Text(text = stringResource(id = coreR.string.core_cancel))
                     }
                 }
             )
@@ -460,20 +460,20 @@ private fun AllVideosDownloadItem(
                 downloadModelsSize.remainingCount == 0
 
     val downloadVideoTitleRes = when {
-        isDownloadingAllVideos -> org.openedx.core.R.string.core_video_downloading_to_device
-        isDownloadedAllVideos -> org.openedx.core.R.string.core_video_downloaded_to_device
-        else -> org.openedx.core.R.string.core_video_download_to_device
+        isDownloadingAllVideos -> coreR.string.core_video_downloading_to_device
+        isDownloadedAllVideos -> coreR.string.core_video_downloaded_to_device
+        else -> coreR.string.core_video_download_to_device
     }
     val downloadVideoSubTitle =
         if (isDownloadedAllVideos) {
             stringResource(
-                id = org.openedx.core.R.string.core_video_downloaded_subtitle,
+                id = coreR.string.core_video_downloaded_subtitle,
                 downloadModelsSize.allCount,
                 downloadModelsSize.allSize.toFileSize()
             )
         } else {
             stringResource(
-                id = org.openedx.core.R.string.core_video_remaining_to_download,
+                id = coreR.string.core_video_remaining_to_download,
                 downloadModelsSize.remainingCount,
                 downloadModelsSize.remainingSize.toFileSize()
             )
@@ -589,7 +589,7 @@ private fun AllVideosDownloadItem(
                 .padding(8.dp)
         ) {
             Text(
-                text = stringResource(id = org.openedx.core.R.string.core_video_download_quality),
+                text = stringResource(id = coreR.string.core_video_download_quality),
                 color = MaterialTheme.appColors.textPrimary,
                 style = MaterialTheme.appTypography.titleMedium
             )

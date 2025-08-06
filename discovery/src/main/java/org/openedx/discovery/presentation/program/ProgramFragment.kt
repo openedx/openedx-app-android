@@ -60,7 +60,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.discovery.R
 import org.openedx.discovery.presentation.DiscoveryAnalyticsScreen
 import org.openedx.discovery.presentation.catalog.CatalogWebViewScreen
-import org.openedx.discovery.presentation.catalog.WebViewLink
 import org.openedx.foundation.extension.takeIfNotEmpty
 import org.openedx.foundation.extension.toastMessage
 import org.openedx.foundation.presentation.WindowSize
@@ -170,8 +169,7 @@ class ProgramFragment : Fragment() {
                             }
 
                             linkAuthority.PROGRAM_INFO,
-                            linkAuthority.COURSE_INFO,
-                            -> {
+                            linkAuthority.COURSE_INFO -> {
                                 viewModel.onViewCourseClick(
                                     fragmentManager = requireActivity().supportFragmentManager,
                                     courseId = param,
@@ -251,7 +249,7 @@ private fun ProgramInfoScreen(
     onWebViewUIAction: (WebViewUIAction) -> Unit,
     onSettingsClick: () -> Unit,
     onBackClick: () -> Unit,
-    onUriClick: (String, WebViewLink.Authority) -> Unit,
+    onUriClick: (String, linkAuthority) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current

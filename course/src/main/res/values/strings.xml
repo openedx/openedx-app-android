@@ -1,20 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="course_outline">Course Outline</string>
-    <string name="course_content">Course content</string>
-    <string name="course_units">Course units</string>
-    <string name="course_subsections">Course subsections</string>
-    <string name="course_videos">Videos</string>
     <string name="course_you_earned_certificate">Congratulations, you have earned this course certificate in \"%s\".</string>
     <string name="course_view_certificate">View certificate</string>
     <string name="course_navigation_prev">Prev</string>
-    <string name="course_navigation_prev_unit">Previous Unit</string>
     <string name="course_navigation_next">Next</string>
-    <string name="course_navigation_next_unit">Next Unit</string>
     <string name="course_navigation_finish">Finish</string>
-    <string name="course_resume_unit_title">Last unit:</string>
-    <string name="course_resume_unit_btn">Resume</string>
-    <string name="course_discussion">Discussion</string>
     <string name="course_handouts">Handouts</string>
     <string name="course_announcements">Announcements</string>
     <string name="course_find_important_info">Find important course information</string>
@@ -24,7 +14,6 @@
     <string name="course_back_to_outline">Back to outline</string>
     <string name="course_next_section">Next section</string>
     <string name="course_not_started">This course hasn’t started yet.</string>
-    <string name="course_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
     <string name="course_can_download_only_with_wifi">You can download content only from Wi-fi</string>
     <string name="course_this_interactive_component">This interactive component isn’t yet available</string>
     <string name="course_explore_other_parts_on_web">Explore other parts of this course or view this on web.</string>
@@ -38,7 +27,6 @@
     <string name="course_dates_shifted_message">Dates Shifted</string>
 
     <!-- Error Message when course dates are not available -->
-    <string name="course_dates_unavailable_message" tools:ignore="MissingTranslation">Course dates are not currently available.</string>
 
     <string name="course_container_nav_home">Home</string>
     <string name="course_container_nav_videos">Videos</string>
@@ -63,7 +51,6 @@
 
     <string name="course_label_back">Back</string>
     <string name="course_error_expired_not_upgradeable_title" formatted="false">Your free audit access to this course expired on %s.</string>
-    <string name="course_find_new_course_button">Find a new course</string>
     <string name="course_error_not_started_title">This course will begin on %s. Come back then to start learning!</string>
     <string name="course_an_error_occurred">An error occurred while loading your course</string>
 </resources>

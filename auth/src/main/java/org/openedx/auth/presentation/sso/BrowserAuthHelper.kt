@@ -25,7 +25,7 @@ class BrowserAuthHelper(private val config: Config) {
             .appendQueryParameter("response_type", ApiConstants.BrowserLogin.RESPONSE_TYPE).build()
         val intent =
             CustomTabsIntent.Builder().setUrlBarHidingEnabled(true).setShowTitle(true).build()
-        intent.intent.setFlags(FLAG_ACTIVITY_NEW_TASK)
+        intent.intent.flags = FLAG_ACTIVITY_NEW_TASK
         intent.launchUrl(activityContext, uri)
     }
 

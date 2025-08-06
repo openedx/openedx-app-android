@@ -277,7 +277,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         }
     }
 
-    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    @androidx.annotation.OptIn(UnstableApi::class)
     private fun setPlayerMedia(mediaItem: MediaItem) {
         if (viewModel.videoUrl.endsWith(".m3u8")) {
             val factory = DefaultDataSource.Factory(requireContext())

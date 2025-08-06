@@ -4,7 +4,6 @@
     <string name="dashboard_you_are_not_enrolled">You are not enrolled in any courses yet.</string>
     <string name="dashboard_learn">Learn</string>
     <string name="dashboard_programs">Programs</string>
-    <string name="dashboard_course_date">Course %1$s</string>
     <string name="dashboard_start_course">Start Course</string>
     <string name="dashboard_resume_course">Resume Course</string>
     <string name="dashboard_view_all_with_count">View All Courses (%1$d)</string>

@@ -2,7 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">@string/platform_name</string>
 
-    <string name="core_results">Results</string>
     <string name="core_error_invalid_grant">Invalid credentials</string>
     <string name="core_error_no_connection">Slow or no internet connection</string>
     <string name="core_error_unknown_error">Something went wrong</string>
@@ -57,7 +56,6 @@
     <string name="core_settings">Settings</string>
     <string name="core_app_update_required_title">App Update Required</string>
     <string name="core_app_update_required_description">This version of the OpenEdX app is out-of-date. To continue learning and get the latest features and fixes, please upgrade to the latest version.</string>
-    <string name="core_why_do_you_need_update">Why do I need to update?</string>
     <string name="core_version">Version: %1$s</string>
     <string name="core_up_to_date">Up-to-date</string>
     <string name="core_tap_to_update_to_version">Tap to update to version %1$s</string>
@@ -130,12 +128,10 @@
     <string name="core_video_download_quality">Video download quality</string>
     <string name="core_manage_account">Manage Account</string>
 
-    <string name="core_assignment_due_tag" tools:ignore="MissingTranslation">Assignment Due</string>
     <string name="core_title_syncing_calendar" tools:ignore="MissingTranslation">Syncing calendar…</string>
 
     <!-- region: Calendar Sync -->
     <string name="core_header_sync_to_calendar" tools:ignore="MissingTranslation">Sync to calendar</string>
-    <string name="core_body_sync_to_calendar" tools:ignore="MissingTranslation">Automatically sync all deadlines and due dates for this course to your calendar.</string>
 
     <string name="core_title_request_calendar_permission" tools:ignore="MissingTranslation">\“%s\” Would Like to Access Your Calendar</string>
     <string name="core_message_request_calendar_permission" tools:ignore="MissingTranslation">%s would like to use your calendar list to subscribe to your personalized %s calendar for this course.</string>
@@ -157,18 +153,8 @@
     <string name="core_label_update_now" tools:ignore="MissingTranslation">Update Now</string>
     <string name="core_label_remove_course_calendar" tools:ignore="MissingTranslation">Remove Course Calendar</string>
 
-    <string name="core_snackbar_course_calendar_added" tools:ignore="MissingTranslation">Your course calendar has been added.</string>
-    <string name="core_snackbar_course_calendar_removed" tools:ignore="MissingTranslation">Your course calendar has been removed.</string>
-    <string name="core_snackbar_course_calendar_updated" tools:ignore="MissingTranslation">Your course calendar has been updated.</string>
-    <string name="core_snackbar_course_calendar_error" tools:ignore="MissingTranslation">Error Adding Calendar, Please try later</string>
-
     <!-- endregion -->
 
-    <string name="core_course_container_nav_home">Home</string>
-    <string name="core_course_container_nav_videos">Videos</string>
-    <string name="core_course_container_nav_discussions">Discussions</string>
-    <string name="core_course_container_nav_more">More</string>
-    <string name="core_course_container_nav_dates" tools:ignore="MissingTranslation">Dates</string>
     <string name="core_no_course_content">No course content is currently available.</string>
     <string name="core_no_videos">There are currently no videos for this course.</string>
     <string name="core_no_dates">Course dates are currently not available.</string>

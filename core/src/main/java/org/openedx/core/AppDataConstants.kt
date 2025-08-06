@@ -1,6 +1,6 @@
 package org.openedx.core
 
-import java.util.*
+import java.util.Locale
 
 object AppDataConstants {
     const val USER_MIN_YEAR = 13
