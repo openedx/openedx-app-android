@@ -290,7 +290,7 @@ private fun CourseSubsectionItem(
             painterResource(R.drawable.course_ic_task_alt)
         } else {
             painterResource(
-                CoreR.drawable.ic_core_chapter_icon
+                CoreR.drawable.core_ic_chapter_icon
             )
         }
     val completedIconColor =

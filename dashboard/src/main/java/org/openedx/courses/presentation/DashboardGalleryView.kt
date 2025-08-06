@@ -678,7 +678,7 @@ private fun PrimaryCourseButtons(
                         navigateToDates(primaryCourse)
                     }
                 },
-                painter = painterResource(id = CoreR.drawable.ic_core_chapter_icon),
+                painter = painterResource(id = CoreR.drawable.core_ic_chapter_icon),
                 title = title,
                 info = stringResource(
                     R.string.dashboard_assignment_due,

@@ -324,7 +324,7 @@ private fun RestorePasswordScreen(
                             ) {
                                 Icon(
                                     modifier = Modifier.size(100.dp),
-                                    painter = painterResource(id = authR.drawable.ic_auth_email),
+                                    painter = painterResource(id = authR.drawable.auth_ic_email),
                                     contentDescription = null,
                                     tint = MaterialTheme.appColors.textPrimary
                                 )

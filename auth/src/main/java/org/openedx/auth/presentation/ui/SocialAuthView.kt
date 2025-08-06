@@ -54,7 +54,7 @@ internal fun SocialAuthView(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_auth_google),
+                        painter = painterResource(id = R.drawable.auth_ic_google),
                         contentDescription = null,
                         tint = Color.Unspecified,
                     )
@@ -86,7 +86,7 @@ internal fun SocialAuthView(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_auth_facebook),
+                        painter = painterResource(id = R.drawable.auth_ic_facebook),
                         contentDescription = null,
                         tint = MaterialTheme.appColors.primaryButtonText,
                     )
@@ -118,7 +118,7 @@ internal fun SocialAuthView(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_auth_microsoft),
+                        painter = painterResource(id = R.drawable.auth_ic_microsoft),
                         contentDescription = null,
                         tint = Color.Unspecified,
                     )

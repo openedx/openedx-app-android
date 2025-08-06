@@ -137,7 +137,7 @@ fun CourseSectionCard(
             val completedIconPainter = if (block.isCompleted()) {
                 painterResource(R.drawable.course_ic_task_alt)
             } else {
-                painterResource(coreR.drawable.ic_core_chapter_icon)
+                painterResource(coreR.drawable.core_ic_chapter_icon)
             }
             val completedIconColor = if (block.isCompleted()) {
                 MaterialTheme.appColors.primary
@@ -781,7 +781,7 @@ fun CourseSubSectionItem(
     val icon = if (block.isCompleted()) {
         painterResource(R.drawable.course_ic_task_alt)
     } else {
-        painterResource(coreR.drawable.ic_core_chapter_icon)
+        painterResource(coreR.drawable.core_ic_chapter_icon)
     }
     val iconColor = if (block.isCompleted()) {
         MaterialTheme.appColors.successGreen
@@ -912,7 +912,7 @@ fun SubSectionUnitsTitle(
         if (hasMultipleUnits) {
             Icon(
                 modifier = Modifier.rotate(if (unitsListShowed) 180f else 0f),
-                painter = painterResource(id = R.drawable.ic_course_arrow_down),
+                painter = painterResource(id = R.drawable.course_ic_arrow_down),
                 contentDescription = null,
                 tint = MaterialTheme.appColors.textPrimary
             )
@@ -955,7 +955,7 @@ fun SubSectionUnitsList(
                             modifier = Modifier
                                 .size(16.dp)
                                 .alpha(if (unit.isCompleted()) 1f else 0f),
-                            painter = painterResource(id = coreR.drawable.ic_core_check),
+                            painter = painterResource(id = coreR.drawable.core_ic_check),
                             contentDescription = "done"
                         )
                         Text(
@@ -989,7 +989,7 @@ fun SubSectionUnitsList(
                             Image(
                                 modifier = Modifier
                                     .size(16.dp),
-                                painter = painterResource(id = R.drawable.ic_course_gated),
+                                painter = painterResource(id = R.drawable.course_ic_gated),
                                 contentDescription = "gated"
                             )
                             Text(
@@ -1348,7 +1348,7 @@ private fun CourseMessagePreview() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 12.dp),
-                icon = painterResource(R.drawable.ic_course_certificate),
+                icon = painterResource(R.drawable.course_ic_certificate),
                 message = stringResource(
                     R.string.course_you_earned_certificate,
                     "Demo Course"

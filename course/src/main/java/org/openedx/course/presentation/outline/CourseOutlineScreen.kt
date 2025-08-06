@@ -261,7 +261,7 @@ private fun CourseOutlineUI(
                                                     .fillMaxWidth()
                                                     .padding(vertical = 12.dp)
                                                     .then(listPadding),
-                                                icon = painterResource(R.drawable.ic_course_certificate),
+                                                icon = painterResource(R.drawable.course_ic_certificate),
                                                 message = stringResource(
                                                     R.string.course_you_earned_certificate,
                                                     uiState.courseStructure.name
@@ -499,10 +499,10 @@ private fun CourseProgress(
 
 fun getUnitBlockIcon(block: Block): Int {
     return when (block.type) {
-        BlockType.VIDEO -> R.drawable.ic_course_video
-        BlockType.PROBLEM -> R.drawable.ic_course_pen
-        BlockType.DISCUSSION -> R.drawable.ic_course_discussion
-        else -> R.drawable.ic_course_block
+        BlockType.VIDEO -> R.drawable.course_ic_video
+        BlockType.PROBLEM -> R.drawable.course_ic_pen
+        BlockType.DISCUSSION -> R.drawable.course_ic_discussion
+        else -> R.drawable.course_ic_block
     }
 }
 
