@@ -67,3 +67,5 @@
 -dontwarn org.bouncycastle.openssl.PEMKeyPair
 -dontwarn org.bouncycastle.openssl.PEMParser
 -dontwarn org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter
+-dontwarn com.android.billingclient.api.BillingClientStateListener
+-dontwarn com.android.billingclient.api.PurchasesUpdatedListener
