@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'org.yaml:snakeyaml:2.0'
+        classpath "org.yaml:snakeyaml:$snakeyaml_version"
     }
 }
 
@@ -21,17 +21,17 @@ def config = configHelper.fetchConfig()
 def themeDirectory = config.getOrDefault("THEME_DIRECTORY", "openedx")
 
 android {
-    compileSdk 34
+    namespace 'org.openedx.core'
+    compileSdkVersion compile_sdk_version
 
     defaultConfig {
-        minSdk 24
-        targetSdk 34
+        minSdk min_sdk_version
+        targetSdk target_sdk_version
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
 
-    namespace 'org.openedx.core'
 
     flavorDimensions += "env"
     productFlavors {
@@ -76,11 +76,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility java_version
+        targetCompatibility java_version
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17
+        jvmTarget = java_version
         freeCompilerArgs = List.of("-Xstring-concat=inline")
     }
 
@@ -109,22 +109,22 @@ dependencies {
     api "com.google.android.play:review-ktx:$in_app_review"
 
     // Branch SDK Integration
-    api "io.branch.sdk.android:library:5.9.0"
-    api "com.google.android.gms:play-services-ads-identifier:18.1.0"
-    api "com.android.installreferrer:installreferrer:2.2"
+    api "io.branch.sdk.android:library:$branch_sdk_version"
+    api "com.google.android.gms:play-services-ads-identifier:$play_services_ads_identifier_version"
+    api "com.android.installreferrer:installreferrer:$install_referrer_version"
 
     // Zip
     api "net.lingala.zip4j:zip4j:$zip_version"
 
     //  OpenEdx libs
-    api("com.github.openedx:openedx-app-foundation-android:1.0.1")
+    api("com.github.openedx:openedx-app-foundation-android:$openedx_foundation_version")
 
     // Preview
     debugApi "androidx.compose.ui:ui-tooling:$compose_ui_tooling"
 
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    testImplementation "junit:junit:$junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$test_ext_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
 }
 
 def insertBuildConfigFields(currentFlavour, buildType) {

@@ -2,7 +2,6 @@ package org.openedx.app
 
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -157,10 +156,10 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         window.apply {
             addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             WindowCompat.setDecorFitsSystemWindows(this, false)
-
             val insetsController = WindowInsetsControllerCompat(this, binding.root)
             insetsController.isAppearanceLightStatusBars = !isUsingNightModeResources()
-            statusBarColor = Color.TRANSPARENT
+            insetsController.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
     }
 
@@ -214,7 +213,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         this.intent = intent
 
@@ -222,13 +221,13 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             addFragment(SignInFragment.newInstance(null, null, authCode = authCode))
         }
 
-        val extras = intent?.extras
+        val extras = intent.extras
         if (extras?.containsKey(DeepLink.Keys.NOTIFICATION_TYPE.value) == true) {
             handlePushNotification(extras)
         }
 
         if (viewModel.isBranchEnabled) {
-            if (intent?.getBooleanExtra(BRANCH_FORCE_NEW_SESSION, false) == true) {
+            if (intent.getBooleanExtra(BRANCH_FORCE_NEW_SESSION, false)) {
                 Branch.sessionBuilder(this)
                     .withCallback(branchCallback)
                     .reInit()

@@ -28,12 +28,13 @@ if (firebaseEnabled) {
 }
 
 android {
-    compileSdk 34
+    namespace 'org.openedx.app'
+    compileSdkVersion compile_sdk_version
 
     defaultConfig {
         applicationId appId
-        minSdk 24
-        targetSdk 34
+        minSdk min_sdk_version
+        targetSdk target_sdk_version
         versionCode 1
         versionName "1.0.0"
 
@@ -42,7 +43,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    namespace 'org.openedx.app'
 
     flavorDimensions += "env"
     productFlavors {
@@ -88,11 +88,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility java_version
+        targetCompatibility java_version
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17
+        jvmTarget = java_version
         freeCompilerArgs = List.of("-Xstring-concat=inline")
     }
     buildFeatures {
@@ -129,19 +129,19 @@ dependencies {
 
     ksp "androidx.room:room-compiler:$room_version"
 
-    implementation 'androidx.core:core-splashscreen:1.0.1'
+    implementation "androidx.core:core-splashscreen:$core_splashscreen_version"
 
     api platform("com.google.firebase:firebase-bom:$firebase_version")
     api "com.google.firebase:firebase-messaging"
 
     // Braze SDK Integration
-    implementation "com.braze:android-sdk-ui:30.2.0"
+    implementation "com.braze:android-sdk-ui:$braze_sdk_version"
 
     // Plugins
-    implementation("com.github.openedx:openedx-app-firebase-analytics-android:1.0.1")
+    implementation("com.github.openedx:openedx-app-firebase-analytics-android:$openedx_firebase_analytics_version")
 
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation "androidx.test.ext:junit:$test_ext_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
     testImplementation "junit:junit:$junit_version"
     testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation "io.mockk:mockk-android:$mockk_version"

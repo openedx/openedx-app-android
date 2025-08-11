@@ -7,11 +7,11 @@ plugins {
 
 android {
     namespace 'org.openedx.whatsnew'
-    compileSdk 34
+    compileSdkVersion compile_sdk_version
 
     defaultConfig {
-        minSdk 24
-        targetSdk 34
+        minSdk min_sdk_version
+        targetSdk target_sdk_version
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -19,18 +19,16 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility java_version
+        targetCompatibility java_version
     }
-
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17
+        jvmTarget = java_version
         freeCompilerArgs = List.of("-Xstring-concat=inline")
     }
 
@@ -51,15 +49,15 @@ android {
             dimension 'env'
         }
     }
-}
 
-dependencies {
-    implementation project(path: ":core")
+    dependencies {
+        implementation project(path: ":core")
 
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
-    testImplementation "junit:junit:$junit_version"
-    testImplementation "io.mockk:mockk:$mockk_version"
-    testImplementation "io.mockk:mockk-android:$mockk_version"
-    testImplementation "androidx.arch.core:core-testing:$android_arch_version"
+        testImplementation "junit:junit:$junit_version"
+        testImplementation "io.mockk:mockk:$mockk_version"
+        testImplementation "androidx.arch.core:core-testing:$android_arch_version"
+        testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinx_coroutines_test_version"
+        androidTestImplementation "androidx.test.ext:junit:$test_ext_version"
+        androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
+    }
 }

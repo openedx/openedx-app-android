@@ -6,31 +6,30 @@ plugins {
 }
 
 android {
-    compileSdk 34
+    namespace 'org.openedx.course'
+    compileSdkVersion compile_sdk_version
 
     defaultConfig {
-        minSdk 24
-        targetSdk 34
+        minSdk min_sdk_version
+        targetSdk target_sdk_version
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
 
-    namespace 'org.openedx.course'
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility java_version
+        targetCompatibility java_version
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17
-        freeCompilerArgs = List.of("-Xstring-concat=inline")
+        jvmTarget = java_version
     }
 
     buildFeatures {
@@ -60,15 +59,17 @@ dependencies {
     implementation project(path: ':core')
     implementation project(path: ':discussion')
     implementation "com.pierfrancescosoffritti.androidyoutubeplayer:core:$youtubeplayer_version"
+
+    // Media3
     implementation "androidx.media3:media3-exoplayer:$media3_version"
     implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
     implementation "androidx.media3:media3-ui:$media3_version"
     implementation "androidx.media3:media3-cast:$media3_version"
     implementation "me.saket.extendedspans:extendedspans:$extented_spans_version"
 
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
     testImplementation "junit:junit:$junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$test_ext_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
     testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation "io.mockk:mockk-android:$mockk_version"
     testImplementation "androidx.arch.core:core-testing:$android_arch_version"

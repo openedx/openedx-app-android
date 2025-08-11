@@ -24,7 +24,7 @@ object TimeUtils {
 
     fun formatToString(context: Context, date: Date, useRelativeDates: Boolean): String {
         if (!useRelativeDates) {
-            val locale = Locale(Locale.getDefault().language)
+            val locale = Locale.Builder().setLanguage(Locale.getDefault().language).build()
             val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, locale)
             return dateFormat.format(date)
         }

@@ -14,5 +14,5 @@ java {
 dependencies {
     implementation localGroovy()
     implementation gradleApi()
-    implementation 'org.yaml:snakeyaml:1.33'
+    implementation "org.yaml:snakeyaml:2.4"
 }
