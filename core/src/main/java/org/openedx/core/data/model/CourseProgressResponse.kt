@@ -92,8 +92,18 @@ data class CourseProgressResponse(
         @SerializedName("grade_range") val gradeRange: Map<String, Float>?,
         @SerializedName("assignment_colors") val assignmentColors: List<String>?
     ) {
-        // Temporary solution. Backend will returns color list later
-        val defaultColors = listOf("#fe553a", "#32c0ff", "#a3ff7b", "#ff30ee")
+        // TODO Temporary solution. Backend will returns color list later
+        val defaultColors = listOf(
+            "#D24242",
+            "#7B9645",
+            "#5A5AD8",
+            "#B0842C",
+            "#2E90C2",
+            "#D13F88",
+            "#36A17D",
+            "#AE5AD8",
+            "#3BA03B"
+        )
 
         fun mapToRoomEntity() = GradingPolicyDb(
             assignmentPolicies = assignmentPolicies?.map { it.mapToRoomEntity() } ?: emptyList(),
