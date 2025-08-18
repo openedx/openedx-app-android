@@ -25,6 +25,8 @@ import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogItem
 import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.CourseStructureGot
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.foundation.extension.toFileSize
 import org.openedx.foundation.utils.FileUtil
@@ -37,6 +39,7 @@ class CourseOfflineViewModel(
     private val downloadDialogManager: DownloadDialogManager,
     private val fileUtil: FileUtil,
     private val networkConnection: NetworkConnection,
+    private val courseNotifier: CourseNotifier,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
@@ -71,11 +74,7 @@ class CourseOfflineViewModel(
                 _uiState.update { it.copy(isDownloading = isDownloading) }
             }
         }
-
-        viewModelScope.launch {
-            async { initDownloadFragment() }.await()
-            getOfflineData()
-        }
+        collectCourseNotifier()
     }
 
     fun downloadAllBlocks(fragmentManager: FragmentManager) {
@@ -221,6 +220,19 @@ class CourseOfflineViewModel(
 
                 FileType.X_BLOCK -> it.offlineDownload?.fileSize ?: 0
                 else -> 0
+            }
+        }
+    }
+
+    private fun collectCourseNotifier() {
+        viewModelScope.launch {
+            courseNotifier.notifier.collect { event ->
+                when (event) {
+                    is CourseStructureGot -> {
+                        async { initDownloadFragment() }.await()
+                        getOfflineData()
+                    }
+                }
             }
         }
     }
