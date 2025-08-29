@@ -1,7 +1,7 @@
 package org.openedx.core.ui.theme
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
@@ -210,7 +210,7 @@ fun OpenEdXTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
         shapes = LocalShapes.current.material,
     ) {
         CompositionLocalProvider(
-            LocalOverscrollConfiguration provides null,
+            LocalOverscrollFactory provides null,
             content = content
         )
     }
