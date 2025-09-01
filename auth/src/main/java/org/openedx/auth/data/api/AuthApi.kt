@@ -13,6 +13,7 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.Response
 
 interface AuthApi {
 
@@ -35,7 +36,7 @@ interface AuthApi {
         @Field("password") password: String,
         @Field("token_type") tokenType: String,
         @Field("asymmetric_jwt") isAsymmetricJwt: Boolean = true,
-    ): AuthResponse
+    ): Response<AuthResponse>
 
     @FormUrlEncoded
     @POST(ApiConstants.URL_ACCESS_TOKEN)

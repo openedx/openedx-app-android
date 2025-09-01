@@ -58,7 +58,7 @@ class NativeDiscoveryViewModelTest {
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         every { appNotifier.notifier } returns emptyFlow()
         every { corePreferences.user } returns null
-        every { config.getApiHostURL() } returns "http://localhost:8000"
+        every { config.getApiHostURL() } returns "https://4c1346f74eb5.ngrok-free.app"
         every { config.isPreLoginExperienceEnabled() } returns false
     }
 

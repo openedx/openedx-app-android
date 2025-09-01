@@ -38,7 +38,7 @@ Open `config.yaml` and fill in the required fields.
 Example:
 
 ```yaml
-API_HOST_URL: 'https://mylmsexample.com'
+API_HOST_URL: 'https://4c1346f74eb5.ngrok-free.app'
 APPLICATION_ID: 'org.openedx.app'
 ENVIRONMENT_DISPLAY_NAME: 'MyLMSExample'
 FEEDBACK_EMAIL_ADDRESS: 'support@mylmsexample.com'

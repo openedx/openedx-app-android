@@ -1,4 +1,4 @@
-API_HOST_URL: 'http://localhost:8000'
+API_HOST_URL: 'https://4c1346f74eb5.ngrok-free.app'
 APPLICATION_ID: 'org.openedx.app'
 ENVIRONMENT_DISPLAY_NAME: 'Localhost'
 URI_SCHEME: ''

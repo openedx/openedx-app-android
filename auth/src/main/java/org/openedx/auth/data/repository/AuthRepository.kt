@@ -9,6 +9,7 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.system.EdxError
+import android.util.Log
 
 class AuthRepository(
     private val config: Config,
@@ -16,20 +17,30 @@ class AuthRepository(
     private val preferencesManager: CorePreferences,
 ) {
 
-    suspend fun login(
-        username: String,
-        password: String,
-    ) {
-        api.getAccessToken(
-            ApiConstants.GRANT_TYPE_PASSWORD,
-            config.getOAuthClientId(),
-            username,
-            password,
-            config.getAccessTokenType(),
-        )
-            .mapToDomain()
-            .processAuthResponse()
+    suspend fun login(username: String, password: String): Result<AuthResponse> {
+        return try {
+            val response = api.getAccessToken(
+                grantType = "password",
+                clientId = "android",
+                username = username,
+                password = password,
+                tokenType = "JWT",            // from your config (TOKEN_TYPE in JSON)
+                isAsymmetricJwt = true        // default, you can omit if always true
+            )
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    Result.success(it.mapToDomain())
+                } ?: Result.failure(Exception("Empty response"))
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                Result.failure(Exception(errorMsg))
+            }
+
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
+
 
     suspend fun socialLogin(token: String?, authType: AuthType) {
         require(!token.isNullOrBlank()) { "Token is null" }

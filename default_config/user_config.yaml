@@ -1,0 +1,12 @@
+API_HOST_URL: "https://4c1346f74eb5.ngrok-free.app"
+PLATFORM_NAME: "Soham's Local edX"
+ENVIRONMENT_DISPLAY_NAME: "Local Dev"
+OAUTH_CLIENT_ID: "android"
+DISCOVERY:
+  TYPE: native
+FIREBASE:
+  ENABLED: false
+MICROSOFT:
+  ENABLED: false
+FACEBOOK:
+  ENABLED: false
