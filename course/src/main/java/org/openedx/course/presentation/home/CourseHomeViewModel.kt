@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
@@ -17,9 +18,10 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
-import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.CourseStructure
+import org.openedx.core.extension.getChapterBlocks
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.module.DownloadWorkerController
@@ -29,12 +31,11 @@ import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogManager
-import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseOpenBlock
+import org.openedx.core.system.notifier.CourseProgressLoaded
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
@@ -94,8 +95,6 @@ class CourseHomeViewModel(
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
     val courseSubSectionUnit = mutableMapOf<String, Block?>()
 
-    private var isOfflineBlocksUpToDate = false
-
     init {
         viewModelScope.launch {
             courseNotifier.notifier.collect { event ->
@@ -108,6 +107,10 @@ class CourseHomeViewModel(
 
                     is CourseOpenBlock -> {
                         _resumeBlockId.emit(event.blockId)
+                    }
+
+                    is CourseProgressLoaded -> {
+                        getCourseProgress()
                     }
                 }
             }
@@ -123,10 +126,11 @@ class CourseHomeViewModel(
                         resumeComponent = state.resumeComponent,
                         resumeUnitTitle = resumeVerticalBlock?.displayName ?: "",
                         courseSubSections = courseSubSections,
-                        courseSectionsState = state.courseSectionsState,
                         subSectionsDownloadsCount = subSectionsDownloadsCount,
                         datesBannerInfo = state.datesBannerInfo,
-                        useRelativeDates = preferencesManager.isRelativeDatesEnabled
+                        useRelativeDates = preferencesManager.isRelativeDatesEnabled,
+                        next = state.next,
+                        courseProgress = state.courseProgress
                     )
                 }
             }
@@ -157,54 +161,33 @@ class CourseHomeViewModel(
         getCourseDataInternal()
     }
 
-    fun switchCourseSections(blockId: String): Boolean {
-        return if (_uiState.value is CourseHomeUIState.CourseData) {
-            val state = _uiState.value as CourseHomeUIState.CourseData
-            val courseSectionsState = state.courseSectionsState.toMutableMap()
-            courseSectionsState[blockId] = !(state.courseSectionsState[blockId] ?: false)
-
-            _uiState.value = CourseHomeUIState.CourseData(
-                courseStructure = state.courseStructure,
-                downloadedState = state.downloadedState,
-                resumeComponent = state.resumeComponent,
-                resumeUnitTitle = resumeVerticalBlock?.displayName ?: "",
-                courseSubSections = courseSubSections,
-                courseSectionsState = courseSectionsState,
-                subSectionsDownloadsCount = subSectionsDownloadsCount,
-                datesBannerInfo = state.datesBannerInfo,
-                useRelativeDates = preferencesManager.isRelativeDatesEnabled
-            )
-
-            courseSectionsState[blockId] ?: false
-        } else {
-            false
-        }
-    }
-
     private fun getCourseDataInternal() {
         viewModelScope.launch {
             val courseStructureFlow = interactor.getCourseStructureFlow(courseId, false)
                 .catch { emit(null) }
             val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
             val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
+            val courseProgressFlow = interactor.getCourseProgress(courseId, false)
             combine(
                 courseStructureFlow,
                 courseStatusFlow,
-                courseDatesFlow
-            ) { courseStructure, courseStatus, courseDatesResult ->
-                Triple(courseStructure, courseStatus, courseDatesResult)
+                courseDatesFlow,
+                courseProgressFlow
+            ) { courseStructure, courseStatus, courseDatesResult, courseProgress ->
+                if (courseStructure == null) return@combine
+                val blocks = courseStructure.blockData
+                val datesBannerInfo = courseDatesResult.courseBanner
+
+                initializeCourseData(
+                    blocks,
+                    courseStructure,
+                    courseStatus,
+                    datesBannerInfo,
+                    courseProgress
+                )
             }.catch { e ->
                 handleCourseDataError(e)
-            }.collect { (courseStructure, courseStatus, courseDates) ->
-                if (courseStructure == null) return@collect
-                val blocks = courseStructure.blockData
-                val datesBannerInfo = courseDates.courseBanner
-
-                checkIfCalendarOutOfDate(courseDates.datesSection.values.flatten())
-                updateOutdatedOfflineXBlocks(courseStructure)
-
-                initializeCourseData(blocks, courseStructure, courseStatus, datesBannerInfo)
-            }
+            }.collect { }
         }
     }
 
@@ -212,27 +195,27 @@ class CourseHomeViewModel(
         blocks: List<Block>,
         courseStructure: CourseStructure,
         courseStatus: CourseComponentStatus,
-        datesBannerInfo: CourseDatesBannerInfo
+        datesBannerInfo: CourseDatesBannerInfo,
+        courseProgress: CourseProgress
     ) {
         setBlocks(blocks)
         courseSubSections.clear()
         courseSubSectionUnit.clear()
         val sortedStructure = courseStructure.copy(blockData = sortBlocks(blocks))
         initDownloadModelsStatus()
-
-        val courseSectionsState =
-            (_uiState.value as? CourseHomeUIState.CourseData)?.courseSectionsState.orEmpty()
+        val nextSection = findFirstChapterWithIncompleteDescendants(blocks)
 
         _uiState.value = CourseHomeUIState.CourseData(
             courseStructure = sortedStructure,
+            next = nextSection,
             downloadedState = getDownloadModelsStatus(),
             resumeComponent = getResumeBlock(blocks, courseStatus.lastVisitedBlockId),
             resumeUnitTitle = resumeVerticalBlock?.displayName ?: "",
             courseSubSections = courseSubSections,
-            courseSectionsState = courseSectionsState,
             subSectionsDownloadsCount = subSectionsDownloadsCount,
             datesBannerInfo = datesBannerInfo,
-            useRelativeDates = preferencesManager.isRelativeDatesEnabled
+            useRelativeDates = preferencesManager.isRelativeDatesEnabled,
+            courseProgress = courseProgress
         )
     }
 
@@ -284,6 +267,26 @@ class CourseHomeViewModel(
         resumeSectionBlock =
             blocks.getSequentialBlocks().find { it.descendants.contains(resumeVerticalBlock?.id) }
         return resumeBlock
+    }
+
+    /**
+     * Finds the first chapter which has incomplete descendants and returns it as a Pair<Block, Block>
+     * where the first Block is the chapter and the second Block is the first incomplete subsection
+     */
+    private fun findFirstChapterWithIncompleteDescendants(blocks: List<Block>): Pair<Block, Block>? {
+        val incompleteChapterBlock =
+            blocks.getChapterBlocks().find { !it.isCompleted() } ?: return null
+        val incompleteSubsection =
+            findFirstIncompleteSubsection(incompleteChapterBlock, blocks) ?: return null
+        return Pair(incompleteChapterBlock, incompleteSubsection)
+    }
+
+    private fun findFirstIncompleteSubsection(chapter: Block, blocks: List<Block>): Block? {
+        // Get all sequential blocks (subsections) in this chapter
+        val sequentialBlocks = chapter.descendants.mapNotNull { descendantId ->
+            blocks.find { it.id == descendantId && it.type == BlockType.SEQUENTIAL }
+        }
+        return sequentialBlocks.find { !it.isCompleted() }
     }
 
     fun resetCourseDatesBanner(onResetDates: (Boolean) -> Unit) {
@@ -403,18 +406,6 @@ class CourseHomeViewModel(
         }
     }
 
-    private fun checkIfCalendarOutOfDate(courseDates: List<CourseDateBlock>) {
-        viewModelScope.launch {
-            courseNotifier.send(
-                CreateCalendarSyncEvent(
-                    courseDates = courseDates,
-                    dialogType = CalendarSyncDialogType.NONE.name,
-                    checkOutOfSync = true,
-                )
-            )
-        }
-    }
-
     fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager) {
         viewModelScope.launch {
             val courseData = _uiState.value as? CourseHomeUIState.CourseData ?: return@launch
@@ -478,34 +469,20 @@ class CourseHomeViewModel(
         }
     }
 
-    private fun updateOutdatedOfflineXBlocks(courseStructure: CourseStructure) {
+    fun getCourseProgress() {
         viewModelScope.launch {
-            if (!isOfflineBlocksUpToDate) {
-                val xBlocks = courseStructure.blockData.filter { it.isxBlock }
-                if (xBlocks.isNotEmpty()) {
-                    val xBlockIds = xBlocks.map { it.id }.toSet()
-                    val savedDownloadModelsMap = interactor.getAllDownloadModels()
-                        .filter { it.id in xBlockIds }
-                        .associateBy { it.id }
-
-                    val outdatedBlockIds = xBlocks
-                        .filter { block ->
-                            val savedBlock = savedDownloadModelsMap[block.id]
-                            savedBlock != null && block.offlineDownload?.lastModified != savedBlock.lastModified
-                        }
-                        .map { it.id }
-
-                    outdatedBlockIds.forEach { blockId ->
-                        interactor.removeDownloadModel(blockId)
+            interactor.getCourseProgress(courseId, false)
+                .catch { e ->
+                    if (_uiState.value !is CourseHomeUIState.CourseData) {
+                        _uiState.value = CourseHomeUIState.Error
                     }
-                    saveDownloadModels(
-                        fileUtil.getExternalAppDir().path,
-                        courseId,
-                        outdatedBlockIds
-                    )
                 }
-                isOfflineBlocksUpToDate = true
-            }
+                .collectLatest { progress ->
+                    val currentState = _uiState.value
+                    if (currentState is CourseHomeUIState.CourseData) {
+                        _uiState.value = currentState.copy(courseProgress = progress)
+                    }
+                }
         }
     }
 }

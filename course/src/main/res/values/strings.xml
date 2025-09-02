@@ -45,6 +45,14 @@
     <string name="course_container_content_tab_video">Videos</string>
     <string name="course_container_content_tab_assignment">Assignments</string>
 
+    <!-- Course Completion UI -->
+    <string name="course_completion_title">Course Completion</string>
+    <string name="course_completion_progress_label">Progress</string>
+    <string name="course_completion_progress_description">You have completed %1$s%% of the course content</string>
+    <string name="course_completion_completed">Completed</string>
+    <string name="course_completion_next_sequence">Next Sequence</string>
+    <string name="course_completion_view_all_content">View All Content</string>
+
     <!-- Accessibility -->
     <string name="course_accessibility_video_player">Video player</string>
     <string name="course_accessibility_remove_course_section">Remove course section</string>

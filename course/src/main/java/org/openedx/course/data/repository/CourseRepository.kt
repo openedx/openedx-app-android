@@ -264,8 +264,10 @@ class CourseRepository(
                     trySend(cached.mapToDomain())
                 }
             }
-            val response = api.getCourseProgress(courseId)
-            courseDao.insertCourseProgressEntity(response.mapToRoomEntity(courseId))
-            trySend(response.mapToDomain())
+            if (networkConnection.isOnline()) {
+                val response = api.getCourseProgress(courseId)
+                courseDao.insertCourseProgressEntity(response.mapToRoomEntity(courseId))
+                trySend(response.mapToDomain())
+            }
         }
 }

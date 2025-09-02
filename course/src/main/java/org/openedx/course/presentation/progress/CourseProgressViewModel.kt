@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.CourseProgressLoaded
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.RefreshProgress
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -56,6 +57,7 @@ class CourseProgressViewModel(
                 .collectLatest { progress ->
                     _uiState.value = CourseProgressUIState.Data(progress)
                     courseNotifier.send(CourseLoading(false))
+                    courseNotifier.send(CourseProgressLoaded)
                 }
         }
     }

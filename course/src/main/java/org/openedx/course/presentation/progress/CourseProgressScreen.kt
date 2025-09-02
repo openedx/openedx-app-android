@@ -434,42 +434,11 @@ private fun CourseCompletionView(
                 color = MaterialTheme.appColors.textDark,
             )
         }
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .semantics(mergeDescendants = true) {}
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .size(100.dp)
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.appColors.progressBarBackgroundColor,
-                        shape = CircleShape
-                    )
-                    .padding(3.dp),
-                progress = progress.completion,
-                color = MaterialTheme.appColors.primary,
-                backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor,
-                strokeWidth = 10.dp,
-                strokeCap = StrokeCap.Round
-            )
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "${progress.completionPercent}%",
-                    style = MaterialTheme.appTypography.headlineSmall,
-                    color = MaterialTheme.appColors.primary,
-                )
-                Text(
-                    text = stringResource(R.string.course_completed),
-                    style = MaterialTheme.appTypography.labelSmall,
-                    color = MaterialTheme.appColors.textPrimaryVariant,
-                )
-            }
-        }
+        CourseCompletionCircularProgress(
+            progress = progress.completion,
+            progressPercent = progress.completionPercent,
+            completedText = stringResource(R.string.course_completed)
+        )
     }
 }
 
@@ -541,6 +510,50 @@ private fun AssignmentTypeRow(
                 style = MaterialTheme.appTypography.bodyLarge,
                 fontWeight = FontWeight.W700,
                 color = MaterialTheme.appColors.textDark,
+            )
+        }
+    }
+}
+
+@Composable
+fun CourseCompletionCircularProgress(
+    modifier: Modifier = Modifier,
+    progress: Float,
+    progressPercent: Int,
+    completedText: String
+) {
+    Box(
+        modifier = modifier
+            .semantics(mergeDescendants = true) {}
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .size(100.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.appColors.progressBarBackgroundColor,
+                    shape = CircleShape
+                )
+                .padding(3.dp),
+            progress = progress,
+            color = MaterialTheme.appColors.primary,
+            backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor,
+            strokeWidth = 10.dp,
+            strokeCap = StrokeCap.Round
+        )
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "$progressPercent%",
+                style = MaterialTheme.appTypography.headlineSmall,
+                color = MaterialTheme.appColors.primary,
+            )
+            Text(
+                text = completedText,
+                style = MaterialTheme.appTypography.labelSmall,
+                color = MaterialTheme.appColors.textPrimaryVariant,
             )
         }
     }

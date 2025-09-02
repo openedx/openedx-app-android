@@ -49,16 +49,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import kotlinx.coroutines.launch
-import org.openedx.core.BlockType
+import org.openedx.core.Mock
 import org.openedx.core.NoContentScreenType
-import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseDatesBannerInfo
-import org.openedx.core.domain.model.CourseStructure
-import org.openedx.core.domain.model.CoursewareAccess
-import org.openedx.core.domain.model.OfflineDownload
-import org.openedx.core.domain.model.Progress
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
@@ -69,15 +63,16 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.course.R
+import org.openedx.course.presentation.container.CourseContentTab
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseMessage
+import org.openedx.course.presentation.ui.ResumeCourseButton
 import org.openedx.foundation.extension.takeIfNotEmpty
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
-import java.util.Date
 import org.openedx.core.R as coreR
 
 @Composable
@@ -86,6 +81,7 @@ fun CourseHomeScreen(
     viewModel: CourseHomeViewModel,
     fragmentManager: FragmentManager,
     onResetDatesClick: () -> Unit,
+    onNavigateToContent: (CourseContentTab) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val uiMessage by viewModel.uiMessage.collectAsState(null)
@@ -102,14 +98,6 @@ fun CourseHomeScreen(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
-        onExpandClick = { block ->
-            if (viewModel.switchCourseSections(block.id)) {
-                viewModel.sequentialClickedEvent(
-                    block.blockId,
-                    block.displayName
-                )
-            }
-        },
         onSubSectionClick = { subSectionBlock ->
             if (viewModel.isCourseDropdownNavigationEnabled) {
                 viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
@@ -160,7 +148,8 @@ fun CourseHomeScreen(
             viewModel.viewCertificateTappedEvent()
             it.takeIfNotEmpty()
                 ?.let { url -> AndroidUriHandler(context).openUri(url) }
-        }
+        },
+        onNavigateToContent = onNavigateToContent
     )
 }
 
@@ -169,12 +158,12 @@ private fun CourseHomeUI(
     windowSize: WindowSize,
     uiState: CourseHomeUIState,
     uiMessage: UIMessage?,
-    onExpandClick: (Block) -> Unit,
     onSubSectionClick: (Block) -> Unit,
     onResumeClick: (String) -> Unit,
     onDownloadClick: (blockIds: List<String>) -> Unit,
     onResetDatesClick: () -> Unit,
     onCertificateClick: (String) -> Unit,
+    onNavigateToContent: (CourseContentTab) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -270,7 +259,12 @@ private fun CourseHomeUI(
                                     }
 
                                     if (uiState.resumeComponent != null) {
-                                        // Add button with onResumeClick
+                                        ResumeCourseButton(
+                                            modifier = Modifier.padding(16.dp),
+                                            block = uiState.resumeComponent,
+                                            displayName = uiState.resumeUnitTitle,
+                                            onResumeClick = onResumeClick
+                                        )
                                     }
 
                                     Spacer(modifier = Modifier.height(12.dp))
@@ -290,7 +284,14 @@ private fun CourseHomeUI(
                                         ) {
                                             when (tab) {
                                                 CourseHomePagerTab.COURSE_COMPLETION -> {
-                                                    Text(tab.name)
+                                                    CourseCompletionHomePagerCardContent(
+                                                        uiState = uiState,
+                                                        onViewAllContentClick = {
+                                                            onNavigateToContent(CourseContentTab.ALL)
+                                                        },
+                                                        onDownloadClick = onDownloadClick,
+                                                        onSubSectionClick = onSubSectionClick
+                                                    )
                                                 }
 
                                                 else -> {
@@ -330,14 +331,15 @@ fun <T> CourseHomePager(
     val coroutineScope = rememberCoroutineScope()
 
     Column(
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
     ) {
         HorizontalPager(
             modifier = Modifier.fillMaxWidth(),
             state = pagerState,
             contentPadding = PaddingValues(horizontal = 16.dp),
-            pageSpacing = 8.dp
+            pageSpacing = 8.dp,
+            beyondViewportPageCount = pages.size
         ) { page ->
             pageContent(pages[page])
         }
@@ -406,29 +408,30 @@ private fun CourseHomeScreenPreview() {
         CourseHomeUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseHomeUIState.CourseData(
-                mockCourseStructure,
-                mapOf(),
-                mockChapterBlock,
-                "Resumed Unit",
-                mapOf(),
-                mapOf(),
-                mapOf(),
-                CourseDatesBannerInfo(
+                courseStructure = Mock.mockCourseStructure,
+                courseProgress = null, // No course progress for preview
+                next = null, // No next section for preview
+                downloadedState = mapOf(),
+                resumeComponent = Mock.mockChapterBlock,
+                resumeUnitTitle = "Resumed Unit",
+                courseSubSections = mapOf(),
+                subSectionsDownloadsCount = mapOf(),
+                datesBannerInfo = CourseDatesBannerInfo(
                     missedDeadlines = false,
                     missedGatedContent = false,
                     verifiedUpgradeLink = "",
                     contentTypeGatingEnabled = false,
                     hasEnded = false
                 ),
-                true
+                useRelativeDates = true
             ),
             uiMessage = null,
-            onExpandClick = {},
             onSubSectionClick = {},
             onResumeClick = {},
             onDownloadClick = {},
             onResetDatesClick = {},
             onCertificateClick = {},
+            onNavigateToContent = { _ -> },
         )
     }
 }
@@ -441,101 +444,30 @@ private fun CourseHomeScreenTabletPreview() {
         CourseHomeUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseHomeUIState.CourseData(
-                mockCourseStructure,
-                mapOf(),
-                mockChapterBlock,
-                "Resumed Unit",
-                mapOf(),
-                mapOf(),
-                mapOf(),
-                CourseDatesBannerInfo(
+                courseStructure = Mock.mockCourseStructure,
+                courseProgress = null, // No course progress for preview
+                next = null, // No next section for preview
+                downloadedState = mapOf(),
+                resumeComponent = Mock.mockChapterBlock,
+                resumeUnitTitle = "Resumed Unit",
+                courseSubSections = mapOf(),
+                subSectionsDownloadsCount = mapOf(),
+                datesBannerInfo = CourseDatesBannerInfo(
                     missedDeadlines = false,
                     missedGatedContent = false,
                     verifiedUpgradeLink = "",
                     contentTypeGatingEnabled = false,
                     hasEnded = false
                 ),
-                true
+                useRelativeDates = true
             ),
             uiMessage = null,
-            onExpandClick = {},
             onSubSectionClick = {},
             onResumeClick = {},
             onDownloadClick = {},
             onResetDatesClick = {},
             onCertificateClick = {},
+            onNavigateToContent = { _ -> },
         )
     }
 }
-
-private val mockAssignmentProgress = AssignmentProgress(
-    assignmentType = "Home",
-    numPointsEarned = 1f,
-    numPointsPossible = 3f,
-    shortLabel = "HM"
-)
-private val mockChapterBlock = Block(
-    id = "id",
-    blockId = "blockId",
-    lmsWebUrl = "lmsWebUrl",
-    legacyWebUrl = "legacyWebUrl",
-    studentViewUrl = "studentViewUrl",
-    type = BlockType.CHAPTER,
-    displayName = "Chapter",
-    graded = false,
-    studentViewData = null,
-    studentViewMultiDevice = false,
-    blockCounts = BlockCounts(1),
-    descendants = emptyList(),
-    descendantsType = BlockType.CHAPTER,
-    completion = 0.0,
-    containsGatedContent = false,
-    assignmentProgress = mockAssignmentProgress,
-    due = Date(),
-    offlineDownload = null
-)
-private val mockSequentialBlock = Block(
-    id = "id",
-    blockId = "blockId",
-    lmsWebUrl = "lmsWebUrl",
-    legacyWebUrl = "legacyWebUrl",
-    studentViewUrl = "studentViewUrl",
-    type = BlockType.SEQUENTIAL,
-    displayName = "Sequential",
-    graded = false,
-    studentViewData = null,
-    studentViewMultiDevice = false,
-    blockCounts = BlockCounts(1),
-    descendants = emptyList(),
-    descendantsType = BlockType.CHAPTER,
-    completion = 0.0,
-    containsGatedContent = false,
-    assignmentProgress = mockAssignmentProgress,
-    due = Date(),
-    offlineDownload = OfflineDownload("fileUrl", "", 1),
-)
-
-private val mockCourseStructure = CourseStructure(
-    root = "",
-    blockData = listOf(mockSequentialBlock, mockSequentialBlock),
-    id = "id",
-    name = "Course name",
-    number = "",
-    org = "Org",
-    start = Date(),
-    startDisplay = "",
-    startType = "",
-    end = Date(),
-    coursewareAccess = CoursewareAccess(
-        true,
-        "",
-        "",
-        "",
-        "",
-        ""
-    ),
-    media = null,
-    certificate = null,
-    isSelfPaced = false,
-    progress = Progress(1, 3),
-)

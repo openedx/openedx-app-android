@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,6 +51,7 @@ import androidx.compose.material.Snackbar
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDone
@@ -103,6 +105,7 @@ import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.TextIcon
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -900,14 +903,16 @@ fun DownloadIcon(
 @Composable
 fun CourseSection(
     modifier: Modifier = Modifier,
-    block: Block,
+    section: Block,
     useRelativeDates: Boolean,
+    isExpandable: Boolean = true,
     onItemClick: (Block) -> Unit,
     isSectionVisible: Boolean?,
-    courseSubSections: List<Block>?,
+    subSections: List<Block>?,
     downloadedStateMap: Map<String, DownloadedState>,
     onSubSectionClick: (Block) -> Unit,
     onDownloadClick: (blocksIds: List<String>) -> Unit,
+    progress: Float? = null
 ) {
     val arrowRotation by animateFloatAsState(
         targetValue = if (isSectionVisible == true) {
@@ -917,7 +922,7 @@ fun CourseSection(
         },
         label = ""
     )
-    val subSectionIds = courseSubSections?.map { it.id }.orEmpty()
+    val subSectionIds = subSections?.map { it.id }.orEmpty()
     val filteredStatuses = downloadedStateMap.filterKeys { it in subSectionIds }.values
     val downloadedState = when {
         filteredStatuses.isEmpty() -> null
@@ -927,14 +932,14 @@ fun CourseSection(
     }
 
     // Section progress
-    val completedCount = courseSubSections?.count { it.isCompleted() } ?: 0
-    val totalCount = courseSubSections?.size ?: 0
-    val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
+    val completedCount = subSections?.count { it.isCompleted() } ?: 0
+    val totalCount = subSections?.size ?: 0
+    val progress = progress ?: if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
 
     Column(
         modifier = modifier
             .clip(MaterialTheme.appShapes.sectionCardShape)
-            .noRippleClickable { onItemClick(block) }
+            .noRippleClickable { onItemClick(section) }
             .background(MaterialTheme.appColors.cardViewBackground)
             .border(
                 1.dp,
@@ -951,14 +956,15 @@ fun CourseSection(
             backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
         )
         CourseExpandableChapterCard(
-            block = block,
+            block = section,
             arrowDegrees = arrowRotation,
+            isExpandable = isExpandable,
             downloadedState = downloadedState,
             onDownloadClick = {
-                onDownloadClick(block.descendants)
+                onDownloadClick(section.descendants)
             }
         )
-        courseSubSections?.forEach { subSectionBlock ->
+        subSections?.forEach { subSectionBlock ->
             AnimatedVisibility(
                 visible = isSectionVisible == true
             ) {
@@ -977,6 +983,7 @@ fun CourseExpandableChapterCard(
     modifier: Modifier = Modifier,
     block: Block,
     arrowDegrees: Float = 0f,
+    isExpandable: Boolean = true,
     downloadedState: DownloadedState?,
     onDownloadClick: () -> Unit,
 ) {
@@ -989,7 +996,9 @@ fun CourseExpandableChapterCard(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        CardArrow(degrees = arrowDegrees)
+        if (isExpandable) {
+            CardArrow(degrees = arrowDegrees)
+        }
         if (block.isCompleted()) {
             val completedIconPainter = painterResource(R.drawable.course_ic_task_alt)
             val completedIconColor = MaterialTheme.appColors.successGreen
@@ -1005,7 +1014,7 @@ fun CourseExpandableChapterCard(
         Text(
             modifier = Modifier.weight(1f),
             text = block.displayName,
-            style = MaterialTheme.appTypography.titleSmall,
+            style = MaterialTheme.appTypography.titleMedium,
             color = MaterialTheme.appColors.textPrimary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -1538,6 +1547,44 @@ fun CourseProgress(
     }
 }
 
+@Composable
+fun ResumeCourseButton(
+    modifier: Modifier = Modifier,
+    block: Block,
+    displayName: String,
+    onResumeClick: (String) -> Unit,
+) {
+    OpenEdXButton(
+        modifier = modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 54.dp),
+        onClick = {
+            onResumeClick(block.id)
+        },
+        content = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = displayName,
+                    color = MaterialTheme.appColors.primaryButtonText,
+                    style = MaterialTheme.appTypography.titleMedium,
+                    fontWeight = FontWeight.W600
+                )
+                TextIcon(
+                    text = stringResource(id = R.string.course_continue),
+                    icon = Icons.AutoMirrored.Filled.ArrowForward,
+                    color = MaterialTheme.appColors.primaryButtonText,
+                    textStyle = MaterialTheme.appTypography.labelLarge
+                )
+            }
+        }
+    )
+}
+
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -1706,3 +1753,7 @@ private val mockChapterBlock = Block(
     due = Date(),
     offlineDownload = null
 )
+
+
+
+
