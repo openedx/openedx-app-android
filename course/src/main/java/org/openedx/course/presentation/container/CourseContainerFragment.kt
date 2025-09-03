@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -26,6 +27,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarData
@@ -34,6 +37,9 @@ import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -77,6 +83,7 @@ import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.PageIndicator
 import org.openedx.core.ui.RoundTabsBar
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -90,6 +97,7 @@ import org.openedx.course.presentation.contenttab.ContentTabScreen
 import org.openedx.course.presentation.dates.CourseDatesScreen
 import org.openedx.course.presentation.handouts.HandoutsScreen
 import org.openedx.course.presentation.handouts.HandoutsType
+import org.openedx.course.presentation.home.CourseHomePagerTab
 import org.openedx.course.presentation.home.CourseHomeScreen
 import org.openedx.course.presentation.offline.CourseOfflineScreen
 import org.openedx.course.presentation.progress.CourseProgressScreen
@@ -273,6 +281,10 @@ fun CourseDashboard(
         initialPage = 0,
         pageCount = { CourseContentTab.entries.size }
     )
+    val homePagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { CourseHomePagerTab.entries.size }
+    )
     val accessStatus = viewModel.courseAccessStatus.observeAsState()
     val tabState = rememberLazyListState()
     val snackState = remember { SnackbarHostState() }
@@ -293,28 +305,12 @@ fun CourseDashboard(
             scaffoldState = scaffoldState,
             backgroundColor = MaterialTheme.appColors.background,
             bottomBar = {
+                val currentPage = CourseContainerTab.entries[pagerState.currentPage]
                 Box {
-                    if (CourseContainerTab.entries[pagerState.currentPage] == CourseContainerTab.CONTENT &&
-                        selectedContentTab == CourseContentTab.ASSIGNMENTS
-                    ) {
-                        Column(
-                            modifier = Modifier.background(MaterialTheme.appColors.background),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Divider(modifier = Modifier.fillMaxWidth())
-                            TextButton(
-                                onClick = {
-                                    scrollToProgress(scope, pagerState)
-                                }
-                            ) {
-                                IconText(
-                                    text = stringResource(R.string.course_review_grading_policy),
-                                    painter = painterResource(id = coreR.drawable.core_ic_mountains),
-                                    color = MaterialTheme.appColors.primary,
-                                    textStyle = MaterialTheme.appTypography.labelLarge
-                                )
-                            }
-                        }
+                    if (currentPage == CourseContainerTab.CONTENT && selectedContentTab == CourseContentTab.ASSIGNMENTS) {
+                        AssignmentsBottomBar(scope = scope, pagerState = pagerState)
+                    } else if (currentPage == CourseContainerTab.HOME) {
+                        HomeNavigationRow(homePagerState = homePagerState)
                     }
                     var isInternetConnectionShown by rememberSaveable {
                         mutableStateOf(false)
@@ -412,6 +408,7 @@ fun CourseDashboard(
                                         viewModel = viewModel,
                                         pagerState = pagerState,
                                         contentTabPagerState = contentTabPagerState,
+                                        homePagerState = homePagerState,
                                         isResumed = isResumed,
                                         fragmentManager = fragmentManager,
                                         onContentTabSelected = { tab ->
@@ -457,6 +454,7 @@ private fun DashboardPager(
     viewModel: CourseContainerViewModel,
     pagerState: PagerState,
     contentTabPagerState: PagerState,
+    homePagerState: PagerState,
     isResumed: Boolean,
     fragmentManager: FragmentManager,
     onContentTabSelected: (CourseContentTab) -> Unit,
@@ -476,6 +474,7 @@ private fun DashboardPager(
                         parameters = { parametersOf(viewModel.courseId, viewModel.courseName) }
                     ),
                     fragmentManager = fragmentManager,
+                    homePagerState = homePagerState,
                     onResetDatesClick = {
                         viewModel.onRefresh(CourseContainerTab.DATES)
                     },
@@ -711,5 +710,89 @@ private fun scrollToDates(scope: CoroutineScope, pagerState: PagerState) {
 private fun scrollToProgress(scope: CoroutineScope, pagerState: PagerState) {
     scope.launch {
         pagerState.animateScrollToPage(CourseContainerTab.entries.indexOf(CourseContainerTab.PROGRESS))
+    }
+}
+
+@Composable
+private fun HomeNavigationRow(homePagerState: PagerState) {
+    val homeCoroutineScope = rememberCoroutineScope()
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val isPreviousPageEnabled = homePagerState.currentPage > 0
+        IconButton(
+            enabled = homePagerState.currentPage > 0,
+            onClick = {
+                homeCoroutineScope.launch {
+                    homePagerState.animateScrollToPage(homePagerState.currentPage - 1)
+                }
+            }
+        ) {
+            Icon(
+                modifier = Modifier.size(12.dp),
+                imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
+                contentDescription = stringResource(coreR.string.core_previous),
+                tint = if (isPreviousPageEnabled) {
+                    MaterialTheme.appColors.textDark
+                } else {
+                    MaterialTheme.appColors.textFieldHint
+                }
+            )
+        }
+        PageIndicator(
+            modifier = Modifier.padding(vertical = 16.dp),
+            numberOfPages = CourseHomePagerTab.entries.size,
+            selectedPage = homePagerState.currentPage,
+            defaultRadius = 8.dp,
+            space = 8.dp,
+            selectedLength = 24.dp,
+        )
+        val isNextPageEnabled = homePagerState.currentPage < CourseHomePagerTab.entries.size - 1
+        IconButton(
+            enabled = isNextPageEnabled,
+            onClick = {
+                homeCoroutineScope.launch {
+                    homePagerState.animateScrollToPage(homePagerState.currentPage + 1)
+                }
+            }
+        ) {
+            Icon(
+                modifier = Modifier.size(12.dp),
+                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                contentDescription = stringResource(coreR.string.core_next),
+                tint = if (isNextPageEnabled) {
+                    MaterialTheme.appColors.textDark
+                } else {
+                    MaterialTheme.appColors.textFieldHint
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun AssignmentsBottomBar(
+    scope: CoroutineScope,
+    pagerState: PagerState
+) {
+    Column(
+        modifier = Modifier.background(MaterialTheme.appColors.background),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Divider(modifier = Modifier.fillMaxWidth())
+        TextButton(
+            onClick = {
+                scrollToProgress(scope, pagerState)
+            }
+        ) {
+            IconText(
+                text = stringResource(R.string.course_review_grading_policy),
+                painter = painterResource(id = coreR.drawable.core_ic_mountains),
+                color = MaterialTheme.appColors.primary,
+                textStyle = MaterialTheme.appTypography.labelLarge
+            )
+        }
     }
 }

@@ -3,32 +3,25 @@ package org.openedx.course.presentation.home
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +29,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AndroidUriHandler
@@ -48,7 +40,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
-import kotlinx.coroutines.launch
 import org.openedx.core.Mock
 import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.Block
@@ -57,7 +48,6 @@ import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.NoContentScreen
-import org.openedx.core.ui.PageIndicator
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -73,13 +63,13 @@ import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
-import org.openedx.core.R as coreR
 
 @Composable
 fun CourseHomeScreen(
     windowSize: WindowSize,
     viewModel: CourseHomeViewModel,
     fragmentManager: FragmentManager,
+    homePagerState: PagerState,
     onResetDatesClick: () -> Unit,
     onNavigateToContent: (CourseContentTab) -> Unit = {},
 ) {
@@ -98,6 +88,7 @@ fun CourseHomeScreen(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
+        homePagerState = homePagerState,
         onSubSectionClick = { subSectionBlock ->
             if (viewModel.isCourseDropdownNavigationEnabled) {
                 viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
@@ -158,6 +149,7 @@ private fun CourseHomeUI(
     windowSize: WindowSize,
     uiState: CourseHomeUIState,
     uiMessage: UIMessage?,
+    homePagerState: PagerState,
     onSubSectionClick: (Block) -> Unit,
     onResumeClick: (String) -> Unit,
     onDownloadClick: (blockIds: List<String>) -> Unit,
@@ -178,15 +170,6 @@ private fun CourseHomeUI(
                 windowSize.windowSizeValue(
                     expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
                     compact = Modifier.fillMaxWidth()
-                )
-            )
-        }
-
-        val bottomPadding by remember(key1 = windowSize) {
-            mutableStateOf(
-                windowSize.windowSizeValue(
-                    expanded = PaddingValues(bottom = 24.dp),
-                    compact = PaddingValues(bottom = 24.dp)
                 )
             )
         }
@@ -213,7 +196,6 @@ private fun CourseHomeUI(
                                 Column(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding(bottomPadding)
                                         .verticalScroll(rememberScrollState()),
                                 ) {
                                     if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
@@ -270,7 +252,8 @@ private fun CourseHomeUI(
                                     Spacer(modifier = Modifier.height(12.dp))
                                     CourseHomePager(
                                         modifier = Modifier.fillMaxSize(),
-                                        pages = CourseHomePagerTab.entries
+                                        pages = CourseHomePagerTab.entries,
+                                        pagerState = homePagerState
                                     ) { tab ->
                                         Card(
                                             modifier = Modifier.fillMaxWidth(),
@@ -322,13 +305,9 @@ private fun CourseHomeUI(
 fun <T> CourseHomePager(
     modifier: Modifier = Modifier,
     pages: List<T>,
+    pagerState: PagerState,
     pageContent: @Composable (T) -> Unit
 ) {
-    val pagerState = rememberPagerState(
-        initialPage = 0,
-        pageCount = { pages.size }
-    )
-    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = modifier,
@@ -343,60 +322,6 @@ fun <T> CourseHomePager(
         ) { page ->
             pageContent(pages[page])
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val isPreviousPageEnabled = pagerState.currentPage > 0
-            IconButton(
-                enabled = pagerState.currentPage > 0,
-                onClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                    }
-                }
-            ) {
-                Icon(
-                    modifier = Modifier.size(12.dp),
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-                    contentDescription = stringResource(coreR.string.core_previous),
-                    tint = if (isPreviousPageEnabled) {
-                        MaterialTheme.appColors.textDark
-                    } else {
-                        MaterialTheme.appColors.textFieldHint
-                    }
-                )
-            }
-            PageIndicator(
-                modifier = Modifier.padding(vertical = 16.dp),
-                numberOfPages = pages.size,
-                selectedPage = pagerState.currentPage,
-                defaultRadius = 8.dp,
-                space = 8.dp,
-                selectedLength = 24.dp,
-            )
-            val isNextPageEnabled = pagerState.currentPage < pages.size - 1
-            IconButton(
-                enabled = isNextPageEnabled,
-                onClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                    }
-                }
-            ) {
-                Icon(
-                    modifier = Modifier.size(12.dp),
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                    contentDescription = stringResource(coreR.string.core_next),
-                    tint = if (isNextPageEnabled) {
-                        MaterialTheme.appColors.textDark
-                    } else {
-                        MaterialTheme.appColors.textFieldHint
-                    }
-                )
-            }
-        }
     }
 }
 
@@ -405,6 +330,10 @@ fun <T> CourseHomePager(
 @Composable
 private fun CourseHomeScreenPreview() {
     OpenEdXTheme {
+        val previewPagerState = rememberPagerState(
+            initialPage = 0,
+            pageCount = { CourseHomePagerTab.entries.size }
+        )
         CourseHomeUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseHomeUIState.CourseData(
@@ -426,6 +355,7 @@ private fun CourseHomeScreenPreview() {
                 useRelativeDates = true
             ),
             uiMessage = null,
+            homePagerState = previewPagerState,
             onSubSectionClick = {},
             onResumeClick = {},
             onDownloadClick = {},
@@ -441,6 +371,10 @@ private fun CourseHomeScreenPreview() {
 @Composable
 private fun CourseHomeScreenTabletPreview() {
     OpenEdXTheme {
+        val previewPagerState = rememberPagerState(
+            initialPage = 0,
+            pageCount = { CourseHomePagerTab.entries.size }
+        )
         CourseHomeUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseHomeUIState.CourseData(
@@ -462,6 +396,7 @@ private fun CourseHomeScreenTabletPreview() {
                 useRelativeDates = true
             ),
             uiMessage = null,
+            homePagerState = previewPagerState,
             onSubSectionClick = {},
             onResumeClick = {},
             onDownloadClick = {},
