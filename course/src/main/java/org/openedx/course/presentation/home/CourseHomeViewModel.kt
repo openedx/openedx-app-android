@@ -97,6 +97,7 @@ class CourseHomeViewModel(
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
     val courseSubSectionUnit = mutableMapOf<String, Block?>()
     private val courseVideos = mutableMapOf<String, MutableList<Block>>()
+    private val courseAssignments = mutableListOf<Block>()
 
     init {
         viewModelScope.launch {
@@ -135,6 +136,7 @@ class CourseHomeViewModel(
                         next = state.next,
                         courseProgress = state.courseProgress,
                         courseVideos = state.courseVideos,
+                        courseAssignments = courseAssignments,
                         videoPreview = state.videoPreview,
                         videoProgress = state.videoProgress
                     )
@@ -208,6 +210,18 @@ class CourseHomeViewModel(
         courseSubSections.clear()
         courseSubSectionUnit.clear()
         courseVideos.clear()
+        courseAssignments.clear()
+
+        // Collect all assignments from the original blocks
+        val allAssignments = blocks
+            .filter { !it.assignmentProgress?.assignmentType.isNullOrEmpty() }
+            .filter { it.graded }
+            .sortedWith(
+                compareBy<Block> { it.due == null }
+                    .thenBy { it.due }
+            )
+        courseAssignments.addAll(allAssignments)
+
         val sortedStructure = courseStructure.copy(blockData = sortBlocks(blocks))
         initDownloadModelsStatus()
         val nextSection = findFirstChapterWithIncompleteDescendants(blocks)
@@ -226,7 +240,7 @@ class CourseHomeViewModel(
                 val progress =
                     videoProgressEntity.videoTime.toFloat() / videoProgressEntity.duration.toFloat()
                 progress.coerceIn(0f, 1f)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 0f
             }
         } else {
@@ -245,6 +259,7 @@ class CourseHomeViewModel(
             useRelativeDates = preferencesManager.isRelativeDatesEnabled,
             courseProgress = courseProgress,
             courseVideos = courseVideos,
+            courseAssignments = courseAssignments,
             videoPreview = videoPreview,
             videoProgress = videoProgress
         )
@@ -543,6 +558,23 @@ class CourseHomeViewModel(
                     put(
                         CourseAnalyticsKey.NAME.key,
                         CourseAnalyticsEvent.COURSE_CONTENT_VIDEO_CLICK.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                }
+            )
+        }
+    }
+
+    fun logAssignmentClick(blockId: String) {
+        val currentState = uiState.value
+        if (currentState is CourseHomeUIState.CourseData) {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_CONTENT_ASSIGNMENT_CLICK.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.COURSE_CONTENT_ASSIGNMENT_CLICK.biValue
                     )
                     put(CourseAnalyticsKey.COURSE_ID.key, courseId)
                     put(CourseAnalyticsKey.BLOCK_ID.key, blockId)

@@ -97,6 +97,11 @@ object TimeUtils {
         }
     }
 
+    fun formatToDayMonth(date: Date): String {
+        val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
+        return sdf.format(date)
+    }
+
     fun getCurrentTime(): Long {
         return Calendar.getInstance().timeInMillis
     }

@@ -149,6 +149,15 @@ fun CourseHomeScreen(
             )
             viewModel.logVideoClick(videoBlock.id)
         },
+        onAssignmentClick = { assignmentBlock ->
+            viewModel.courseRouter.navigateToCourseContainer(
+                fragmentManager,
+                courseId = viewModel.courseId,
+                unitId = viewModel.getBlockParent(assignmentBlock.id)?.id ?: return@CourseHomeUI,
+                mode = CourseViewMode.FULL
+            )
+            viewModel.logAssignmentClick(assignmentBlock.id)
+        },
         onNavigateToContent = onNavigateToContent
     )
 }
@@ -165,6 +174,7 @@ private fun CourseHomeUI(
     onResetDatesClick: () -> Unit,
     onCertificateClick: (String) -> Unit,
     onVideoClick: (Block) -> Unit,
+    onAssignmentClick: (Block) -> Unit,
     onNavigateToContent: (CourseContentTab) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -296,6 +306,16 @@ private fun CourseHomeUI(
                                                 )
                                             }
 
+                                            CourseHomePagerTab.ASSIGNMENT -> {
+                                                AssignmentsHomePagerCardContent(
+                                                    uiState = uiState,
+                                                    onAssignmentClick = onAssignmentClick,
+                                                    onViewAllAssignmentsClick = {
+                                                        onNavigateToContent(CourseContentTab.ASSIGNMENTS)
+                                                    }
+                                                )
+                                            }
+
                                             else -> {
                                                 Text(tab.name)
                                             }
@@ -367,6 +387,7 @@ private fun CourseHomeScreenPreview() {
                 ),
                 useRelativeDates = true,
                 courseVideos = mapOf(),
+                courseAssignments = emptyList(),
                 videoPreview = null,
                 videoProgress = 0f
             ),
@@ -378,6 +399,7 @@ private fun CourseHomeScreenPreview() {
             onResetDatesClick = {},
             onCertificateClick = {},
             onVideoClick = {},
+            onAssignmentClick = {},
             onNavigateToContent = { _ -> },
         )
     }
@@ -412,6 +434,7 @@ private fun CourseHomeScreenTabletPreview() {
                 ),
                 useRelativeDates = true,
                 courseVideos = mapOf(),
+                courseAssignments = emptyList(),
                 videoPreview = null,
                 videoProgress = 0f
             ),
@@ -423,6 +446,7 @@ private fun CourseHomeScreenTabletPreview() {
             onResetDatesClick = {},
             onCertificateClick = {},
             onVideoClick = {},
+            onAssignmentClick = {},
             onNavigateToContent = { _ -> },
         )
     }

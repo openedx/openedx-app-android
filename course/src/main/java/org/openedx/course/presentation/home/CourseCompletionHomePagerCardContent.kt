@@ -165,6 +165,7 @@ private fun CourseCompletionHomePagerCardContentPreview() {
                 ),
                 useRelativeDates = true,
                 courseVideos = mapOf(),
+                courseAssignments = emptyList(),
                 videoPreview = null,
                 videoProgress = 0f
             ),

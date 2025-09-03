@@ -95,4 +95,13 @@
     <string name="course_view_all_videos">View All Videos</string>
     <string name="course_video_time_remaining">%1$s left</string>
     <string name="course_videos_completed">Videos\ncompleted</string>
+
+    <!-- Assignments UI -->
+    <string name="course_assignments_completed">Assignments\ncompleted</string>
+    <string name="course_view_all_assignments">View All Assignments</string>
+    <string name="course_due_soon">Due Soon</string>
+    <string name="course_due_today">Due Today: %1$s</string>
+    <string name="course_days_past_due">%1$d Days Past Due: %2$s</string>
+    <string name="course_due_in_days">Due in %1$d Days: %2$s</string>
+    <string name="course_section">Section: %1$s</string>
 </resources>
