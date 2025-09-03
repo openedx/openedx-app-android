@@ -89,4 +89,10 @@
     <string name="course_of_grade">%1$s %% of Grade</string>
     <string name="course_review_grading_policy">Review Course Grading Policy</string>
     <string name="course_return_to_course_home">Return to Course Home</string>
+
+    <!-- Videos UI -->
+    <string name="course_continue_watching">Continue Watching</string>
+    <string name="course_view_all_videos">View All Videos</string>
+    <string name="course_video_time_remaining">%1$s left</string>
+    <string name="course_videos_completed">Videos\ncompleted</string>
 </resources>

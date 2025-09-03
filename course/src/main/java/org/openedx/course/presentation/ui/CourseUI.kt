@@ -664,6 +664,9 @@ fun CourseVideoSection(
         ) {
             items(videoBlocks) { block ->
                 CourseVideoItem(
+                    modifier = Modifier
+                        .width(192.dp)
+                        .height(108.dp),
                     videoBlock = block,
                     preview = preview[block.id],
                     progress = progress[block.id] ?: 0f,
@@ -679,15 +682,14 @@ fun CourseVideoSection(
 
 @Composable
 fun CourseVideoItem(
+    modifier: Modifier = Modifier,
     videoBlock: Block,
     preview: VideoPreview?,
     progress: Float,
     onClick: () -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .width(192.dp)
-            .height(108.dp)
+        modifier = modifier
             .clip(MaterialTheme.appShapes.videoPreviewShape)
             .let {
                 if (videoBlock.isCompleted()) {

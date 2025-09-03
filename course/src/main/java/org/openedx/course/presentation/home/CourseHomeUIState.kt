@@ -5,6 +5,7 @@ import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.module.db.DownloadedState
+import org.openedx.core.utils.VideoPreview
 
 sealed class CourseHomeUIState {
     data class CourseData(
@@ -18,6 +19,9 @@ sealed class CourseHomeUIState {
         val subSectionsDownloadsCount: Map<String, Int>,
         val datesBannerInfo: CourseDatesBannerInfo,
         val useRelativeDates: Boolean,
+        val courseVideos: Map<String, List<Block>>,
+        val videoPreview: VideoPreview?,
+        val videoProgress: Float,
     ) : CourseHomeUIState()
 
     data object Error : CourseHomeUIState()

@@ -163,7 +163,10 @@ private fun CourseCompletionHomePagerCardContentPreview() {
                     contentTypeGatingEnabled = false,
                     hasEnded = false
                 ),
-                useRelativeDates = true
+                useRelativeDates = true,
+                courseVideos = mapOf(),
+                videoPreview = null,
+                videoProgress = 0f
             ),
             onViewAllContentClick = {},
             onDownloadClick = {},

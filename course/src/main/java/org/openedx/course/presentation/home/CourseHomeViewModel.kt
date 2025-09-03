@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.home
 
+import android.content.Context
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -51,6 +52,7 @@ import org.openedx.course.R as courseR
 class CourseHomeViewModel(
     val courseId: String,
     private val courseTitle: String,
+    private val context: Context,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
@@ -94,6 +96,7 @@ class CourseHomeViewModel(
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
     val courseSubSectionUnit = mutableMapOf<String, Block?>()
+    private val courseVideos = mutableMapOf<String, MutableList<Block>>()
 
     init {
         viewModelScope.launch {
@@ -130,7 +133,10 @@ class CourseHomeViewModel(
                         datesBannerInfo = state.datesBannerInfo,
                         useRelativeDates = preferencesManager.isRelativeDatesEnabled,
                         next = state.next,
-                        courseProgress = state.courseProgress
+                        courseProgress = state.courseProgress,
+                        courseVideos = state.courseVideos,
+                        videoPreview = state.videoPreview,
+                        videoProgress = state.videoProgress
                     )
                 }
             }
@@ -201,9 +207,31 @@ class CourseHomeViewModel(
         setBlocks(blocks)
         courseSubSections.clear()
         courseSubSectionUnit.clear()
+        courseVideos.clear()
         val sortedStructure = courseStructure.copy(blockData = sortBlocks(blocks))
         initDownloadModelsStatus()
         val nextSection = findFirstChapterWithIncompleteDescendants(blocks)
+
+        // Get video data
+        val allVideos = courseVideos.values.flatten()
+        val firstIncompleteVideo = allVideos.find { !it.isCompleted() }
+        val videoPreview = firstIncompleteVideo?.getVideoPreview(
+            context,
+            networkConnection.isOnline(),
+            null
+        )
+        val videoProgress = if (firstIncompleteVideo != null) {
+            try {
+                val videoProgressEntity = interactor.getVideoProgress(firstIncompleteVideo.id)
+                val progress =
+                    videoProgressEntity.videoTime.toFloat() / videoProgressEntity.duration.toFloat()
+                progress.coerceIn(0f, 1f)
+            } catch (e: Exception) {
+                0f
+            }
+        } else {
+            0f
+        }
 
         _uiState.value = CourseHomeUIState.CourseData(
             courseStructure = sortedStructure,
@@ -215,7 +243,10 @@ class CourseHomeViewModel(
             subSectionsDownloadsCount = subSectionsDownloadsCount,
             datesBannerInfo = datesBannerInfo,
             useRelativeDates = preferencesManager.isRelativeDatesEnabled,
-            courseProgress = courseProgress
+            courseProgress = courseProgress,
+            courseVideos = courseVideos,
+            videoPreview = videoPreview,
+            videoProgress = videoProgress
         )
     }
 
@@ -250,11 +281,28 @@ class CourseHomeViewModel(
             subSectionsDownloadsCount[sequentialBlock.id] =
                 sequentialBlock.getDownloadsCount(blocks)
             addDownloadableChildrenForSequentialBlock(sequentialBlock)
+
+            // Add video processing logic
+            val verticalBlocks = blocks.filter { block ->
+                block.id in sequentialBlock.descendants
+            }
+            val videoBlocks = blocks.filter { block ->
+                verticalBlocks.any { vertical -> block.id in vertical.descendants } && block.type == BlockType.VIDEO
+            }
+            addToVideos(block, videoBlocks)
         }
     }
 
     private fun addSequentialBlockToSubSections(block: Block, sequentialBlock: Block) {
         courseSubSections.getOrPut(block.id) { mutableListOf() }.add(sequentialBlock)
+    }
+
+    private fun addToVideos(chapterBlock: Block, videoBlocks: List<Block>) {
+        courseVideos.getOrPut(chapterBlock.id) { mutableListOf() }.addAll(videoBlocks)
+    }
+
+    fun getBlockParent(blockId: String): Block? {
+        return allBlocks.values.find { blockId in it.descendants }
     }
 
     private fun getResumeBlock(
@@ -483,6 +531,23 @@ class CourseHomeViewModel(
                         _uiState.value = currentState.copy(courseProgress = progress)
                     }
                 }
+        }
+    }
+
+    fun logVideoClick(blockId: String) {
+        val currentState = uiState.value
+        if (currentState is CourseHomeUIState.CourseData) {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_CONTENT_VIDEO_CLICK.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.COURSE_CONTENT_VIDEO_CLICK.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                }
+            )
         }
     }
 }
