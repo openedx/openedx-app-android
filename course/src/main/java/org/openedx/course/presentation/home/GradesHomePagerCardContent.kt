@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -99,7 +100,9 @@ private fun GradeCard(
     val gradePercent = if (possible > 0) (earned.toFloat() / possible * 100).toInt() else 0
 
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {},
         backgroundColor = color.copy(alpha = 0.1f),
         shape = MaterialTheme.appShapes.material.small,
         elevation = 0.dp,
@@ -179,6 +182,7 @@ private fun GradeCardsGrid(
                 rowPolicies.forEachIndexed { index, policy ->
                     val policyIndex = assignmentPolicies.indexOf(policy)
                     GradeCard(
+                        modifier = Modifier.weight(1f),
                         policy = policy,
                         progress = progress,
                         color = if (assignmentColors.isNotEmpty()) {
@@ -186,7 +190,6 @@ private fun GradeCardsGrid(
                         } else {
                             MaterialTheme.appColors.primary
                         },
-                        modifier = Modifier.weight(1f)
                     )
                 }
                 // Fill remaining space if row has only 1 item
