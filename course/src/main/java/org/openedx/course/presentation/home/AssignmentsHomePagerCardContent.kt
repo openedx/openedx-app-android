@@ -33,6 +33,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
+import org.openedx.course.presentation.contenttab.CourseContentAssignmentEmptyState
 import java.util.Date
 import org.openedx.core.R as coreR
 
@@ -42,6 +43,14 @@ fun AssignmentsHomePagerCardContent(
     onAssignmentClick: (Block) -> Unit,
     onViewAllAssignmentsClick: () -> Unit
 ) {
+    if (uiState.courseAssignments.isEmpty()) {
+        CourseContentAssignmentEmptyState(
+            onReturnToCourseClick = {},
+            showReturnButton = false
+        )
+        return
+    }
+
     val completedAssignments = uiState.courseAssignments.count { it.isCompleted() }
     val totalAssignments = uiState.courseAssignments.size
     val firstIncompleteAssignment = uiState.courseAssignments.find { !it.isCompleted() }

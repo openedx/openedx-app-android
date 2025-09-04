@@ -27,6 +27,7 @@ import org.openedx.core.domain.model.Block
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
+import org.openedx.course.presentation.contenttab.CourseContentVideoEmptyState
 import org.openedx.course.presentation.ui.CourseVideoItem
 
 @Composable
@@ -36,6 +37,15 @@ fun VideosHomePagerCardContent(
     onViewAllVideosClick: () -> Unit
 ) {
     val allVideos = uiState.courseVideos.values.flatten()
+    
+    if (allVideos.isEmpty()) {
+        CourseContentVideoEmptyState(
+            onReturnToCourseClick = {},
+            showReturnButton = false
+        )
+        return
+    }
+
     val completedVideos = allVideos.count { it.isCompleted() }
     val totalVideos = allVideos.size
     val firstIncompleteVideo = allVideos.find { !it.isCompleted() }

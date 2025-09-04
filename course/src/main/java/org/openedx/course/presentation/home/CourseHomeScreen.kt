@@ -219,119 +219,115 @@ private fun CourseHomeUI(
             ) {
                 when (uiState) {
                     is CourseHomeUIState.CourseData -> {
-                        if (uiState.courseStructure.blockData.isEmpty()) {
-                            NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_OUTLINE)
-                        } else {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .verticalScroll(rememberScrollState()),
-                            ) {
-                                if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
-                                    Box(
-                                        modifier = Modifier
-                                            .padding(all = 8.dp)
-                                    ) {
-                                        if (windowSize.isTablet) {
-                                            CourseDatesBannerTablet(
-                                                banner = uiState.datesBannerInfo,
-                                                resetDates = onResetDatesClick,
-                                            )
-                                        } else {
-                                            CourseDatesBanner(
-                                                banner = uiState.datesBannerInfo,
-                                                resetDates = onResetDatesClick,
-                                            )
-                                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
+                        ) {
+                            if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(all = 8.dp)
+                                ) {
+                                    if (windowSize.isTablet) {
+                                        CourseDatesBannerTablet(
+                                            banner = uiState.datesBannerInfo,
+                                            resetDates = onResetDatesClick,
+                                        )
+                                    } else {
+                                        CourseDatesBanner(
+                                            banner = uiState.datesBannerInfo,
+                                            resetDates = onResetDatesClick,
+                                        )
                                     }
                                 }
+                            }
 
-                                val certificate = uiState.courseStructure.certificate
-                                if (certificate?.isCertificateEarned() == true) {
-                                    CourseMessage(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(
-                                                vertical = 12.dp,
-                                                horizontal = 24.dp
-                                            ),
-                                        icon = painterResource(R.drawable.course_ic_certificate),
-                                        message = stringResource(
-                                            R.string.course_you_earned_certificate,
-                                            uiState.courseStructure.name
+                            val certificate = uiState.courseStructure.certificate
+                            if (certificate?.isCertificateEarned() == true) {
+                                CourseMessage(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(
+                                            vertical = 12.dp,
+                                            horizontal = 24.dp
                                         ),
-                                        action = stringResource(R.string.course_view_certificate),
-                                        onActionClick = {
-                                            onCertificateClick(
-                                                certificate.certificateURL ?: ""
+                                    icon = painterResource(R.drawable.course_ic_certificate),
+                                    message = stringResource(
+                                        R.string.course_you_earned_certificate,
+                                        uiState.courseStructure.name
+                                    ),
+                                    action = stringResource(R.string.course_view_certificate),
+                                    onActionClick = {
+                                        onCertificateClick(
+                                            certificate.certificateURL ?: ""
+                                        )
+                                    }
+                                )
+                            }
+
+                            if (uiState.resumeComponent != null) {
+                                ResumeCourseButton(
+                                    modifier = Modifier.padding(16.dp),
+                                    block = uiState.resumeComponent,
+                                    displayName = uiState.resumeUnitTitle,
+                                    onResumeClick = onResumeClick
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+                            CourseHomePager(
+                                modifier = Modifier.fillMaxSize(),
+                                pages = CourseHomePagerTab.entries,
+                                pagerState = homePagerState
+                            ) { tab ->
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    backgroundColor = MaterialTheme.appColors.cardViewBackground,
+                                    border = BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.appColors.cardViewBorder
+                                    ),
+                                    shape = MaterialTheme.appShapes.cardShape,
+                                    elevation = 0.dp,
+                                ) {
+                                    when (tab) {
+                                        CourseHomePagerTab.COURSE_COMPLETION -> {
+                                            CourseCompletionHomePagerCardContent(
+                                                uiState = uiState,
+                                                onViewAllContentClick = {
+                                                    onNavigateToContent(CourseContentTab.ALL)
+                                                },
+                                                onDownloadClick = onDownloadClick,
+                                                onSubSectionClick = onSubSectionClick
                                             )
                                         }
-                                    )
-                                }
 
-                                if (uiState.resumeComponent != null) {
-                                    ResumeCourseButton(
-                                        modifier = Modifier.padding(16.dp),
-                                        block = uiState.resumeComponent,
-                                        displayName = uiState.resumeUnitTitle,
-                                        onResumeClick = onResumeClick
-                                    )
-                                }
+                                        CourseHomePagerTab.VIDEOS -> {
+                                            VideosHomePagerCardContent(
+                                                uiState = uiState,
+                                                onVideoClick = onVideoClick,
+                                                onViewAllVideosClick = {
+                                                    onNavigateToContent(CourseContentTab.VIDEOS)
+                                                }
+                                            )
+                                        }
 
-                                Spacer(modifier = Modifier.height(12.dp))
-                                CourseHomePager(
-                                    modifier = Modifier.fillMaxSize(),
-                                    pages = CourseHomePagerTab.entries,
-                                    pagerState = homePagerState
-                                ) { tab ->
-                                    Card(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        backgroundColor = MaterialTheme.appColors.cardViewBackground,
-                                        border = BorderStroke(
-                                            1.dp,
-                                            MaterialTheme.appColors.cardViewBorder
-                                        ),
-                                        shape = MaterialTheme.appShapes.cardShape,
-                                        elevation = 0.dp,
-                                    ) {
-                                        when (tab) {
-                                            CourseHomePagerTab.COURSE_COMPLETION -> {
-                                                CourseCompletionHomePagerCardContent(
-                                                    uiState = uiState,
-                                                    onViewAllContentClick = {
-                                                        onNavigateToContent(CourseContentTab.ALL)
-                                                    },
-                                                    onDownloadClick = onDownloadClick,
-                                                    onSubSectionClick = onSubSectionClick
-                                                )
-                                            }
+                                        CourseHomePagerTab.ASSIGNMENT -> {
+                                            AssignmentsHomePagerCardContent(
+                                                uiState = uiState,
+                                                onAssignmentClick = onAssignmentClick,
+                                                onViewAllAssignmentsClick = {
+                                                    onNavigateToContent(CourseContentTab.ASSIGNMENTS)
+                                                }
+                                            )
+                                        }
 
-                                            CourseHomePagerTab.VIDEOS -> {
-                                                VideosHomePagerCardContent(
-                                                    uiState = uiState,
-                                                    onVideoClick = onVideoClick,
-                                                    onViewAllVideosClick = {
-                                                        onNavigateToContent(CourseContentTab.VIDEOS)
-                                                    }
-                                                )
-                                            }
-
-                                            CourseHomePagerTab.ASSIGNMENT -> {
-                                                AssignmentsHomePagerCardContent(
-                                                    uiState = uiState,
-                                                    onAssignmentClick = onAssignmentClick,
-                                                    onViewAllAssignmentsClick = {
-                                                        onNavigateToContent(CourseContentTab.ASSIGNMENTS)
-                                                    }
-                                                )
-                                            }
-
-                                            CourseHomePagerTab.GRADES -> {
-                                                GradesHomePagerCardContent(
-                                                    uiState = uiState,
-                                                    onViewProgressClick = onNavigateToProgress
-                                                )
-                                            }
+                                        CourseHomePagerTab.GRADES -> {
+                                            GradesHomePagerCardContent(
+                                                uiState = uiState,
+                                                onViewProgressClick = onNavigateToProgress
+                                            )
                                         }
                                     }
                                 }

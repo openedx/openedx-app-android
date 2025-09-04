@@ -29,6 +29,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
+import org.openedx.course.presentation.contenttab.CourseHomeGradesEmptyState
 import org.openedx.course.presentation.progress.CurrentOverallGradeText
 import org.openedx.course.presentation.progress.GradeProgressBar
 import org.openedx.course.presentation.progress.RequiredGradeMarker
@@ -40,6 +41,11 @@ fun GradesHomePagerCardContent(
 ) {
     val courseProgress = uiState.courseProgress
     val gradingPolicy = courseProgress?.gradingPolicy
+
+    if (courseProgress == null || gradingPolicy == null || gradingPolicy.assignmentPolicies.isEmpty()) {
+        CourseHomeGradesEmptyState()
+        return
+    }
 
     Column(
         modifier = Modifier
@@ -59,33 +65,25 @@ fun GradesHomePagerCardContent(
             color = MaterialTheme.appColors.textPrimaryVariant,
         )
         Spacer(modifier = Modifier.height(16.dp))
-        if (courseProgress != null && gradingPolicy != null) {
-            CurrentOverallGradeText(progress = courseProgress)
-            Spacer(modifier = Modifier.height(12.dp))
-            GradeProgressBar(
-                progress = courseProgress,
-                gradingPolicy = gradingPolicy,
-                notCompletedWeightedGradePercent = courseProgress.getNotCompletedWeightedGradePercent()
-            )
-            RequiredGradeMarker(progress = courseProgress)
-            Spacer(modifier = Modifier.height(20.dp))
-            GradeCardsGrid(
-                assignmentPolicies = gradingPolicy.assignmentPolicies,
-                assignmentColors = gradingPolicy.assignmentColors,
-                progress = courseProgress
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            ViewAllButton(
-                text = stringResource(R.string.course_view_progress),
-                onClick = onViewProgressClick,
-            )
-        } else {
-            Text(
-                text = stringResource(R.string.course_progress_no_assignments),
-                style = MaterialTheme.appTypography.labelMedium,
-                color = MaterialTheme.appColors.textPrimaryVariant,
-            )
-        }
+        CurrentOverallGradeText(progress = courseProgress)
+        Spacer(modifier = Modifier.height(12.dp))
+        GradeProgressBar(
+            progress = courseProgress,
+            gradingPolicy = gradingPolicy,
+            notCompletedWeightedGradePercent = courseProgress.getNotCompletedWeightedGradePercent()
+        )
+        RequiredGradeMarker(progress = courseProgress)
+        Spacer(modifier = Modifier.height(20.dp))
+        GradeCardsGrid(
+            assignmentPolicies = gradingPolicy.assignmentPolicies,
+            assignmentColors = gradingPolicy.assignmentColors,
+            progress = courseProgress
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        ViewAllButton(
+            text = stringResource(R.string.course_view_progress),
+            onClick = onViewProgressClick,
+        )
     }
 }
 
