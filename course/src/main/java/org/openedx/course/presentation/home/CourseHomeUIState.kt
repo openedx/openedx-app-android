@@ -27,4 +27,5 @@ sealed class CourseHomeUIState {
 
     data object Error : CourseHomeUIState()
     data object Loading : CourseHomeUIState()
+    data object Waiting : CourseHomeUIState()
 }

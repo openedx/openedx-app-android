@@ -1755,7 +1755,3 @@ private val mockChapterBlock = Block(
     due = Date(),
     offlineDownload = null
 )
-
-
-
-

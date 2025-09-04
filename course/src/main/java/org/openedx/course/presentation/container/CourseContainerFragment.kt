@@ -307,7 +307,9 @@ fun CourseDashboard(
             bottomBar = {
                 val currentPage = CourseContainerTab.entries[pagerState.currentPage]
                 Box {
-                    if (currentPage == CourseContainerTab.CONTENT && selectedContentTab == CourseContentTab.ASSIGNMENTS) {
+                    if (currentPage == CourseContainerTab.CONTENT &&
+                        selectedContentTab == CourseContentTab.ASSIGNMENTS
+                    ) {
                         AssignmentsBottomBar(scope = scope, pagerState = pagerState)
                     } else if (currentPage == CourseContainerTab.HOME) {
                         HomeNavigationRow(homePagerState = homePagerState)

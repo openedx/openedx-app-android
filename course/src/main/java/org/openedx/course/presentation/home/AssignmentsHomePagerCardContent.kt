@@ -38,6 +38,14 @@ import org.openedx.course.presentation.contenttab.CourseContentAssignmentEmptySt
 import java.util.Date
 import org.openedx.core.R as coreR
 
+private const val MILLISECONDS_PER_SECOND = 1000
+private const val SECONDS_PER_MINUTE = 60
+private const val MINUTES_PER_HOUR = 60
+private const val HOURS_PER_DAY = 24
+
+private const val MILLISECONDS_PER_DAY =
+    MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY
+
 @Composable
 fun AssignmentsHomePagerCardContent(
     uiState: CourseHomeUIState.CourseData,
@@ -153,7 +161,7 @@ private fun AssignmentCard(
     // Due date status text
     val dueDateStatusText = assignment.due?.let { due ->
         val formattedDate = TimeUtils.formatToDayMonth(due)
-        val daysDifference = ((due.time - Date().time) / (1000 * 60 * 60 * 24)).toInt()
+        val daysDifference = ((due.time - Date().time) / MILLISECONDS_PER_DAY).toInt()
         when {
             daysDifference < 0 -> {
                 // Past due
@@ -236,7 +244,6 @@ private fun AssignmentCard(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                     }
-
 
                     // Assignment and section name
                     Text(

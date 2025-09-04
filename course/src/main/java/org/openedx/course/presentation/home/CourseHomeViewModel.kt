@@ -76,7 +76,7 @@ class CourseHomeViewModel(
 ) {
     val isCourseDropdownNavigationEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
-    private val _uiState = MutableStateFlow<CourseHomeUIState>(CourseHomeUIState.Loading)
+    private val _uiState = MutableStateFlow<CourseHomeUIState>(CourseHomeUIState.Waiting)
     val uiState: StateFlow<CourseHomeUIState>
         get() = _uiState.asStateFlow()
 
@@ -337,11 +337,15 @@ class CourseHomeViewModel(
      * where the first Block is the chapter and the second Block is the first incomplete subsection
      */
     private fun findFirstChapterWithIncompleteDescendants(blocks: List<Block>): Pair<Block, Block>? {
-        val incompleteChapterBlock =
-            blocks.getChapterBlocks().find { !it.isCompleted() } ?: return null
-        val incompleteSubsection =
-            findFirstIncompleteSubsection(incompleteChapterBlock, blocks) ?: return null
-        return Pair(incompleteChapterBlock, incompleteSubsection)
+        val incompleteChapterBlock = blocks.getChapterBlocks().find { !it.isCompleted() }
+        val incompleteSubsection = incompleteChapterBlock?.let {
+            findFirstIncompleteSubsection(it, blocks)
+        }
+        return if (incompleteChapterBlock != null && incompleteSubsection != null) {
+            Pair(incompleteChapterBlock, incompleteSubsection)
+        } else {
+            null
+        }
     }
 
     private fun findFirstIncompleteSubsection(chapter: Block, blocks: List<Block>): Block? {
@@ -534,6 +538,9 @@ class CourseHomeViewModel(
 
     fun getCourseProgress() {
         viewModelScope.launch {
+            if (_uiState.value !is CourseHomeUIState.CourseData) {
+                _uiState.value = CourseHomeUIState.Loading
+            }
             interactor.getCourseProgress(courseId, false)
                 .catch { e ->
                     if (_uiState.value !is CourseHomeUIState.CourseData) {

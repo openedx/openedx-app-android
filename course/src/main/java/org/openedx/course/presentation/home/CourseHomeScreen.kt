@@ -343,6 +343,8 @@ private fun CourseHomeUI(
                     CourseHomeUIState.Loading -> {
                         CircularProgress()
                     }
+
+                    CourseHomeUIState.Waiting -> {}
                 }
             }
         }

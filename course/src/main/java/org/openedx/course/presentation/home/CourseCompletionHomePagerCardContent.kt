@@ -99,7 +99,9 @@ fun CourseCompletionHomePagerCardContent(
 
             CourseSection(
                 section = chapter,
-                onItemClick = {},
+                onItemClick = {
+                    onSubSectionClick(subsection)
+                },
                 isExpandable = false,
                 isSectionVisible = true,
                 useRelativeDates = uiState.useRelativeDates,

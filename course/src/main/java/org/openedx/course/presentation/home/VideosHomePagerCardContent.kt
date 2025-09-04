@@ -38,7 +38,6 @@ fun VideosHomePagerCardContent(
     onViewAllVideosClick: () -> Unit
 ) {
     val allVideos = uiState.courseVideos.values.flatten()
-    
     if (allVideos.isEmpty()) {
         CourseContentVideoEmptyState(
             onReturnToCourseClick = {},
