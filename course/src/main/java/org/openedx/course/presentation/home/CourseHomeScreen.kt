@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.AndroidUriHandler
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -367,6 +368,46 @@ fun <T> CourseHomePager(
     }
 }
 
+@Composable
+fun ViewAllButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.List,
+            contentDescription = null,
+            tint = MaterialTheme.appColors.primary,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.appTypography.labelLarge,
+            color = MaterialTheme.appColors.primary
+        )
+    }
+}
+
+@Composable
+fun CaughtUpMessage(
+    modifier: Modifier = Modifier,
+    message: String,
+) {
+    Text(
+        modifier = modifier
+            .fillMaxWidth(),
+        text = message,
+        color = MaterialTheme.appColors.textPrimary,
+        style = MaterialTheme.appTypography.bodyLarge,
+        textAlign = TextAlign.Center
+    )
+}
+
 @Preview(uiMode = UI_MODE_NIGHT_NO)
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
@@ -459,31 +500,6 @@ private fun CourseHomeScreenTabletPreview() {
             onAssignmentClick = {},
             onNavigateToContent = { _ -> },
             onNavigateToProgress = { },
-        )
-    }
-}
-
-@Composable
-fun ViewAllButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    TextButton(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.List,
-            contentDescription = null,
-            tint = MaterialTheme.appColors.primary,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = text,
-            style = MaterialTheme.appTypography.labelLarge,
-            color = MaterialTheme.appColors.primary
         )
     }
 }

@@ -109,4 +109,8 @@
     <string name="course_grades_title">Grades</string>
     <string name="course_grades_description">This represents your weighted grade against the grade needed to pass this course.</string>
     <string name="course_view_progress">View Progress</string>
+
+    <!-- Caught Up Messages -->
+    <string name="course_videos_caught_up">You\'re all caught up. Take a breather and relax.</string>
+    <string name="course_assignments_caught_up">You\'re all caught up on assignments. Take a breather and relax.</string>
 </resources>

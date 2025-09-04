@@ -117,6 +117,10 @@ fun AssignmentsHomePagerCardContent(
                 assignment = firstIncompleteAssignment,
                 onAssignmentClick = onAssignmentClick
             )
+        } else {
+            CaughtUpMessage(
+                message = stringResource(R.string.course_assignments_caught_up)
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
