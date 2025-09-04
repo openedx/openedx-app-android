@@ -14,9 +14,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -129,22 +127,9 @@ fun VideosHomePagerCardContent(
         Spacer(modifier = Modifier.height(8.dp))
 
         // View All Videos button
-        TextButton(
-            onClick = onViewAllVideosClick,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.List,
-                contentDescription = null,
-                tint = MaterialTheme.appColors.primary,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = stringResource(R.string.course_view_all_videos),
-                style = MaterialTheme.appTypography.labelLarge,
-                color = MaterialTheme.appColors.primary
-            )
-        }
+        ViewAllButton(
+            text = stringResource(R.string.course_view_all_videos),
+            onClick = onViewAllVideosClick
+        )
     }
 }

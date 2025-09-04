@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -18,10 +20,14 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,6 +58,7 @@ import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
+import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.openedx.course.presentation.container.CourseContentTab
 import org.openedx.course.presentation.ui.CourseDatesBanner
@@ -72,6 +79,7 @@ fun CourseHomeScreen(
     homePagerState: PagerState,
     onResetDatesClick: () -> Unit,
     onNavigateToContent: (CourseContentTab) -> Unit = {},
+    onNavigateToProgress: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val uiMessage by viewModel.uiMessage.collectAsState(null)
@@ -158,7 +166,8 @@ fun CourseHomeScreen(
             )
             viewModel.logAssignmentClick(assignmentBlock.id)
         },
-        onNavigateToContent = onNavigateToContent
+        onNavigateToContent = onNavigateToContent,
+        onNavigateToProgress = onNavigateToProgress
     )
 }
 
@@ -176,6 +185,7 @@ private fun CourseHomeUI(
     onVideoClick: (Block) -> Unit,
     onAssignmentClick: (Block) -> Unit,
     onNavigateToContent: (CourseContentTab) -> Unit,
+    onNavigateToProgress: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -316,8 +326,11 @@ private fun CourseHomeUI(
                                                 )
                                             }
 
-                                            else -> {
-                                                Text(tab.name)
+                                            CourseHomePagerTab.GRADES -> {
+                                                GradesHomePagerCardContent(
+                                                    uiState = uiState,
+                                                    onViewProgressClick = onNavigateToProgress
+                                                )
                                             }
                                         }
                                     }
@@ -401,6 +414,7 @@ private fun CourseHomeScreenPreview() {
             onVideoClick = {},
             onAssignmentClick = {},
             onNavigateToContent = { _ -> },
+            onNavigateToProgress = {}
         )
     }
 }
@@ -448,6 +462,32 @@ private fun CourseHomeScreenTabletPreview() {
             onVideoClick = {},
             onAssignmentClick = {},
             onNavigateToContent = { _ -> },
+            onNavigateToProgress = { },
+        )
+    }
+}
+
+@Composable
+fun ViewAllButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.List,
+            contentDescription = null,
+            tint = MaterialTheme.appColors.primary,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.appTypography.labelLarge,
+            color = MaterialTheme.appColors.primary
         )
     }
 }

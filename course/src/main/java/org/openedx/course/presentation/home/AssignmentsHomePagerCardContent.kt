@@ -17,11 +17,9 @@ import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -115,23 +113,10 @@ fun AssignmentsHomePagerCardContent(
         Spacer(modifier = Modifier.height(8.dp))
 
         // View All Assignments button
-        TextButton(
-            onClick = onViewAllAssignmentsClick,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.List,
-                contentDescription = null,
-                tint = MaterialTheme.appColors.primary,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = stringResource(R.string.course_view_all_assignments),
-                style = MaterialTheme.appTypography.labelLarge,
-                color = MaterialTheme.appColors.primary
-            )
-        }
+        ViewAllButton(
+            text = stringResource(R.string.course_view_all_assignments),
+            onClick = onViewAllAssignmentsClick
+        )
     }
 }
 

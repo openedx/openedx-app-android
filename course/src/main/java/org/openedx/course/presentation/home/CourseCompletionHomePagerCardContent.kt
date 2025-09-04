@@ -7,14 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -117,28 +111,11 @@ fun CourseCompletionHomePagerCardContent(
         Spacer(modifier = Modifier.height(8.dp))
 
         // View All Content Button
-        TextButton(
+        ViewAllButton(
+            text = stringResource(R.string.course_completion_view_all_content),
             onClick = onViewAllContentClick,
             modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.List,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.appColors.primary
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.course_completion_view_all_content),
-                    style = MaterialTheme.appTypography.labelLarge,
-                    color = MaterialTheme.appColors.primary
-                )
-            }
-        }
+        )
     }
 }
 

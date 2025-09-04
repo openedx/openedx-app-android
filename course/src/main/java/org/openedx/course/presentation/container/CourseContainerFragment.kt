@@ -489,6 +489,13 @@ private fun DashboardPager(
                                 CourseContentTab.entries.indexOf(contentTab)
                             )
                         }
+                    },
+                    onNavigateToProgress = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(
+                                CourseContainerTab.entries.indexOf(CourseContainerTab.PROGRESS)
+                            )
+                        }
                     }
                 )
             }
@@ -717,7 +724,9 @@ private fun scrollToProgress(scope: CoroutineScope, pagerState: PagerState) {
 private fun HomeNavigationRow(homePagerState: PagerState) {
     val homeCoroutineScope = rememberCoroutineScope()
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.appColors.background),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
