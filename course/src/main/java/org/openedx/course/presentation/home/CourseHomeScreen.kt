@@ -99,12 +99,13 @@ fun CourseHomeScreen(
         uiMessage = uiMessage,
         homePagerState = homePagerState,
         onSubSectionClick = { subSectionBlock ->
+            // Log section/subsection click event
+            viewModel.logSectionSubsectionClick(
+                subSectionBlock.blockId,
+                subSectionBlock.displayName
+            )
             if (viewModel.isCourseDropdownNavigationEnabled) {
                 viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
-                    viewModel.logUnitDetailViewedEvent(
-                        unit.blockId,
-                        unit.displayName
-                    )
                     viewModel.courseRouter.navigateToCourseContainer(
                         fragmentManager,
                         courseId = viewModel.courseId,
@@ -113,10 +114,6 @@ fun CourseHomeScreen(
                     )
                 }
             } else {
-                viewModel.sequentialClickedEvent(
-                    subSectionBlock.blockId,
-                    subSectionBlock.displayName
-                )
                 viewModel.courseRouter.navigateToCourseSubsections(
                     fm = fragmentManager,
                     courseId = viewModel.courseId,
@@ -169,7 +166,11 @@ fun CourseHomeScreen(
         },
         onNavigateToContent = onNavigateToContent,
         onNavigateToProgress = onNavigateToProgress,
-        getBlockParent = viewModel::getBlockParent
+        getBlockParent = viewModel::getBlockParent,
+        onViewAllContentClick = viewModel::logViewAllContentClick,
+        onViewAllVideosClick = viewModel::logViewAllVideosClick,
+        onViewAllAssignmentsClick = viewModel::logViewAllAssignmentsClick,
+        onViewProgressClick = viewModel::logViewProgressClick
     )
 }
 
@@ -189,6 +190,10 @@ private fun CourseHomeUI(
     onNavigateToContent: (CourseContentTab) -> Unit,
     onNavigateToProgress: () -> Unit,
     getBlockParent: (blockId: String) -> Block?,
+    onViewAllContentClick: () -> Unit,
+    onViewAllVideosClick: () -> Unit,
+    onViewAllAssignmentsClick: () -> Unit,
+    onViewProgressClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -299,6 +304,7 @@ private fun CourseHomeUI(
                                             CourseCompletionHomePagerCardContent(
                                                 uiState = uiState,
                                                 onViewAllContentClick = {
+                                                    onViewAllContentClick()
                                                     onNavigateToContent(CourseContentTab.ALL)
                                                 },
                                                 onDownloadClick = onDownloadClick,
@@ -311,6 +317,7 @@ private fun CourseHomeUI(
                                                 uiState = uiState,
                                                 onVideoClick = onVideoClick,
                                                 onViewAllVideosClick = {
+                                                    onViewAllVideosClick()
                                                     onNavigateToContent(CourseContentTab.VIDEOS)
                                                 }
                                             )
@@ -322,6 +329,7 @@ private fun CourseHomeUI(
                                                 onAssignmentClick = onAssignmentClick,
                                                 getBlockParent = getBlockParent,
                                                 onViewAllAssignmentsClick = {
+                                                    onViewAllAssignmentsClick()
                                                     onNavigateToContent(CourseContentTab.ASSIGNMENTS)
                                                 }
                                             )
@@ -330,7 +338,10 @@ private fun CourseHomeUI(
                                         CourseHomePagerTab.GRADES -> {
                                             GradesHomePagerCardContent(
                                                 uiState = uiState,
-                                                onViewProgressClick = onNavigateToProgress
+                                                onViewProgressClick = {
+                                                    onViewProgressClick()
+                                                    onNavigateToProgress()
+                                                }
                                             )
                                         }
                                     }
@@ -458,6 +469,10 @@ private fun CourseHomeScreenPreview() {
             onNavigateToContent = { _ -> },
             onNavigateToProgress = {},
             getBlockParent = { null },
+            onViewAllContentClick = {},
+            onViewAllVideosClick = {},
+            onViewAllAssignmentsClick = {},
+            onViewProgressClick = {},
         )
     }
 }
@@ -507,6 +522,10 @@ private fun CourseHomeScreenTabletPreview() {
             onNavigateToContent = { _ -> },
             onNavigateToProgress = { },
             getBlockParent = { null },
+            onViewAllContentClick = {},
+            onViewAllVideosClick = {},
+            onViewAllAssignmentsClick = {},
+            onViewProgressClick = {},
         )
     }
 }

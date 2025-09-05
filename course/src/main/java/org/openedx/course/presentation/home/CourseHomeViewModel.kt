@@ -417,62 +417,6 @@ class CourseHomeViewModel(
         }
     }
 
-    fun viewCertificateTappedEvent() {
-        analytics.logEvent(
-            CourseAnalyticsEvent.VIEW_CERTIFICATE.eventName,
-            buildMap {
-                put(CourseAnalyticsKey.NAME.key, CourseAnalyticsEvent.VIEW_CERTIFICATE.biValue)
-                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
-            }
-        )
-    }
-
-    private fun resumeCourseTappedEvent(blockId: String) {
-        val currentState = uiState.value
-        if (currentState is CourseHomeUIState.CourseData) {
-            analytics.logEvent(
-                CourseAnalyticsEvent.RESUME_COURSE_CLICKED.eventName,
-                buildMap {
-                    put(
-                        CourseAnalyticsKey.NAME.key,
-                        CourseAnalyticsEvent.RESUME_COURSE_CLICKED.biValue
-                    )
-                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
-                    put(CourseAnalyticsKey.COURSE_NAME.key, courseTitle)
-                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
-                }
-            )
-        }
-    }
-
-    fun sequentialClickedEvent(blockId: String, blockName: String) {
-        val currentState = uiState.value
-        if (currentState is CourseHomeUIState.CourseData) {
-            analytics.sequentialClickedEvent(
-                courseId,
-                currentState.courseStructure.name,
-                blockId,
-                blockName
-            )
-        }
-    }
-
-    fun logUnitDetailViewedEvent(blockId: String, blockName: String) {
-        val currentState = uiState.value
-        if (currentState is CourseHomeUIState.CourseData) {
-            analytics.logEvent(
-                CourseAnalyticsEvent.UNIT_DETAIL.eventName,
-                buildMap {
-                    put(CourseAnalyticsKey.NAME.key, CourseAnalyticsEvent.UNIT_DETAIL.biValue)
-                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
-                    put(CourseAnalyticsKey.COURSE_NAME.key, courseTitle)
-                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
-                    put(CourseAnalyticsKey.BLOCK_NAME.key, blockName)
-                }
-            )
-        }
-    }
-
     fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager) {
         viewModelScope.launch {
             val courseData = _uiState.value as? CourseHomeUIState.CourseData ?: return@launch
@@ -560,13 +504,14 @@ class CourseHomeViewModel(
         val currentState = uiState.value
         if (currentState is CourseHomeUIState.CourseData) {
             analytics.logEvent(
-                CourseAnalyticsEvent.COURSE_CONTENT_VIDEO_CLICK.eventName,
+                CourseAnalyticsEvent.COURSE_HOME_VIDEO_CLICK.eventName,
                 buildMap {
                     put(
                         CourseAnalyticsKey.NAME.key,
-                        CourseAnalyticsEvent.COURSE_CONTENT_VIDEO_CLICK.biValue
+                        CourseAnalyticsEvent.COURSE_HOME_VIDEO_CLICK.biValue
                     )
                     put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, currentState.courseStructure.name)
                     put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
                 }
             )
@@ -577,14 +522,130 @@ class CourseHomeViewModel(
         val currentState = uiState.value
         if (currentState is CourseHomeUIState.CourseData) {
             analytics.logEvent(
-                CourseAnalyticsEvent.COURSE_CONTENT_ASSIGNMENT_CLICK.eventName,
+                CourseAnalyticsEvent.COURSE_HOME_ASSIGNMENT_CLICK.eventName,
                 buildMap {
                     put(
                         CourseAnalyticsKey.NAME.key,
-                        CourseAnalyticsEvent.COURSE_CONTENT_ASSIGNMENT_CLICK.biValue
+                        CourseAnalyticsEvent.COURSE_HOME_ASSIGNMENT_CLICK.biValue
                     )
                     put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, currentState.courseStructure.name)
                     put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                }
+            )
+        }
+    }
+
+    fun viewCertificateTappedEvent() {
+        analytics.logEvent(
+            CourseAnalyticsEvent.VIEW_CERTIFICATE.eventName,
+            buildMap {
+                put(CourseAnalyticsKey.NAME.key, CourseAnalyticsEvent.VIEW_CERTIFICATE.biValue)
+                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+            }
+        )
+    }
+
+    private fun resumeCourseTappedEvent(blockId: String) {
+        val currentState = uiState.value
+        if (currentState is CourseHomeUIState.CourseData) {
+            analytics.logEvent(
+                CourseAnalyticsEvent.RESUME_COURSE_CLICKED.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.RESUME_COURSE_CLICKED.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, courseTitle)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                }
+            )
+        }
+    }
+
+    fun logSectionSubsectionClick(blockId: String, blockName: String) {
+        val currentState = uiState.value
+        if (currentState is CourseHomeUIState.CourseData) {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_HOME_SECTION_SUBSECTION_CLICK.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.COURSE_HOME_SECTION_SUBSECTION_CLICK.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, currentState.courseStructure.name)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                    put(CourseAnalyticsKey.BLOCK_NAME.key, blockName)
+                }
+            )
+        }
+    }
+
+    fun logViewAllContentClick() {
+        val currentState = uiState.value
+        if (currentState is CourseHomeUIState.CourseData) {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_HOME_VIEW_ALL_CONTENT.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.COURSE_HOME_VIEW_ALL_CONTENT.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, currentState.courseStructure.name)
+                }
+            )
+        }
+    }
+
+    fun logViewAllVideosClick() {
+        val currentState = uiState.value
+        if (currentState is CourseHomeUIState.CourseData) {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_HOME_VIEW_ALL_VIDEOS.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.COURSE_HOME_VIEW_ALL_VIDEOS.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, currentState.courseStructure.name)
+                }
+            )
+        }
+    }
+
+    fun logViewAllAssignmentsClick() {
+        val currentState = uiState.value
+        if (currentState is CourseHomeUIState.CourseData) {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_HOME_VIEW_ALL_ASSIGNMENTS.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.COURSE_HOME_VIEW_ALL_ASSIGNMENTS.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, currentState.courseStructure.name)
+                }
+            )
+        }
+    }
+
+    fun logViewProgressClick() {
+        val currentState = uiState.value
+        if (currentState is CourseHomeUIState.CourseData) {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_HOME_GRADES_VIEW_PROGRESS.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.COURSE_HOME_GRADES_VIEW_PROGRESS.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, currentState.courseStructure.name)
                 }
             )
         }
