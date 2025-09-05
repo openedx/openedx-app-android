@@ -68,6 +68,14 @@ data class CourseProgress(
         return if (notCompletedPercent < 0.0) 0f else notCompletedPercent.toFloat()
     }
 
+    fun getNotEmptyGradingPolicies() = gradingPolicy?.assignmentPolicies?.mapNotNull {
+        if (getPossibleAssignmentProblems(it) > 0) {
+            it
+        } else {
+            null
+        }
+    }
+
     data class CertificateData(
         val certStatus: String,
         val certWebViewUrl: String,

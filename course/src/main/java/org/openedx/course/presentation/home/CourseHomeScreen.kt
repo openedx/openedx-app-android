@@ -168,7 +168,8 @@ fun CourseHomeScreen(
             viewModel.logAssignmentClick(assignmentBlock.id)
         },
         onNavigateToContent = onNavigateToContent,
-        onNavigateToProgress = onNavigateToProgress
+        onNavigateToProgress = onNavigateToProgress,
+        getBlockParent = viewModel::getBlockParent
     )
 }
 
@@ -187,6 +188,7 @@ private fun CourseHomeUI(
     onAssignmentClick: (Block) -> Unit,
     onNavigateToContent: (CourseContentTab) -> Unit,
     onNavigateToProgress: () -> Unit,
+    getBlockParent: (blockId: String) -> Block?,
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -318,6 +320,7 @@ private fun CourseHomeUI(
                                             AssignmentsHomePagerCardContent(
                                                 uiState = uiState,
                                                 onAssignmentClick = onAssignmentClick,
+                                                getBlockParent = getBlockParent,
                                                 onViewAllAssignmentsClick = {
                                                     onNavigateToContent(CourseContentTab.ASSIGNMENTS)
                                                 }
@@ -453,7 +456,8 @@ private fun CourseHomeScreenPreview() {
             onVideoClick = {},
             onAssignmentClick = {},
             onNavigateToContent = { _ -> },
-            onNavigateToProgress = {}
+            onNavigateToProgress = {},
+            getBlockParent = { null },
         )
     }
 }
@@ -502,6 +506,7 @@ private fun CourseHomeScreenTabletPreview() {
             onAssignmentClick = {},
             onNavigateToContent = { _ -> },
             onNavigateToProgress = { },
+            getBlockParent = { null },
         )
     }
 }

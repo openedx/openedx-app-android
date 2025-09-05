@@ -134,7 +134,8 @@ private fun CourseProgressContent(
                         )
                     }
                     if (gradingPolicy == null) return@LazyColumn
-                    if (gradingPolicy.assignmentPolicies.isNotEmpty()) {
+                    val assignmentPolicies = uiState.progress.getNotEmptyGradingPolicies()
+                    if (!assignmentPolicies.isNullOrEmpty()) {
                         item {
                             OverallGradeView(
                                 progress = uiState.progress,
@@ -143,7 +144,7 @@ private fun CourseProgressContent(
                         item {
                             GradeDetailsHeaderView()
                         }
-                        itemsIndexed(gradingPolicy.assignmentPolicies) { index, policy ->
+                        itemsIndexed(assignmentPolicies) { index, policy ->
                             AssignmentTypeRow(
                                 progress = uiState.progress,
                                 policy = policy,

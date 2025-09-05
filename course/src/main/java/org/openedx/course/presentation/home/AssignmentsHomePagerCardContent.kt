@@ -50,7 +50,8 @@ private const val MILLISECONDS_PER_DAY =
 fun AssignmentsHomePagerCardContent(
     uiState: CourseHomeUIState.CourseData,
     onAssignmentClick: (Block) -> Unit,
-    onViewAllAssignmentsClick: () -> Unit
+    onViewAllAssignmentsClick: () -> Unit,
+    getBlockParent: (blockId: String) -> Block?,
 ) {
     if (uiState.courseAssignments.isEmpty()) {
         CourseContentAssignmentEmptyState(
@@ -126,6 +127,7 @@ fun AssignmentsHomePagerCardContent(
         if (firstIncompleteAssignment != null) {
             AssignmentCard(
                 assignment = firstIncompleteAssignment,
+                sectionName = getBlockParent(firstIncompleteAssignment.id)?.displayName ?: "",
                 onAssignmentClick = onAssignmentClick
             )
         } else {
@@ -147,6 +149,7 @@ fun AssignmentsHomePagerCardContent(
 @Composable
 private fun AssignmentCard(
     assignment: Block,
+    sectionName: String,
     onAssignmentClick: (Block) -> Unit
 ) {
     val isDuePast = assignment.due != null && assignment.due!! < Date()
@@ -247,14 +250,14 @@ private fun AssignmentCard(
 
                     // Assignment and section name
                     Text(
-                        text = assignment.assignmentProgress?.assignmentType ?: "",
+                        text = assignment.displayName,
                         style = MaterialTheme.appTypography.titleSmall,
                         color = MaterialTheme.appColors.textPrimary,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = assignment.displayName,
+                        text = sectionName,
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.textPrimaryVariant,
                     )

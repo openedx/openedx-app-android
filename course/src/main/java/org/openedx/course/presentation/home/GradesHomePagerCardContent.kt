@@ -42,8 +42,9 @@ fun GradesHomePagerCardContent(
 ) {
     val courseProgress = uiState.courseProgress
     val gradingPolicy = courseProgress?.gradingPolicy
+    val assignmentPolicies = courseProgress?.getNotEmptyGradingPolicies()
 
-    if (courseProgress == null || gradingPolicy == null || gradingPolicy.assignmentPolicies.isEmpty()) {
+    if (courseProgress == null || gradingPolicy == null || assignmentPolicies.isNullOrEmpty()) {
         CourseHomeGradesEmptyState()
         return
     }
