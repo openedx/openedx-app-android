@@ -104,6 +104,7 @@ fun CourseCompletionHomePagerCardContent(
                 },
                 isExpandable = false,
                 isSectionVisible = true,
+                showDueDate = false,
                 useRelativeDates = uiState.useRelativeDates,
                 subSections = listOf(subsection),
                 downloadedStateMap = uiState.downloadedState,

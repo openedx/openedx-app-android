@@ -397,14 +397,14 @@ fun ViewAllButton(
         Icon(
             imageVector = Icons.AutoMirrored.Filled.List,
             contentDescription = null,
-            tint = MaterialTheme.appColors.primary,
+            tint = MaterialTheme.appColors.textAccent,
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = text,
             style = MaterialTheme.appTypography.labelLarge,
-            color = MaterialTheme.appColors.primary
+            color = MaterialTheme.appColors.textAccent
         )
     }
 }

@@ -2,7 +2,9 @@ package org.openedx.app
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
@@ -158,8 +160,12 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             WindowCompat.setDecorFitsSystemWindows(this, false)
             val insetsController = WindowInsetsControllerCompat(this, binding.root)
             insetsController.isAppearanceLightStatusBars = !isUsingNightModeResources()
-            insetsController.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                insetsController.systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            } else {
+                window.statusBarColor = Color.TRANSPARENT
+            }
         }
     }
 

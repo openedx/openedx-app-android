@@ -47,12 +47,14 @@ data class CourseProgress(
         }
 
     fun getAssignmentGradedPercent(type: String): Float {
-        val assignmentSections = sectionScores
-            .flatMap { it.subsections }
-            .filter { it.assignmentType == type }
+        val assignmentSections = getAssignmentSections(type)
         if (assignmentSections.isEmpty()) return 0f
         return assignmentSections.sumOf { it.percentGraded }.toFloat() / assignmentSections.size
     }
+
+    fun getAssignmentSections(type: String) = sectionScores
+        .flatMap { it.subsections }
+        .filter { it.assignmentType == type }
 
     fun getAssignmentWeightedGradedPercent(assignmentPolicy: GradingPolicy.AssignmentPolicy): Float {
         return (assignmentPolicy.weight * getAssignmentGradedPercent(assignmentPolicy.type) * 100f).toFloat()

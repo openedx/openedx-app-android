@@ -79,6 +79,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -666,7 +667,8 @@ fun CourseVideoSection(
                 CourseVideoItem(
                     modifier = Modifier
                         .width(192.dp)
-                        .height(108.dp),
+                        .height(108.dp)
+                        .clip(MaterialTheme.appShapes.videoPreviewShape),
                     videoBlock = block,
                     preview = preview[block.id],
                     progress = progress[block.id] ?: 0f,
@@ -686,11 +688,13 @@ fun CourseVideoItem(
     videoBlock: Block,
     preview: VideoPreview?,
     progress: Float,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    titleStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
+    contentModifier: Modifier = Modifier.padding(8.dp),
+    progressModifier: Modifier = Modifier.height(4.dp),
 ) {
     Box(
         modifier = modifier
-            .clip(MaterialTheme.appShapes.videoPreviewShape)
             .let {
                 if (videoBlock.isCompleted()) {
                     it.border(
@@ -731,58 +735,64 @@ fun CourseVideoItem(
                 )
         )
 
-        Image(
-            modifier = Modifier
-                .size(32.dp)
-                .align(Alignment.Center),
-            painter = painterResource(id = R.drawable.course_video_play_button),
-            contentDescription = null,
-        )
-
-        // Title (top-left)
-        Text(
-            text = videoBlock.displayName,
-            color = Color.White,
-            style = MaterialTheme.appTypography.bodySmall,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(8.dp),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        // Progress bar (bottom)
-        if (progress > 0.0f) {
-            Box(
+        Box(
+            modifier = contentModifier.fillMaxSize()
+        ) {
+            Image(
                 modifier = Modifier
-                    .padding(bottom = 4.dp)
-                    .height(16.dp)
-                    .align(Alignment.BottomCenter),
-                contentAlignment = Alignment.Center
-            ) {
-                LinearProgressIndicator(
+                    .size(32.dp)
+                    .align(Alignment.Center),
+                painter = painterResource(id = R.drawable.course_video_play_button),
+                contentDescription = null,
+            )
+
+            // Title (top-left)
+            Text(
+                text = videoBlock.displayName,
+                color = Color.White,
+                style = titleStyle,
+                modifier = Modifier
+                    .align(Alignment.TopStart),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            // Progress bar (bottom)
+            if (progress > 0.0f) {
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .padding(horizontal = 8.dp)
-                        .clip(CircleShape),
-                    progress = progress,
-                    color = if (videoBlock.isCompleted() && progress > 0.95f) {
-                        MaterialTheme.appColors.progressBarColor
-                    } else {
-                        MaterialTheme.appColors.primary
-                    },
-                    backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
-                )
-                if (videoBlock.isCompleted()) {
-                    Image(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(16.dp)
-                            .offset(x = (-4).dp),
-                        painter = painterResource(id = coreR.drawable.ic_core_check),
-                        contentDescription = stringResource(R.string.course_accessibility_video_watched),
+                        .align(Alignment.BottomCenter),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LinearProgressIndicator(
+                        modifier = progressModifier
+                            .fillMaxWidth()
+                            .clip(CircleShape),
+                        progress = progress,
+                        color = if (videoBlock.isCompleted() && progress > 0.95f) {
+                            MaterialTheme.appColors.progressBarColor
+                        } else {
+                            MaterialTheme.appColors.info
+                        },
+                        backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
                     )
+                    if (videoBlock.isCompleted()) {
+                        Image(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .size(16.dp)
+                                .offset(x = 1.dp),
+                            painter = painterResource(id = coreR.drawable.ic_core_check),
+                            contentDescription = stringResource(R.string.course_accessibility_video_watched),
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .size(16.dp)
+                                .offset(x = 1.dp),
+                        )
+                    }
                 }
             }
         }
@@ -855,7 +865,7 @@ fun DownloadIcon(
             val downloadIconTint = if (downloadedState == DownloadedState.DOWNLOADED) {
                 MaterialTheme.appColors.successGreen
             } else {
-                MaterialTheme.appColors.textAccent
+                MaterialTheme.appColors.primary
             }
             IconButton(
                 modifier = iconModifier,
@@ -907,6 +917,7 @@ fun CourseSection(
     modifier: Modifier = Modifier,
     section: Block,
     useRelativeDates: Boolean,
+    showDueDate: Boolean = true,
     isExpandable: Boolean = true,
     onItemClick: (Block) -> Unit,
     isSectionVisible: Boolean?,
@@ -973,6 +984,7 @@ fun CourseSection(
                 CourseSubSectionItem(
                     block = subSectionBlock,
                     onClick = onSubSectionClick,
+                    showDueDate = showDueDate,
                     useRelativeDates = useRelativeDates
                 )
             }
@@ -1033,6 +1045,7 @@ fun CourseSubSectionItem(
     modifier: Modifier = Modifier,
     block: Block,
     useRelativeDates: Boolean,
+    showDueDate: Boolean,
     onClick: (Block) -> Unit,
 ) {
     val context = LocalContext.current
@@ -1076,7 +1089,7 @@ fun CourseSubSectionItem(
                 maxLines = 1
             )
             Spacer(modifier = Modifier.width(16.dp))
-            if (due != null) {
+            if (due != null || showDueDate) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     tint = MaterialTheme.appColors.onSurface,
@@ -1104,7 +1117,7 @@ fun CourseSubSectionItem(
             .filter { !it.isNullOrEmpty() }
             .joinToString(" - ")
 
-        if (assignmentString.isNotEmpty()) {
+        if (assignmentString.isNotEmpty() && showDueDate) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = assignmentString,

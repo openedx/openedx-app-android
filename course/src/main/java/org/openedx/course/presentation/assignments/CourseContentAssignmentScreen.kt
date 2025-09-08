@@ -268,7 +268,7 @@ private fun AssignmentGroupSection(
         if (isCompletedShown || progress.value != 1f) {
             if (assignments.size > 1) {
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.padding(vertical = 8.dp),
                     contentPadding = PaddingValues(horizontal = 24.dp)
                 ) {
@@ -303,7 +303,7 @@ private fun AssignmentGroupSection(
                 AssignmentDetails(
                     modifier = Modifier
                         .padding(horizontal = 24.dp)
-                        .padding(top = 8.dp),
+                        .padding(top = 12.dp),
                     assignment = assignment,
                     sectionName = sectionNames[assignment.id] ?: "",
                     onAssignmentClick = onAssignmentClick
@@ -429,7 +429,7 @@ private fun AssignmentDetails(
     val color = when {
         assignment.isCompleted() -> MaterialTheme.appColors.successGreen
         isDuePast -> MaterialTheme.appColors.warning
-        else -> MaterialTheme.appColors.cardViewBorder
+        else -> MaterialTheme.appColors.assignmentCardBorder
     }
     val label = assignment.assignmentProgress?.label
     val description = when {
@@ -495,12 +495,14 @@ private fun AssignmentDetails(
                         color = MaterialTheme.appColors.textDark
                     )
                     Text(
+                        modifier = Modifier.padding(top = 4.dp),
                         text = assignment.displayName,
                         style = MaterialTheme.appTypography.bodyLarge,
                         color = MaterialTheme.appColors.textDark
                     )
                     if (description.isNotEmpty()) {
                         Text(
+                            modifier = Modifier.padding(top = 6.dp),
                             text = description,
                             style = MaterialTheme.appTypography.bodySmall,
                             color = MaterialTheme.appColors.textDark

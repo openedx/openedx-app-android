@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,6 +44,10 @@ fun GradesHomePagerCardContent(
     val courseProgress = uiState.courseProgress
     val gradingPolicy = courseProgress?.gradingPolicy
     val assignmentPolicies = courseProgress?.getNotEmptyGradingPolicies()
+    val requiredGradeString = stringResource(
+        R.string.course_progress_required_grade_percent,
+        courseProgress?.requiredGradePercent.toString()
+    )
 
     if (courseProgress == null || gradingPolicy == null || assignmentPolicies.isNullOrEmpty()) {
         CourseHomeGradesEmptyState()
@@ -69,12 +74,19 @@ fun GradesHomePagerCardContent(
         Spacer(modifier = Modifier.height(16.dp))
         CurrentOverallGradeText(progress = courseProgress)
         Spacer(modifier = Modifier.height(12.dp))
-        GradeProgressBar(
-            progress = courseProgress,
-            gradingPolicy = gradingPolicy,
-            notCompletedWeightedGradePercent = courseProgress.getNotCompletedWeightedGradePercent()
-        )
-        RequiredGradeMarker(progress = courseProgress)
+        Column(
+            modifier = Modifier
+                .semantics {
+                    contentDescription = requiredGradeString
+                }
+        ) {
+            GradeProgressBar(
+                progress = courseProgress,
+                gradingPolicy = gradingPolicy,
+                notCompletedWeightedGradePercent = courseProgress.getNotCompletedWeightedGradePercent()
+            )
+            RequiredGradeMarker(progress = courseProgress)
+        }
         Spacer(modifier = Modifier.height(20.dp))
         GradeCardsGrid(
             assignmentPolicies = gradingPolicy.assignmentPolicies,

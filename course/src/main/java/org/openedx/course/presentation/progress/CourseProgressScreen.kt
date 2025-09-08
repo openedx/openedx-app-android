@@ -355,8 +355,9 @@ private fun AssignmentTypeRow(
     policy: CourseProgress.GradingPolicy.AssignmentPolicy,
     color: Color
 ) {
-    val earned = progress.getEarnedAssignmentProblems(policy)
-    val possible = progress.getPossibleAssignmentProblems(policy)
+    val assignments = progress.getAssignmentSections(policy.type)
+    val earned = assignments.filter { it.numPointsEarned > 0f }.size //Is it correct?
+    val possible = assignments.size
     Column(
         modifier = Modifier
             .semantics(mergeDescendants = true) {}
@@ -390,8 +391,8 @@ private fun AssignmentTypeRow(
                 Text(
                     text = stringResource(
                         R.string.course_progress_earned_possible_assignment_problems,
-                        earned.toInt(),
-                        possible.toInt()
+                        earned,
+                        possible
                     ),
                     style = MaterialTheme.appTypography.bodySmall,
                     color = MaterialTheme.appColors.textDark,
@@ -519,6 +520,7 @@ fun GradeProgressBar(
             Box(
                 modifier = Modifier
                     .weight(notCompletedWeightedGradePercent)
+                    .background(MaterialTheme.appColors.gradeProgressBarBackground)
                     .fillMaxHeight()
             )
         }

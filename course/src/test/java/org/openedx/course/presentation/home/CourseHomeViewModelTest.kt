@@ -46,14 +46,13 @@ import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 import java.net.UnknownHostException
 
+@Suppress("LargeClass")
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseHomeViewModelTest {
 
     @get:Rule
     val testInstantTaskExecutorRule: TestRule = InstantTaskExecutorRule()
-
     private val dispatcher = StandardTestDispatcher()
-
     private val courseId = "test-course-id"
     private val courseTitle = "Test Course"
     private val context = mockk<Context>()
@@ -92,8 +91,12 @@ class CourseHomeViewModelTest {
 
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
-        every { resourceManager.getString(org.openedx.course.R.string.course_can_download_only_with_wifi) } returns cantDownload
-        every { resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg) } returns "Failed to shift dates"
+        every {
+            resourceManager.getString(org.openedx.course.R.string.course_can_download_only_with_wifi)
+        } returns cantDownload
+        every {
+            resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg)
+        } returns "Failed to shift dates"
 
         every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns true
         every { config.getCourseUIConfig().isCourseDownloadQueueEnabled } returns true
@@ -234,6 +237,7 @@ class CourseHomeViewModelTest {
         assertTrue(viewModel.uiState.value !is CourseHomeUIState.CourseData)
     }
 
+    @Suppress("TooGenericExceptionThrown")
     @Test
     fun `getCourseData unknown error`() = runTest {
         coEvery {
@@ -241,7 +245,7 @@ class CourseHomeViewModelTest {
                 courseId,
                 false
             )
-        } returns flow { throw Exception("Unknown error") }
+        } returns flow { throw Exception() }
         coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
             emit(
                 courseComponentStatus
@@ -748,7 +752,6 @@ class CourseHomeViewModelTest {
         )
 
         advanceUntilIdle()
-
     }
 
     @Test

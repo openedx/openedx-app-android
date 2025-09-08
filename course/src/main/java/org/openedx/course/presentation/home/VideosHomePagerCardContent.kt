@@ -1,6 +1,6 @@
 package org.openedx.course.presentation.home
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -25,7 +26,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.openedx.core.domain.model.Block
+import org.openedx.core.extension.getUnitChapter
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.openedx.course.presentation.contenttab.CourseContentVideoEmptyState
@@ -118,21 +121,41 @@ fun VideosHomePagerCardContent(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Video card using CourseVideoItem
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                CourseVideoItem(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
-                    videoBlock = firstIncompleteVideo,
-                    preview = uiState.videoPreview,
-                    progress = uiState.videoProgress,
-                    onClick = {
-                        onVideoClick(firstIncompleteVideo)
-                    }
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                backgroundColor = MaterialTheme.appColors.cardViewBackground,
+                shape = MaterialTheme.appShapes.videoPreviewShape,
+                elevation = 0.dp,
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.appColors.cardViewBorder
                 )
+            ) {
+                Column {
+                    CourseVideoItem(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp),
+                        videoBlock = firstIncompleteVideo,
+                        preview = uiState.videoPreview,
+                        progress = uiState.videoProgress,
+                        onClick = {
+                            onVideoClick(firstIncompleteVideo)
+                        },
+                        titleStyle = MaterialTheme.appTypography.titleMedium,
+                        contentModifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        progressModifier = Modifier.height(8.dp),
+                    )
+                    Text(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        text = uiState.courseStructure.blockData
+                            .getUnitChapter(firstIncompleteVideo.id)?.displayName ?: "",
+                        style = MaterialTheme.appTypography.labelMedium,
+                        color = MaterialTheme.appColors.textPrimary,
+                    )
+                }
             }
         } else {
             CaughtUpMessage(

@@ -483,18 +483,18 @@ private fun DashboardPager(
                     onNavigateToContent = { contentTab ->
                         scope.launch {
                             // First scroll to CONTENT tab
-                            pagerState.animateScrollToPage(
+                            pagerState.scrollToPage(
                                 CourseContainerTab.entries.indexOf(CourseContainerTab.CONTENT)
                             )
                             // Then scroll to the specified content tab
-                            contentTabPagerState.animateScrollToPage(
+                            contentTabPagerState.scrollToPage(
                                 CourseContentTab.entries.indexOf(contentTab)
                             )
                         }
                     },
                     onNavigateToProgress = {
                         scope.launch {
-                            pagerState.animateScrollToPage(
+                            pagerState.scrollToPage(
                                 CourseContainerTab.entries.indexOf(CourseContainerTab.PROGRESS)
                             )
                         }
@@ -582,7 +582,7 @@ private fun DashboardPager(
                     onTabSelected = onContentTabSelected,
                     onNavigateToHome = {
                         scope.launch {
-                            pagerState.animateScrollToPage(
+                            pagerState.scrollToPage(
                                 CourseContainerTab.entries.indexOf(
                                     CourseContainerTab.HOME
                                 )
@@ -711,14 +711,14 @@ private fun SetupCourseAccessErrorButtons(
 @OptIn(ExperimentalFoundationApi::class)
 private fun scrollToDates(scope: CoroutineScope, pagerState: PagerState) {
     scope.launch {
-        pagerState.animateScrollToPage(CourseContainerTab.entries.indexOf(CourseContainerTab.DATES))
+        pagerState.scrollToPage(CourseContainerTab.entries.indexOf(CourseContainerTab.DATES))
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 private fun scrollToProgress(scope: CoroutineScope, pagerState: PagerState) {
     scope.launch {
-        pagerState.animateScrollToPage(CourseContainerTab.entries.indexOf(CourseContainerTab.PROGRESS))
+        pagerState.scrollToPage(CourseContainerTab.entries.indexOf(CourseContainerTab.PROGRESS))
     }
 }
 
@@ -734,6 +734,7 @@ private fun HomeNavigationRow(homePagerState: PagerState) {
     ) {
         val isPreviousPageEnabled = homePagerState.currentPage > 0
         IconButton(
+            modifier = Modifier.size(60.dp),
             enabled = homePagerState.currentPage > 0,
             onClick = {
                 homeCoroutineScope.launch {
@@ -762,6 +763,7 @@ private fun HomeNavigationRow(homePagerState: PagerState) {
         )
         val isNextPageEnabled = homePagerState.currentPage < CourseHomePagerTab.entries.size - 1
         IconButton(
+            modifier = Modifier.size(60.dp),
             enabled = isNextPageEnabled,
             onClick = {
                 homeCoroutineScope.launch {

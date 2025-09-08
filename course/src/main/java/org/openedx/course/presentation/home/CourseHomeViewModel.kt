@@ -222,7 +222,7 @@ class CourseHomeViewModel(
             )
         courseAssignments.addAll(allAssignments)
 
-        val sortedStructure = courseStructure.copy(blockData = sortBlocks(blocks))
+        sortBlocks(blocks)
         initDownloadModelsStatus()
         val nextSection = findFirstChapterWithIncompleteDescendants(blocks)
 
@@ -248,7 +248,7 @@ class CourseHomeViewModel(
         }
 
         _uiState.value = CourseHomeUIState.CourseData(
-            courseStructure = sortedStructure,
+            courseStructure = courseStructure,
             next = nextSection,
             downloadedState = getDownloadModelsStatus(),
             resumeComponent = getResumeBlock(blocks, courseStatus.lastVisitedBlockId),

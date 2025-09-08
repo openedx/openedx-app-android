@@ -97,7 +97,7 @@ object TimeUtils {
         }
     }
 
-    fun formatToDayMonth(date: Date): String {
+    fun formatToMonthDay(date: Date): String {
         val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
         return sdf.format(date)
     }

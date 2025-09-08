@@ -163,7 +163,7 @@ private fun AssignmentCard(
 
     // Due date status text
     val dueDateStatusText = assignment.due?.let { due ->
-        val formattedDate = TimeUtils.formatToDayMonth(due)
+        val formattedDate = TimeUtils.formatToMonthDay(due)
         val daysDifference = ((due.time - Date().time) / MILLISECONDS_PER_DAY).toInt()
         when {
             daysDifference < 0 -> {
