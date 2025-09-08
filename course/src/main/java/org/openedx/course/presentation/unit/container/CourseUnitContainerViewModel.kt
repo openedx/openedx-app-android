@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.unit.container
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -9,19 +10,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.openedx.core.BlockType
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Block
+import org.openedx.core.extension.safeDivBy
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSectionChanged
 import org.openedx.core.system.notifier.CourseStructureUpdated
+import org.openedx.core.utils.VideoPreview
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.course.presentation.CourseRouter
 import org.openedx.foundation.extension.clearAndAddAll
 import org.openedx.foundation.extension.indexOfFirstFromIndex
 import org.openedx.foundation.presentation.BaseViewModel
@@ -29,11 +34,14 @@ import org.openedx.foundation.presentation.BaseViewModel
 class CourseUnitContainerViewModel(
     val courseId: String,
     val unitId: String,
+    val mode: CourseViewMode,
+    private val context: Context,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics,
     private val networkConnection: NetworkConnection,
+    private val router: CourseRouter,
 ) : BaseViewModel() {
 
     private val blocks = ArrayList<Block>()
@@ -48,12 +56,16 @@ class CourseUnitContainerViewModel(
 
     val isFirstIndexInContainer: Boolean
         get() {
-            return _descendantsBlocks.value.firstOrNull() == _descendantsBlocks.value.getOrNull(currentIndex)
+            return _descendantsBlocks.value.firstOrNull() == _descendantsBlocks.value.getOrNull(
+                currentIndex
+            )
         }
 
     val isLastIndexInContainer: Boolean
         get() {
-            return _descendantsBlocks.value.lastOrNull() == _descendantsBlocks.value.getOrNull(currentIndex)
+            return _descendantsBlocks.value.lastOrNull() == _descendantsBlocks.value.getOrNull(
+                currentIndex
+            )
         }
 
     private val _verticalBlockCounts = MutableLiveData<Int>()
@@ -70,6 +82,18 @@ class CourseUnitContainerViewModel(
 
     private val _subSectionUnitBlocks = MutableStateFlow<List<Block>>(listOf())
     val subSectionUnitBlocks = _subSectionUnitBlocks.asStateFlow()
+
+    private val _videoList = MutableStateFlow<List<Block>>(listOf())
+    val videoList = _videoList.asStateFlow()
+
+    private val _videoPreview = MutableStateFlow<Map<String, VideoPreview?>>(emptyMap())
+    val videoPreview = _videoPreview.asStateFlow()
+
+    private val _videoProgress = MutableStateFlow<Map<String, Float>>(emptyMap())
+    val videoProgress = _videoProgress.asStateFlow()
+
+    private val _currentBlock = MutableStateFlow<Block?>(null)
+    val currentBlock = _currentBlock.asStateFlow()
 
     var nextButtonText = ""
     var hasNextBlock = false
@@ -95,7 +119,10 @@ class CourseUnitContainerViewModel(
                 val blocks = courseStructure.blockData
                 courseName = courseStructure.name
                 this@CourseUnitContainerViewModel.blocks.clearAndAddAll(blocks)
-
+                if (mode == CourseViewMode.VIDEOS) {
+                    _videoList.value = getAllVideoBlocks()
+                    loadVideoData()
+                }
                 setupCurrentIndex(componentId)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -151,6 +178,8 @@ class CourseUnitContainerViewModel(
                     currentIndex = _descendantsBlocks.value.indexOfFirst { it.id == componentId }
                     _indexInContainer.value = currentIndex
                 }
+                // Initialize current block
+                _currentBlock.value = getCurrentBlock()
                 return
             }
         }
@@ -220,7 +249,9 @@ class CourseUnitContainerViewModel(
     }
 
     fun getCurrentBlock(): Block {
-        return blocks[currentIndex]
+        val block = _descendantsBlocks.value.getOrNull(currentIndex) ?: blocks[currentVerticalIndex]
+        _currentBlock.value = block
+        return block
     }
 
     fun moveToNextBlock(): Block? {
@@ -237,6 +268,7 @@ class CourseUnitContainerViewModel(
             if (currentVerticalIndex != -1) {
                 _indexInContainer.value = currentIndex
             }
+            _currentBlock.value = block
             return block
         }
         return null
@@ -297,5 +329,90 @@ class CourseUnitContainerViewModel(
 
     fun setUnitsListVisibility(isVisible: Boolean) {
         _unitsListShowed.value = isVisible
+    }
+
+    fun getAllVideoBlocks(): List<Block> = blocks.filter { it.type == BlockType.VIDEO }
+
+    fun setSelectedVideoBlock(videoBlock: Block) {
+        // Find the parent vertical block for this video
+        val verticalBlock = findParentBlock(videoBlock.id) ?: return
+        val verticalIndex = blocks.indexOfFirst { it.id == verticalBlock.id }
+        if (verticalIndex == -1) return
+
+        // Update vertical index
+        currentVerticalIndex = verticalIndex
+
+        // Find and update section index
+        val sectionIndex = blocks.indexOfFirst {
+            it.descendants.contains(blocks[currentVerticalIndex].id)
+        }
+        if (sectionIndex != currentSectionIndex) {
+            currentSectionIndex = sectionIndex
+            blocks.getOrNull(currentSectionIndex)?.id?.let {
+                sendCourseSectionChanged(it)
+            }
+        }
+
+        // Update descendants blocks for the new vertical
+        val verticalBlockData = blocks[currentVerticalIndex]
+        if (verticalBlockData.descendants.isNotEmpty() || verticalBlockData.isGated()) {
+            _descendantsBlocks.value =
+                verticalBlockData.descendants.mapNotNull { descendant ->
+                    blocks.firstOrNull { descendant == it.id }
+                }
+            _subSectionUnitBlocks.value =
+                getSubSectionUnitBlocks(blocks, getSubSectionId(verticalBlockData.id))
+
+            if (_descendantsBlocks.value.isEmpty()) {
+                _descendantsBlocks.value = listOf(verticalBlockData)
+            }
+        }
+
+        // Update vertical block counts
+        _verticalBlockCounts.value = verticalBlockData.descendants.size
+
+        // Find the video block index in the new descendants and set it as current
+        val blockIndex = _descendantsBlocks.value.indexOfFirst { it.id == videoBlock.id }
+        if (blockIndex != -1) {
+            currentIndex = blockIndex
+            _indexInContainer.value = currentIndex
+            _currentBlock.value = videoBlock
+        }
+    }
+
+    private fun findParentBlock(childId: String): Block? {
+        return blocks.firstOrNull { it.descendants.contains(childId) }
+    }
+
+    private fun loadVideoData() {
+        viewModelScope.launch {
+            loadVideoPreview()
+            loadVideoProgress()
+        }
+    }
+
+    private suspend fun loadVideoProgress() {
+        val videoBlocks = getAllVideoBlocks()
+        val videoProgress = videoBlocks.associate { block ->
+            val videoProgressEntity = interactor.getVideoProgress(block.id)
+            val progress = videoProgressEntity.videoTime.toFloat()
+                .safeDivBy(videoProgressEntity.duration.toFloat())
+            block.id to progress
+        }
+        _videoProgress.value = videoProgress
+    }
+
+    private suspend fun loadVideoPreview() {
+        val videoBlocks = getAllVideoBlocks()
+        val videoPreview = withContext(Dispatchers.IO) {
+            videoBlocks.associate { block ->
+                block.id to block.getVideoPreview(
+                    context,
+                    networkConnection.isOnline(),
+                    null
+                )
+            }
+        }
+        _videoPreview.value = videoPreview
     }
 }

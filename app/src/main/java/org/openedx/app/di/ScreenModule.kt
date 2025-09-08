@@ -13,6 +13,7 @@ import org.openedx.auth.presentation.signin.SignInViewModel
 import org.openedx.auth.presentation.signup.SignUpViewModel
 import org.openedx.core.Validator
 import org.openedx.core.domain.interactor.CalendarInteractor
+import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectDialogViewModel
 import org.openedx.core.presentation.settings.video.VideoQualityViewModel
 import org.openedx.core.repository.CalendarRepository
@@ -340,10 +341,13 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String, unitId: String) ->
+    viewModel { (courseId: String, unitId: String, mode: CourseViewMode) ->
         CourseUnitContainerViewModel(
             courseId,
             unitId,
+            mode,
+            get(),
+            get(),
             get(),
             get(),
             get(),

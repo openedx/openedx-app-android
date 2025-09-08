@@ -700,9 +700,11 @@ fun CourseVideoItem(
     titleStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
     contentModifier: Modifier = Modifier.padding(8.dp),
     progressModifier: Modifier = Modifier.height(4.dp),
+    playButtonSize: Dp = 32.dp
 ) {
     Box(
         modifier = modifier
+            .clip(MaterialTheme.appShapes.videoPreviewShape)
             .let {
                 if (videoBlock.isCompleted()) {
                     it.border(
@@ -748,7 +750,7 @@ fun CourseVideoItem(
         ) {
             Image(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(playButtonSize)
                     .align(Alignment.Center),
                 painter = painterResource(id = R.drawable.course_video_play_button),
                 contentDescription = null,
