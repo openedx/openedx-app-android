@@ -26,7 +26,6 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
-import org.openedx.course.presentation.CourseRouter
 import org.openedx.foundation.extension.clearAndAddAll
 import org.openedx.foundation.extension.indexOfFirstFromIndex
 import org.openedx.foundation.presentation.BaseViewModel
@@ -41,7 +40,6 @@ class CourseUnitContainerViewModel(
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics,
     private val networkConnection: NetworkConnection,
-    private val router: CourseRouter,
 ) : BaseViewModel() {
 
     private val blocks = ArrayList<Block>()
@@ -94,6 +92,9 @@ class CourseUnitContainerViewModel(
 
     private val _currentBlock = MutableStateFlow<Block?>(null)
     val currentBlock = _currentBlock.asStateFlow()
+
+    private val _hierarchyPath = MutableStateFlow<String>("")
+    val hierarchyPath = _hierarchyPath.asStateFlow()
 
     var nextButtonText = ""
     var hasNextBlock = false
@@ -251,6 +252,7 @@ class CourseUnitContainerViewModel(
     fun getCurrentBlock(): Block {
         val block = _descendantsBlocks.value.getOrNull(currentIndex) ?: blocks[currentVerticalIndex]
         _currentBlock.value = block
+        _hierarchyPath.value = buildHierarchyPath(block)
         return block
     }
 
@@ -269,6 +271,7 @@ class CourseUnitContainerViewModel(
                 _indexInContainer.value = currentIndex
             }
             _currentBlock.value = block
+            _hierarchyPath.value = buildHierarchyPath(block)
             return block
         }
         return null
@@ -377,6 +380,10 @@ class CourseUnitContainerViewModel(
             currentIndex = blockIndex
             _indexInContainer.value = currentIndex
             _currentBlock.value = videoBlock
+            _hierarchyPath.value = buildHierarchyPath(videoBlock)
+        }
+        viewModelScope.launch {
+            loadVideoProgress()
         }
     }
 
@@ -414,5 +421,30 @@ class CourseUnitContainerViewModel(
             }
         }
         _videoPreview.value = videoPreview
+    }
+
+    private fun buildHierarchyPath(block: Block): String {
+        val pathComponents = mutableListOf<String>()
+
+        // Find the current block (Unit)
+        pathComponents.add(block.displayName)
+
+        // Find the parent Vertical block (but don't add it to path)
+        val verticalBlock = findParentBlock(block.id)
+        verticalBlock?.let { vertical ->
+            // Find the parent Sequential block (Subsection)
+            val sequentialBlock = findParentBlock(vertical.id)
+            sequentialBlock?.let { sequential ->
+                pathComponents.add(0, sequential.displayName)
+
+                // Find the parent Chapter block (Section)
+                val chapterBlock = findParentBlock(sequential.id)
+                chapterBlock?.let { chapter ->
+                    pathComponents.add(0, chapter.displayName)
+                }
+            }
+        }
+
+        return pathComponents.joinToString(" > ")
     }
 }

@@ -10,13 +10,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -24,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
@@ -341,6 +347,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Divider()
+                    if (viewModel.mode == CourseViewMode.VIDEOS) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        HierarchyPathText()
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
@@ -500,7 +510,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 hasPrevBlock = hasPrevBlock,
                 nextButtonText = nextButtonText,
                 hasNextBlock = hasNextBlock,
-                isVerticalNavigation = !viewModel.isCourseUnitProgressEnabled,
+                isVerticalNavigation = !viewModel.isCourseUnitProgressEnabled || viewModel.mode != CourseViewMode.VIDEOS,
                 onPrevClick = {
                     handlePrevClick { next, hasPrev, hasNext ->
                         nextButtonText = next
@@ -527,17 +537,29 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         val videoPreview by viewModel.videoPreview.collectAsState()
         val videoProgress by viewModel.videoProgress.collectAsState()
         val currentBlock by viewModel.currentBlock.collectAsState()
+        val rowState = rememberLazyListState()
+
+        LaunchedEffect(currentBlock) {
+            rowState.animateScrollToItem(videoBlocks.indexOf(currentBlock))
+        }
 
         if (videoBlocks.isNotEmpty()) {
             LazyRow(
+                state = rowState,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 items(videoBlocks) { block ->
-                    val playButtonSize = if (block.id == currentBlock?.id) {
+                    val isSelectedBlock = block.id == currentBlock?.id
+                    val playButtonSize = if (isSelectedBlock) {
                         0.dp
                     } else {
                         14.dp
+                    }
+                    val borderColor = if (isSelectedBlock) {
+                        MaterialTheme.appColors.primary
+                    } else {
+                        null
                     }
                     CourseVideoItem(
                         modifier = Modifier
@@ -546,12 +568,33 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                         videoBlock = block,
                         preview = videoPreview[block.id],
                         progress = videoProgress[block.id] ?: 0f,
-                        onClick = { onVideoClick(block) },
+                        onClick = {
+                            onVideoClick(block)
+                        },
                         style = MaterialTheme.appTypography.labelSmall,
                         playButtonSize = playButtonSize,
+                        borderColor = borderColor
                     )
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun HierarchyPathText() {
+        val hierarchyPath by viewModel.hierarchyPath.collectAsState()
+
+        if (hierarchyPath.isNotEmpty()) {
+            Text(
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                text = hierarchyPath,
+                style = MaterialTheme.appTypography.bodySmall,
+                color = MaterialTheme.appColors.textDark,
+                maxLines = 2,
+            )
         }
     }
 

@@ -674,6 +674,9 @@ fun CourseVideoSection(
                 }
                 CourseVideoItem(
                     modifier = Modifier
+                        .width(192.dp)
+                        .height(108.dp),
+                    modifier = Modifier
                         .width(videoCardWidth)
                         .height(108.dp)
                         .clip(MaterialTheme.appShapes.videoPreviewShape),
@@ -700,22 +703,22 @@ fun CourseVideoItem(
     titleStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
     contentModifier: Modifier = Modifier.padding(8.dp),
     progressModifier: Modifier = Modifier.height(4.dp),
-    playButtonSize: Dp = 32.dp
+    playButtonSize: Dp = 32.dp,
+    borderColor: Color? = null
 ) {
+    val borderColor = borderColor ?: if (videoBlock.isCompleted()) {
+        MaterialTheme.appColors.successGreen
+    } else {
+        Color.Transparent
+    }
     Box(
         modifier = modifier
             .clip(MaterialTheme.appShapes.videoPreviewShape)
-            .let {
-                if (videoBlock.isCompleted()) {
-                    it.border(
-                        width = 3.dp,
-                        color = MaterialTheme.appColors.successGreen,
-                        shape = MaterialTheme.appShapes.videoPreviewShape
-                    )
-                } else {
-                    it
-                }
-            }
+            .border(
+                width = 3.dp,
+                color = borderColor,
+                shape = MaterialTheme.appShapes.videoPreviewShape
+            )
             .clickable { onClick() }
     ) {
         AsyncImage(
