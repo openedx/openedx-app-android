@@ -38,7 +38,7 @@ class CourseAssignmentViewModel(
 
     private fun collectData() {
         viewModelScope.launch {
-            val courseProgressFlow = interactor.getCourseProgress(courseId, false)
+            val courseProgressFlow = interactor.getCourseProgress(courseId, false, true)
             val courseStructureFlow = interactor.getCourseStructureFlow(courseId)
 
             combine(

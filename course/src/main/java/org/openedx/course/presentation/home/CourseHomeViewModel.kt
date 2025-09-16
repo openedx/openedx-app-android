@@ -3,6 +3,7 @@ package org.openedx.course.presentation.home
 import android.content.Context
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -175,7 +176,7 @@ class CourseHomeViewModel(
                 .catch { emit(null) }
             val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
             val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
-            val courseProgressFlow = interactor.getCourseProgress(courseId, false)
+            val courseProgressFlow = interactor.getCourseProgress(courseId, false, true)
             combine(
                 courseStructureFlow,
                 courseStatusFlow,
@@ -229,11 +230,6 @@ class CourseHomeViewModel(
         // Get video data
         val allVideos = courseVideos.values.flatten()
         val firstIncompleteVideo = allVideos.find { !it.isCompleted() }
-        val videoPreview = firstIncompleteVideo?.getVideoPreview(
-            context,
-            networkConnection.isOnline(),
-            null
-        )
         val videoProgress = if (firstIncompleteVideo != null) {
             try {
                 val videoProgressEntity = interactor.getVideoProgress(firstIncompleteVideo.id)
@@ -260,9 +256,24 @@ class CourseHomeViewModel(
             courseProgress = courseProgress,
             courseVideos = courseVideos,
             courseAssignments = courseAssignments,
-            videoPreview = videoPreview,
+            videoPreview = (_uiState.value as? CourseHomeUIState.CourseData)?.videoPreview,
             videoProgress = videoProgress
         )
+        getVideoPreview(firstIncompleteVideo)
+    }
+
+    private fun getVideoPreview(videoBlock: Block?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val videoPreview = videoBlock?.getVideoPreview(
+                context,
+                networkConnection.isOnline(),
+                null
+            )
+            _uiState.value = (_uiState.value as? CourseHomeUIState.CourseData)
+                ?.copy(
+                    videoPreview = videoPreview
+                ) ?: return@launch
+        }
     }
 
     private suspend fun handleCourseDataError(e: Throwable?) {
@@ -485,7 +496,7 @@ class CourseHomeViewModel(
             if (_uiState.value !is CourseHomeUIState.CourseData) {
                 _uiState.value = CourseHomeUIState.Loading
             }
-            interactor.getCourseProgress(courseId, false)
+            interactor.getCourseProgress(courseId, false, true)
                 .catch { e ->
                     if (_uiState.value !is CourseHomeUIState.CourseData) {
                         _uiState.value = CourseHomeUIState.Error

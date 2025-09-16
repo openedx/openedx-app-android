@@ -47,7 +47,7 @@ class CourseProgressViewModel(
             if (!isRefresh) {
                 _uiState.value = CourseProgressUIState.Loading
             }
-            interactor.getCourseProgress(courseId, isRefresh)
+            interactor.getCourseProgress(courseId, isRefresh, getOnlyCacheIfExist = false)
                 .catch { e ->
                     if (_uiState.value !is CourseProgressUIState.Data) {
                         _uiState.value = CourseProgressUIState.Error

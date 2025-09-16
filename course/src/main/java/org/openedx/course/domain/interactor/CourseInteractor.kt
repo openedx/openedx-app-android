@@ -120,8 +120,8 @@ class CourseInteractor(
     suspend fun submitOfflineXBlockProgress(blockId: String, courseId: String) =
         repository.submitOfflineXBlockProgress(blockId, courseId)
 
-    fun getCourseProgress(courseId: String, isRefresh: Boolean) =
-        repository.getCourseProgress(courseId, isRefresh)
+    fun getCourseProgress(courseId: String, isRefresh: Boolean, getOnlyCacheIfExist: Boolean) =
+        repository.getCourseProgress(courseId, isRefresh, getOnlyCacheIfExist)
 
     suspend fun getVideoProgress(blockId: String) = repository.getVideoProgress(blockId)
 }

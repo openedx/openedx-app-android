@@ -152,7 +152,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
         coEvery { interactor.getVideoProgress("video1") } returns videoProgress
@@ -182,7 +183,7 @@ class CourseHomeViewModelTest {
         coVerify { interactor.getCourseStructureFlow(courseId, false) }
         coVerify { interactor.getCourseStatusFlow(courseId) }
         coVerify { interactor.getCourseDatesFlow(courseId) }
-        coVerify { interactor.getCourseProgress(courseId, false) }
+        coVerify { interactor.getCourseProgress(courseId, false, true) }
 
         assertTrue(viewModel.uiState.value is CourseHomeUIState.CourseData)
         val courseData = viewModel.uiState.value as CourseHomeUIState.CourseData
@@ -208,7 +209,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
 
@@ -255,7 +257,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
 
@@ -303,7 +306,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
 
@@ -351,7 +355,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
 
@@ -407,7 +412,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
 
@@ -462,7 +468,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
 
@@ -519,7 +526,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
 
@@ -576,7 +584,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
 
@@ -631,7 +640,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
 
@@ -659,7 +669,7 @@ class CourseHomeViewModelTest {
 
         viewModel.getCourseProgress()
 
-        coVerify { interactor.getCourseProgress(courseId, false) }
+        coVerify { interactor.getCourseProgress(courseId, false, true) }
     }
 
     @Test
@@ -678,7 +688,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
 
@@ -725,7 +736,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
 
@@ -770,7 +782,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
 
@@ -798,7 +811,7 @@ class CourseHomeViewModelTest {
 
         advanceUntilIdle()
 
-        coVerify(atLeast = 2) { interactor.getCourseProgress(courseId, false) }
+        coVerify(atLeast = 2) { interactor.getCourseProgress(courseId, false, true) }
     }
 
     @Test
@@ -819,7 +832,8 @@ class CourseHomeViewModelTest {
         coEvery {
             interactor.getCourseProgress(
                 courseId,
-                false
+                false,
+                true
             )
         } returns flow { emit(courseProgress) }
 

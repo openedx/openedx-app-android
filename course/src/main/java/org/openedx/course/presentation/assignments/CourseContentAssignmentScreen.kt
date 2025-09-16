@@ -148,7 +148,7 @@ private fun CourseContentAssignmentScreen(
             ) {
                 val progress = uiState.progress
                 val description = stringResource(
-                    id = R.string.course_completed,
+                    id = R.string.course_completed_of,
                     progress.completed,
                     progress.total
                 )
@@ -277,11 +277,7 @@ private fun AssignmentGroupSection(
                             assignment = assignment,
                             isSelected = assignment.id == selectedId,
                             onClick = {
-                                selectedId = if (selectedId == assignment.id) {
-                                    null
-                                } else {
-                                    assignment.id
-                                }
+                                selectedId = assignment.id
                             }
                         )
                     }

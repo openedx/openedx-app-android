@@ -6,6 +6,7 @@ import okhttp3.MultipartBody
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
+import org.openedx.core.data.model.room.CourseProgressEntity
 import org.openedx.core.data.model.room.OfflineXBlockProgress
 import org.openedx.core.data.model.room.VideoProgressEntity
 import org.openedx.core.data.model.room.XBlockProgressData
@@ -256,15 +257,20 @@ class CourseRepository(
             ?: VideoProgressEntity(blockId, "", 0L, 0L)
     }
 
-    fun getCourseProgress(courseId: String, isRefresh: Boolean): Flow<CourseProgress> =
+    fun getCourseProgress(
+        courseId: String,
+        isRefresh: Boolean,
+        getOnlyCacheIfExist: Boolean
+    ): Flow<CourseProgress> =
         channelFlowWithAwait {
+            var courseProgress: CourseProgressEntity? = null
             if (!isRefresh) {
-                val cached = courseDao.getCourseProgressById(courseId)
-                if (cached != null) {
-                    trySend(cached.mapToDomain())
+                courseProgress = courseDao.getCourseProgressById(courseId)
+                if (courseProgress != null) {
+                    trySend(courseProgress.mapToDomain())
                 }
             }
-            if (networkConnection.isOnline()) {
+            if (networkConnection.isOnline() && (!getOnlyCacheIfExist || courseProgress == null)) {
                 val response = api.getCourseProgress(courseId)
                 courseDao.insertCourseProgressEntity(response.mapToRoomEntity(courseId))
                 trySend(response.mapToDomain())

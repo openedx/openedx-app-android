@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.openedx.core.BlockType
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
@@ -148,16 +147,6 @@ class CourseVideoViewModel(
                     courseSubSectionUnit.clear()
                     courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
                     initDownloadModelsStatus()
-                    val downloadingModels = getDownloadModelList()
-                    val videoPreview = withContext(Dispatchers.IO) {
-                        courseVideos.values.flatten().associate { block ->
-                            block.id to block.getVideoPreview(
-                                context,
-                                networkConnection.isOnline(),
-                                downloadingModels.find { block.id == it.id }?.path
-                            )
-                        }
-                    }
                     val videoProgress = courseVideos.values.flatten().associate { block ->
                         val videoProgressEntity = interactor.getVideoProgress(block.id)
                         val progress = videoProgressEntity.videoTime.toFloat()
@@ -176,14 +165,34 @@ class CourseVideoViewModel(
                             subSectionsDownloadsCount = subSectionsDownloadsCount,
                             downloadModelsSize = getDownloadModelsSize(),
                             isCompletedSectionsShown = isCompletedSectionsShown,
-                            videoPreview = videoPreview,
+                            videoPreview = (_uiState.value as? CourseVideoUIState.CourseData)?.videoPreview
+                                ?: emptyMap(),
                             videoProgress = videoProgress,
                         )
                 }
                 courseNotifier.send(CourseLoading(false))
+                getVideoPreviews()
             } catch (e: Exception) {
                 e.printStackTrace()
                 _uiState.value = CourseVideoUIState.Empty
+            }
+        }
+    }
+
+    private fun getVideoPreviews() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val downloadingModels = getDownloadModelList()
+            courseVideos.values.flatten().forEach { block ->
+                val previewMap = block.id to block.getVideoPreview(
+                    context,
+                    networkConnection.isOnline(),
+                    downloadingModels.find { block.id == it.id }?.path
+                )
+                val currentUiState =
+                    (_uiState.value as? CourseVideoUIState.CourseData) ?: return@forEach
+                _uiState.value = currentUiState.copy(
+                    videoPreview = currentUiState.videoPreview + previewMap
+                )
             }
         }
     }

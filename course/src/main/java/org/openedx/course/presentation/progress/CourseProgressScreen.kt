@@ -356,7 +356,7 @@ private fun AssignmentTypeRow(
     color: Color
 ) {
     val assignments = progress.getAssignmentSections(policy.type)
-    val earned = assignments.filter { it.numPointsEarned > 0f }.size //Is it correct?
+    val earned = assignments.filter { it.numPointsEarned > 0f }.size // Is it correct?
     val possible = assignments.size
     Column(
         modifier = Modifier
