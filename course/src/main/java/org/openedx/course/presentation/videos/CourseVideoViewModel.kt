@@ -149,8 +149,13 @@ class CourseVideoViewModel(
                     initDownloadModelsStatus()
                     val videoProgress = courseVideos.values.flatten().associate { block ->
                         val videoProgressEntity = interactor.getVideoProgress(block.id)
-                        val progress = videoProgressEntity.videoTime.toFloat()
-                            .safeDivBy(videoProgressEntity.duration.toFloat())
+                        val videoTime = videoProgressEntity.videoTime?.toFloat()
+                        val videoDuration = videoProgressEntity.duration?.toFloat()
+                        val progress = if (videoTime != null && videoDuration != null) {
+                            videoTime.safeDivBy(videoDuration)
+                        } else {
+                            null
+                        }
                         block.id to progress
                     }
                     val isCompletedSectionsShown =

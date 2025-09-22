@@ -146,7 +146,7 @@ private fun CourseProgressContent(
                         }
                         itemsIndexed(assignmentPolicies) { index, policy ->
                             AssignmentTypeRow(
-                                progress = uiState.progress,
+                                uiState = uiState,
                                 policy = policy,
                                 color = if (gradingPolicy.assignmentColors.isNotEmpty()) {
                                     gradingPolicy.assignmentColors[index % gradingPolicy.assignmentColors.size]
@@ -351,12 +351,12 @@ private fun CourseCompletionView(
 
 @Composable
 private fun AssignmentTypeRow(
-    progress: CourseProgress,
+    uiState: CourseProgressUIState.Data,
     policy: CourseProgress.GradingPolicy.AssignmentPolicy,
     color: Color
 ) {
-    val assignments = progress.getAssignmentSections(policy.type)
-    val earned = assignments.filter { it.numPointsEarned > 0f }.size // Is it correct?
+    val assignments = uiState.progress.getAssignmentSections(policy.type)
+    val earned = uiState.progress.getCompletedAssignmentCount(policy, uiState.courseStructure)
     val possible = assignments.size
     Column(
         modifier = Modifier
@@ -412,7 +412,7 @@ private fun AssignmentTypeRow(
             Text(
                 stringResource(
                     R.string.course_progress_current_and_max_weighted_graded_percent,
-                    progress.getAssignmentWeightedGradedPercent(policy).toInt(),
+                    uiState.progress.getAssignmentWeightedGradedPercent(policy).toInt(),
                     (policy.weight * 100).toInt()
                 ),
                 style = MaterialTheme.appTypography.bodyLarge,

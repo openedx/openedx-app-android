@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -128,7 +129,8 @@ fun AssignmentsHomePagerCardContent(
             AssignmentCard(
                 assignment = firstIncompleteAssignment,
                 sectionName = getBlockParent(firstIncompleteAssignment.id)?.displayName ?: "",
-                onAssignmentClick = onAssignmentClick
+                onAssignmentClick = onAssignmentClick,
+                background = MaterialTheme.appColors.background,
             )
         } else {
             CaughtUpMessage(
@@ -150,7 +152,8 @@ fun AssignmentsHomePagerCardContent(
 private fun AssignmentCard(
     assignment: Block,
     sectionName: String,
-    onAssignmentClick: (Block) -> Unit
+    onAssignmentClick: (Block) -> Unit,
+    background: Color = MaterialTheme.appColors.surface
 ) {
     val isDuePast = assignment.due != null && assignment.due!! < Date()
 
@@ -158,7 +161,7 @@ private fun AssignmentCard(
     val headerText = if (isDuePast) {
         stringResource(coreR.string.core_date_type_past_due)
     } else {
-        stringResource(R.string.course_due_soon)
+        stringResource(R.string.course_next_assignment)
     }
 
     // Due date status text
@@ -199,7 +202,7 @@ private fun AssignmentCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onAssignmentClick(assignment) },
-        backgroundColor = MaterialTheme.appColors.surface,
+        backgroundColor = background,
         border = BorderStroke(1.dp, MaterialTheme.appColors.cardViewBorder),
         shape = RoundedCornerShape(8.dp),
         elevation = 0.dp
@@ -214,13 +217,15 @@ private fun AssignmentCard(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Timer,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.appColors.warning
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    if (isDuePast) {
+                        Icon(
+                            imageVector = Icons.Filled.Timer,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = MaterialTheme.appColors.warning
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
                     Text(
                         text = headerText,
                         style = MaterialTheme.appTypography.titleMedium,

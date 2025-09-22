@@ -22,7 +22,7 @@ sealed class CourseHomeUIState {
         val courseVideos: Map<String, List<Block>>,
         val courseAssignments: List<Block>,
         val videoPreview: VideoPreview?,
-        val videoProgress: Float,
+        val videoProgress: Float?,
     ) : CourseHomeUIState()
 
     data object Error : CourseHomeUIState()

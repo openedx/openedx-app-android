@@ -52,6 +52,11 @@ fun VideosHomePagerCardContent(
     val completedVideos = allVideos.count { it.isCompleted() }
     val totalVideos = allVideos.size
     val firstIncompleteVideo = allVideos.find { !it.isCompleted() }
+    val videoProgress = uiState.videoProgress ?: if (firstIncompleteVideo?.isCompleted() ?: false) {
+        1f
+    } else {
+        0f
+    }
 
     Column(
         modifier = Modifier
@@ -111,8 +116,13 @@ fun VideosHomePagerCardContent(
 
         // Continue Watching section
         if (firstIncompleteVideo != null) {
+            val title = if (videoProgress > 0) {
+                stringResource(R.string.course_continue_watching)
+            } else {
+                stringResource(R.string.course_next_video)
+            }
             Text(
-                text = stringResource(R.string.course_continue_watching),
+                text = title,
                 style = MaterialTheme.appTypography.titleMedium,
                 color = MaterialTheme.appColors.textPrimary,
                 fontWeight = FontWeight.SemiBold
@@ -139,7 +149,7 @@ fun VideosHomePagerCardContent(
                             .height(180.dp),
                         videoBlock = firstIncompleteVideo,
                         preview = uiState.videoPreview,
-                        progress = uiState.videoProgress,
+                        progress = videoProgress,
                         onClick = {
                             onVideoClick(firstIncompleteVideo)
                         },

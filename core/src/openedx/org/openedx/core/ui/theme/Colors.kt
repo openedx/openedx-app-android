@@ -75,7 +75,7 @@ val light_settings_title_content = Color.White
 val light_progress_bar_color = light_success_green
 val light_progress_bar_background_color = Color(0xFFCCD4E0)
 val light_grade_progress_bar_color = Color.Black
-val light_grade_progress_bar_background = light_background
+val light_grade_progress_bar_background = Color(0xFFCCD4E0)
 val light_assignment_card_border = Color(0xFFCCD4E0)
 
 val dark_primary = Color(0xFF3F68F8)

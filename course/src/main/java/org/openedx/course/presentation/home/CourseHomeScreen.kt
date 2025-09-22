@@ -3,6 +3,7 @@ package org.openedx.course.presentation.home
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,6 +42,7 @@ import androidx.compose.ui.platform.AndroidUriHandler
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -71,6 +73,7 @@ import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
+import org.openedx.core.R as coreR
 
 @Composable
 fun CourseHomeScreen(
@@ -414,14 +417,27 @@ fun CaughtUpMessage(
     modifier: Modifier = Modifier,
     message: String,
 ) {
-    Text(
-        modifier = modifier
-            .fillMaxWidth(),
-        text = message,
-        color = MaterialTheme.appColors.textPrimary,
-        style = MaterialTheme.appTypography.bodyLarge,
-        textAlign = TextAlign.Center
-    )
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(
+            modifier = Modifier.size(48.dp),
+            painter = painterResource(coreR.drawable.core_ic_check),
+            contentDescription = null,
+            tint = MaterialTheme.appColors.successGreen
+        )
+        Text(
+            modifier = modifier
+                .fillMaxWidth(),
+            text = message,
+            color = MaterialTheme.appColors.textPrimary,
+            style = MaterialTheme.appTypography.bodyLarge,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 @Preview(uiMode = UI_MODE_NIGHT_NO)

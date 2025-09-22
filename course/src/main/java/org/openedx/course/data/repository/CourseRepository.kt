@@ -254,13 +254,13 @@ class CourseRepository(
 
     suspend fun getVideoProgress(blockId: String): VideoProgressEntity {
         return courseDao.getVideoProgressByBlockId(blockId)
-            ?: VideoProgressEntity(blockId, "", 0L, 0L)
+            ?: VideoProgressEntity(blockId, "", null, null)
     }
 
     fun getCourseProgress(
         courseId: String,
         isRefresh: Boolean,
-        getOnlyCacheIfExist: Boolean
+        getOnlyCacheIfExist: Boolean // If true, only returns cached data if available, otherwise fetches from network
     ): Flow<CourseProgress> =
         channelFlowWithAwait {
             var courseProgress: CourseProgressEntity? = null

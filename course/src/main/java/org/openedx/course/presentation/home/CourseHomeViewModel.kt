@@ -26,6 +26,7 @@ import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.extension.getChapterBlocks
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
+import org.openedx.core.extension.safeDivBy
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
@@ -233,9 +234,14 @@ class CourseHomeViewModel(
         val videoProgress = if (firstIncompleteVideo != null) {
             try {
                 val videoProgressEntity = interactor.getVideoProgress(firstIncompleteVideo.id)
-                val progress =
-                    videoProgressEntity.videoTime.toFloat() / videoProgressEntity.duration.toFloat()
-                progress.coerceIn(0f, 1f)
+                val videoTime = videoProgressEntity.videoTime?.toFloat()
+                val videoDuration = videoProgressEntity.duration?.toFloat()
+                val progress = if (videoTime != null && videoDuration != null) {
+                    videoTime.safeDivBy(videoDuration)
+                } else {
+                    null
+                }
+                progress?.coerceIn(0f, 1f)
             } catch (_: Exception) {
                 0f
             }

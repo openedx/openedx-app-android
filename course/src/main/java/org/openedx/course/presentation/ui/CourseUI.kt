@@ -618,7 +618,7 @@ fun CourseVideoSection(
     block: Block,
     videoBlocks: List<Block>,
     preview: Map<String, VideoPreview?>,
-    progress: Map<String, Float>,
+    progress: Map<String, Float?>,
     downloadedStateMap: Map<String, DownloadedState>,
     onVideoClick: (Block) -> Unit,
     onDownloadClick: (blocksIds: List<String>) -> Unit,
@@ -632,6 +632,8 @@ fun CourseVideoSection(
         filteredStatuses.any { it.isWaitingOrDownloading } -> DownloadedState.DOWNLOADING
         else -> DownloadedState.NOT_DOWNLOADED
     }
+    val videoCardWidth = 192.dp
+    val rowHorizontalArrangement = 8.dp
 
     LaunchedEffect(Unit) {
         try {
@@ -655,23 +657,29 @@ fun CourseVideoSection(
         )
         LazyRow(
             state = state,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(rowHorizontalArrangement),
             contentPadding = PaddingValues(
                 top = 8.dp,
                 bottom = 16.dp,
                 start = 16.dp,
-                end = 16.dp,
+                end = videoCardWidth + rowHorizontalArrangement,
             )
         ) {
             items(videoBlocks) { block ->
+                val localProgress = progress[block.id]
+                val progress = localProgress ?: if (block.isCompleted()) {
+                    1f
+                } else {
+                    0f
+                }
                 CourseVideoItem(
                     modifier = Modifier
-                        .width(192.dp)
+                        .width(videoCardWidth)
                         .height(108.dp)
                         .clip(MaterialTheme.appShapes.videoPreviewShape),
                     videoBlock = block,
                     preview = preview[block.id],
-                    progress = progress[block.id] ?: 0f,
+                    progress = progress,
                     onClick = {
                         onVideoClick(block)
                     }
@@ -758,12 +766,13 @@ fun CourseVideoItem(
             )
 
             // Progress bar (bottom)
-            if (progress > 0.0f) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter),
-                    contentAlignment = Alignment.Center
-                ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter),
+                contentAlignment = Alignment.Center
+            ) {
+                if (progress > 0.0f) {
                     LinearProgressIndicator(
                         modifier = progressModifier
                             .fillMaxWidth()
@@ -776,23 +785,23 @@ fun CourseVideoItem(
                         },
                         backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
                     )
-                    if (videoBlock.isCompleted()) {
-                        Image(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .size(16.dp)
-                                .offset(x = 1.dp),
-                            painter = painterResource(id = coreR.drawable.ic_core_check),
-                            contentDescription = stringResource(R.string.course_accessibility_video_watched),
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .size(16.dp)
-                                .offset(x = 1.dp),
-                        )
-                    }
+                }
+                if (videoBlock.isCompleted()) {
+                    Image(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(16.dp)
+                            .offset(x = 1.dp),
+                        painter = painterResource(id = coreR.drawable.ic_core_check),
+                        contentDescription = stringResource(R.string.course_accessibility_video_watched),
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(16.dp)
+                            .offset(x = 1.dp),
+                    )
                 }
             }
         }
@@ -925,7 +934,8 @@ fun CourseSection(
     downloadedStateMap: Map<String, DownloadedState>,
     onSubSectionClick: (Block) -> Unit,
     onDownloadClick: (blocksIds: List<String>) -> Unit,
-    progress: Float? = null
+    progress: Float? = null,
+    background: Color = MaterialTheme.appColors.cardViewBackground
 ) {
     val arrowRotation by animateFloatAsState(
         targetValue = if (isSectionVisible == true) {
@@ -953,7 +963,7 @@ fun CourseSection(
         modifier = modifier
             .clip(MaterialTheme.appShapes.sectionCardShape)
             .noRippleClickable { onItemClick(section) }
-            .background(MaterialTheme.appColors.cardViewBackground)
+            .background(background)
             .border(
                 1.dp,
                 MaterialTheme.appColors.cardViewBorder,

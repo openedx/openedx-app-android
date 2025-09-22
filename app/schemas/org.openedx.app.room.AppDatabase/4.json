@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "488bd2b78e977fef626afb28014c80f2",
+    "identityHash": "7ea446decde04c9c16700cb3981703c2",
     "entities": [
       {
         "tableName": "course_discovery_table",
@@ -1008,7 +1008,7 @@
       },
       {
         "tableName": "video_progress_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`block_id` TEXT NOT NULL, `video_url` TEXT NOT NULL, `video_time` INTEGER NOT NULL, `duration` INTEGER NOT NULL, PRIMARY KEY(`block_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`block_id` TEXT NOT NULL, `video_url` TEXT NOT NULL, `video_time` INTEGER, `duration` INTEGER, PRIMARY KEY(`block_id`))",
         "fields": [
           {
             "fieldPath": "blockId",
@@ -1026,13 +1026,13 @@
             "fieldPath": "videoTime",
             "columnName": "video_time",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "duration",
             "columnName": "duration",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -1230,7 +1230,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '488bd2b78e977fef626afb28014c80f2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7ea446decde04c9c16700cb3981703c2')"
     ]
   }
 }

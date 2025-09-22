@@ -28,24 +28,6 @@ data class CourseProgress(
     val requiredGrade = gradingPolicy?.gradeRange?.values?.firstOrNull() ?: 0f
     val requiredGradePercent = (requiredGrade * 100f).toInt()
 
-    fun getEarnedAssignmentProblems(
-        policy: GradingPolicy.AssignmentPolicy
-    ) = sectionScores
-        .flatMap { section ->
-            section.subsections.filter { it.assignmentType == policy.type }
-        }.sumOf { subsection ->
-            subsection.problemScores.sumOf { it.earned }
-        }
-
-    fun getPossibleAssignmentProblems(
-        policy: GradingPolicy.AssignmentPolicy
-    ) = sectionScores
-        .flatMap { section ->
-            section.subsections.filter { it.assignmentType == policy.type }
-        }.sumOf { subsection ->
-            subsection.problemScores.sumOf { it.possible }
-        }
-
     fun getAssignmentGradedPercent(type: String): Float {
         val assignmentSections = getAssignmentSections(type)
         if (assignmentSections.isEmpty()) return 0f
@@ -71,11 +53,22 @@ data class CourseProgress(
     }
 
     fun getNotEmptyGradingPolicies() = gradingPolicy?.assignmentPolicies?.mapNotNull {
-        if (getPossibleAssignmentProblems(it) > 0) {
+        if (getAssignmentSections(it.type).isNotEmpty()) {
             it
         } else {
             null
         }
+    }
+
+    fun getCompletedAssignmentCount(
+        policy: GradingPolicy.AssignmentPolicy,
+        courseStructure: CourseStructure? = null
+    ): Int {
+        val assignments = getAssignmentSections(policy.type)
+        return courseStructure?.blockData
+            ?.filter { it.id in assignments.map { assignment -> assignment.blockKey } }
+            ?.filter { it.isCompleted() }
+            ?.size ?: 0
     }
 
     data class CertificateData(

@@ -182,7 +182,7 @@ private fun CourseVideosUI(
                                                 null
                                             },
                                             description = stringResource(
-                                                R.string.course_completed,
+                                                R.string.course_completed_of,
                                                 progress.completed,
                                                 progress.total
                                             )

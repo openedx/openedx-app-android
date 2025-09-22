@@ -12,7 +12,7 @@ data class VideoProgressEntity(
     @ColumnInfo("video_url")
     val videoUrl: String,
     @ColumnInfo("video_time")
-    val videoTime: Long,
+    val videoTime: Long?,
     @ColumnInfo("duration")
-    val duration: Long,
+    val duration: Long?,
 )

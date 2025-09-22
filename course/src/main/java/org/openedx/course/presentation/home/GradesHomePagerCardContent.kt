@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.openedx.core.domain.model.CourseProgress
+import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
@@ -89,9 +90,10 @@ fun GradesHomePagerCardContent(
         }
         Spacer(modifier = Modifier.height(20.dp))
         GradeCardsGrid(
-            assignmentPolicies = gradingPolicy.assignmentPolicies,
+            assignmentPolicies = assignmentPolicies,
             assignmentColors = gradingPolicy.assignmentColors,
-            progress = courseProgress
+            progress = courseProgress,
+            courseStructure = uiState.courseStructure
         )
         Spacer(modifier = Modifier.height(8.dp))
         ViewAllButton(
@@ -105,11 +107,13 @@ fun GradesHomePagerCardContent(
 private fun GradeCard(
     policy: CourseProgress.GradingPolicy.AssignmentPolicy,
     progress: CourseProgress,
+    courseStructure: CourseStructure?,
     color: Color,
     modifier: Modifier = Modifier
 ) {
-    val earned = progress.getEarnedAssignmentProblems(policy)
-    val possible = progress.getPossibleAssignmentProblems(policy)
+    val assignments = progress.getAssignmentSections(policy.type)
+    val earned = progress.getCompletedAssignmentCount(policy, courseStructure)
+    val possible = assignments.size
     val gradePercent = if (possible > 0) (earned.toFloat() / possible * 100).toInt() else 0
 
     Card(
@@ -156,7 +160,7 @@ private fun GradeCard(
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        text = if (possible > 0) "$gradePercent%" else "--%",
+                        text = "$gradePercent%",
                         style = MaterialTheme.appTypography.bodyLarge,
                         color = MaterialTheme.appColors.textPrimary,
                         fontWeight = FontWeight.Bold
@@ -165,8 +169,8 @@ private fun GradeCard(
                     Text(
                         text = stringResource(
                             R.string.course_progress_earned_possible_assignment_problems,
-                            earned.toInt(),
-                            possible.toInt()
+                            earned,
+                            possible
                         ),
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.textPrimary,
@@ -181,7 +185,8 @@ private fun GradeCard(
 private fun GradeCardsGrid(
     assignmentPolicies: List<CourseProgress.GradingPolicy.AssignmentPolicy>,
     assignmentColors: List<Color>,
-    progress: CourseProgress
+    progress: CourseProgress,
+    courseStructure: CourseStructure?
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -198,6 +203,7 @@ private fun GradeCardsGrid(
                         modifier = Modifier.weight(1f),
                         policy = policy,
                         progress = progress,
+                        courseStructure = courseStructure,
                         color = if (assignmentColors.isNotEmpty()) {
                             assignmentColors[policyIndex % assignmentColors.size]
                         } else {

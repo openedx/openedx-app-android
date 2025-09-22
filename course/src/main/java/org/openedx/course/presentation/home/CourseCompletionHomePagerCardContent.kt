@@ -110,7 +110,8 @@ fun CourseCompletionHomePagerCardContent(
                 downloadedStateMap = uiState.downloadedState,
                 onSubSectionClick = onSubSectionClick,
                 onDownloadClick = onDownloadClick,
-                progress = progress
+                progress = progress,
+                background = MaterialTheme.appColors.background
             )
         }
 
