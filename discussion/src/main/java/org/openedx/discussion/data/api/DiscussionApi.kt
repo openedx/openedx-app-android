@@ -80,28 +80,28 @@ interface DiscussionApi {
     suspend fun setThreadRead(
         @Path("thread_id") threadId: String,
         @Body body: ReadBody
-    ): ThreadsResponse.Thread
+    ): Thread
 
     @Headers("Cache-Control: no-cache", "Content-type: application/merge-patch+json")
     @PATCH("/api/discussion/v1/threads/{thread_id}/")
     suspend fun setThreadVoted(
         @Path("thread_id") threadId: String,
         @Body body: VoteBody
-    ): ThreadsResponse.Thread
+    ): Thread
 
     @Headers("Cache-Control: no-cache", "Content-type: application/merge-patch+json")
     @PATCH("/api/discussion/v1/threads/{thread_id}/")
     suspend fun setThreadFlagged(
         @Path("thread_id") threadId: String,
         @Body reportBody: ReportBody
-    ): ThreadsResponse.Thread
+    ): Thread
 
     @Headers("Cache-Control: no-cache", "Content-type: application/merge-patch+json")
     @PATCH("/api/discussion/v1/threads/{thread_id}/")
     suspend fun setThreadFollowed(
         @Path("thread_id") threadId: String,
         @Body followBody: FollowBody
-    ): ThreadsResponse.Thread
+    ): Thread
 
     @Headers("Cache-Control: no-cache", "Content-type: application/merge-patch+json")
     @PATCH("/api/discussion/v1/comments/{comment_id}/")

@@ -678,7 +678,7 @@ private fun PrimaryCourseButtons(
                         navigateToDates(primaryCourse)
                     }
                 },
-                painter = painterResource(id = CoreR.drawable.ic_core_chapter_icon),
+                painter = painterResource(id = CoreR.drawable.core_ic_chapter_icon),
                 title = title,
                 info = stringResource(
                     R.string.dashboard_assignment_due,
@@ -734,17 +734,11 @@ private fun PrimaryCourseCaption(
             contentScale = ContentScale.Crop,
             modifier = imageModifier,
         )
-        val progress: Float = try {
-            primaryCourse.progress.assignmentsCompleted.toFloat() /
-                    primaryCourse.progress.totalAssignmentsCount.toFloat()
-        } catch (_: ArithmeticException) {
-            0f
-        }
         LinearProgressIndicator(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp),
-            progress = progress,
+            progress = primaryCourse.progress.value,
             color = MaterialTheme.appColors.primary,
             backgroundColor = MaterialTheme.appColors.divider
         )

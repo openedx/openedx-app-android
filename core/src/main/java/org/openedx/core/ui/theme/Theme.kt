@@ -1,7 +1,7 @@
 package org.openedx.core.ui.theme
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
@@ -96,7 +96,8 @@ private val DarkColorPalette = AppColors(
     settingsTitleContent = dark_settings_title_content,
 
     progressBarColor = dark_progress_bar_color,
-    progressBarBackgroundColor = dark_progress_bar_background_color
+    progressBarBackgroundColor = dark_progress_bar_background_color,
+    gradeProgressBarBorder = dark_grade_progress_bar_color
 )
 
 private val LightColorPalette = AppColors(
@@ -185,7 +186,8 @@ private val LightColorPalette = AppColors(
     settingsTitleContent = light_settings_title_content,
 
     progressBarColor = light_progress_bar_color,
-    progressBarBackgroundColor = light_progress_bar_background_color
+    progressBarBackgroundColor = light_progress_bar_background_color,
+    gradeProgressBarBorder = light_grade_progress_bar_color
 )
 
 val MaterialTheme.appColors: AppColors
@@ -208,7 +210,7 @@ fun OpenEdXTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
         shapes = LocalShapes.current.material,
     ) {
         CompositionLocalProvider(
-            LocalOverscrollConfiguration provides null,
+            LocalOverscrollFactory provides null,
             content = content
         )
     }

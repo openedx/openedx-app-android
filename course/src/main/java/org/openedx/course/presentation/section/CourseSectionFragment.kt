@@ -290,7 +290,7 @@ private fun CourseSubsectionItem(
             painterResource(R.drawable.course_ic_task_alt)
         } else {
             painterResource(
-                CoreR.drawable.ic_core_chapter_icon
+                CoreR.drawable.core_ic_chapter_icon
             )
         }
     val completedIconColor =
@@ -405,7 +405,7 @@ private val mockBlock = Block(
     descendantsType = BlockType.HTML,
     completion = 0.0,
     containsGatedContent = false,
-    assignmentProgress = AssignmentProgress("", 1f, 2f),
+    assignmentProgress = AssignmentProgress("", 1f, 2f, "HM1"),
     due = Date(),
     offlineDownload = null
 )

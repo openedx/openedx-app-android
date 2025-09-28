@@ -49,6 +49,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
     private val viewModel by viewModel<EncodedVideoUnitViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_VIDEO_URL, ""),
             requireArguments().getString(ARG_BLOCK_ID, ""),
         )
     }
@@ -79,7 +80,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         lifecycle.addObserver(viewModel)
         handler.post(videoTimeRunnable)
         requireArguments().apply {
-            viewModel.videoUrl = getString(ARG_VIDEO_URL, "")
             viewModel.transcripts = stringToObject<Map<String, String>>(
                 getString(ARG_TRANSCRIPT_URL, "")
             ) ?: emptyMap()
@@ -277,7 +277,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         }
     }
 
-    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    @androidx.annotation.OptIn(UnstableApi::class)
     private fun setPlayerMedia(mediaItem: MediaItem) {
         if (viewModel.videoUrl.endsWith(".m3u8")) {
             val factory = DefaultDataSource.Factory(requireContext())

@@ -49,7 +49,7 @@ import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
-import org.openedx.core.R as CoreR
+import org.openedx.core.R as сoreR
 
 @Composable
 fun ImageHeader(
@@ -70,11 +70,11 @@ fun ImageHeader(
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(courseImage?.toImageLink(apiHostUrl))
-                .error(CoreR.drawable.core_no_image_course)
-                .placeholder(CoreR.drawable.core_no_image_course)
+                .error(сoreR.drawable.core_no_image_course)
+                .placeholder(сoreR.drawable.core_no_image_course)
                 .build(),
             contentDescription = stringResource(
-                id = CoreR.string.core_accessibility_header_image_for,
+                id = сoreR.string.core_accessibility_header_image_for,
                 courseName
             ),
             contentScale = contentScale,
@@ -119,8 +119,8 @@ fun DiscoveryCourseItem(
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(course.media.courseImage?.uri?.toImageLink(apiHostUrl) ?: "")
-                    .error(org.openedx.core.R.drawable.core_no_image_course)
-                    .placeholder(org.openedx.core.R.drawable.core_no_image_course)
+                    .error(сoreR.drawable.core_no_image_course)
+                    .placeholder(сoreR.drawable.core_no_image_course)
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
@@ -216,7 +216,7 @@ fun WarningLabel(
 private fun WarningLabelPreview() {
     OpenEdXTheme {
         WarningLabel(
-            painter = painterResource(id = CoreR.drawable.core_ic_offline),
+            painter = painterResource(id = сoreR.drawable.core_ic_offline),
             text = stringResource(id = R.string.discovery_no_internet_label)
         )
     }

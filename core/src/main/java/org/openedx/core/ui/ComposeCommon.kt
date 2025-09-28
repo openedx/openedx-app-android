@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -992,7 +993,9 @@ fun HorizontalLine() {
 
 @Composable
 fun OpenEdXButton(
-    modifier: Modifier = Modifier.fillMaxWidth(),
+    modifier: Modifier = Modifier
+        .fillMaxWidth()
+        .height(42.dp),
     text: String = "",
     onClick: () -> Unit,
     enabled: Boolean = true,
@@ -1003,8 +1006,7 @@ fun OpenEdXButton(
     Button(
         modifier = Modifier
             .testTag("btn_${text.tagId()}")
-            .then(modifier)
-            .height(42.dp),
+            .then(modifier),
         shape = MaterialTheme.appShapes.buttonShape,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = backgroundColor
@@ -1150,7 +1152,11 @@ fun NoContentScreen(message: String, icon: Painter) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            modifier = Modifier.size(80.dp),
+            modifier = Modifier
+                .sizeIn(
+                    maxWidth = 80.dp,
+                    maxHeight = 80.dp
+                ),
             painter = icon,
             contentDescription = null,
             tint = MaterialTheme.appColors.progressBarBackgroundColor,

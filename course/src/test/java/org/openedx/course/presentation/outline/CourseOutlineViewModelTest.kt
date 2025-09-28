@@ -95,7 +95,8 @@ class CourseOutlineViewModelTest {
     private val assignmentProgress = AssignmentProgress(
         assignmentType = "Homework",
         numPointsEarned = 1f,
-        numPointsPossible = 3f
+        numPointsPossible = 3f,
+        shortLabel = "HW1",
     )
 
     private val blocks = listOf(
@@ -271,7 +272,7 @@ class CourseOutlineViewModelTest {
             } returns Unit
             coEvery { interactor.getCourseStatusFlow(any()) } returns flow { throw UnknownHostException() }
 
-            val viewModel = CourseOutlineViewModel(
+            val viewModel = CourseContentAllViewModel(
                 "",
                 "",
                 config,
@@ -300,7 +301,7 @@ class CourseOutlineViewModelTest {
             coVerify(exactly = 2) { interactor.getCourseStatusFlow(any()) }
 
             assertEquals(noInternet, message.await()?.message)
-            assert(viewModel.uiState.value is CourseOutlineUIState.Error)
+            assert(viewModel.uiState.value is CourseContentAllUIState.Error)
         }
 
     @Suppress("TooGenericExceptionThrown")
@@ -310,7 +311,7 @@ class CourseOutlineViewModelTest {
         every { networkConnection.isOnline() } returns true
         every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
         coEvery { interactor.getCourseStatusFlow(any()) } returns flow { throw Exception() }
-        val viewModel = CourseOutlineViewModel(
+        val viewModel = CourseContentAllViewModel(
             "",
             "",
             config,
@@ -339,7 +340,7 @@ class CourseOutlineViewModelTest {
         coVerify(exactly = 2) { interactor.getCourseStatusFlow(any()) }
 
         assertEquals(somethingWrong, message.await()?.message)
-        assert(viewModel.uiState.value is CourseOutlineUIState.Error)
+        assert(viewModel.uiState.value is CourseContentAllUIState.Error)
     }
 
     @Test
@@ -361,7 +362,7 @@ class CourseOutlineViewModelTest {
             coEvery { interactor.getCourseStatusFlow(any()) } returns flowOf(CourseComponentStatus("id"))
             every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
-            val viewModel = CourseOutlineViewModel(
+            val viewModel = CourseContentAllViewModel(
                 "",
                 "",
                 config,
@@ -393,7 +394,7 @@ class CourseOutlineViewModelTest {
             coVerify(exactly = 2) { interactor.getCourseStatusFlow(any()) }
 
             assert(message.await() == null)
-            assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
+            assert(viewModel.uiState.value is CourseContentAllUIState.CourseData)
         }
 
     @Test
@@ -415,7 +416,7 @@ class CourseOutlineViewModelTest {
             coEvery { interactor.getCourseStatusFlow(any()) } returns flowOf(CourseComponentStatus("id"))
             every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
-            val viewModel = CourseOutlineViewModel(
+            val viewModel = CourseContentAllViewModel(
                 "",
                 "",
                 config,
@@ -446,7 +447,7 @@ class CourseOutlineViewModelTest {
             coVerify(exactly = 2) { interactor.getCourseStatusFlow(any()) }
 
             assert(message.await() == null)
-            assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
+            assert(viewModel.uiState.value is CourseContentAllUIState.CourseData)
         }
 
     @Test
@@ -468,7 +469,7 @@ class CourseOutlineViewModelTest {
             coEvery { interactor.getCourseStatusFlow(any()) } returns flowOf(CourseComponentStatus("id"))
             every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
-            val viewModel = CourseOutlineViewModel(
+            val viewModel = CourseContentAllViewModel(
                 "",
                 "",
                 config,
@@ -499,7 +500,7 @@ class CourseOutlineViewModelTest {
             coVerify(exactly = 2) { interactor.getCourseStatusFlow(any()) }
 
             assert(message.await() == null)
-            assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
+            assert(viewModel.uiState.value is CourseContentAllUIState.CourseData)
         }
 
     @Test
@@ -510,7 +511,7 @@ class CourseOutlineViewModelTest {
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseStatusFlow(any()) } returns flowOf(CourseComponentStatus("id"))
 
-        val viewModel = CourseOutlineViewModel(
+        val viewModel = CourseContentAllViewModel(
             "",
             "",
             config,
@@ -560,7 +561,7 @@ class CourseOutlineViewModelTest {
         coEvery { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
         every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
-        val viewModel = CourseOutlineViewModel(
+        val viewModel = CourseContentAllViewModel(
             "",
             "",
             config,
@@ -612,7 +613,7 @@ class CourseOutlineViewModelTest {
             every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
             every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
-            val viewModel = CourseOutlineViewModel(
+            val viewModel = CourseContentAllViewModel(
                 "",
                 "",
                 config,

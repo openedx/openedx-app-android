@@ -34,7 +34,6 @@ abstract class BaseDownloadViewModel(
     private val _downloadModelsStatusFlow = MutableSharedFlow<HashMap<String, DownloadedState>>()
     protected val downloadModelsStatusFlow = _downloadModelsStatusFlow.asSharedFlow()
 
-    private var downloadingModelsList = listOf<DownloadModel>()
     private val _downloadingModelsFlow = MutableSharedFlow<List<DownloadModel>>()
     protected val downloadingModelsFlow = _downloadingModelsFlow.asSharedFlow()
 
@@ -53,7 +52,7 @@ abstract class BaseDownloadViewModel(
         _downloadModelsStatusFlow.emit(downloadModelsStatus)
     }
 
-    private suspend fun getDownloadModelList(): List<DownloadModel> {
+    suspend fun getDownloadModelList(): List<DownloadModel> {
         return downloadDao.getAllDataFlow().first().map { it.mapToDomain() }
     }
 
@@ -198,21 +197,12 @@ abstract class BaseDownloadViewModel(
         )
     }
 
-    fun hasDownloadModelsInQueue() = downloadingModelsList.isNotEmpty()
-
     fun getDownloadableChildren(id: String) = downloadableChildrenMap[id]
 
     open fun removeDownloadModels(blockId: String, courseId: String) {
         viewModelScope.launch {
             val downloadableChildren = downloadableChildrenMap[blockId] ?: listOf()
             logSubsectionDeleteEvent(blockId, downloadableChildren.size, courseId)
-            workerController.removeModels(downloadableChildren)
-        }
-    }
-
-    fun removeAllDownloadModels() {
-        viewModelScope.launch {
-            val downloadableChildren = downloadableChildrenMap.values.flatten()
             workerController.removeModels(downloadableChildren)
         }
     }
@@ -242,16 +232,6 @@ abstract class BaseDownloadViewModel(
     private fun addDownloadableChild(parentId: String, childId: String) {
         val children = downloadableChildrenMap[parentId] ?: listOf()
         downloadableChildrenMap[parentId] = children + childId
-    }
-
-    fun logBulkDownloadToggleEvent(toggle: Boolean, courseId: String) {
-        logEvent(
-            CoreAnalyticsEvent.VIDEO_BULK_DOWNLOAD_TOGGLE,
-            buildMap {
-                put(CoreAnalyticsKey.ACTION.key, toggle)
-            },
-            courseId
-        )
     }
 
     private fun logSubsectionDownloadEvent(

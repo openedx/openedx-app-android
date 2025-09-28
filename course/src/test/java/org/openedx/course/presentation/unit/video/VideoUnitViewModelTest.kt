@@ -58,6 +58,8 @@ class VideoUnitViewModelTest {
     fun `markBlockCompleted exception`() = runTest {
         val viewModel = VideoUnitViewModel(
             "",
+            "",
+            "",
             courseRepository,
             notifier,
             networkConnection,
@@ -96,6 +98,8 @@ class VideoUnitViewModelTest {
     @Test
     fun `markBlockCompleted success`() = runTest {
         val viewModel = VideoUnitViewModel(
+            "",
+            "",
             "",
             courseRepository,
             notifier,
@@ -136,6 +140,8 @@ class VideoUnitViewModelTest {
     fun `CourseVideoPositionChanged notifier test`() = runTest {
         val viewModel = VideoUnitViewModel(
             "",
+            "",
+            "",
             courseRepository,
             notifier,
             networkConnection,
@@ -147,10 +153,12 @@ class VideoUnitViewModelTest {
                 CourseVideoPositionChanged(
                     "",
                     10,
-                    false
+                    10000L,
+                    false,
                 )
             )
         }
+        coEvery { courseRepository.saveVideoProgress(any(), any(), any(), any()) } returns Unit
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
         lifecycleRegistry.addObserver(viewModel)

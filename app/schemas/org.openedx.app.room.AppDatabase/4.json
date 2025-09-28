@@ -1,0 +1,1236 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 4,
+    "identityHash": "488bd2b78e977fef626afb28014c80f2",
+    "entities": [
+      {
+        "tableName": "course_discovery_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `blocksUrl` TEXT NOT NULL, `courseId` TEXT NOT NULL, `effort` TEXT NOT NULL, `enrollmentStart` TEXT NOT NULL, `enrollmentEnd` TEXT NOT NULL, `hidden` INTEGER NOT NULL, `invitationOnly` INTEGER NOT NULL, `mobileAvailable` INTEGER NOT NULL, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `org` TEXT NOT NULL, `pacing` TEXT NOT NULL, `shortDescription` TEXT NOT NULL, `start` TEXT NOT NULL, `end` TEXT NOT NULL, `startDisplay` TEXT NOT NULL, `startType` TEXT NOT NULL, `overview` TEXT NOT NULL, `isEnrolled` INTEGER NOT NULL, `bannerImage` TEXT, `courseImage` TEXT, `courseVideo` TEXT, `image` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "blocksUrl",
+            "columnName": "blocksUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseId",
+            "columnName": "courseId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "effort",
+            "columnName": "effort",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enrollmentStart",
+            "columnName": "enrollmentStart",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enrollmentEnd",
+            "columnName": "enrollmentEnd",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hidden",
+            "columnName": "hidden",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "invitationOnly",
+            "columnName": "invitationOnly",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mobileAvailable",
+            "columnName": "mobileAvailable",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "org",
+            "columnName": "org",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pacing",
+            "columnName": "pacing",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shortDescription",
+            "columnName": "shortDescription",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "start",
+            "columnName": "start",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "end",
+            "columnName": "end",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startDisplay",
+            "columnName": "startDisplay",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startType",
+            "columnName": "startType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "overview",
+            "columnName": "overview",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isEnrolled",
+            "columnName": "isEnrolled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "media.bannerImage",
+            "columnName": "bannerImage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "media.courseImage",
+            "columnName": "courseImage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "media.courseVideo",
+            "columnName": "courseVideo",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "media.image",
+            "columnName": "image",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "course_enrolled_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`courseId` TEXT NOT NULL, `auditAccessExpires` TEXT NOT NULL, `created` TEXT NOT NULL, `mode` TEXT NOT NULL, `isActive` INTEGER NOT NULL, `id` TEXT NOT NULL, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `org` TEXT NOT NULL, `start` TEXT NOT NULL, `startDisplay` TEXT NOT NULL, `startType` TEXT NOT NULL, `end` TEXT NOT NULL, `dynamicUpgradeDeadline` TEXT NOT NULL, `subscriptionId` TEXT NOT NULL, `course_image_link` TEXT NOT NULL, `courseAbout` TEXT NOT NULL, `courseUpdates` TEXT NOT NULL, `courseHandouts` TEXT NOT NULL, `discussionUrl` TEXT NOT NULL, `videoOutline` TEXT NOT NULL, `isSelfPaced` INTEGER NOT NULL, `hasAccess` INTEGER, `errorCode` TEXT, `developerMessage` TEXT, `userMessage` TEXT, `additionalContextUserMessage` TEXT, `userFragment` TEXT, `bannerImage` TEXT, `courseImage` TEXT, `courseVideo` TEXT, `image` TEXT, `facebook` TEXT NOT NULL, `twitter` TEXT NOT NULL, `certificateURL` TEXT, `assignments_completed` INTEGER NOT NULL, `total_assignments_count` INTEGER NOT NULL, `lastVisitedModuleId` TEXT, `lastVisitedModulePath` TEXT, `lastVisitedBlockId` TEXT, `lastVisitedUnitDisplayName` TEXT, `futureAssignments` TEXT, `pastAssignments` TEXT, PRIMARY KEY(`courseId`))",
+        "fields": [
+          {
+            "fieldPath": "courseId",
+            "columnName": "courseId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "auditAccessExpires",
+            "columnName": "auditAccessExpires",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "created",
+            "columnName": "created",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mode",
+            "columnName": "mode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isActive",
+            "columnName": "isActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.number",
+            "columnName": "number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.org",
+            "columnName": "org",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.start",
+            "columnName": "start",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.startDisplay",
+            "columnName": "startDisplay",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.startType",
+            "columnName": "startType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.end",
+            "columnName": "end",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.dynamicUpgradeDeadline",
+            "columnName": "dynamicUpgradeDeadline",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.subscriptionId",
+            "columnName": "subscriptionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.courseImage",
+            "columnName": "course_image_link",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.courseAbout",
+            "columnName": "courseAbout",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.courseUpdates",
+            "columnName": "courseUpdates",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.courseHandouts",
+            "columnName": "courseHandouts",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.discussionUrl",
+            "columnName": "discussionUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.videoOutline",
+            "columnName": "videoOutline",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.isSelfPaced",
+            "columnName": "isSelfPaced",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.coursewareAccess.hasAccess",
+            "columnName": "hasAccess",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "course.coursewareAccess.errorCode",
+            "columnName": "errorCode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "course.coursewareAccess.developerMessage",
+            "columnName": "developerMessage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "course.coursewareAccess.userMessage",
+            "columnName": "userMessage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "course.coursewareAccess.additionalContextUserMessage",
+            "columnName": "additionalContextUserMessage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "course.coursewareAccess.userFragment",
+            "columnName": "userFragment",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "course.media.bannerImage",
+            "columnName": "bannerImage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "course.media.courseImage",
+            "columnName": "courseImage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "course.media.courseVideo",
+            "columnName": "courseVideo",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "course.media.image",
+            "columnName": "image",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "course.courseSharingUtmParameters.facebook",
+            "columnName": "facebook",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "course.courseSharingUtmParameters.twitter",
+            "columnName": "twitter",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "certificate.certificateURL",
+            "columnName": "certificateURL",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "progress.assignmentsCompleted",
+            "columnName": "assignments_completed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "progress.totalAssignmentsCount",
+            "columnName": "total_assignments_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseStatus.lastVisitedModuleId",
+            "columnName": "lastVisitedModuleId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseStatus.lastVisitedModulePath",
+            "columnName": "lastVisitedModulePath",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseStatus.lastVisitedBlockId",
+            "columnName": "lastVisitedBlockId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseStatus.lastVisitedUnitDisplayName",
+            "columnName": "lastVisitedUnitDisplayName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseAssignments.futureAssignments",
+            "columnName": "futureAssignments",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseAssignments.pastAssignments",
+            "columnName": "pastAssignments",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "courseId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "course_structure_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`root` TEXT NOT NULL, `id` TEXT NOT NULL, `blocks` TEXT NOT NULL, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `org` TEXT NOT NULL, `start` TEXT, `startDisplay` TEXT NOT NULL, `startType` TEXT NOT NULL, `end` TEXT, `isSelfPaced` INTEGER NOT NULL, `hasAccess` INTEGER, `errorCode` TEXT, `developerMessage` TEXT, `userMessage` TEXT, `additionalContextUserMessage` TEXT, `userFragment` TEXT, `bannerImage` TEXT, `courseImage` TEXT, `courseVideo` TEXT, `image` TEXT, `certificateURL` TEXT, `assignments_completed` INTEGER NOT NULL, `total_assignments_count` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "root",
+            "columnName": "root",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "blocks",
+            "columnName": "blocks",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "org",
+            "columnName": "org",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "start",
+            "columnName": "start",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "startDisplay",
+            "columnName": "startDisplay",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startType",
+            "columnName": "startType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "end",
+            "columnName": "end",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isSelfPaced",
+            "columnName": "isSelfPaced",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "coursewareAccess.hasAccess",
+            "columnName": "hasAccess",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "coursewareAccess.errorCode",
+            "columnName": "errorCode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "coursewareAccess.developerMessage",
+            "columnName": "developerMessage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "coursewareAccess.userMessage",
+            "columnName": "userMessage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "coursewareAccess.additionalContextUserMessage",
+            "columnName": "additionalContextUserMessage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "coursewareAccess.userFragment",
+            "columnName": "userFragment",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "media.bannerImage",
+            "columnName": "bannerImage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "media.courseImage",
+            "columnName": "courseImage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "media.courseVideo",
+            "columnName": "courseVideo",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "media.image",
+            "columnName": "image",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "certificate.certificateURL",
+            "columnName": "certificateURL",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "progress.assignmentsCompleted",
+            "columnName": "assignments_completed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "progress.totalAssignmentsCount",
+            "columnName": "total_assignments_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "download_model",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `courseId` TEXT NOT NULL, `size` INTEGER NOT NULL, `path` TEXT NOT NULL, `url` TEXT NOT NULL, `type` TEXT NOT NULL, `downloadedState` TEXT NOT NULL, `lastModified` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseId",
+            "columnName": "courseId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "size",
+            "columnName": "size",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "path",
+            "columnName": "path",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "downloadedState",
+            "columnName": "downloadedState",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastModified",
+            "columnName": "lastModified",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "offline_x_block_progress_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `courseId` TEXT NOT NULL, `url` TEXT NOT NULL, `type` TEXT NOT NULL, `data` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "blockId",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseId",
+            "columnName": "courseId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "jsonProgress.url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "jsonProgress.type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "jsonProgress.data",
+            "columnName": "data",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "course_calendar_event_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`event_id` INTEGER NOT NULL, `course_id` TEXT NOT NULL, PRIMARY KEY(`event_id`))",
+        "fields": [
+          {
+            "fieldPath": "eventId",
+            "columnName": "event_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseId",
+            "columnName": "course_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "event_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "course_calendar_state_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`course_id` TEXT NOT NULL, `checksum` INTEGER NOT NULL, `is_course_sync_enabled` INTEGER NOT NULL, PRIMARY KEY(`course_id`))",
+        "fields": [
+          {
+            "fieldPath": "courseId",
+            "columnName": "course_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "checksum",
+            "columnName": "checksum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCourseSyncEnabled",
+            "columnName": "is_course_sync_enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "course_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "download_course_preview_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`course_id` TEXT NOT NULL, `course_name` TEXT, `course_image` TEXT, `total_size` INTEGER, PRIMARY KEY(`course_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "course_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "course_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "image",
+            "columnName": "course_image",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "totalSize",
+            "columnName": "total_size",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "course_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "course_enrollment_details_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `courseUpdates` TEXT NOT NULL, `courseHandouts` TEXT NOT NULL, `discussionUrl` TEXT NOT NULL, `hasUnmetPrerequisites` INTEGER NOT NULL, `isTooEarly` INTEGER NOT NULL, `isStaff` INTEGER NOT NULL, `auditAccessExpires` TEXT, `hasAccess` INTEGER, `errorCode` TEXT, `developerMessage` TEXT, `userMessage` TEXT, `additionalContextUserMessage` TEXT, `userFragment` TEXT, `certificateURL` TEXT, `created` TEXT, `mode` TEXT, `isActive` INTEGER NOT NULL, `upgradeDeadline` TEXT, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `org` TEXT NOT NULL, `startDisplay` TEXT NOT NULL, `startType` TEXT NOT NULL, `isSelfPaced` INTEGER NOT NULL, `courseAbout` TEXT NOT NULL, `bannerImage` TEXT, `courseImage` TEXT, `courseVideo` TEXT, `image` TEXT, `facebook` TEXT NOT NULL, `twitter` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseUpdates",
+            "columnName": "courseUpdates",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseHandouts",
+            "columnName": "courseHandouts",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discussionUrl",
+            "columnName": "discussionUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseAccessDetails.hasUnmetPrerequisites",
+            "columnName": "hasUnmetPrerequisites",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseAccessDetails.isTooEarly",
+            "columnName": "isTooEarly",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseAccessDetails.isStaff",
+            "columnName": "isStaff",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseAccessDetails.auditAccessExpires",
+            "columnName": "auditAccessExpires",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseAccessDetails.coursewareAccess.hasAccess",
+            "columnName": "hasAccess",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseAccessDetails.coursewareAccess.errorCode",
+            "columnName": "errorCode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseAccessDetails.coursewareAccess.developerMessage",
+            "columnName": "developerMessage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseAccessDetails.coursewareAccess.userMessage",
+            "columnName": "userMessage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseAccessDetails.coursewareAccess.additionalContextUserMessage",
+            "columnName": "additionalContextUserMessage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseAccessDetails.coursewareAccess.userFragment",
+            "columnName": "userFragment",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "certificate.certificateURL",
+            "columnName": "certificateURL",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "enrollmentDetails.created",
+            "columnName": "created",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "enrollmentDetails.mode",
+            "columnName": "mode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "enrollmentDetails.isActive",
+            "columnName": "isActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enrollmentDetails.upgradeDeadline",
+            "columnName": "upgradeDeadline",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseInfoOverview.name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseInfoOverview.number",
+            "columnName": "number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseInfoOverview.org",
+            "columnName": "org",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseInfoOverview.startDisplay",
+            "columnName": "startDisplay",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseInfoOverview.startType",
+            "columnName": "startType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseInfoOverview.isSelfPaced",
+            "columnName": "isSelfPaced",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseInfoOverview.courseAbout",
+            "columnName": "courseAbout",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseInfoOverview.media.bannerImage",
+            "columnName": "bannerImage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseInfoOverview.media.courseImage",
+            "columnName": "courseImage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseInfoOverview.media.courseVideo",
+            "columnName": "courseVideo",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseInfoOverview.media.image",
+            "columnName": "image",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseInfoOverview.courseSharingUtmParameters.facebook",
+            "columnName": "facebook",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseInfoOverview.courseSharingUtmParameters.twitter",
+            "columnName": "twitter",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "video_progress_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`block_id` TEXT NOT NULL, `video_url` TEXT NOT NULL, `video_time` INTEGER NOT NULL, `duration` INTEGER NOT NULL, PRIMARY KEY(`block_id`))",
+        "fields": [
+          {
+            "fieldPath": "blockId",
+            "columnName": "block_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "videoUrl",
+            "columnName": "video_url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "videoTime",
+            "columnName": "video_time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "duration",
+            "columnName": "duration",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "block_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "course_progress_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`courseId` TEXT NOT NULL, `verifiedMode` TEXT NOT NULL, `accessExpiration` TEXT NOT NULL, `creditCourseRequirements` TEXT NOT NULL, `end` TEXT NOT NULL, `enrollmentMode` TEXT NOT NULL, `hasScheduledContent` INTEGER NOT NULL, `sectionScores` TEXT NOT NULL, `studioUrl` TEXT NOT NULL, `username` TEXT NOT NULL, `userHasPassingGrade` INTEGER NOT NULL, `disableProgressGraph` INTEGER NOT NULL, `certificate_certStatus` TEXT, `certificate_certWebViewUrl` TEXT, `certificate_downloadUrl` TEXT, `certificate_certificateAvailableDate` TEXT, `completion_completeCount` INTEGER, `completion_incompleteCount` INTEGER, `completion_lockedCount` INTEGER, `grade_letterGrade` TEXT, `grade_percent` REAL, `grade_isPassing` INTEGER, `grading_assignmentPolicies` TEXT, `grading_gradeRange` TEXT, `grading_assignmentColors` TEXT, `verification_link` TEXT, `verification_status` TEXT, `verification_statusDate` TEXT, PRIMARY KEY(`courseId`))",
+        "fields": [
+          {
+            "fieldPath": "courseId",
+            "columnName": "courseId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "verifiedMode",
+            "columnName": "verifiedMode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accessExpiration",
+            "columnName": "accessExpiration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "creditCourseRequirements",
+            "columnName": "creditCourseRequirements",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "end",
+            "columnName": "end",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enrollmentMode",
+            "columnName": "enrollmentMode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hasScheduledContent",
+            "columnName": "hasScheduledContent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sectionScores",
+            "columnName": "sectionScores",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "studioUrl",
+            "columnName": "studioUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "username",
+            "columnName": "username",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userHasPassingGrade",
+            "columnName": "userHasPassingGrade",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "disableProgressGraph",
+            "columnName": "disableProgressGraph",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "certificateData.certStatus",
+            "columnName": "certificate_certStatus",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "certificateData.certWebViewUrl",
+            "columnName": "certificate_certWebViewUrl",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "certificateData.downloadUrl",
+            "columnName": "certificate_downloadUrl",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "certificateData.certificateAvailableDate",
+            "columnName": "certificate_certificateAvailableDate",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "completionSummary.completeCount",
+            "columnName": "completion_completeCount",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "completionSummary.incompleteCount",
+            "columnName": "completion_incompleteCount",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "completionSummary.lockedCount",
+            "columnName": "completion_lockedCount",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseGrade.letterGrade",
+            "columnName": "grade_letterGrade",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseGrade.percent",
+            "columnName": "grade_percent",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "courseGrade.isPassing",
+            "columnName": "grade_isPassing",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "gradingPolicy.assignmentPolicies",
+            "columnName": "grading_assignmentPolicies",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "gradingPolicy.gradeRange",
+            "columnName": "grading_gradeRange",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "gradingPolicy.assignmentColors",
+            "columnName": "grading_assignmentColors",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "verificationData.link",
+            "columnName": "verification_link",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "verificationData.status",
+            "columnName": "verification_status",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "verificationData.statusDate",
+            "columnName": "verification_statusDate",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "courseId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '488bd2b78e977fef626afb28014c80f2')"
+    ]
+  }
+}

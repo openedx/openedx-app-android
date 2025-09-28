@@ -1,20 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="course_outline">Course Outline</string>
-    <string name="course_content">Course content</string>
-    <string name="course_units">Course units</string>
-    <string name="course_subsections">Course subsections</string>
-    <string name="course_videos">Videos</string>
     <string name="course_you_earned_certificate">Congratulations, you have earned this course certificate in \"%s\".</string>
     <string name="course_view_certificate">View certificate</string>
     <string name="course_navigation_prev">Prev</string>
-    <string name="course_navigation_prev_unit">Previous Unit</string>
     <string name="course_navigation_next">Next</string>
-    <string name="course_navigation_next_unit">Next Unit</string>
     <string name="course_navigation_finish">Finish</string>
-    <string name="course_resume_unit_title">Last unit:</string>
-    <string name="course_resume_unit_btn">Resume</string>
-    <string name="course_discussion">Discussion</string>
     <string name="course_handouts">Handouts</string>
     <string name="course_announcements">Announcements</string>
     <string name="course_find_important_info">Find important course information</string>
@@ -24,28 +14,36 @@
     <string name="course_back_to_outline">Back to outline</string>
     <string name="course_next_section">Next section</string>
     <string name="course_not_started">This course hasn’t started yet.</string>
-    <string name="course_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
     <string name="course_can_download_only_with_wifi">You can download content only from Wi-fi</string>
     <string name="course_this_interactive_component">This interactive component isn’t yet available</string>
     <string name="course_explore_other_parts_on_web">Explore other parts of this course or view this on web.</string>
     <string name="course_open_in_browser">Open in browser</string>
     <string name="course_subtitles">Subtitles</string>
-    <string name="course_continue_with">Continue with:</string>
-    <string name="course_resume">Resume</string>
     <string name="course_to_proceed">To proceed with \"%s\" press \"Next section\".</string>
     <string name="course_gated_content_label">Some content in this part of the course is locked for upgraded users only.</string>
     <string name="course_change_quality_when_downloading">You cannot change the download video quality when all videos are downloading</string>
     <string name="course_dates_shifted_message">Dates Shifted</string>
-
-    <!-- Error Message when course dates are not available -->
-    <string name="course_dates_unavailable_message" tools:ignore="MissingTranslation">Course dates are not currently available.</string>
+    <string name="course_progress_completion_title">Course Completion</string>
+    <string name="course_progress_completion_description">This represents how much of the course content you have completed. Note that some content may not yet be released.</string>
+    <string name="course_progress_overall_title">Overall Grade</string>
+    <string name="course_progress_overall_description">This represents your weighted grade against the grade needed to pass this course.</string>
+    <string name="course_progress_current_overall">Current Overall Weighted Grade:</string>
+    <string name="course_progress_required_grade_percent">A weighted grade of %1$s%% is required to pass this course</string>
+    <string name="course_progress_grade_details">Grade Details</string>
+    <string name="course_progress_assignment_type">Assignment Type</string>
+    <string name="course_progress_current_max">Current / Max %</string>
 
     <string name="course_container_nav_home">Home</string>
-    <string name="course_container_nav_videos">Videos</string>
+    <string name="course_container_nav_content">Content</string>
     <string name="course_container_nav_discussions">Discussions</string>
     <string name="course_container_nav_more">More</string>
     <string name="course_container_nav_dates">Dates</string>
     <string name="course_container_nav_downloads">Downloads</string>
+    <string name="course_container_nav_progress">Progress</string>
+
+    <string name="course_container_content_tab_all">All</string>
+    <string name="course_container_content_tab_video">Videos</string>
+    <string name="course_container_content_tab_assignment">Assignments</string>
 
     <!-- Accessibility -->
     <string name="course_accessibility_video_player">Video player</string>
@@ -54,16 +52,33 @@
     <string name="course_accessibility_stop_downloading_course_section">Stop downloading course section</string>
     <string name="course_accessibility_section_completed">Section completed</string>
     <string name="course_accessibility_section_uncompleted">Section uncompleted</string>
+    <string name="course_accessibility_video_watched">Video watched</string>
+    <string name="course_accessibility_assignment_completed">Assignment completed</string>
+    <string name="course_accessibility_assignment_due_date_past">Assignment due date past</string>
 
-
-    <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
-        <item quantity="one">%1$s of %2$s  assignment complete</item>
-        <item quantity="other">%1$s of %2$s  assignments complete</item>
+    <plurals name="course_sections_complete" tools:ignore="MissingTranslation">
+        <item quantity="one">%1$s/%2$s Section Completed</item>
+        <item quantity="other">%1$s/%2$s Sections Completed</item>
     </plurals>
 
     <string name="course_label_back">Back</string>
     <string name="course_error_expired_not_upgradeable_title" formatted="false">Your free audit access to this course expired on %s.</string>
-    <string name="course_find_new_course_button">Find a new course</string>
     <string name="course_error_not_started_title">This course will begin on %s. Come back then to start learning!</string>
     <string name="course_an_error_occurred">An error occurred while loading your course</string>
+    <string name="course_continue">Continue</string>
+    <string name="course_view_completed">View Completed</string>
+    <string name="course_hide_completed">Hide Completed</string>
+    <string name="course_completed">Completed</string>
+    <string name="course_progress_earned_possible_assignment_problems">%1$s / %2$s Complete</string>
+    <string name="course_progress_of_grade">of Grade</string>
+    <string name="course_progress_current_and_max_weighted_graded_percent">%1$s / %2$s%%</string>
+    <string name="course_progress_no_assignments">This course does not contain graded assignments.</string>
+    <string name="course_video_watched">%1$s/%2$s Watched</string>
+    <string name="course_completed_of">%1$s/%2$s Completed</string>
+    <string name="course_complete_points">Complete - %1$s points</string>
+    <string name="course_past_due">Past Due - %1$s points</string>
+    <string name="course_in_progress">In Progress - %1$s points</string>
+    <string name="course_of_grade">%1$s %% of Grade</string>
+    <string name="course_review_grading_policy">Review Course Grading Policy</string>
+    <string name="course_return_to_course_home">Return to Course Home</string>
 </resources>

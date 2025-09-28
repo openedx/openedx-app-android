@@ -169,7 +169,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     }
 
     private fun setupMediaRouteButton() {
-        binding.mediaRouteButton.setAlwaysVisible(true)
+        binding.mediaRouteButton.visibility = View.VISIBLE
         CastButtonFactory.setUpMediaRouteButton(requireContext(), binding.mediaRouteButton)
     }
 

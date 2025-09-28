@@ -73,6 +73,7 @@ abstract class AbstractDownloader : KoinComponent {
     private fun closeResources() {
         fos?.close()
         input?.close()
+        currentDownloadingFilePath = null
     }
 
     suspend fun cancelDownloading() {

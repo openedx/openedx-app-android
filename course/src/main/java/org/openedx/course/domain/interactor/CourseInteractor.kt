@@ -65,14 +65,19 @@ class CourseInteractor(
         return blocks.firstOrNull { it.descendants.contains(childId) }
     }
 
-    private fun addToResultBlocks(videoBlock: Block, verticalBlock: Block, resultBlocks: MutableList<Block>) {
+    private fun addToResultBlocks(
+        videoBlock: Block,
+        verticalBlock: Block,
+        resultBlocks: MutableList<Block>
+    ) {
         resultBlocks.add(videoBlock)
         val verticalIndex = resultBlocks.indexOfFirst { it.id == verticalBlock.id }
         if (verticalIndex == -1) {
             resultBlocks.add(verticalBlock.copy(descendants = listOf(videoBlock.id)))
         } else {
             val block = resultBlocks[verticalIndex]
-            resultBlocks[verticalIndex] = block.copy(descendants = block.descendants + videoBlock.id)
+            resultBlocks[verticalIndex] =
+                block.copy(descendants = block.descendants + videoBlock.id)
         }
     }
 
@@ -114,4 +119,9 @@ class CourseInteractor(
 
     suspend fun submitOfflineXBlockProgress(blockId: String, courseId: String) =
         repository.submitOfflineXBlockProgress(blockId, courseId)
+
+    fun getCourseProgress(courseId: String, isRefresh: Boolean) =
+        repository.getCourseProgress(courseId, isRefresh)
+
+    suspend fun getVideoProgress(blockId: String) = repository.getVideoProgress(blockId)
 }

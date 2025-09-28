@@ -1,7 +1,10 @@
 package org.openedx.course.presentation.videos
 
+import android.annotation.SuppressLint
+import android.content.Context
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -9,11 +12,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.openedx.core.BlockType
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.VideoSettings
+import org.openedx.core.extension.safeDivBy
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
@@ -24,30 +28,30 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.core.system.notifier.VideoNotifier
-import org.openedx.core.system.notifier.VideoQualityChanged
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 
+@SuppressLint("StaticFieldLeak")
 class CourseVideoViewModel(
     val courseId: String,
-    val courseTitle: String,
+    private val context: Context,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val courseNotifier: CourseNotifier,
-    private val videoNotifier: VideoNotifier,
-    private val analytics: CourseAnalytics,
     private val downloadDialogManager: DownloadDialogManager,
     private val fileUtil: FileUtil,
     val courseRouter: CourseRouter,
+    private val analytics: CourseAnalytics,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
@@ -59,20 +63,15 @@ class CourseVideoViewModel(
     coreAnalytics,
     downloadHelper,
 ) {
-
-    val isCourseDropdownNavigationEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
-
-    private val _uiState = MutableStateFlow<CourseVideosUIState>(CourseVideosUIState.Loading)
-    val uiState: StateFlow<CourseVideosUIState>
+    private val _uiState = MutableStateFlow<CourseVideoUIState>(CourseVideoUIState.Loading)
+    val uiState: StateFlow<CourseVideoUIState>
         get() = _uiState.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
-    private val _videoSettings = MutableStateFlow(VideoSettings.default)
-    val videoSettings = _videoSettings.asStateFlow()
-
+    private val courseVideos = mutableMapOf<String, MutableList<Block>>()
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
     val courseSubSectionUnit = mutableMapOf<String, Block?>()
@@ -92,8 +91,8 @@ class CourseVideoViewModel(
 
         viewModelScope.launch {
             downloadModelsStatusFlow.collect {
-                if (_uiState.value is CourseVideosUIState.CourseData) {
-                    val state = _uiState.value as CourseVideosUIState.CourseData
+                if (_uiState.value is CourseVideoUIState.CourseData) {
+                    val state = _uiState.value as CourseVideoUIState.CourseData
                     _uiState.value = state.copy(
                         downloadedState = it.toMap(),
                         downloadModelsSize = getDownloadModelsSize()
@@ -101,23 +100,6 @@ class CourseVideoViewModel(
                 }
             }
         }
-
-        viewModelScope.launch {
-            videoNotifier.notifier.collect { event ->
-                if (event is VideoQualityChanged) {
-                    _videoSettings.value = preferencesManager.videoSettings
-
-                    if (_uiState.value is CourseVideosUIState.CourseData) {
-                        val state = _uiState.value as CourseVideosUIState.CourseData
-                        _uiState.value = state.copy(
-                            downloadModelsSize = getDownloadModelsSize()
-                        )
-                    }
-                }
-            }
-        }
-
-        _videoSettings.value = preferencesManager.videoSettings
 
         getVideos()
     }
@@ -159,65 +141,50 @@ class CourseVideoViewModel(
                 var courseStructure = interactor.getCourseStructureForVideos(courseId)
                 val blocks = courseStructure.blockData
                 if (blocks.isEmpty()) {
-                    _uiState.value = CourseVideosUIState.Empty
+                    _uiState.value = CourseVideoUIState.Empty
                 } else {
                     setBlocks(courseStructure.blockData)
-                    courseSubSections.clear()
+                    courseVideos.clear()
                     courseSubSectionUnit.clear()
                     courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
                     initDownloadModelsStatus()
-
-                    val courseSectionsState =
-                        (_uiState.value as? CourseVideosUIState.CourseData)?.courseSectionsState.orEmpty()
+                    val downloadingModels = getDownloadModelList()
+                    val videoPreview = withContext(Dispatchers.IO) {
+                        courseVideos.values.flatten().associate { block ->
+                            block.id to block.getVideoPreview(
+                                context,
+                                networkConnection.isOnline(),
+                                downloadingModels.find { block.id == it.id }?.path
+                            )
+                        }
+                    }
+                    val videoProgress = courseVideos.values.flatten().associate { block ->
+                        val videoProgressEntity = interactor.getVideoProgress(block.id)
+                        val progress = videoProgressEntity.videoTime.toFloat()
+                            .safeDivBy(videoProgressEntity.duration.toFloat())
+                        block.id to progress
+                    }
+                    val isCompletedSectionsShown =
+                        (_uiState.value as? CourseVideoUIState.CourseData)?.isCompletedSectionsShown
+                            ?: false
 
                     _uiState.value =
-                        CourseVideosUIState.CourseData(
+                        CourseVideoUIState.CourseData(
                             courseStructure = courseStructure,
                             downloadedState = getDownloadModelsStatus(),
-                            courseSubSections = courseSubSections,
-                            courseSectionsState = courseSectionsState,
+                            courseVideos = courseVideos,
                             subSectionsDownloadsCount = subSectionsDownloadsCount,
                             downloadModelsSize = getDownloadModelsSize(),
-                            useRelativeDates = preferencesManager.isRelativeDatesEnabled
+                            isCompletedSectionsShown = isCompletedSectionsShown,
+                            videoPreview = videoPreview,
+                            videoProgress = videoProgress,
                         )
                 }
                 courseNotifier.send(CourseLoading(false))
             } catch (e: Exception) {
                 e.printStackTrace()
-                _uiState.value = CourseVideosUIState.Empty
+                _uiState.value = CourseVideoUIState.Empty
             }
-        }
-    }
-
-    fun switchCourseSections(blockId: String) {
-        if (_uiState.value is CourseVideosUIState.CourseData) {
-            val state = _uiState.value as CourseVideosUIState.CourseData
-            val courseSectionsState = state.courseSectionsState.toMutableMap()
-            courseSectionsState[blockId] = !(state.courseSectionsState[blockId] ?: false)
-
-            _uiState.value = state.copy(courseSectionsState = courseSectionsState)
-        }
-    }
-
-    fun sequentialClickedEvent(blockId: String, blockName: String) {
-        val currentState = uiState.value
-        if (currentState is CourseVideosUIState.CourseData) {
-            analytics.sequentialClickedEvent(
-                courseId,
-                courseTitle,
-                blockId,
-                blockName
-            )
-        }
-    }
-
-    fun onChangingVideoQualityWhileDownloading() {
-        viewModelScope.launch {
-            _uiMessage.emit(
-                UIMessage.SnackBarMessage(
-                    resourceManager.getString(R.string.course_change_quality_when_downloading)
-                )
-            )
         }
     }
 
@@ -237,7 +204,14 @@ class CourseVideoViewModel(
     private fun processDescendants(chapterBlock: Block, blocks: List<Block>) {
         chapterBlock.descendants.forEach { descendantId ->
             val sequentialBlock = blocks.find { it.id == descendantId } ?: return@forEach
+            val verticalBlocks = blocks.filter { block ->
+                block.id in sequentialBlock.descendants
+            }
+            val videoBlocks = blocks.filter { block ->
+                verticalBlocks.any { vertical -> block.id in vertical.descendants } && block.type == BlockType.VIDEO
+            }
             addToSubSections(chapterBlock, sequentialBlock)
+            addToVideo(chapterBlock, videoBlocks)
             updateSubSectionUnit(sequentialBlock, blocks)
             updateDownloadsCount(sequentialBlock, blocks)
             addDownloadableChildrenForSequentialBlock(sequentialBlock)
@@ -246,6 +220,10 @@ class CourseVideoViewModel(
 
     private fun addToSubSections(chapterBlock: Block, sequentialBlock: Block) {
         courseSubSections.getOrPut(chapterBlock.id) { mutableListOf() }.add(sequentialBlock)
+    }
+
+    private fun addToVideo(chapterBlock: Block, videoBlocks: List<Block>) {
+        courseVideos.getOrPut(chapterBlock.id) { mutableListOf() }.addAll(videoBlocks)
     }
 
     private fun updateSubSectionUnit(sequentialBlock: Block, blocks: List<Block>) {
@@ -258,10 +236,8 @@ class CourseVideoViewModel(
 
     fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager) {
         viewModelScope.launch {
-            val courseData = _uiState.value as? CourseVideosUIState.CourseData ?: return@launch
-
             val subSectionsBlocks =
-                courseData.courseSubSections.values.flatten().filter { it.id in blocksIds }
+                courseSubSections.values.flatten().filter { it.id in blocksIds }
 
             val blocks = subSectionsBlocks.flatMap { subSectionsBlock ->
                 val verticalBlocks =
@@ -314,5 +290,43 @@ class CourseVideoViewModel(
                 )
             }
         }
+    }
+
+    fun onCompletedSectionVisibilityChange() {
+        if (_uiState.value is CourseVideoUIState.CourseData) {
+            val state = _uiState.value as CourseVideoUIState.CourseData
+            _uiState.value = state.copy(isCompletedSectionsShown = !state.isCompletedSectionsShown)
+
+            analytics.logEvent(
+                CourseAnalyticsEvent.VIDEO_SHOW_COMPLETED.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.VIDEO_SHOW_COMPLETED.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                }
+            )
+        }
+    }
+
+    fun logVideoClick(blockId: String) {
+        if (_uiState.value is CourseVideoUIState.CourseData) {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_CONTENT_VIDEO_CLICK.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.COURSE_CONTENT_VIDEO_CLICK.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                }
+            )
+        }
+    }
+
+    fun getBlockParent(blockId: String): Block? {
+        return allBlocks.values.find { blockId in it.descendants }
     }
 }

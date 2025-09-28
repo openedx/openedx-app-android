@@ -12,7 +12,7 @@ pluginManagement {
             }
         }
         dependencies {
-            classpath("com.android.tools:r8:8.5.35")
+            classpath("com.android.tools:r8:8.12.14")
         }
     }
 }

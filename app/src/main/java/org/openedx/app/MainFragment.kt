@@ -39,8 +39,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private val viewModel by viewModel<MainViewModel>()
     private val router by inject<DiscoveryRouter>()
 
-    private lateinit var adapter: NavigationFragmentAdapter
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
@@ -89,26 +87,28 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         requireArguments().remove(ARG_OPEN_TAB)
     }
 
-    private fun createTabList(openTabArg: String): List<Pair<Int, Fragment>> {
-        val learnFragment = LearnFragment.newInstance(
-            openTab = if (openTabArg == HomeTab.PROGRAMS.name) {
-                LearnTab.PROGRAMS.name
-            } else {
-                LearnTab.COURSES.name
-            }
-        )
+    private fun createTabList(openTabArg: String): List<Pair<Int, () -> Fragment>> {
+        val learnFragmentFactory = {
+            LearnFragment.newInstance(
+                openTab = if (openTabArg == HomeTab.PROGRAMS.name) {
+                    LearnTab.PROGRAMS.name
+                } else {
+                    LearnTab.COURSES.name
+                }
+            )
+        }
 
-        return mutableListOf<Pair<Int, Fragment>>().apply {
-            add(R.id.fragmentLearn to learnFragment)
-            add(R.id.fragmentDiscover to viewModel.getDiscoveryFragment)
+        return mutableListOf<Pair<Int, () -> Fragment>>().apply {
+            add(R.id.fragmentLearn to learnFragmentFactory)
+            add(R.id.fragmentDiscover to { viewModel.getDiscoveryFragment })
             if (viewModel.isDownloadsFragmentEnabled) {
-                add(R.id.fragmentDownloads to DownloadsFragment())
+                add(R.id.fragmentDownloads to { DownloadsFragment() })
             }
-            add(R.id.fragmentProfile to ProfileFragment())
+            add(R.id.fragmentProfile to { ProfileFragment() })
         }
     }
 
-    private fun addMenuItems(menu: Menu, tabList: List<Pair<Int, Fragment>>) {
+    private fun addMenuItems(menu: Menu, tabList: List<Pair<Int, () -> Fragment>>) {
         val tabTitles = mapOf(
             R.id.fragmentLearn to resources.getString(R.string.app_navigation_learn),
             R.id.fragmentDiscover to resources.getString(R.string.app_navigation_discovery),
@@ -128,7 +128,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
-    private fun setupBottomNavListener(tabList: List<Pair<Int, Fragment>>) {
+    private fun setupBottomNavListener(tabList: List<Pair<Int, () -> Fragment>>) {
         val menuIdToIndex = tabList.mapIndexed { index, pair -> pair.first to index }.toMap()
 
         binding.bottomNavView.setOnItemSelectedListener { menuItem ->
@@ -173,21 +173,21 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             } else {
                 R.id.fragmentLearn
             }
+
             HomeTab.PROFILE.name -> R.id.fragmentProfile
             else -> R.id.fragmentLearn
         }
     }
 
-    private fun initViewPager(tabList: List<Pair<Int, Fragment>>) {
+    private fun initViewPager(tabList: List<Pair<Int, () -> Fragment>>) {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         binding.viewPager.offscreenPageLimit = tabList.size
-
-        adapter = NavigationFragmentAdapter(this).apply {
-            tabList.forEach { (_, fragment) ->
-                addFragment(fragment)
+        binding.viewPager.adapter = NavigationFragmentAdapter(this).apply {
+            tabList.forEach { (_, fragmentFactory) ->
+                // Use fragment factory to prevent memory leaks
+                addFragment { fragmentFactory() }
             }
         }
-        binding.viewPager.adapter = adapter
         binding.viewPager.isUserInputEnabled = false
     }
 

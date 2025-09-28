@@ -124,6 +124,11 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
                     }
                     youTubePlayer.addListener(youtubeTrackerListener)
                 }
+
+                override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
+                    viewModel.duration = (duration * 1000).toLong()
+                    super.onVideoDuration(youTubePlayer, duration)
+                }
             },
             options
         )

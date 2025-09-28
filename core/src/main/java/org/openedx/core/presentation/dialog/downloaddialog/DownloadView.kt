@@ -27,7 +27,7 @@ fun DownloadDialogItem(
     val icon = if (downloadDialogItem.icon != null) {
         rememberVectorPainter(downloadDialogItem.icon)
     } else {
-        painterResource(id = R.drawable.ic_core_chapter_icon)
+        painterResource(id = R.drawable.core_ic_chapter_icon)
     }
     Row(
         modifier = modifier.padding(vertical = 6.dp),

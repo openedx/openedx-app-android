@@ -18,11 +18,14 @@ import org.openedx.core.presentation.settings.video.VideoQualityViewModel
 import org.openedx.core.repository.CalendarRepository
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.assignments.CourseAssignmentViewModel
 import org.openedx.course.presentation.container.CourseContainerViewModel
+import org.openedx.course.presentation.contenttab.ContentTabViewModel
 import org.openedx.course.presentation.dates.CourseDatesViewModel
 import org.openedx.course.presentation.handouts.HandoutsViewModel
 import org.openedx.course.presentation.offline.CourseOfflineViewModel
-import org.openedx.course.presentation.outline.CourseOutlineViewModel
+import org.openedx.course.presentation.outline.CourseContentAllViewModel
+import org.openedx.course.presentation.progress.CourseProgressViewModel
 import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel
 import org.openedx.course.presentation.unit.html.HtmlUnitViewModel
@@ -278,7 +281,7 @@ val screenModule = module {
         )
     }
     viewModel { (courseId: String, courseTitle: String) ->
-        CourseOutlineViewModel(
+        CourseContentAllViewModel(
             courseId,
             courseTitle,
             get(),
@@ -294,6 +297,13 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
+        )
+    }
+    viewModel { (courseId: String, courseTitle: String) ->
+        ContentTabViewModel(
+            courseId,
+            courseTitle,
             get(),
         )
     }
@@ -317,10 +327,9 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String, courseTitle: String) ->
+    viewModel { (courseId: String) ->
         CourseVideoViewModel(
             courseId,
-            courseTitle,
             get(),
             get(),
             get(),
@@ -340,9 +349,11 @@ val screenModule = module {
     }
     viewModel { (courseId: String) -> BaseVideoViewModel(courseId, get()) }
     viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get(), get()) }
-    viewModel { (courseId: String) ->
+    viewModel { (courseId: String, videoUrl: String, blockId: String) ->
         VideoUnitViewModel(
             courseId,
+            videoUrl,
+            blockId,
             get(),
             get(),
             get(),
@@ -350,9 +361,10 @@ val screenModule = module {
             get()
         )
     }
-    viewModel { (courseId: String, blockId: String) ->
+    viewModel { (courseId: String, videoUrl: String, blockId: String) ->
         EncodedVideoUnitViewModel(
             courseId,
+            videoUrl,
             blockId,
             get(),
             get(),
@@ -491,6 +503,14 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get()
+        )
+    }
+    viewModel { (courseId: String) ->
+        CourseProgressViewModel(
+            courseId,
+            get(),
+            get()
         )
     }
 
@@ -525,6 +545,15 @@ val screenModule = module {
             discoveryNotifier = get(),
             courseNotifier = get(),
             router = get()
+        )
+    }
+    viewModel { (courseId: String) ->
+        CourseAssignmentViewModel(
+            courseId = courseId,
+            interactor = get(),
+            courseRouter = get(),
+            courseNotifier = get(),
+            analytics = get()
         )
     }
 }

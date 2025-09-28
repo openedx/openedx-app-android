@@ -40,7 +40,7 @@ internal fun SocialSignedView(authType: AuthType) {
                 modifier = Modifier
                     .padding(end = 8.dp)
                     .size(20.dp),
-                painter = painterResource(id = coreR.drawable.ic_core_check),
+                painter = painterResource(id = coreR.drawable.core_ic_check),
                 tint = MaterialTheme.appColors.successBackground,
                 contentDescription = ""
             )

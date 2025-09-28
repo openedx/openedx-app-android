@@ -21,6 +21,8 @@ import subtitleFile.TimedTextObject
 
 open class VideoUnitViewModel(
     val courseId: String,
+    val videoUrl: String,
+    val blockId: String,
     private val courseRepository: CourseRepository,
     private val notifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
@@ -28,7 +30,6 @@ open class VideoUnitViewModel(
     courseAnalytics: CourseAnalytics,
 ) : BaseVideoViewModel(courseId, courseAnalytics) {
 
-    var videoUrl = ""
     var transcripts = emptyMap<String, String>()
     var isPlaying = true
     var transcriptLanguage = AppDataConstants.defaultLocale.language ?: "en"
@@ -39,6 +40,8 @@ open class VideoUnitViewModel(
     private val _currentVideoTime = MutableLiveData<Long>(0)
     val currentVideoTime: LiveData<Long>
         get() = _currentVideoTime
+
+    var duration = 0L
 
     protected val isUpdatedMutable = MutableLiveData(true)
     val isUpdated: LiveData<Boolean>
@@ -58,6 +61,10 @@ open class VideoUnitViewModel(
 
     private var isBlockAlreadyCompleted = false
 
+    init {
+        initVideoProgress()
+    }
+
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
@@ -65,6 +72,7 @@ open class VideoUnitViewModel(
                 if (it is CourseVideoPositionChanged && videoUrl == it.videoUrl) {
                     isUpdatedMutable.value = false
                     _currentVideoTime.value = it.videoTime
+                    saveVideoProgress()
                     isUpdatedMutable.value = true
                     isPlaying = it.isPlaying
                 } else if (it is CourseSubtitleLanguageChanged) {
@@ -73,6 +81,22 @@ open class VideoUnitViewModel(
                     downloadSubtitles()
                 }
             }
+        }
+    }
+
+    override fun onPause(owner: LifecycleOwner) {
+        saveVideoProgress()
+        super.onPause(owner)
+    }
+
+    private fun saveVideoProgress() {
+        viewModelScope.launch {
+            courseRepository.saveVideoProgress(
+                blockId,
+                videoUrl,
+                _currentVideoTime.value ?: 0L,
+                duration
+            )
         }
     }
 
@@ -131,4 +155,15 @@ open class VideoUnitViewModel(
     }
 
     fun getCurrentVideoTime() = currentVideoTime.value ?: 0
+
+    private fun initVideoProgress() {
+        viewModelScope.launch {
+            try {
+                val videoProgress = courseRepository.getVideoProgress(blockId)
+                _currentVideoTime.value = videoProgress.videoTime
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 }

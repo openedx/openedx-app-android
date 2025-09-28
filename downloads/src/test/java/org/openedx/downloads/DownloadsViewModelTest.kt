@@ -93,7 +93,8 @@ class DownloadsViewModelTest {
     private val assignmentProgress = AssignmentProgress(
         assignmentType = "Homework",
         numPointsEarned = 1f,
-        numPointsPossible = 3f
+        numPointsPossible = 3f,
+        shortLabel = "HW1",
     )
     private val blocks = listOf(
         Block(

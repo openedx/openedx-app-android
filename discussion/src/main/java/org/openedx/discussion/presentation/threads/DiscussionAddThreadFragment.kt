@@ -389,7 +389,7 @@ private fun DiscussionAddThreadScreen(
                                         .fillMaxWidth()
                                         .height(150.dp),
                                     title = if (currentPage == 0) {
-                                        stringResource(id = org.openedx.discussion.R.string.discussion_discussion)
+                                        stringResource(id = discussionR.string.discussion_discussion)
                                     } else {
                                         stringResource(
                                             id = discussionR.string.discussion_question

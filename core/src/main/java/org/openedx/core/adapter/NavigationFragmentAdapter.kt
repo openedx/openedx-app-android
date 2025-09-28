@@ -5,13 +5,13 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 
 class NavigationFragmentAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
 
-    private val fragments = ArrayList<Fragment>()
+    private val fragmentFactories = ArrayList<() -> Fragment>()
 
-    override fun getItemCount(): Int = fragments.size
+    override fun getItemCount(): Int = fragmentFactories.size
 
-    override fun createFragment(position: Int): Fragment = fragments[position]
+    override fun createFragment(position: Int): Fragment = fragmentFactories[position].invoke()
 
-    fun addFragment(fragment: Fragment) {
-        fragments.add(fragment)
+    fun addFragment(fragmentFactory: () -> Fragment) {
+        fragmentFactories.add(fragmentFactory)
     }
 }

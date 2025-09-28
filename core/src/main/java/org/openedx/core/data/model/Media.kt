@@ -14,7 +14,7 @@ data class Media(
     val image: Image?,
 ) {
 
-    fun mapToDomain(): org.openedx.core.domain.model.Media {
+    fun mapToDomain(): Media {
         return Media(
             bannerImage = bannerImage?.mapToDomain(),
             courseImage = courseImage?.mapToDomain(),

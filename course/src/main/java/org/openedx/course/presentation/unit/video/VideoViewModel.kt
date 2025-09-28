@@ -20,6 +20,7 @@ class VideoViewModel(
 
     var videoUrl = ""
     var currentVideoTime = 0L
+    var duration = 0L
     var isPlaying: Boolean? = null
 
     private var isBlockAlreadyCompleted = false
@@ -31,7 +32,8 @@ class VideoViewModel(
                     CourseVideoPositionChanged(
                         videoUrl,
                         currentVideoTime,
-                        isPlaying ?: false
+                        duration,
+                        isPlaying == true
                     )
                 )
             }

@@ -11,8 +11,8 @@ data class Progress(
     val totalAssignmentsCount: Int?,
 ) {
     fun mapToDomain() = Progress(
-        assignmentsCompleted = assignmentsCompleted ?: 0,
-        totalAssignmentsCount = totalAssignmentsCount ?: 0
+        completed = assignmentsCompleted ?: 0,
+        total = totalAssignmentsCount ?: 0
     )
 
     fun mapToRoomEntity() = ProgressDb(

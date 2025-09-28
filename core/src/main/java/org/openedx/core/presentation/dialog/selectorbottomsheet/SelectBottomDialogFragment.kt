@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -47,7 +46,7 @@ class SelectBottomDialogFragment : BottomSheetDialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.values = requireArguments().parcelableArrayList(ARG_LIST_VALUES)!!
-        setStyle(DialogFragment.STYLE_NORMAL, R.style.BottomSheetDialog)
+        setStyle(STYLE_NORMAL, R.style.BottomSheetDialog)
     }
 
     override fun onCreateView(

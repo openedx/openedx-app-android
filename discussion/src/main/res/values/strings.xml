@@ -1,10 +1,8 @@
 <resources>
-    <string name="discussion_discussions">Discussions</string>
     <string name="discussion_all_posts">All Posts</string>
     <string name="discussion_unread">Unread</string>
     <string name="discussion_unanswered">Unanswered</string>
     <string name="discussion_posts_following">Posts I\'m following</string>
-    <string name="discussion_refine">Refine:</string>
     <string name="discussion_recent_activity">Recent activity</string>
     <string name="discussion_most_activity">Most activity</string>
     <string name="discussion_most_votes">Most votes</string>
@@ -23,9 +21,6 @@
     <string name="discussion_title">Title</string>
     <string name="discussion_follow_discussion">Follow this discussion</string>
     <string name="discussion_follow_question">Follow this question</string>
-    <string name="discussion_post_discussion">Post discussion</string>
-    <string name="discussion_post_question">Post question</string>
-    <string name="discussion_general">General</string>
     <string name="discussion_search_all_posts">Search all posts</string>
     <string name="discussion_main_categories">Main categories</string>
     <string name="discussion_select_post_type">Select post type</string>

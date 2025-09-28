@@ -93,7 +93,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         initPlayer()
     }
 
-    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    @OptIn(UnstableApi::class)
     private fun initPlayer() {
         if (exoPlayer == null) {
             exoPlayer = buildExoPlayer()
@@ -175,7 +175,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         })
     }
 
-    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    @OptIn(UnstableApi::class)
     private fun setPlayerMedia(mediaItem: MediaItem) {
         if (viewModel.videoUrl.endsWith(".m3u8")) {
             val factory = DefaultDataSource.Factory(requireContext())
@@ -204,6 +204,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
 
     override fun onDestroyView() {
         viewModel.currentVideoTime = exoPlayer?.currentPosition ?: C.TIME_UNSET
+        viewModel.duration = exoPlayer?.duration ?: 0L
         viewModel.sendTime()
         super.onDestroyView()
     }

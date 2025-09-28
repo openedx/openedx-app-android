@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.openedx.core.domain.model.DownloadCoursePreview
+import org.openedx.core.extension.safeDivBy
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.DownloadedState.LOADING_COURSE_STRUCTURE
@@ -285,11 +286,7 @@ private fun CourseItem(
         .sumOf { it.size }
     val availableSize = downloadCoursePreview.totalSize - downloadedSize
     val availableSizeString = availableSize.toFileSize(space = false, round = 1)
-    val progress: Float = try {
-        downloadedSize.toFloat() / downloadCoursePreview.totalSize.toFloat()
-    } catch (_: ArithmeticException) {
-        0f
-    }
+    val progress = downloadedSize.toFloat().safeDivBy(downloadCoursePreview.totalSize.toFloat())
     Card(
         modifier = modifier
             .fillMaxWidth(),
