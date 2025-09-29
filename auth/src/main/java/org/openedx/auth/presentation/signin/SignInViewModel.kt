@@ -58,6 +58,7 @@ class SignInViewModel(
     config: Config,
     val courseId: String?,
     val infoType: String?,
+    currentLang: String,
 ) : BaseViewModel() {
 
     private val logger = Logger("SignInViewModel")
@@ -66,7 +67,7 @@ class SignInViewModel(
         SignInUIState(
             isLoginRegistrationFormEnabled = config.isLoginRegistrationEnabled(),
             isSSOLoginEnabled = config.isSSOLoginEnabled(),
-            ssoButtonTitle = config.getSSOButtonTitle(key = Resources.getSystem().getConfiguration().locales[0].language.uppercase(), ""),
+            ssoButtonTitle = currentLang,
             isSSODefaultLoginButton = config.isSSODefaultLoginButton(),
             isFacebookAuthEnabled = config.getFacebookConfig().isEnabled(),
             isGoogleAuthEnabled = config.getGoogleConfig().isEnabled(),

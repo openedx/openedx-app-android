@@ -2,7 +2,6 @@ package org.openedx.app
 
 import android.content.Intent
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
@@ -203,10 +202,6 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         this.intent = intent
-
-        if (authCode != null) {
-            addFragment(SignInFragment.newInstance(null, null, authCode = authCode))
-        }
 
         val extras = intent.extras
         if (extras?.containsKey(DeepLink.Keys.NOTIFICATION_TYPE.value) == true) {

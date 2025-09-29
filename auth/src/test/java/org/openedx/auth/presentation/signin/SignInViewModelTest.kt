@@ -95,6 +95,9 @@ class SignInViewModelTest {
         coEvery { calendarInteractor.clearCalendarCachedData() } returns Unit
         every { analytics.logScreenEvent(any(), any()) } returns Unit
         every { config.isRegistrationEnabled() } returns true
+        every { config.isLoginRegistrationEnabled() } returns true
+        every { config.isSSOLoginEnabled() } returns false
+        every { config.isSSODefaultLoginButton() } returns false
     }
 
     @After
@@ -123,7 +126,9 @@ class SignInViewModelTest {
             courseId = "",
             infoType = "",
             calendarInteractor = calendarInteractor,
-            calendarPreferences = calendarPreferences
+            calendarPreferences = calendarPreferences,
+            configuration = config,
+            currentLang = "EN"
         )
         viewModel.login("", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -159,7 +164,9 @@ class SignInViewModelTest {
             courseId = "",
             infoType = "",
             calendarInteractor = calendarInteractor,
-            calendarPreferences = calendarPreferences
+            calendarPreferences = calendarPreferences,
+            configuration = config,
+            currentLang = "EN"
         )
         viewModel.login("acc@test.o", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -195,7 +202,9 @@ class SignInViewModelTest {
             courseId = "",
             infoType = "",
             calendarInteractor = calendarInteractor,
-            calendarPreferences = calendarPreferences
+            calendarPreferences = calendarPreferences,
+            configuration = config,
+            currentLang = "EN"
         )
         viewModel.login("acc@test.org", "")
 
@@ -230,7 +239,9 @@ class SignInViewModelTest {
             courseId = "",
             infoType = "",
             calendarInteractor = calendarInteractor,
-            calendarPreferences = calendarPreferences
+            calendarPreferences = calendarPreferences,
+            configuration = config,
+            currentLang = "EN"
         )
         viewModel.login("acc@test.org", "ed")
 
@@ -269,7 +280,9 @@ class SignInViewModelTest {
             courseId = "",
             infoType = "",
             calendarInteractor = calendarInteractor,
-            calendarPreferences = calendarPreferences
+            calendarPreferences = calendarPreferences,
+            configuration = config,
+            currentLang = "EN"
         )
         coEvery { interactor.login("acc@test.org", "edx") } returns Unit
         viewModel.login("acc@test.org", "edx")
@@ -308,7 +321,9 @@ class SignInViewModelTest {
             courseId = "",
             infoType = "",
             calendarInteractor = calendarInteractor,
-            calendarPreferences = calendarPreferences
+            calendarPreferences = calendarPreferences,
+            configuration = config,
+            currentLang = "EN"
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws UnknownHostException()
         viewModel.login("acc@test.org", "edx")
@@ -349,7 +364,9 @@ class SignInViewModelTest {
             courseId = "",
             infoType = "",
             calendarInteractor = calendarInteractor,
-            calendarPreferences = calendarPreferences
+            calendarPreferences = calendarPreferences,
+            configuration = config,
+            currentLang = "EN"
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws EdxError.InvalidGrantException()
         viewModel.login("acc@test.org", "edx")
@@ -390,7 +407,9 @@ class SignInViewModelTest {
             courseId = "",
             infoType = "",
             calendarInteractor = calendarInteractor,
-            calendarPreferences = calendarPreferences
+            calendarPreferences = calendarPreferences,
+            configuration = config,
+            currentLang = "EN"
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws IllegalStateException()
         viewModel.login("acc@test.org", "edx")
