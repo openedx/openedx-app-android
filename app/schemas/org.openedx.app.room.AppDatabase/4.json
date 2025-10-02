@@ -896,6 +896,16 @@
             "notNull": true
           },
           {
+            "fieldPath": "courseInfoOverview.start.fastTime",
+            "columnName": "fastTime",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "courseInfoOverview.start.cdate",
+            "columnName": "cdate",
+            "affinity": "TEXT"
+          },
+          {
             "fieldPath": "courseInfoOverview.end.fastTime",
             "columnName": "fastTime",
             "affinity": "INTEGER"
