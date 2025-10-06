@@ -338,6 +338,7 @@ fun NavigationUnitsButtons(
     nextButtonText: String,
     hasPrevBlock: Boolean,
     hasNextBlock: Boolean,
+    showFinishButton: Boolean = true,
     isVerticalNavigation: Boolean,
     onPrevClick: () -> Unit,
     onNextClick: () -> Unit,
@@ -400,32 +401,34 @@ fun NavigationUnitsButtons(
             }
             Spacer(Modifier.width(16.dp))
         }
-        Button(
-            modifier = Modifier
-                .height(42.dp),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.appColors.primaryButtonBackground
-            ),
-            elevation = null,
-            shape = MaterialTheme.appShapes.navigationButtonShape,
-            onClick = onNextClick
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+        if (hasNextBlock || showFinishButton) {
+            Button(
+                modifier = Modifier
+                    .height(42.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = MaterialTheme.appColors.primaryButtonBackground
+                ),
+                elevation = null,
+                shape = MaterialTheme.appShapes.navigationButtonShape,
+                onClick = onNextClick
             ) {
-                Text(
-                    text = nextButtonText,
-                    color = MaterialTheme.appColors.primaryButtonText,
-                    style = MaterialTheme.appTypography.labelLarge
-                )
-                Spacer(Modifier.width(8.dp))
-                Icon(
-                    modifier = Modifier.rotate(if (isVerticalNavigation || !hasNextBlock) 0f else -90f),
-                    painter = nextButtonIcon,
-                    contentDescription = null,
-                    tint = MaterialTheme.appColors.primaryButtonText
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = nextButtonText,
+                        color = MaterialTheme.appColors.primaryButtonText,
+                        style = MaterialTheme.appTypography.labelLarge
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        modifier = Modifier.rotate(if (isVerticalNavigation || !hasNextBlock) 0f else -90f),
+                        painter = nextButtonIcon,
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.primaryButtonText
+                    )
+                }
             }
         }
     }
@@ -673,9 +676,6 @@ fun CourseVideoSection(
                     0f
                 }
                 CourseVideoItem(
-                    modifier = Modifier
-                        .width(192.dp)
-                        .height(108.dp),
                     modifier = Modifier
                         .width(videoCardWidth)
                         .height(108.dp)

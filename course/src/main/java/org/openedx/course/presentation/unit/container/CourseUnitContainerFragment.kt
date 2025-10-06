@@ -46,7 +46,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
-import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.InsetHolder
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -151,7 +150,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
         componentId = requireArguments().getString(ARG_COMPONENT_ID, "")
-        viewModel.loadBlocks(viewModel.mode, componentId)
+        viewModel.loadBlocks(componentId)
         viewModel.courseUnitContainerShowedEvent()
     }
 
@@ -489,43 +488,95 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
     @Composable
     private fun NavigationBar() {
-        OpenEdXTheme {
-            var nextButtonText by rememberSaveable {
-                mutableStateOf(viewModel.nextButtonText)
-            }
-            var hasNextBlock by rememberSaveable {
-                mutableStateOf(viewModel.hasNextBlock)
-            }
-            var hasPrevBlock by rememberSaveable {
-                mutableStateOf(viewModel.hasNextBlock)
-            }
-
-            updateNavigationButtons { next, hasPrev, hasNext ->
-                nextButtonText = next
-                hasPrevBlock = hasPrev
-                hasNextBlock = hasNext
-            }
-
-            NavigationUnitsButtons(
-                hasPrevBlock = hasPrevBlock,
-                nextButtonText = nextButtonText,
-                hasNextBlock = hasNextBlock,
-                isVerticalNavigation = !viewModel.isCourseUnitProgressEnabled || viewModel.mode != CourseViewMode.VIDEOS,
-                onPrevClick = {
-                    handlePrevClick { next, hasPrev, hasNext ->
-                        nextButtonText = next
-                        hasPrevBlock = hasPrev
-                        hasNextBlock = hasNext
-                    }
-                },
-                onNextClick = {
-                    handleNextClick { next, hasPrev, hasNext ->
-                        nextButtonText = next
-                        hasPrevBlock = hasPrev
-                        hasNextBlock = hasNext
-                    }
+        if (viewModel.mode == CourseViewMode.VIDEOS) {
+            OpenEdXTheme {
+                val videoBlocks by viewModel.videoList.collectAsState()
+                val currentBlock by viewModel.currentBlock.collectAsState()
+                val hasNextBlock = videoBlocks.lastOrNull()?.id != currentBlock?.id
+                val nextButtonText = if (hasNextBlock) {
+                    getString(R.string.course_navigation_next)
+                } else {
+                    getString(R.string.course_navigation_finish)
                 }
-            )
+                NavigationUnitsButtons(
+                    hasPrevBlock = videoBlocks.firstOrNull()?.id != currentBlock?.id,
+                    nextButtonText = nextButtonText,
+                    hasNextBlock = hasNextBlock,
+                    isVerticalNavigation = false,
+                    showFinishButton = false,
+                    onPrevClick = {
+                        if (!restrictDoubleClick()) {
+                            val currentIndex =
+                                videoBlocks.indexOfFirst { it.id == currentBlock?.id }
+                            if (currentIndex > 0) {
+                                val target = videoBlocks[currentIndex - 1]
+                                viewModel.setSelectedVideoBlock(target)
+                                updateViewPagerAdapter()
+                                val blockIndex =
+                                    viewModel.getUnitBlocks().indexOfFirst { it.id == target.id }
+                                if (blockIndex != -1) {
+                                    binding.viewPager.setCurrentItem(blockIndex, true)
+                                }
+                            }
+                        }
+                    },
+                    onNextClick = {
+                        if (!restrictDoubleClick()) {
+                            val currentIndex =
+                                videoBlocks.indexOfFirst { it.id == currentBlock?.id }
+                            if (currentIndex != -1 && currentIndex < videoBlocks.lastIndex) {
+                                val target = videoBlocks[currentIndex + 1]
+                                viewModel.setSelectedVideoBlock(target)
+                                updateViewPagerAdapter()
+                                val blockIndex =
+                                    viewModel.getUnitBlocks().indexOfFirst { it.id == target.id }
+                                if (blockIndex != -1) {
+                                    binding.viewPager.setCurrentItem(blockIndex, true)
+                                }
+                            }
+                        }
+                    }
+                )
+            }
+        } else {
+            OpenEdXTheme {
+                var nextButtonText by rememberSaveable {
+                    mutableStateOf(viewModel.nextButtonText)
+                }
+                var hasNextBlock by rememberSaveable {
+                    mutableStateOf(viewModel.hasNextBlock)
+                }
+                var hasPrevBlock by rememberSaveable {
+                    mutableStateOf(viewModel.hasNextBlock)
+                }
+
+                updateNavigationButtons { next, hasPrev, hasNext ->
+                    nextButtonText = next
+                    hasPrevBlock = hasPrev
+                    hasNextBlock = hasNext
+                }
+
+                NavigationUnitsButtons(
+                    hasPrevBlock = hasPrevBlock,
+                    nextButtonText = nextButtonText,
+                    hasNextBlock = hasNextBlock,
+                    isVerticalNavigation = !viewModel.isCourseUnitProgressEnabled,
+                    onPrevClick = {
+                        handlePrevClick { next, hasPrev, hasNext ->
+                            nextButtonText = next
+                            hasPrevBlock = hasPrev
+                            hasNextBlock = hasNext
+                        }
+                    },
+                    onNextClick = {
+                        handleNextClick { next, hasPrev, hasNext ->
+                            nextButtonText = next
+                            hasPrevBlock = hasPrev
+                            hasNextBlock = hasNext
+                        }
+                    }
+                )
+            }
         }
     }
 
@@ -571,7 +622,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                         onClick = {
                             onVideoClick(block)
                         },
-                        style = MaterialTheme.appTypography.labelSmall,
+                        titleStyle = MaterialTheme.appTypography.labelSmall,
                         playButtonSize = playButtonSize,
                         borderColor = borderColor
                     )

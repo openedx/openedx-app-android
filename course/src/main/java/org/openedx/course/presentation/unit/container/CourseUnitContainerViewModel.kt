@@ -98,8 +98,6 @@ class CourseUnitContainerViewModel(
 
     var nextButtonText = ""
     var hasNextBlock = false
-
-    private var currentMode: CourseViewMode? = null
     private var currentComponentId = ""
     private var courseName = ""
 
@@ -109,8 +107,7 @@ class CourseUnitContainerViewModel(
     val hasNetworkConnection: Boolean
         get() = networkConnection.isOnline()
 
-    fun loadBlocks(mode: CourseViewMode, componentId: String = "") {
-        currentMode = mode
+    fun loadBlocks(componentId: String = "") {
         viewModelScope.launch {
             try {
                 val courseStructure = when (mode) {
@@ -138,8 +135,7 @@ class CourseUnitContainerViewModel(
             notifier.notifier.collect { event ->
                 if (event is CourseStructureUpdated) {
                     if (event.courseId != courseId) return@collect
-
-                    currentMode?.let { loadBlocks(it, currentComponentId) }
+                    loadBlocks(currentComponentId)
                     val blockId = blocks[currentVerticalIndex].id
                     _subSectionUnitBlocks.value =
                         getSubSectionUnitBlocks(blocks, getSubSectionId(blockId))
@@ -402,8 +398,8 @@ class CourseUnitContainerViewModel(
         val videoBlocks = getAllVideoBlocks()
         val videoProgress = videoBlocks.associate { block ->
             val videoProgressEntity = interactor.getVideoProgress(block.id)
-            val progress = videoProgressEntity.videoTime.toFloat()
-                .safeDivBy(videoProgressEntity.duration.toFloat())
+            val progress = videoProgressEntity.videoTime?.toFloat()
+                ?.safeDivBy(videoProgressEntity.duration?.toFloat() ?: 0f) ?: 0f
             block.id to progress
         }
         _videoProgress.value = videoProgress
