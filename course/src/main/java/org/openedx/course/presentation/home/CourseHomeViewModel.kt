@@ -32,7 +32,6 @@ import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
 import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
-import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDatesShifted
@@ -45,6 +44,7 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
@@ -137,7 +137,7 @@ class CourseHomeViewModel(
                         useRelativeDates = preferencesManager.isRelativeDatesEnabled,
                         next = state.next,
                         courseProgress = state.courseProgress,
-                        courseVideos = state.courseVideos,
+                        courseVideos = courseVideos,
                         courseAssignments = courseAssignments,
                         videoPreview = state.videoPreview,
                         videoProgress = state.videoProgress

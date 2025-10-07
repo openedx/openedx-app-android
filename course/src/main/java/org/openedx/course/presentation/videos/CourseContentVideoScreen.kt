@@ -37,7 +37,6 @@ import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.module.download.DownloadModelsSize
-import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -47,6 +46,7 @@ import org.openedx.course.R
 import org.openedx.course.presentation.contenttab.CourseContentVideoEmptyState
 import org.openedx.course.presentation.ui.CourseProgress
 import org.openedx.course.presentation.ui.CourseVideoSection
+import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType

@@ -14,7 +14,6 @@ import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Block
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
-import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSectionChanged

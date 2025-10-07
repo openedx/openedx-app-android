@@ -11,7 +11,6 @@ import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
 import org.openedx.core.CalendarRouter
 import org.openedx.core.FragmentViewType
-import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.appupgrade.AppUpgradeRouter
 import org.openedx.core.presentation.global.appupgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.webview.WebContentFragment
@@ -24,6 +23,7 @@ import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.handouts.HandoutsWebViewFragment
 import org.openedx.course.presentation.section.CourseSectionFragment
 import org.openedx.course.presentation.unit.container.CourseUnitContainerFragment
+import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
 import org.openedx.course.settings.download.DownloadQueueFragment

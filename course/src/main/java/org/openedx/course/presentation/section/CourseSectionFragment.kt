@@ -58,7 +58,6 @@ import org.openedx.core.BlockType
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
-import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -70,6 +69,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CardArrow
+import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.foundation.extension.serializable
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize

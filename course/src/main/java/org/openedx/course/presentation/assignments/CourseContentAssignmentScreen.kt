@@ -58,7 +58,6 @@ import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.Progress
-import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -67,6 +66,7 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
 import org.openedx.course.presentation.contenttab.CourseContentAssignmentEmptyState
 import org.openedx.course.presentation.ui.CourseProgress
+import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue

@@ -67,7 +67,6 @@ import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.presentation.CoreAnalyticsScreen
-import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncState
 import org.openedx.core.ui.CircularProgress
@@ -82,6 +81,7 @@ import org.openedx.core.utils.TimeUtils.formatToString
 import org.openedx.core.utils.clearTime
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
+import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.foundation.extension.isNotEmptyThenLet
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
@@ -286,7 +286,12 @@ private fun CourseDatesUI(
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(top = 8.dp, start = 16.dp, end = 8.dp, bottom = 8.dp),
+                                                .padding(
+                                                    top = 8.dp,
+                                                    start = 16.dp,
+                                                    end = 8.dp,
+                                                    bottom = 8.dp
+                                                ),
                                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {

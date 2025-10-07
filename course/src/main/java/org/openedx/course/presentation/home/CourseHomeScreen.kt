@@ -53,7 +53,6 @@ import org.openedx.core.Mock
 import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseDatesBannerInfo
-import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.NoContentScreen
@@ -68,6 +67,7 @@ import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseMessage
 import org.openedx.course.presentation.ui.ResumeCourseButton
+import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.foundation.extension.takeIfNotEmpty
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
