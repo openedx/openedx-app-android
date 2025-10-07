@@ -69,3 +69,7 @@
 -dontwarn org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter
 -dontwarn com.android.billingclient.api.BillingClientStateListener
 -dontwarn com.android.billingclient.api.PurchasesUpdatedListener
+-dontwarn com.google.crypto.tink.subtle.XChaCha20Poly1305
+-dontwarn net.jcip.annotations.GuardedBy
+-dontwarn net.jcip.annotations.Immutable
+-dontwarn net.jcip.annotations.ThreadSafe

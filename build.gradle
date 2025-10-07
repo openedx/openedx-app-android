@@ -1,5 +1,6 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import org.edx.builder.ConfigHelper
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -7,21 +8,21 @@ import java.util.regex.Pattern
 buildscript {
     ext {
         // Plugin versions
-        android_gradle_plugin_version = '8.12.0'
+        android_gradle_plugin_version = '8.12.2'
         google_services_version = '4.4.3'
         firebase_crashlytics_version = '3.0.6'
-        ksp_version = '2.0.0-1.0.24'
+        ksp_version = '2.2.10-2.0.2'
 
         //Depends on versions in OEXFoundation
-        kotlin_version = '2.0.0'
-        room_version = '2.6.1'
-        detekt_version = '1.23.7'
+        kotlin_version = '2.2.10'
+        room_version = '2.7.2'
+        detekt_version = '1.23.8'
 
         // Library versions
         media3_version = "1.8.0"
         youtubeplayer_version = "11.1.0"
         firebase_version = "33.0.0"
-        jsoup_version = '1.21.1'
+        jsoup_version = '1.21.2'
         in_app_review = '2.0.2'
         extented_spans_version = "1.4.0"
         zip_version = '2.11.5'
@@ -31,7 +32,7 @@ buildscript {
         play_services_ads_identifier_version = '18.2.0'
         install_referrer_version = '2.2'
         snakeyaml_version = '2.4'
-        openedx_foundation_version = '1.0.1'
+        openedx_foundation_version = '1.0.2'
         openedx_firebase_analytics_version = '1.0.1'
         braze_sdk_version = '37.0.0'
 
@@ -84,6 +85,7 @@ ext {
     target_sdk_version = 36
     min_sdk_version = 24
     java_version = JavaVersion.VERSION_17
+    jvm_target_version = JvmTarget.JVM_17
 
     configHelper = new ConfigHelper(projectDir, getCurrentFlavor())
 }

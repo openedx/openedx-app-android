@@ -131,26 +131,22 @@
           {
             "fieldPath": "media.bannerImage",
             "columnName": "bannerImage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "media.courseImage",
             "columnName": "courseImage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "media.courseVideo",
             "columnName": "courseVideo",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "media.image",
             "columnName": "image",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -158,9 +154,7 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "course_enrolled_table",
@@ -301,62 +295,52 @@
           {
             "fieldPath": "course.coursewareAccess.hasAccess",
             "columnName": "hasAccess",
-            "affinity": "INTEGER",
-            "notNull": false
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "course.coursewareAccess.errorCode",
             "columnName": "errorCode",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "course.coursewareAccess.developerMessage",
             "columnName": "developerMessage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "course.coursewareAccess.userMessage",
             "columnName": "userMessage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "course.coursewareAccess.additionalContextUserMessage",
             "columnName": "additionalContextUserMessage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "course.coursewareAccess.userFragment",
             "columnName": "userFragment",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "course.media.bannerImage",
             "columnName": "bannerImage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "course.media.courseImage",
             "columnName": "courseImage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "course.media.courseVideo",
             "columnName": "courseVideo",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "course.media.image",
             "columnName": "image",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "course.courseSharingUtmParameters.facebook",
@@ -373,8 +357,7 @@
           {
             "fieldPath": "certificate.certificateURL",
             "columnName": "certificateURL",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "progress.assignmentsCompleted",
@@ -391,38 +374,32 @@
           {
             "fieldPath": "courseStatus.lastVisitedModuleId",
             "columnName": "lastVisitedModuleId",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseStatus.lastVisitedModulePath",
             "columnName": "lastVisitedModulePath",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseStatus.lastVisitedBlockId",
             "columnName": "lastVisitedBlockId",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseStatus.lastVisitedUnitDisplayName",
             "columnName": "lastVisitedUnitDisplayName",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseAssignments.futureAssignments",
             "columnName": "futureAssignments",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseAssignments.pastAssignments",
             "columnName": "pastAssignments",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -430,9 +407,7 @@
           "columnNames": [
             "courseId"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "course_structure_table",
@@ -477,8 +452,7 @@
           {
             "fieldPath": "start",
             "columnName": "start",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "startDisplay",
@@ -495,8 +469,7 @@
           {
             "fieldPath": "end",
             "columnName": "end",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "isSelfPaced",
@@ -507,68 +480,57 @@
           {
             "fieldPath": "coursewareAccess.hasAccess",
             "columnName": "hasAccess",
-            "affinity": "INTEGER",
-            "notNull": false
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "coursewareAccess.errorCode",
             "columnName": "errorCode",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "coursewareAccess.developerMessage",
             "columnName": "developerMessage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "coursewareAccess.userMessage",
             "columnName": "userMessage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "coursewareAccess.additionalContextUserMessage",
             "columnName": "additionalContextUserMessage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "coursewareAccess.userFragment",
             "columnName": "userFragment",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "media.bannerImage",
             "columnName": "bannerImage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "media.courseImage",
             "columnName": "courseImage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "media.courseVideo",
             "columnName": "courseVideo",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "media.image",
             "columnName": "image",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "certificate.certificateURL",
             "columnName": "certificateURL",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "progress.assignmentsCompleted",
@@ -588,9 +550,7 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "download_model",
@@ -647,8 +607,7 @@
           {
             "fieldPath": "lastModified",
             "columnName": "lastModified",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -656,9 +615,7 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "offline_x_block_progress_table",
@@ -700,9 +657,7 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "course_calendar_event_table",
@@ -726,9 +681,7 @@
           "columnNames": [
             "event_id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "course_calendar_state_table",
@@ -758,9 +711,7 @@
           "columnNames": [
             "course_id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "download_course_preview_table",
@@ -775,20 +726,17 @@
           {
             "fieldPath": "name",
             "columnName": "course_name",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "image",
             "columnName": "course_image",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "totalSize",
             "columnName": "total_size",
-            "affinity": "INTEGER",
-            "notNull": false
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -796,9 +744,7 @@
           "columnNames": [
             "course_id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "course_enrollment_details_table",
@@ -849,62 +795,52 @@
           {
             "fieldPath": "courseAccessDetails.auditAccessExpires",
             "columnName": "auditAccessExpires",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseAccessDetails.coursewareAccess.hasAccess",
             "columnName": "hasAccess",
-            "affinity": "INTEGER",
-            "notNull": false
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "courseAccessDetails.coursewareAccess.errorCode",
             "columnName": "errorCode",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseAccessDetails.coursewareAccess.developerMessage",
             "columnName": "developerMessage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseAccessDetails.coursewareAccess.userMessage",
             "columnName": "userMessage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseAccessDetails.coursewareAccess.additionalContextUserMessage",
             "columnName": "additionalContextUserMessage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseAccessDetails.coursewareAccess.userFragment",
             "columnName": "userFragment",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "certificate.certificateURL",
             "columnName": "certificateURL",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "enrollmentDetails.created",
             "columnName": "created",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "enrollmentDetails.mode",
             "columnName": "mode",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "enrollmentDetails.isActive",
@@ -915,8 +851,7 @@
           {
             "fieldPath": "enrollmentDetails.upgradeDeadline",
             "columnName": "upgradeDeadline",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseInfoOverview.name",
@@ -963,26 +898,22 @@
           {
             "fieldPath": "courseInfoOverview.media.bannerImage",
             "columnName": "bannerImage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseInfoOverview.media.courseImage",
             "columnName": "courseImage",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseInfoOverview.media.courseVideo",
             "columnName": "courseVideo",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseInfoOverview.media.image",
             "columnName": "image",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseInfoOverview.courseSharingUtmParameters.facebook",
@@ -1002,9 +933,7 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "video_progress_table",
@@ -1025,14 +954,12 @@
           {
             "fieldPath": "videoTime",
             "columnName": "video_time",
-            "affinity": "INTEGER",
-            "notNull": false
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "duration",
             "columnName": "duration",
-            "affinity": "INTEGER",
-            "notNull": false
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -1040,9 +967,7 @@
           "columnNames": [
             "block_id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "course_progress_table",
@@ -1123,98 +1048,82 @@
           {
             "fieldPath": "certificateData.certStatus",
             "columnName": "certificate_certStatus",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "certificateData.certWebViewUrl",
             "columnName": "certificate_certWebViewUrl",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "certificateData.downloadUrl",
             "columnName": "certificate_downloadUrl",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "certificateData.certificateAvailableDate",
             "columnName": "certificate_certificateAvailableDate",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "completionSummary.completeCount",
             "columnName": "completion_completeCount",
-            "affinity": "INTEGER",
-            "notNull": false
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "completionSummary.incompleteCount",
             "columnName": "completion_incompleteCount",
-            "affinity": "INTEGER",
-            "notNull": false
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "completionSummary.lockedCount",
             "columnName": "completion_lockedCount",
-            "affinity": "INTEGER",
-            "notNull": false
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "courseGrade.letterGrade",
             "columnName": "grade_letterGrade",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "courseGrade.percent",
             "columnName": "grade_percent",
-            "affinity": "REAL",
-            "notNull": false
+            "affinity": "REAL"
           },
           {
             "fieldPath": "courseGrade.isPassing",
             "columnName": "grade_isPassing",
-            "affinity": "INTEGER",
-            "notNull": false
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "gradingPolicy.assignmentPolicies",
             "columnName": "grading_assignmentPolicies",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "gradingPolicy.gradeRange",
             "columnName": "grading_gradeRange",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "gradingPolicy.assignmentColors",
             "columnName": "grading_assignmentColors",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "verificationData.link",
             "columnName": "verification_link",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "verificationData.status",
             "columnName": "verification_status",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "verificationData.statusDate",
             "columnName": "verification_statusDate",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -1222,12 +1131,9 @@
           "columnNames": [
             "courseId"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       }
     ],
-    "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
       "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7ea446decde04c9c16700cb3981703c2')"
