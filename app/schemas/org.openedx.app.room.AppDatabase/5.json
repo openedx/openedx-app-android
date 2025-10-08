@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "7ea446decde04c9c16700cb3981703c2",
+    "identityHash": "09f6fc49a2f7a494d27f3290d7bae350",
     "entities": [
       {
         "tableName": "course_discovery_table",
@@ -748,7 +748,7 @@
       },
       {
         "tableName": "course_enrollment_details_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `courseUpdates` TEXT NOT NULL, `courseHandouts` TEXT NOT NULL, `discussionUrl` TEXT NOT NULL, `hasUnmetPrerequisites` INTEGER NOT NULL, `isTooEarly` INTEGER NOT NULL, `isStaff` INTEGER NOT NULL, `auditAccessExpires` TEXT, `hasAccess` INTEGER, `errorCode` TEXT, `developerMessage` TEXT, `userMessage` TEXT, `additionalContextUserMessage` TEXT, `userFragment` TEXT, `certificateURL` TEXT, `created` TEXT, `mode` TEXT, `isActive` INTEGER NOT NULL, `upgradeDeadline` TEXT, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `org` TEXT NOT NULL, `startDisplay` TEXT NOT NULL, `startType` TEXT NOT NULL, `isSelfPaced` INTEGER NOT NULL, `courseAbout` TEXT NOT NULL, `bannerImage` TEXT, `courseImage` TEXT, `courseVideo` TEXT, `image` TEXT, `facebook` TEXT NOT NULL, `twitter` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `courseUpdates` TEXT NOT NULL, `courseHandouts` TEXT NOT NULL, `discussionUrl` TEXT NOT NULL, `hasUnmetPrerequisites` INTEGER NOT NULL, `isTooEarly` INTEGER NOT NULL, `isStaff` INTEGER NOT NULL, `auditAccessExpires` TEXT, `hasAccess` INTEGER, `errorCode` TEXT, `developerMessage` TEXT, `userMessage` TEXT, `additionalContextUserMessage` TEXT, `userFragment` TEXT, `certificateURL` TEXT, `created` TEXT, `mode` TEXT, `isActive` INTEGER NOT NULL, `upgradeDeadline` TEXT, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `org` TEXT NOT NULL, `start` INTEGER, `startDisplay` TEXT NOT NULL, `startType` TEXT NOT NULL, `end` INTEGER, `isSelfPaced` INTEGER NOT NULL, `courseAbout` TEXT NOT NULL, `bannerImage` TEXT, `courseImage` TEXT, `courseVideo` TEXT, `image` TEXT, `facebook` TEXT NOT NULL, `twitter` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -872,6 +872,11 @@
             "notNull": true
           },
           {
+            "fieldPath": "courseInfoOverview.start",
+            "columnName": "start",
+            "affinity": "INTEGER"
+          },
+          {
             "fieldPath": "courseInfoOverview.startDisplay",
             "columnName": "startDisplay",
             "affinity": "TEXT",
@@ -882,6 +887,11 @@
             "columnName": "startType",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "courseInfoOverview.end",
+            "columnName": "end",
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "courseInfoOverview.isSelfPaced",
@@ -1136,7 +1146,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7ea446decde04c9c16700cb3981703c2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '09f6fc49a2f7a494d27f3290d7bae350')"
     ]
   }
 }

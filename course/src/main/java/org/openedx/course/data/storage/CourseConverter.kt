@@ -8,8 +8,19 @@ import org.openedx.core.data.model.room.GradingPolicyDb
 import org.openedx.core.data.model.room.SectionScoreDb
 import org.openedx.core.data.model.room.discovery.CourseDateBlockDb
 import org.openedx.foundation.extension.genericType
+import java.util.Date
 
 class CourseConverter {
+
+    @TypeConverter
+    fun fromDate(value: Date?): Long? {
+        return value?.time
+    }
+
+    @TypeConverter
+    fun toDate(value: Long?): Date? {
+        return value?.let { Date(it) }
+    }
 
     @TypeConverter
     fun fromListOfString(value: List<String>): String {

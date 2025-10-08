@@ -51,13 +51,13 @@ data class CourseInfoOverviewDb(
     val number: String,
     @ColumnInfo("org")
     val org: String,
-    @Embedded
+    @ColumnInfo("start")
     val start: Date?,
     @ColumnInfo("startDisplay")
     val startDisplay: String,
     @ColumnInfo("startType")
     val startType: String,
-    @Embedded
+    @ColumnInfo("end")
     val end: Date?,
     @ColumnInfo("isSelfPaced")
     val isSelfPaced: Boolean,
