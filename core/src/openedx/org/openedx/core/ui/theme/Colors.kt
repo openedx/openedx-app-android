@@ -16,25 +16,25 @@ val light_onSurface = Color.Black
 val light_onError = Color.White
 val light_onWarning = Color.White
 val light_onInfo = Color.White
-val light_info_variant = Color(0xFF3C68FF)
+val light_info_variant = light_primary
 val light_text_primary = Color(0xFF212121)
 val light_text_primary_variant = Color(0xFF3D4964)
 val light_text_primary_light = light_text_primary
 val light_text_secondary = Color(0xFFB3B3B3)
 val light_text_dark = Color(0xFF19212F)
-val light_text_accent = Color(0xFF3C68FF)
+val light_text_accent = light_primary
 val light_text_warning = Color(0xFF19212F)
 val light_text_field_background = Color(0xFFF7F7F8)
 val light_text_field_background_variant = Color.White
 val light_text_field_border = Color(0xFF97A5BB)
 val light_text_field_text = Color(0xFF3D4964)
 val light_text_field_hint = Color(0xFF97A5BB)
-val light_text_hyper_link = Color(0xFF3C68FF)
+val light_text_hyper_link = light_primary
 
-val light_primary_button_background = Color(0xFF3C68FF)
+val light_primary_button_background = light_primary
 val light_primary_button_border = Color(0xFF97A5BB)
 val light_primary_button_text = Color.White
-val light_primary_button_bordered_text = Color(0xFF3C68FF)
+val light_primary_button_bordered_text = light_primary
 
 val light_secondary_button_background = light_primary_button_background
 val light_secondary_button_text = light_primary_button_text
@@ -102,12 +102,12 @@ val dark_text_field_background_variant = Color(0xFF273346)
 val dark_text_field_border = Color(0xFF4E5A70)
 val dark_text_field_text = Color.White
 val dark_text_field_hint = Color(0xFF79889F)
-val dark_text_hyper_link = Color(0xFF5478F9)
+val dark_text_hyper_link = dark_primary
 
-val dark_primary_button_background = Color(0xFF5478F9)
+val dark_primary_button_background = dark_primary
 val dark_primary_button_text = Color.White
 val dark_primary_button_border = Color(0xFF4E5A70)
-val dark_primary_button_bordered_text = Color(0xFF5478F9)
+val dark_primary_button_bordered_text = dark_primary
 
 val dark_secondary_button_background = dark_primary_button_background
 val dark_secondary_button_text = dark_primary_button_text

@@ -51,6 +51,7 @@ import androidx.compose.material.Snackbar
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
@@ -376,7 +377,7 @@ fun NavigationUnitsButtons(
                 colors = ButtonDefaults.outlinedButtonColors(
                     backgroundColor = MaterialTheme.appColors.background
                 ),
-                border = BorderStroke(1.dp, MaterialTheme.appColors.primaryButtonBorder),
+                border = BorderStroke(1.dp, MaterialTheme.appColors.textAccent),
                 elevation = null,
                 shape = MaterialTheme.appShapes.navigationButtonShape,
                 onClick = onPrevClick,
@@ -385,18 +386,27 @@ fun NavigationUnitsButtons(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
+                    if (!isVerticalNavigation) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            tint = MaterialTheme.appColors.textAccent
+                        )
+                        Spacer(Modifier.width(8.dp))
+                    }
                     Text(
                         text = stringResource(R.string.course_navigation_prev),
-                        color = MaterialTheme.appColors.primary,
+                        color = MaterialTheme.appColors.textAccent,
                         style = MaterialTheme.appTypography.labelLarge
                     )
-                    Spacer(Modifier.width(8.dp))
-                    Icon(
-                        modifier = Modifier.rotate(if (isVerticalNavigation) 0f else -90f),
-                        painter = painterResource(id = coreR.drawable.core_ic_up),
-                        contentDescription = null,
-                        tint = MaterialTheme.appColors.primary
-                    )
+                    if (isVerticalNavigation) {
+                        Spacer(Modifier.width(8.dp))
+                        Icon(
+                            painter = painterResource(id = coreR.drawable.core_ic_up),
+                            contentDescription = null,
+                            tint = MaterialTheme.appColors.textAccent
+                        )
+                    }
                 }
             }
             Spacer(Modifier.width(16.dp))
@@ -422,12 +432,19 @@ fun NavigationUnitsButtons(
                         style = MaterialTheme.appTypography.labelLarge
                     )
                     Spacer(Modifier.width(8.dp))
-                    Icon(
-                        modifier = Modifier.rotate(if (isVerticalNavigation || !hasNextBlock) 0f else -90f),
-                        painter = nextButtonIcon,
-                        contentDescription = null,
-                        tint = MaterialTheme.appColors.primaryButtonText
-                    )
+                    if (isVerticalNavigation || !hasNextBlock) {
+                        Icon(
+                            painter = nextButtonIcon,
+                            contentDescription = null,
+                            tint = MaterialTheme.appColors.primaryButtonText
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = MaterialTheme.appColors.primaryButtonText
+                        )
+                    }
                 }
             }
         }
