@@ -93,7 +93,7 @@ class CourseUnitContainerViewModel(
     private val _currentBlock = MutableStateFlow<Block?>(null)
     val currentBlock = _currentBlock.asStateFlow()
 
-    private val _hierarchyPath = MutableStateFlow<String>("")
+    private val _hierarchyPath = MutableStateFlow("")
     val hierarchyPath = _hierarchyPath.asStateFlow()
 
     var nextButtonText = ""
@@ -422,12 +422,10 @@ class CourseUnitContainerViewModel(
     private fun buildHierarchyPath(block: Block): String {
         val pathComponents = mutableListOf<String>()
 
-        // Find the current block (Unit)
-        pathComponents.add(block.displayName)
-
-        // Find the parent Vertical block (but don't add it to path)
         val verticalBlock = findParentBlock(block.id)
         verticalBlock?.let { vertical ->
+            // Vertical name
+            pathComponents.add(0, vertical.displayName)
             // Find the parent Sequential block (Subsection)
             val sequentialBlock = findParentBlock(vertical.id)
             sequentialBlock?.let { sequential ->

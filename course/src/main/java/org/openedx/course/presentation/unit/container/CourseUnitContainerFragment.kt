@@ -612,19 +612,29 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     } else {
                         null
                     }
+                    val borderWidth = if (isSelectedBlock) {
+                        3.dp
+                    } else {
+                        1.dp
+                    }
                     CourseVideoItem(
                         modifier = Modifier
                             .width(112.dp)
                             .height(63.dp),
                         videoBlock = block,
                         preview = videoPreview[block.id],
-                        progress = videoProgress[block.id] ?: 0f,
+                        progress = if (isSelectedBlock) {
+                            0f
+                        } else {
+                            videoProgress[block.id] ?: 0f
+                        },
                         onClick = {
                             onVideoClick(block)
                         },
                         titleStyle = MaterialTheme.appTypography.labelSmall,
                         playButtonSize = playButtonSize,
-                        borderColor = borderColor
+                        borderColor = borderColor,
+                        borderWidth = borderWidth
                     )
                 }
             }

@@ -721,7 +721,8 @@ fun CourseVideoItem(
     contentModifier: Modifier = Modifier.padding(8.dp),
     progressModifier: Modifier = Modifier.height(4.dp),
     playButtonSize: Dp = 32.dp,
-    borderColor: Color? = null
+    borderColor: Color? = null,
+    borderWidth: Dp = 3.dp,
 ) {
     val borderColor = borderColor ?: if (videoBlock.isCompleted()) {
         MaterialTheme.appColors.successGreen
@@ -732,7 +733,7 @@ fun CourseVideoItem(
         modifier = modifier
             .clip(MaterialTheme.appShapes.videoPreviewShape)
             .border(
-                width = 3.dp,
+                width = borderWidth,
                 color = borderColor,
                 shape = MaterialTheme.appShapes.videoPreviewShape
             )
@@ -783,7 +784,7 @@ fun CourseVideoItem(
                 style = titleStyle,
                 modifier = Modifier
                     .align(Alignment.TopStart),
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
