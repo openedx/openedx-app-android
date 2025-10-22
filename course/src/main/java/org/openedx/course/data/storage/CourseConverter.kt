@@ -7,7 +7,6 @@ import org.openedx.core.data.model.room.BlockDb
 import org.openedx.core.data.model.room.GradingPolicyDb
 import org.openedx.core.data.model.room.SectionScoreDb
 import org.openedx.core.data.model.room.discovery.CourseDateBlockDb
-import org.openedx.foundation.extension.genericType
 import java.util.Date
 
 class CourseConverter {
@@ -30,7 +29,7 @@ class CourseConverter {
 
     @TypeConverter
     fun toListOfString(value: String): List<String> {
-        val type = genericType<List<String>>()
+        val type = object : TypeToken<List<String>>() {}.type
         return Gson().fromJson(value, type)
     }
 
@@ -42,7 +41,7 @@ class CourseConverter {
 
     @TypeConverter
     fun toListOfBlockDbEntity(value: String): List<BlockDb> {
-        val type = genericType<List<BlockDb>>()
+        val type = object : TypeToken<List<BlockDb>>() {}.type
         return Gson().fromJson(value, type)
     }
 
@@ -54,7 +53,7 @@ class CourseConverter {
 
     @TypeConverter
     fun toListOfCourseDateBlockDb(value: String): List<CourseDateBlockDb> {
-        val type = genericType<List<CourseDateBlockDb>>()
+        val type = object : TypeToken<List<CourseDateBlockDb>>() {}.type
         return Gson().fromJson(value, type)
     }
 

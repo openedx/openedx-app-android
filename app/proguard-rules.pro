@@ -3,6 +3,10 @@
 # removes such information by default, so configure it to keep all of it.
 -keepattributes Signature
 
+# CRITICAL: Keep generic type information for TypeToken to work properly
+-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
+-keepattributes *Annotation*
+
 # For using GSON @Expose annotation
 -keepattributes *Annotation*
 
@@ -23,8 +27,74 @@
 }
 
 # Retain generic signatures of TypeToken and its subclasses with R8 version 3.0 and higher.
--keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
--keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
+# CRITICAL: Do NOT allow obfuscation or shrinking of TypeToken - it needs to preserve generic type information
+-keep class com.google.gson.reflect.TypeToken
+-keep class * extends com.google.gson.reflect.TypeToken
+
+# Keep TypeToken constructors and methods to preserve generic type information
+-keepclassmembers class com.google.gson.reflect.TypeToken {
+    <init>(...);
+    <methods>;
+}
+
+# Keep all Gson reflection classes that handle generic types
+-keep class com.google.gson.reflect.** { *; }
+
+# CRITICAL: Keep Google Guava TypeToken and TypeCapture classes (used by Gson)
+-keep class com.google.common.reflect.TypeToken { *; }
+-keep class com.google.common.reflect.TypeCapture { *; }
+-keep class com.google.common.reflect.TypeToken$* { *; }
+-keep class com.google.common.reflect.TypeCapture$* { *; }
+
+# Keep all anonymous subclasses of TypeToken (created by object : TypeToken<T>() {})
+-keep class * extends com.google.common.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken { *; }
+
+# Keep Gson TypeAdapter classes used by Room TypeConverters
+-keep class * extends com.google.gson.TypeAdapter
+-keep class * implements com.google.gson.TypeAdapterFactory
+
+# Keep Room TypeConverters that use Gson (important for complex types like List<SectionScoreDb>)
+-keep @androidx.room.TypeConverter class * { *; }
+-keepclassmembers class * {
+    @androidx.room.TypeConverter <methods>;
+}
+
+# Keep generic type information for Room entities with complex types
+-keepclassmembers class org.openedx.**.data.model.room.** {
+    <fields>;
+    <init>(...);
+    * mapToDomain();
+    * mapToRoomEntity();
+    * mapToEntity();
+}
+
+# CRITICAL: Keep the CourseConverter and all its TypeToken usage
+-keep class org.openedx.course.data.storage.CourseConverter { *; }
+-keepclassmembers class org.openedx.course.data.storage.CourseConverter {
+    <init>(...);
+    <methods>;
+}
+
+# Keep anonymous TypeToken subclasses created in CourseConverter
+-keep class org.openedx.course.data.storage.CourseConverter$* { *; }
+
+# CRITICAL: Prevent obfuscation of CourseConverter methods that use TypeToken
+-keepclassmembers,allowobfuscation class org.openedx.course.data.storage.CourseConverter {
+    @androidx.room.TypeConverter <methods>;
+}
+
+# Keep all TypeConverter classes that use Gson
+-keep class org.openedx.discovery.data.converter.DiscoveryConverter { *; }
+
+# Keep the specific TypeToken usage patterns in TypeConverters
+-keepclassmembers class org.openedx.**.data.storage.** {
+    @androidx.room.TypeConverter <methods>;
+}
+
+-keepclassmembers class org.openedx.**.data.converter.** {
+    @androidx.room.TypeConverter <methods>;
+}
 ##---------------End: proguard configuration for Gson  ----------
 
 -keepclassmembers class * extends java.lang.Enum {
@@ -32,6 +102,45 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
+
+##---------------Begin: proguard configuration for Kotlin Coroutines  ----------
+# Keep all coroutine-related classes and methods
+-keep class kotlinx.coroutines.** { *; }
+-keep class kotlin.coroutines.** { *; }
+-keep class kotlin.coroutines.intrinsics.** { *; }
+
+# Keep suspend functions and coroutine builders
+-keepclassmembers class * {
+    kotlin.coroutines.Continuation *(...);
+}
+
+# Keep coroutine context and related classes
+-keep class kotlinx.coroutines.CoroutineContext$* { *; }
+
+# Keep Flow and StateFlow classes
+-keep class kotlinx.coroutines.flow.** { *; }
+
+# Keep coroutine dispatchers
+-keep class kotlinx.coroutines.Dispatchers { *; }
+-keep class kotlinx.coroutines.Dispatchers$* { *; }
+
+# Keep coroutine scope and job classes
+-keep class kotlinx.coroutines.CoroutineScope { *; }
+-keep class kotlinx.coroutines.Job { *; }
+-keep class kotlinx.coroutines.Job$* { *; }
+
+# Keep coroutine intrinsics that are causing the error
+-keep class kotlin.coroutines.intrinsics.IntrinsicsKt { *; }
+-keep class kotlin.coroutines.intrinsics.IntrinsicsKt$* { *; }
+
+# Keep suspend function markers
+-keepclassmembers class * {
+    @kotlin.coroutines.RestrictsSuspension <methods>;
+}
+
+# Keep coroutine-related annotations
+-keep @kotlin.coroutines.RestrictsSuspension class * { *; }
+##---------------End: proguard configuration for Kotlin Coroutines  ----------
 
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
 -dontwarn org.bouncycastle.jsse.BCSSLSocket
