@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.unit.container
 
-import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -21,6 +20,7 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.BlockType
 import org.openedx.core.config.Config
+import org.openedx.core.domain.helper.VideoPreviewHelper
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
@@ -41,12 +41,12 @@ class CourseUnitContainerViewModelTest {
 
     private val dispatcher = StandardTestDispatcher()
 
-    private val context = mockk<Context>()
     private val config = mockk<Config>()
     private val interactor = mockk<CourseInteractor>()
     private val notifier = mockk<CourseNotifier>()
     private val analytics = mockk<CourseAnalytics>()
     private val networkConnection = mockk<NetworkConnection>()
+    private val videoPreviewHelper = mockk<VideoPreviewHelper>()
 
     private val assignmentProgress = AssignmentProgress(
         assignmentType = "Homework",
@@ -163,6 +163,7 @@ class CourseUnitContainerViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
+        every { videoPreviewHelper.getVideoPreviews(any(), any()) } returns emptyMap()
     }
 
     @After
@@ -177,12 +178,12 @@ class CourseUnitContainerViewModelTest {
             "",
             "",
             CourseViewMode.FULL,
-            context,
             config,
             interactor,
             notifier,
             analytics,
-            networkConnection
+            networkConnection,
+            videoPreviewHelper
         )
 
         coEvery { interactor.getCourseStructure(any()) } throws UnknownHostException()
@@ -201,12 +202,12 @@ class CourseUnitContainerViewModelTest {
             "",
             "",
             CourseViewMode.FULL,
-            context,
             config,
             interactor,
             notifier,
             analytics,
-            networkConnection
+            networkConnection,
+            videoPreviewHelper
         )
 
         coEvery { interactor.getCourseStructure(any()) } throws UnknownHostException()
@@ -225,12 +226,12 @@ class CourseUnitContainerViewModelTest {
             "",
             "",
             CourseViewMode.VIDEOS,
-            context,
             config,
             interactor,
             notifier,
             analytics,
-            networkConnection
+            networkConnection,
+            videoPreviewHelper
         )
 
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
@@ -251,12 +252,12 @@ class CourseUnitContainerViewModelTest {
             "",
             "",
             CourseViewMode.VIDEOS,
-            context,
             config,
             interactor,
             notifier,
             analytics,
-            networkConnection
+            networkConnection,
+            videoPreviewHelper
         )
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
@@ -275,12 +276,12 @@ class CourseUnitContainerViewModelTest {
             "",
             "",
             CourseViewMode.VIDEOS,
-            context,
             config,
             interactor,
             notifier,
             analytics,
-            networkConnection
+            networkConnection,
+            videoPreviewHelper
         )
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
@@ -301,12 +302,12 @@ class CourseUnitContainerViewModelTest {
             "",
             "",
             CourseViewMode.VIDEOS,
-            context,
             config,
             interactor,
             notifier,
             analytics,
-            networkConnection
+            networkConnection,
+            videoPreviewHelper
         )
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
@@ -327,12 +328,12 @@ class CourseUnitContainerViewModelTest {
             "",
             "id",
             CourseViewMode.VIDEOS,
-            context,
             config,
             interactor,
             notifier,
             analytics,
-            networkConnection
+            networkConnection,
+            videoPreviewHelper
         )
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
@@ -353,12 +354,12 @@ class CourseUnitContainerViewModelTest {
             "",
             "",
             CourseViewMode.VIDEOS,
-            context,
             config,
             interactor,
             notifier,
             analytics,
-            networkConnection
+            networkConnection,
+            videoPreviewHelper
         )
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
@@ -379,12 +380,12 @@ class CourseUnitContainerViewModelTest {
             "",
             "id",
             CourseViewMode.VIDEOS,
-            context,
             config,
             interactor,
             notifier,
             analytics,
-            networkConnection
+            networkConnection,
+            videoPreviewHelper
         )
         coEvery { interactor.getCourseStructure("") } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos("") } returns courseStructure
@@ -405,12 +406,12 @@ class CourseUnitContainerViewModelTest {
             "",
             "",
             CourseViewMode.VIDEOS,
-            context,
             config,
             interactor,
             notifier,
             analytics,
-            networkConnection
+            networkConnection,
+            videoPreviewHelper
         )
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure

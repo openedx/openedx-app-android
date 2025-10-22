@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.home
 
-import android.content.Context
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +17,7 @@ import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.helper.VideoPreviewHelper
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
 import org.openedx.core.domain.model.CourseDatesBannerInfo
@@ -54,7 +54,6 @@ import org.openedx.course.R as courseR
 class CourseHomeViewModel(
     val courseId: String,
     private val courseTitle: String,
-    private val context: Context,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
@@ -65,6 +64,7 @@ class CourseHomeViewModel(
     private val downloadDialogManager: DownloadDialogManager,
     private val fileUtil: FileUtil,
     val courseRouter: CourseRouter,
+    private val videoPreviewHelper: VideoPreviewHelper,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
@@ -270,11 +270,9 @@ class CourseHomeViewModel(
 
     private fun getVideoPreview(videoBlock: Block?) {
         viewModelScope.launch(Dispatchers.IO) {
-            val videoPreview = videoBlock?.getVideoPreview(
-                context,
-                networkConnection.isOnline(),
-                null
-            )
+            val videoPreview = videoBlock?.let { block ->
+                videoPreviewHelper.getVideoPreview(block, null)
+            }
             _uiState.value = (_uiState.value as? CourseHomeUIState.CourseData)
                 ?.copy(
                     videoPreview = videoPreview

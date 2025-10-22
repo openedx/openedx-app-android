@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.unit.container
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -13,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.openedx.core.BlockType
 import org.openedx.core.config.Config
+import org.openedx.core.domain.helper.VideoPreviewHelper
 import org.openedx.core.domain.model.Block
 import org.openedx.core.extension.safeDivBy
 import org.openedx.core.module.db.DownloadModel
@@ -34,12 +34,12 @@ class CourseUnitContainerViewModel(
     val courseId: String,
     val unitId: String,
     val mode: CourseViewMode,
-    private val context: Context,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics,
     private val networkConnection: NetworkConnection,
+    private val videoPreviewHelper: VideoPreviewHelper,
 ) : BaseViewModel() {
 
     private val blocks = ArrayList<Block>()
@@ -408,13 +408,7 @@ class CourseUnitContainerViewModel(
     private suspend fun loadVideoPreview() {
         val videoBlocks = getAllVideoBlocks()
         val videoPreview = withContext(Dispatchers.IO) {
-            videoBlocks.associate { block ->
-                block.id to block.getVideoPreview(
-                    context,
-                    networkConnection.isOnline(),
-                    null
-                )
-            }
+            videoPreviewHelper.getVideoPreviews(videoBlocks)
         }
         _videoPreview.value = videoPreview
     }

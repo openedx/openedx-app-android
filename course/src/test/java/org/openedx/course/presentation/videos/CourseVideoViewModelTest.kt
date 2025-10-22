@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.videos
 
-import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -32,6 +31,7 @@ import org.openedx.core.BlockType
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.room.VideoProgressEntity
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.helper.VideoPreviewHelper
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
@@ -66,7 +66,6 @@ class CourseVideoViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
 
-    private val context = mockk<Context>()
     private val config = mockk<Config>()
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<CourseInteractor>()
@@ -81,6 +80,7 @@ class CourseVideoViewModelTest {
     private val downloadHelper = mockk<DownloadHelper>()
     private val downloadDialogManager = mockk<DownloadDialogManager>()
     private val fileUtil = mockk<FileUtil>()
+    private val videoPreviewHelper = mockk<VideoPreviewHelper>()
 
     private val cantDownload = "You can download content only from Wi-fi"
 
@@ -211,6 +211,11 @@ class CourseVideoViewModelTest {
                 any(),
             )
         } returns Unit
+
+        every { videoPreviewHelper.getVideoPreviewWithId(any(), any(), any()) } returns Pair(
+            "test",
+            null
+        )
     }
 
     @After
@@ -228,7 +233,6 @@ class CourseVideoViewModelTest {
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",
-            context,
             config,
             interactor,
             resourceManager,
@@ -239,6 +243,7 @@ class CourseVideoViewModelTest {
             fileUtil,
             courseRouter,
             courseAnalytics,
+            videoPreviewHelper,
             coreAnalytics,
             downloadDao,
             workerController,
@@ -266,7 +271,6 @@ class CourseVideoViewModelTest {
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",
-            context,
             config,
             interactor,
             resourceManager,
@@ -277,6 +281,7 @@ class CourseVideoViewModelTest {
             fileUtil,
             courseRouter,
             courseAnalytics,
+            videoPreviewHelper,
             coreAnalytics,
             downloadDao,
             workerController,
@@ -310,7 +315,6 @@ class CourseVideoViewModelTest {
         coEvery { interactor.getVideoProgress(any()) } returns VideoProgressEntity("", "", 0L, 0L)
         val viewModel = CourseVideoViewModel(
             "",
-            context,
             config,
             interactor,
             resourceManager,
@@ -321,6 +325,7 @@ class CourseVideoViewModelTest {
             fileUtil,
             courseRouter,
             courseAnalytics,
+            videoPreviewHelper,
             coreAnalytics,
             downloadDao,
             workerController,
@@ -356,7 +361,6 @@ class CourseVideoViewModelTest {
         every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
         val viewModel = CourseVideoViewModel(
             "",
-            context,
             config,
             interactor,
             resourceManager,
@@ -367,6 +371,7 @@ class CourseVideoViewModelTest {
             fileUtil,
             courseRouter,
             courseAnalytics,
+            videoPreviewHelper,
             coreAnalytics,
             downloadDao,
             workerController,
@@ -398,7 +403,6 @@ class CourseVideoViewModelTest {
             every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
             val viewModel = CourseVideoViewModel(
                 "",
-                context,
                 config,
                 interactor,
                 resourceManager,
@@ -409,6 +413,7 @@ class CourseVideoViewModelTest {
                 fileUtil,
                 courseRouter,
                 courseAnalytics,
+                videoPreviewHelper,
                 coreAnalytics,
                 downloadDao,
                 workerController,
@@ -444,7 +449,6 @@ class CourseVideoViewModelTest {
             coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
             val viewModel = CourseVideoViewModel(
                 "",
-                context,
                 config,
                 interactor,
                 resourceManager,
@@ -455,6 +459,7 @@ class CourseVideoViewModelTest {
                 fileUtil,
                 courseRouter,
                 courseAnalytics,
+                videoPreviewHelper,
                 coreAnalytics,
                 downloadDao,
                 workerController,

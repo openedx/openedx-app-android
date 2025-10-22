@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.home
 
-import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -26,6 +25,7 @@ import org.openedx.core.Mock
 import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.helper.VideoPreviewHelper
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.DownloadHelper
@@ -56,7 +56,6 @@ class CourseHomeViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val courseId = "test-course-id"
     private val courseTitle = "Test Course"
-    private val context = mockk<Context>()
     private val config = mockk<Config>()
     private val interactor = mockk<CourseInteractor>()
     private val resourceManager = mockk<ResourceManager>()
@@ -71,6 +70,7 @@ class CourseHomeViewModelTest {
     private val downloadDao = mockk<DownloadDao>()
     private val workerController = mockk<DownloadWorkerController>()
     private val downloadHelper = mockk<DownloadHelper>()
+    private val videoPreviewHelper = mockk<VideoPreviewHelper>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -130,6 +130,8 @@ class CourseHomeViewModelTest {
         } returns Unit
 
         coEvery { workerController.saveModels(any()) } returns Unit
+
+        every { videoPreviewHelper.getVideoPreview(any(), any()) } returns null
     }
 
     @After
@@ -162,7 +164,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -173,6 +174,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
@@ -218,7 +220,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -229,6 +230,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
@@ -266,7 +268,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -277,6 +278,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
@@ -315,7 +317,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -326,6 +327,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
@@ -364,7 +366,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -375,6 +376,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
@@ -421,7 +423,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -432,6 +433,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
@@ -477,7 +479,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -488,6 +489,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
@@ -535,7 +537,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -546,6 +547,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
@@ -593,7 +595,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -604,6 +605,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
@@ -649,7 +651,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -660,6 +661,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
@@ -699,7 +701,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -710,6 +711,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
@@ -747,7 +749,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -758,6 +759,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
@@ -793,7 +795,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -804,6 +805,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
@@ -841,7 +843,6 @@ class CourseHomeViewModelTest {
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
             courseTitle = courseTitle,
-            context = context,
             config = config,
             interactor = interactor,
             resourceManager = resourceManager,
@@ -852,6 +853,7 @@ class CourseHomeViewModelTest {
             downloadDialogManager = downloadDialogManager,
             fileUtil = fileUtil,
             courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
             coreAnalytics = coreAnalytics,
             downloadDao = downloadDao,
             workerController = workerController,
