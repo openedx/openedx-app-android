@@ -20,7 +20,7 @@ buildscript {
 
         // Library versions
         media3_version = "1.8.0"
-        youtubeplayer_version = "11.1.0"
+        youtubeplayer_version = "13.0.0"
         firebase_version = "33.0.0"
         jsoup_version = '1.21.2'
         in_app_review = '2.0.2'
