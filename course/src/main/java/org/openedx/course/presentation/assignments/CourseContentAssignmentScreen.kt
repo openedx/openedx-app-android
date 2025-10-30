@@ -212,7 +212,7 @@ private fun AssignmentGroupSection(
         completed = assignments.filter { it.isCompleted() }.size
     )
     val description = stringResource(
-        id = R.string.course_completed,
+        id = R.string.course_completed_of,
         progress.completed,
         progress.total
     )
