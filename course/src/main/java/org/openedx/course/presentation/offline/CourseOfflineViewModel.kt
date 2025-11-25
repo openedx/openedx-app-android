@@ -18,7 +18,6 @@ import org.openedx.core.extension.safeDivBy
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModel
-import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
 import org.openedx.core.module.download.BaseDownloadViewModel
 import org.openedx.core.module.download.DownloadHelper
@@ -171,10 +170,13 @@ class CourseOfflineViewModel(
                 val downloadedBlocks = courseStructure.blockData.filter {
                     it.id in completedDownloads.map { it.id }
                 }
-                val isAllDownloaded =
-                    courseDownloadModels.all { it.downloadedState == DownloadedState.DOWNLOADED } &&
-                            courseDownloadModels.isNotEmpty()
-                val isHaveDownloadableBlocks = courseStructure.blockData.any { it.isDownloadable }
+                val allDownloadableBlocks = courseStructure.blockData.filter { it.isDownloadable }
+                val courseDownloadModelsMap = courseDownloadModels.associateBy { it.id }
+                val isAllDownloaded = allDownloadableBlocks.isNotEmpty() &&
+                        allDownloadableBlocks.all { block ->
+                            courseDownloadModelsMap[block.id]?.downloadedState?.isDownloaded == true
+                        }
+                val isHaveDownloadableBlocks = allDownloadableBlocks.isNotEmpty()
 
                 updateUIState(
                     totalDownloadableSize,
