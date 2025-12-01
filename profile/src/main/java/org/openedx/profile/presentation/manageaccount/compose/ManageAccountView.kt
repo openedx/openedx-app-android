@@ -53,9 +53,9 @@ import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
+import org.openedx.profile.ProfileMocks
 import org.openedx.profile.presentation.manageaccount.ManageAccountUIState
 import org.openedx.profile.presentation.ui.ProfileTopic
-import org.openedx.profile.presentation.ui.mockAccount
 import org.openedx.profile.R as ProfileR
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
@@ -213,7 +213,9 @@ private fun ManageAccountViewPreview() {
     OpenEdXTheme {
         ManageAccountView(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = mockUiState,
+            uiState = ManageAccountUIState.Data(
+                account = ProfileMocks.account
+            ),
             uiMessage = null,
             refreshing = false,
             onAction = {}
@@ -228,17 +230,15 @@ private fun ManageAccountViewTabletPreview() {
     OpenEdXTheme {
         ManageAccountView(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = mockUiState,
+            uiState = ManageAccountUIState.Data(
+                account = ProfileMocks.account
+            ),
             uiMessage = null,
             refreshing = false,
             onAction = {}
         )
     }
 }
-
-private val mockUiState = ManageAccountUIState.Data(
-    account = mockAccount
-)
 
 internal interface ManageAccountViewAction {
     object EditAccountClick : ManageAccountViewAction

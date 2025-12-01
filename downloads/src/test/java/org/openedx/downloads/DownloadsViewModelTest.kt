@@ -23,22 +23,14 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.BlockType
+import org.openedx.core.CoreMocks
 import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.domain.model.AssignmentProgress
-import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.BlockCounts
-import org.openedx.core.domain.model.CourseStructure
-import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.DownloadCoursePreview
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
-import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
-import org.openedx.core.module.db.DownloadedState
-import org.openedx.core.module.db.FileType
 import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.DownloadsAnalytics
@@ -53,7 +45,6 @@ import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 import java.net.UnknownHostException
-import java.util.Date
 
 class DownloadsViewModelTest {
 
@@ -90,108 +81,6 @@ class DownloadsViewModelTest {
             image = "",
             totalSize = DownloadDialogManager.MAX_CELLULAR_SIZE.toLong()
         )
-    private val assignmentProgress = AssignmentProgress(
-        assignmentType = "Homework",
-        numPointsEarned = 1f,
-        numPointsPossible = 3f,
-        shortLabel = "HW1",
-    )
-    private val blocks = listOf(
-        Block(
-            id = "id",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.CHAPTER,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = listOf("1", "id1"),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        ),
-        Block(
-            id = "id1",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.HTML,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = listOf("id2"),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        ),
-        Block(
-            id = "id2",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.HTML,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = emptyList(),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        )
-    )
-
-    private val downloadModel = DownloadModel(
-        "id",
-        "title",
-        "",
-        0,
-        "",
-        "url",
-        FileType.VIDEO,
-        DownloadedState.NOT_DOWNLOADED,
-        null
-    )
-
-    private val courseStructure = CourseStructure(
-        root = "",
-        blockData = blocks,
-        id = "id",
-        name = "Course name",
-        number = "",
-        org = "Org",
-        start = Date(),
-        startDisplay = "",
-        startType = "",
-        end = Date(),
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
-        media = null,
-        certificate = null,
-        isSelfPaced = false,
-        progress = null
-    )
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Before
@@ -205,13 +94,13 @@ class DownloadsViewModelTest {
         coEvery { interactor.getDownloadCoursesPreview(any()) } returns flow {
             emit(listOf(downloadCoursePreview))
         }
-        coEvery { interactor.getCourseStructureFromCache("course1") } returns courseStructure
-        coEvery { interactor.getCourseStructure("course1") } returns courseStructure
+        coEvery { interactor.getCourseStructureFromCache("course1") } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructure("course1") } returns CoreMocks.mockCourseStructure
         coEvery { interactor.getDownloadModelsByCourseIds(any()) } returns emptyList()
         coEvery { downloadDao.getAllDataFlow() } returns flowOf(
             listOf(
                 DownloadModelEntity.createFrom(
-                    downloadModel
+                    CoreMocks.mockDownloadModel
                 )
             )
         )
@@ -323,7 +212,7 @@ class DownloadsViewModelTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `removeDownloads should show remove popup with correct parameters`() = runTest {
-        coEvery { interactor.getDownloadModelsByCourseIds(any()) } returns listOf(downloadModel)
+        coEvery { interactor.getDownloadModelsByCourseIds(any()) } returns listOf(CoreMocks.mockDownloadModel)
 
         val viewModel = DownloadsViewModel(
             downloadsRouter,

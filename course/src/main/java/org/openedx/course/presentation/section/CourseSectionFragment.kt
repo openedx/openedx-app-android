@@ -54,10 +54,8 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.BlockType
-import org.openedx.core.domain.model.AssignmentProgress
+import org.openedx.core.CoreMocks
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -76,7 +74,6 @@ import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
-import java.util.Date
 import org.openedx.core.R as CoreR
 
 class CourseSectionFragment : Fragment() {
@@ -350,10 +347,10 @@ private fun CourseSectionScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseSectionUIState.Blocks(
                 listOf(
-                    mockBlock,
-                    mockBlock,
-                    mockBlock,
-                    mockBlock
+                    CoreMocks.mockChapterBlock,
+                    CoreMocks.mockChapterBlock,
+                    CoreMocks.mockChapterBlock,
+                    CoreMocks.mockChapterBlock,
                 ),
                 "",
                 "Course default"
@@ -374,10 +371,10 @@ private fun CourseSectionScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseSectionUIState.Blocks(
                 listOf(
-                    mockBlock,
-                    mockBlock,
-                    mockBlock,
-                    mockBlock
+                    CoreMocks.mockChapterBlock,
+                    CoreMocks.mockChapterBlock,
+                    CoreMocks.mockChapterBlock,
+                    CoreMocks.mockChapterBlock,
                 ),
                 "",
                 "Course default",
@@ -388,24 +385,3 @@ private fun CourseSectionScreenTabletPreview() {
         )
     }
 }
-
-private val mockBlock = Block(
-    id = "id",
-    blockId = "blockId",
-    lmsWebUrl = "lmsWebUrl",
-    legacyWebUrl = "legacyWebUrl",
-    studentViewUrl = "studentViewUrl",
-    type = BlockType.HTML,
-    displayName = "Block",
-    graded = false,
-    studentViewData = null,
-    studentViewMultiDevice = false,
-    blockCounts = BlockCounts(0),
-    descendants = emptyList(),
-    descendantsType = BlockType.HTML,
-    completion = 0.0,
-    containsGatedContent = false,
-    assignmentProgress = AssignmentProgress("", 1f, 2f, "HM1"),
-    due = Date(),
-    offlineDownload = null
-)

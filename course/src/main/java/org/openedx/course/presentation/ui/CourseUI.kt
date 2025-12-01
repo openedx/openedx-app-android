@@ -93,10 +93,8 @@ import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.jsoup.Jsoup
-import org.openedx.core.BlockType
-import org.openedx.core.domain.model.AssignmentProgress
+import org.openedx.core.CoreMocks
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.extension.safeDivBy
@@ -116,8 +114,8 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
 import org.openedx.core.utils.VideoPreview
+import org.openedx.course.CourseMocks
 import org.openedx.course.R
-import org.openedx.course.presentation.dates.mockedCourseBannerInfo
 import org.openedx.course.presentation.outline.getUnitBlockIcon
 import org.openedx.foundation.extension.nonZero
 import org.openedx.foundation.extension.toFileSize
@@ -1700,7 +1698,7 @@ private fun CourseSectionCardPreview() {
     OpenEdXTheme {
         Surface(color = MaterialTheme.appColors.background) {
             CourseSectionCard(
-                mockChapterBlock,
+                CoreMocks.mockChapterBlock,
                 DownloadedState.DOWNLOADED,
                 onItemClick = {},
                 onDownloadClick = {}
@@ -1716,7 +1714,7 @@ private fun CourseDatesBannerPreview() {
     OpenEdXTheme {
         CourseDatesBanner(
             modifier = Modifier,
-            banner = mockedCourseBannerInfo,
+            banner = CourseMocks.courseDatesBannerInfoWithData,
             resetDates = {}
         )
     }
@@ -1729,7 +1727,7 @@ private fun CourseDatesBannerTabletPreview() {
     OpenEdXTheme {
         CourseDatesBannerTablet(
             modifier = Modifier,
-            banner = mockedCourseBannerInfo,
+            banner = CourseMocks.courseDatesBannerInfoWithData,
             resetDates = {}
         )
     }
@@ -1780,24 +1778,3 @@ private fun CourseMessagePreview() {
         }
     }
 }
-
-private val mockChapterBlock = Block(
-    id = "id",
-    blockId = "blockId",
-    lmsWebUrl = "lmsWebUrl",
-    legacyWebUrl = "legacyWebUrl",
-    studentViewUrl = "studentViewUrl",
-    type = BlockType.CHAPTER,
-    displayName = "Chapter",
-    graded = false,
-    studentViewData = null,
-    studentViewMultiDevice = false,
-    blockCounts = BlockCounts(1),
-    descendants = emptyList(),
-    descendantsType = BlockType.CHAPTER,
-    completion = 0.0,
-    containsGatedContent = false,
-    assignmentProgress = AssignmentProgress("", 1f, 2f, "HM1"),
-    due = Date(),
-    offlineDownload = null
-)

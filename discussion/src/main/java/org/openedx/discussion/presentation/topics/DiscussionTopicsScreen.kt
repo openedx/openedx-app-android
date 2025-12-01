@@ -48,8 +48,8 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.discussion.DiscussionMocks
 import org.openedx.discussion.R
-import org.openedx.discussion.domain.model.Topic
 import org.openedx.discussion.presentation.ui.ThreadItemCategory
 import org.openedx.discussion.presentation.ui.TopicItem
 import org.openedx.foundation.presentation.UIMessage
@@ -280,7 +280,12 @@ private fun DiscussionTopicsScreenPreview() {
     OpenEdXTheme {
         DiscussionTopicsUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = DiscussionTopicsUIState.Topics(listOf(mockTopic, mockTopic)),
+            uiState = DiscussionTopicsUIState.Topics(
+                listOf(
+                    DiscussionMocks.topic,
+                    DiscussionMocks.topic
+                )
+            ),
             uiMessage = null,
             onItemClick = { _, _, _ -> },
             onSearchClick = {}
@@ -312,17 +317,15 @@ private fun DiscussionTopicsScreenTabletPreview() {
     OpenEdXTheme {
         DiscussionTopicsUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = DiscussionTopicsUIState.Topics(listOf(mockTopic, mockTopic)),
+            uiState = DiscussionTopicsUIState.Topics(
+                listOf(
+                    DiscussionMocks.topic,
+                    DiscussionMocks.topic
+                )
+            ),
             uiMessage = null,
             onItemClick = { _, _, _ -> },
             onSearchClick = {}
         )
     }
 }
-
-private val mockTopic = Topic(
-    id = "",
-    name = "All Topics",
-    threadListUrl = "",
-    children = emptyList()
-)

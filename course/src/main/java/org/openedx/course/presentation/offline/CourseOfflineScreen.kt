@@ -49,9 +49,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
+import org.openedx.core.CoreMocks
 import org.openedx.core.R
 import org.openedx.core.module.db.DownloadModel
-import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
@@ -476,17 +476,7 @@ private fun CourseOfflineUIPreview() {
                 isDownloading = true,
                 isAllDownloaded = true,
                 largestDownloads = listOf(
-                    DownloadModel(
-                        "",
-                        "",
-                        "",
-                        0,
-                        "",
-                        "",
-                        FileType.X_BLOCK,
-                        DownloadedState.DOWNLOADED,
-                        null
-                    )
+                    CoreMocks.mockDownloadModel
                 ),
             ),
             onDownloadAllClick = {},

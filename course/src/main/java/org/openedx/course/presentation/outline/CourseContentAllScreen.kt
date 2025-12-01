@@ -36,9 +36,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.BlockType
-import org.openedx.core.Mock
+import org.openedx.core.CoreMocks
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.extension.getChapterBlocks
 import org.openedx.core.ui.CircularProgress
@@ -357,20 +356,14 @@ private fun CourseOutlineScreenPreview() {
         CourseContentAllUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseContentAllUIState.CourseData(
-                Mock.mockCourseStructure,
+                CoreMocks.mockCourseStructure,
                 mapOf(),
-                Mock.mockChapterBlock,
+                CoreMocks.mockChapterBlock,
                 "Resumed Unit",
                 mapOf(),
                 mapOf(),
                 mapOf(),
-                CourseDatesBannerInfo(
-                    missedDeadlines = false,
-                    missedGatedContent = false,
-                    verifiedUpgradeLink = "",
-                    contentTypeGatingEnabled = false,
-                    hasEnded = false
-                ),
+                CoreMocks.mockCourseDatesBannerInfo,
                 true
             ),
             uiMessage = null,
@@ -393,20 +386,14 @@ private fun CourseContentAllScreenTabletPreview() {
         CourseContentAllUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseContentAllUIState.CourseData(
-                Mock.mockCourseStructure,
+                CoreMocks.mockCourseStructure,
                 mapOf(),
-                Mock.mockChapterBlock,
+                CoreMocks.mockChapterBlock,
                 "Resumed Unit",
                 mapOf(),
                 mapOf(),
                 mapOf(),
-                CourseDatesBannerInfo(
-                    missedDeadlines = false,
-                    missedGatedContent = false,
-                    verifiedUpgradeLink = "",
-                    contentTypeGatingEnabled = false,
-                    hasEnded = false
-                ),
+                CoreMocks.mockCourseDatesBannerInfo,
                 true
             ),
             uiMessage = null,
@@ -426,6 +413,6 @@ private fun CourseContentAllScreenTabletPreview() {
 @Composable
 private fun ResumeCoursePreview() {
     OpenEdXTheme {
-        ResumeCourseButton(block = Mock.mockChapterBlock, displayName = "Resumed Unit") {}
+        ResumeCourseButton(block = CoreMocks.mockChapterBlock, displayName = "Resumed Unit") {}
     }
 }

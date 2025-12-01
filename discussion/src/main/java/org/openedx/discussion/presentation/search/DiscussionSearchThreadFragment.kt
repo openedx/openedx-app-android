@@ -68,7 +68,7 @@ import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.discussion.domain.model.DiscussionType
+import org.openedx.discussion.DiscussionMocks
 import org.openedx.discussion.presentation.DiscussionRouter
 import org.openedx.discussion.presentation.search.DiscussionSearchThreadFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.discussion.presentation.ui.ThreadItem
@@ -330,6 +330,7 @@ private fun DiscussionSearchThreadScreen(
                                         }
                                     }
                                 }
+
                                 is DiscussionSearchThreadUIState.Threads -> {
                                     items(uiState.data) { thread ->
                                         ThreadItem(thread = thread, onClick = onItemClick)
@@ -347,7 +348,11 @@ private fun DiscussionSearchThreadScreen(
                                             }
                                         }
                                     }
-                                    if (scrollState.shouldLoadMore(firstVisibleIndex, LOAD_MORE_THRESHOLD)) {
+                                    if (scrollState.shouldLoadMore(
+                                            firstVisibleIndex,
+                                            LOAD_MORE_THRESHOLD
+                                        )
+                                    ) {
                                         paginationCallback()
                                     }
                                 }
@@ -372,7 +377,10 @@ fun DiscussionSearchThreadScreenPreview() {
     OpenEdXTheme {
         DiscussionSearchThreadScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = DiscussionSearchThreadUIState.Threads(listOf(mockThread, mockThread), 2),
+            uiState = DiscussionSearchThreadUIState.Threads(
+                listOf(DiscussionMocks.thread, DiscussionMocks.thread),
+                2
+            ),
             uiMessage = null,
             refreshing = false,
             canLoadMore = true,
@@ -392,7 +400,10 @@ fun DiscussionSearchThreadScreenTabletPreview() {
     OpenEdXTheme {
         DiscussionSearchThreadScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = DiscussionSearchThreadUIState.Threads(listOf(mockThread, mockThread), 2),
+            uiState = DiscussionSearchThreadUIState.Threads(
+                listOf(DiscussionMocks.thread, DiscussionMocks.thread),
+                2
+            ),
             uiMessage = null,
             refreshing = false,
             canLoadMore = true,
@@ -404,37 +415,3 @@ fun DiscussionSearchThreadScreenTabletPreview() {
         )
     }
 }
-
-private val mockThread = org.openedx.discussion.domain.model.Thread(
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    false,
-    true,
-    20,
-    emptyList(),
-    false,
-    "",
-    "",
-    "",
-    "",
-    DiscussionType.DISCUSSION,
-    "",
-    "",
-    "Discussion title long Discussion title long good item",
-    true,
-    false,
-    true,
-    21,
-    4,
-    false,
-    false,
-    mapOf(),
-    10,
-    false,
-    false
-)

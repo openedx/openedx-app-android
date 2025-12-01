@@ -17,9 +17,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.openedx.core.Mock
+import org.openedx.core.CoreMocks
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
@@ -132,21 +131,18 @@ private fun CourseCompletionHomePagerCardContentPreview() {
     OpenEdXTheme {
         CourseCompletionHomePagerCardContent(
             uiState = CourseHomeUIState.CourseData(
-                courseStructure = Mock.mockCourseStructure,
+                courseStructure = CoreMocks.mockCourseStructure,
                 courseProgress = null, // No course progress for preview
-                next = Pair(Mock.mockChapterBlock, Mock.mockChapterBlock), // Mock next section
+                next = Pair(
+                    CoreMocks.mockChapterBlock,
+                    CoreMocks.mockChapterBlock
+                ), // Mock next section
                 downloadedState = mapOf(),
-                resumeComponent = Mock.mockChapterBlock,
+                resumeComponent = CoreMocks.mockChapterBlock,
                 resumeUnitTitle = "Resumed Unit",
                 courseSubSections = mapOf(),
                 subSectionsDownloadsCount = mapOf(),
-                datesBannerInfo = CourseDatesBannerInfo(
-                    missedDeadlines = false,
-                    missedGatedContent = false,
-                    verifiedUpgradeLink = "",
-                    contentTypeGatingEnabled = false,
-                    hasEnded = false
-                ),
+                datesBannerInfo = CoreMocks.mockCourseDatesBannerInfo,
                 useRelativeDates = true,
                 courseVideos = mapOf(),
                 courseAssignments = emptyList(),

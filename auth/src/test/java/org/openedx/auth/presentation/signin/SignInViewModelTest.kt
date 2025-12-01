@@ -28,12 +28,12 @@ import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.BrowserAuthHelper
 import org.openedx.auth.presentation.sso.OAuthHelper
+import org.openedx.core.CoreMocks
 import org.openedx.core.Validator
 import org.openedx.core.config.Config
 import org.openedx.core.config.FacebookConfig
 import org.openedx.core.config.GoogleConfig
 import org.openedx.core.config.MicrosoftConfig
-import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
@@ -75,8 +75,6 @@ class SignInViewModelTest {
     private val invalidEmailOrUsername = "Invalid email or username"
     private val invalidPassword = "Password too short"
 
-    private val user = User(0, "", "", "")
-
     @Before
     fun before() {
         Dispatchers.setMain(dispatcher)
@@ -109,7 +107,7 @@ class SignInViewModelTest {
     @Test
     fun `login empty credentials validation error`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns false
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -147,7 +145,7 @@ class SignInViewModelTest {
     @Test
     fun `login invalid email validation error`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns false
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -184,7 +182,7 @@ class SignInViewModelTest {
     fun `login empty password validation error`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns false
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -222,7 +220,7 @@ class SignInViewModelTest {
     fun `login invalid password validation error`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns false
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -262,7 +260,7 @@ class SignInViewModelTest {
     fun `login success`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         coEvery { appNotifier.send(any<SignInEvent>()) } returns Unit
@@ -304,7 +302,7 @@ class SignInViewModelTest {
     fun `login network error`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -347,7 +345,7 @@ class SignInViewModelTest {
     fun `login invalid grant error`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -390,7 +388,7 @@ class SignInViewModelTest {
     fun `login unknown exception`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(

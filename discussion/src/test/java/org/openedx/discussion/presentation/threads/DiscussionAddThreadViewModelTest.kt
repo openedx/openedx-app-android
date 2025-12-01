@@ -19,9 +19,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.R
+import org.openedx.discussion.DiscussionMocks
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
-import org.openedx.discussion.domain.model.DiscussionType
-import org.openedx.discussion.domain.model.Topic
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadAdded
 import org.openedx.foundation.presentation.UIMessage
@@ -44,56 +43,16 @@ class DiscussionAddThreadViewModelTest {
     private val somethingWrong = "Something went wrong"
 
     //region mockThread
-    val mockThread = org.openedx.discussion.domain.model.Thread(
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        false,
-        true,
-        20,
-        emptyList(),
-        false,
-        "",
-        "",
-        "",
-        "",
-        DiscussionType.DISCUSSION,
-        "",
-        "",
-        "Discussion title long Discussion title long good item",
-        true,
-        false,
-        true,
-        21,
-        4,
-        false,
-        false,
-        mapOf(),
-        0,
-        false,
-        false
-    )
     //endregion
 
     //region mockTopic
-    private val mockTopic = Topic(
-        id = "",
-        name = "All Topics",
-        threadListUrl = "",
-        children = emptyList()
-    )
+    //endregion
 
     val topics = listOf(
-        mockTopic.copy(id = "0"),
-        mockTopic.copy(id = "1"),
-        mockTopic.copy(id = "2")
+        DiscussionMocks.topic.copy(id = "0", name = "All Topics"),
+        DiscussionMocks.topic.copy(id = "1", name = "All Topics"),
+        DiscussionMocks.topic.copy(id = "2", name = "All Topics")
     )
-
-    //endregion
 
     @Before
     fun setUp() {
@@ -170,7 +129,7 @@ class DiscussionAddThreadViewModelTest {
                 any(),
                 any()
             )
-        } returns mockThread
+        } returns DiscussionMocks.thread
 
         viewModel.createThread("", "", "", "", false)
         advanceUntilIdle()

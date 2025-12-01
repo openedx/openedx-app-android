@@ -1,17 +1,25 @@
 package org.openedx.core
 
+import org.openedx.core.data.model.User
 import org.openedx.core.data.model.room.VideoProgressEntity
+import org.openedx.core.domain.model.AppConfig
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
+import org.openedx.core.domain.model.CourseAccessDetails
 import org.openedx.core.domain.model.CourseComponentStatus
 import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.domain.model.CourseDatesCalendarSync
 import org.openedx.core.domain.model.CourseDatesResult
+import org.openedx.core.domain.model.CourseEnrollmentDetails
+import org.openedx.core.domain.model.CourseInfoOverview
 import org.openedx.core.domain.model.CourseProgress
+import org.openedx.core.domain.model.CourseSharingUtmParameters
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.DownloadCoursePreview
 import org.openedx.core.domain.model.EncodedVideos
-import org.openedx.core.domain.model.OfflineDownload
+import org.openedx.core.domain.model.EnrollmentDetails
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.domain.model.ResetCourseDates
 import org.openedx.core.domain.model.StudentViewData
@@ -19,14 +27,31 @@ import org.openedx.core.domain.model.VideoInfo
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
+import org.openedx.core.module.download.DownloadModelsSize
 import java.util.Date
 
-object Mock {
-    private val mockAssignmentProgress = AssignmentProgress(
+object CoreMocks {
+    val mockAssignmentProgress = AssignmentProgress(
         assignmentType = "Home",
         numPointsEarned = 1f,
         numPointsPossible = 3f,
         shortLabel = "HM1"
+    )
+
+    val mockUser = User(
+        id = 0,
+        username = "",
+        email = "",
+        name = ""
+    )
+
+    val mockAppConfig = AppConfig(
+        courseDatesCalendarSync = CourseDatesCalendarSync(
+            isEnabled = true,
+            isSelfPacedEnabled = true,
+            isInstructorPacedEnabled = true,
+            isDeepLinkEnabled = false,
+        )
     )
     val mockChapterBlock = Block(
         id = "id",
@@ -40,7 +65,7 @@ object Mock {
         studentViewData = null,
         studentViewMultiDevice = false,
         blockCounts = BlockCounts(1),
-        descendants = emptyList(),
+        descendants = listOf("1"),
         descendantsType = BlockType.CHAPTER,
         completion = 0.0,
         containsGatedContent = false,
@@ -48,30 +73,61 @@ object Mock {
         due = Date(),
         offlineDownload = null
     )
-    private val mockSequentialBlock = Block(
-        id = "id",
-        blockId = "blockId",
-        lmsWebUrl = "lmsWebUrl",
-        legacyWebUrl = "legacyWebUrl",
-        studentViewUrl = "studentViewUrl",
-        type = BlockType.SEQUENTIAL,
-        displayName = "Sequential",
-        graded = false,
-        studentViewData = null,
-        studentViewMultiDevice = false,
-        blockCounts = BlockCounts(1),
-        descendants = emptyList(),
-        descendantsType = BlockType.CHAPTER,
-        completion = 0.0,
-        containsGatedContent = false,
-        assignmentProgress = mockAssignmentProgress,
-        due = Date(),
-        offlineDownload = OfflineDownload("fileUrl", "", 1),
+
+    val mockBlockData = listOf(
+        mockChapterBlock.copy(
+            id = "id",
+            type = BlockType.HTML,
+            blockCounts = BlockCounts(0),
+            descendants = listOf("id2", "id1"),
+            descendantsType = BlockType.HTML,
+            assignmentProgress = mockAssignmentProgress.copy(
+                assignmentType = "Homework",
+                shortLabel = "HW1"
+            ),
+            due = Date()
+        ),
+        mockChapterBlock.copy(
+            id = "id1",
+            type = BlockType.VERTICAL,
+            blockCounts = BlockCounts(0),
+            descendants = listOf("id2", "id"),
+            descendantsType = BlockType.HTML,
+            assignmentProgress = mockAssignmentProgress.copy(
+                assignmentType = "Homework",
+                shortLabel = "HW1"
+            ),
+            due = Date()
+        ),
+        mockChapterBlock.copy(
+            id = "id2",
+            type = BlockType.SEQUENTIAL,
+            blockCounts = BlockCounts(0),
+            descendants = emptyList(),
+            descendantsType = BlockType.HTML,
+            assignmentProgress = mockAssignmentProgress.copy(
+                assignmentType = "Homework",
+                shortLabel = "HW1"
+            ),
+            due = Date()
+        ),
+        mockChapterBlock.copy(
+            id = "id3",
+            type = BlockType.HTML,
+            blockCounts = BlockCounts(0),
+            descendants = emptyList(),
+            descendantsType = BlockType.HTML,
+            assignmentProgress = mockAssignmentProgress.copy(
+                assignmentType = "Homework",
+                shortLabel = "HW1"
+            ),
+            due = Date()
+        )
     )
 
     val mockCourseStructure = CourseStructure(
         root = "",
-        blockData = listOf(mockSequentialBlock, mockSequentialBlock),
+        blockData = mockBlockData,
         id = "id",
         name = "Course name",
         number = "",
@@ -111,6 +167,15 @@ object Mock {
         courseBanner = mockCourseDatesBannerInfo
     )
 
+    val mockCoursewareAccess = CoursewareAccess(
+        hasAccess = true,
+        errorCode = "",
+        developerMessage = "",
+        userMessage = "",
+        userFragment = "",
+        additionalContextUserMessage = ""
+    )
+
     val mockCourseProgress = CourseProgress(
         verifiedMode = "audit",
         accessExpiration = "",
@@ -128,6 +193,46 @@ object Mock {
         userHasPassingGrade = false,
         verificationData = null,
         disableProgressGraph = false
+    )
+
+    val mockCourseAccessDetails = CourseAccessDetails(
+        hasUnmetPrerequisites = false,
+        isTooEarly = false,
+        isStaff = false,
+        auditAccessExpires = null,
+        coursewareAccess = mockCoursewareAccess
+    )
+
+    val mockEnrollmentDetails = EnrollmentDetails(
+        created = Date(),
+        mode = "audit",
+        isActive = true,
+        upgradeDeadline = Date()
+    )
+
+    val mockCourseInfoOverview = CourseInfoOverview(
+        name = "Open edX Demo Course",
+        number = "DemoX",
+        org = "edX",
+        start = Date(),
+        startDisplay = "Today",
+        startType = "",
+        end = null,
+        isSelfPaced = false,
+        media = null,
+        courseSharingUtmParameters = CourseSharingUtmParameters("", ""),
+        courseAbout = "About course"
+    )
+
+    val mockCourseEnrollmentDetails = CourseEnrollmentDetails(
+        id = "course-id",
+        courseUpdates = "Course updates",
+        courseHandouts = "Course handouts",
+        discussionUrl = "https://example.com/discussion",
+        courseAccessDetails = mockCourseAccessDetails,
+        certificate = null,
+        enrollmentDetails = mockEnrollmentDetails,
+        courseInfoOverview = mockCourseInfoOverview
     )
 
     val mockVideoProgress = VideoProgressEntity(
@@ -259,5 +364,20 @@ object Mock {
         certificate = null,
         isSelfPaced = false,
         progress = null
+    )
+
+    val coursePreview = DownloadCoursePreview(
+        id = "course-id",
+        name = "Preview Course",
+        image = "",
+        totalSize = 100L
+    )
+
+    val mockDownloadModelsSize = DownloadModelsSize(
+        isAllBlocksDownloadedOrDownloading = false,
+        remainingCount = 0,
+        remainingSize = 0,
+        allCount = 1,
+        allSize = 0
     )
 }

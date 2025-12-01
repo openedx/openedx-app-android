@@ -72,14 +72,7 @@ import coil.request.ImageRequest
 import org.koin.androidx.compose.koinViewModel
 import org.openedx.Lock
 import org.openedx.core.R
-import org.openedx.core.domain.model.Certificate
-import org.openedx.core.domain.model.CourseAssignments
-import org.openedx.core.domain.model.CourseSharingUtmParameters
-import org.openedx.core.domain.model.CourseStatus
-import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
-import org.openedx.core.domain.model.EnrolledCourseData
-import org.openedx.core.domain.model.Progress
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
@@ -95,6 +88,7 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.courses.presentation.AllEnrolledCoursesFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.courses.presentation.AllEnrolledCoursesFragment.Companion.MOBILE_GRID_COLUMNS
 import org.openedx.courses.presentation.AllEnrolledCoursesFragment.Companion.TABLET_GRID_COLUMNS
+import org.openedx.dashboard.DashboardMocks
 import org.openedx.dashboard.domain.CourseStatusFilter
 import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.UIMessage
@@ -553,7 +547,7 @@ fun EmptyState(
 private fun CourseItemPreview() {
     OpenEdXTheme {
         CourseItem(
-            course = mockCourseEnrolled,
+            course = DashboardMocks.enrolledCourse,
             apiHostUrl = "",
             onClick = {}
         )
@@ -580,14 +574,7 @@ private fun AllEnrolledCoursesPreview() {
         AllEnrolledCoursesView(
             apiHostUrl = "http://localhost:8000",
             state = AllEnrolledCoursesUIState(
-                courses = listOf(
-                    mockCourseEnrolled,
-                    mockCourseEnrolled,
-                    mockCourseEnrolled,
-                    mockCourseEnrolled,
-                    mockCourseEnrolled,
-                    mockCourseEnrolled
-                )
+                courses = DashboardMocks.enrolledCourses(1)
             ),
             uiMessage = null,
             hasInternetConnection = true,
@@ -595,44 +582,3 @@ private fun AllEnrolledCoursesPreview() {
         )
     }
 }
-
-private val mockCourseAssignments = CourseAssignments(null, emptyList())
-private val mockCourseEnrolled = EnrolledCourse(
-    auditAccessExpires = Date(),
-    created = "created",
-    certificate = Certificate(""),
-    mode = "mode",
-    isActive = true,
-    progress = Progress.DEFAULT_PROGRESS,
-    courseStatus = CourseStatus("", emptyList(), "", ""),
-    courseAssignments = mockCourseAssignments,
-    course = EnrolledCourseData(
-        id = "id",
-        name = "name",
-        number = "",
-        org = "Org",
-        start = Date(),
-        startDisplay = "",
-        startType = "",
-        end = Date(),
-        dynamicUpgradeDeadline = "",
-        subscriptionId = "",
-        coursewareAccess = CoursewareAccess(
-            false,
-            "204",
-            "",
-            "",
-            "",
-            ""
-        ),
-        media = null,
-        courseImage = "",
-        courseAbout = "",
-        courseSharingUtmParameters = CourseSharingUtmParameters("", ""),
-        courseUpdates = "",
-        courseHandouts = "",
-        discussionUrl = "",
-        videoOutline = "",
-        isSelfPaced = false
-    )
-)

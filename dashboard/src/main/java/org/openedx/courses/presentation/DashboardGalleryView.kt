@@ -75,20 +75,8 @@ import coil.request.ImageRequest
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.Lock
-import org.openedx.core.domain.model.AppConfig
-import org.openedx.core.domain.model.Certificate
-import org.openedx.core.domain.model.CourseAssignments
-import org.openedx.core.domain.model.CourseDateBlock
-import org.openedx.core.domain.model.CourseDatesCalendarSync
 import org.openedx.core.domain.model.CourseEnrollments
-import org.openedx.core.domain.model.CourseSharingUtmParameters
-import org.openedx.core.domain.model.CourseStatus
-import org.openedx.core.domain.model.CoursewareAccess
-import org.openedx.core.domain.model.DashboardCourseList
 import org.openedx.core.domain.model.EnrolledCourse
-import org.openedx.core.domain.model.EnrolledCourseData
-import org.openedx.core.domain.model.Pagination
-import org.openedx.core.domain.model.Progress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
@@ -101,6 +89,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
 import org.openedx.courses.presentation.DashboardGalleryFragment.Companion.MOBILE_COURSE_LIST_ITEM_COUNT
 import org.openedx.courses.presentation.DashboardGalleryFragment.Companion.TABLET_COURSE_LIST_ITEM_COUNT
+import org.openedx.dashboard.DashboardMocks
 import org.openedx.dashboard.R
 import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.UIMessage
@@ -909,65 +898,6 @@ private fun NoCoursesInfo(
     }
 }
 
-private val mockCourseDateBlock = CourseDateBlock(
-    title = "Homework 1: ABCD",
-    description = "After this date, course content will be archived",
-    date = TimeUtils.iso8601ToDate("2024-05-31T15:08:07Z")!!,
-    assignmentType = "Homework"
-)
-private val mockCourseAssignments =
-    CourseAssignments(listOf(mockCourseDateBlock), listOf(mockCourseDateBlock, mockCourseDateBlock))
-private val mockCourse = EnrolledCourse(
-    auditAccessExpires = Date(),
-    created = "created",
-    certificate = Certificate(""),
-    mode = "mode",
-    isActive = true,
-    progress = Progress.DEFAULT_PROGRESS,
-    courseStatus = CourseStatus("", emptyList(), "", "Unit name"),
-    courseAssignments = mockCourseAssignments,
-    course = EnrolledCourseData(
-        id = "id",
-        name = "Looooooooooooooooooooong Course name",
-        number = "",
-        org = "Org",
-        start = Date(),
-        startDisplay = "",
-        startType = "",
-        end = Date(),
-        dynamicUpgradeDeadline = "",
-        subscriptionId = "",
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            "",
-        ),
-        media = null,
-        courseImage = "",
-        courseAbout = "",
-        courseSharingUtmParameters = CourseSharingUtmParameters("", ""),
-        courseUpdates = "",
-        courseHandouts = "",
-        discussionUrl = "",
-        videoOutline = "",
-        isSelfPaced = false
-    )
-)
-private val mockPagination = Pagination(10, "", 4, "1")
-private val mockDashboardCourseList = DashboardCourseList(
-    pagination = mockPagination,
-    courses = listOf(mockCourse, mockCourse, mockCourse, mockCourse, mockCourse, mockCourse)
-)
-
-private val mockUserCourses = CourseEnrollments(
-    enrollments = mockDashboardCourseList,
-    configs = AppConfig(CourseDatesCalendarSync(true, true, true, true)),
-    primary = mockCourse
-)
-
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -987,7 +917,7 @@ private fun ViewAllItemPreview() {
 private fun DashboardGalleryViewPreview() {
     OpenEdXTheme {
         DashboardGalleryView(
-            uiState = DashboardGalleryUIState.Courses(mockUserCourses, true),
+            uiState = DashboardGalleryUIState.Courses(DashboardMocks.courseEnrollments, true),
             apiHostUrl = "",
             uiMessage = null,
             updating = false,

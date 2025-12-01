@@ -79,7 +79,6 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.domain.model.Media
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
@@ -92,6 +91,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.EmailUtil
+import org.openedx.discovery.DiscoveryMocks
 import org.openedx.discovery.R
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryRouter
@@ -690,7 +690,7 @@ private fun CourseDetailNativeContentPreview() {
     OpenEdXTheme {
         CourseDetailsScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = CourseDetailsUIState.CourseData(mockCourse),
+            uiState = CourseDetailsUIState.CourseData(DiscoveryMocks.course),
             uiMessage = null,
             apiHostUrl = "http://localhost:8000",
             hasInternetConnection = false,
@@ -713,7 +713,7 @@ private fun CourseDetailNativeContentTabletPreview() {
     OpenEdXTheme {
         CourseDetailsScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = CourseDetailsUIState.CourseData(mockCourse),
+            uiState = CourseDetailsUIState.CourseData(DiscoveryMocks.course),
             uiMessage = null,
             apiHostUrl = "http://localhost:8000",
             hasInternetConnection = false,
@@ -728,27 +728,3 @@ private fun CourseDetailNativeContentTabletPreview() {
         )
     }
 }
-
-private val mockCourse = Course(
-    id = "id",
-    blocksUrl = "blocksUrl",
-    courseId = "courseId",
-    effort = "effort",
-    enrollmentStart = null,
-    enrollmentEnd = null,
-    hidden = false,
-    invitationOnly = false,
-    media = Media(),
-    mobileAvailable = true,
-    name = "Test course",
-    number = "number",
-    org = "EdX",
-    pacing = "pacing",
-    shortDescription = "shortDescription",
-    start = "start",
-    end = "end",
-    startDisplay = "startDisplay",
-    startType = "startType",
-    overview = "",
-    isEnrolled = false
-)

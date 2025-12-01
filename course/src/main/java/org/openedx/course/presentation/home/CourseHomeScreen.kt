@@ -49,10 +49,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
-import org.openedx.core.Mock
+import org.openedx.core.CoreMocks
 import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.NoContentScreen
@@ -452,21 +451,15 @@ private fun CourseHomeScreenPreview() {
         CourseHomeUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseHomeUIState.CourseData(
-                courseStructure = Mock.mockCourseStructure,
+                courseStructure = CoreMocks.mockCourseStructure,
                 courseProgress = null, // No course progress for preview
                 next = null, // No next section for preview
                 downloadedState = mapOf(),
-                resumeComponent = Mock.mockChapterBlock,
+                resumeComponent = CoreMocks.mockChapterBlock,
                 resumeUnitTitle = "Resumed Unit",
                 courseSubSections = mapOf(),
                 subSectionsDownloadsCount = mapOf(),
-                datesBannerInfo = CourseDatesBannerInfo(
-                    missedDeadlines = false,
-                    missedGatedContent = false,
-                    verifiedUpgradeLink = "",
-                    contentTypeGatingEnabled = false,
-                    hasEnded = false
-                ),
+                datesBannerInfo = CoreMocks.mockCourseDatesBannerInfo,
                 useRelativeDates = true,
                 courseVideos = mapOf(),
                 courseAssignments = emptyList(),
@@ -505,21 +498,15 @@ private fun CourseHomeScreenTabletPreview() {
         CourseHomeUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseHomeUIState.CourseData(
-                courseStructure = Mock.mockCourseStructure,
+                courseStructure = CoreMocks.mockCourseStructure,
                 courseProgress = null, // No course progress for preview
                 next = null, // No next section for preview
                 downloadedState = mapOf(),
-                resumeComponent = Mock.mockChapterBlock,
+                resumeComponent = CoreMocks.mockChapterBlock,
                 resumeUnitTitle = "Resumed Unit",
                 courseSubSections = mapOf(),
                 subSectionsDownloadsCount = mapOf(),
-                datesBannerInfo = CourseDatesBannerInfo(
-                    missedDeadlines = false,
-                    missedGatedContent = false,
-                    verifiedUpgradeLink = "",
-                    contentTypeGatingEnabled = false,
-                    hasEnded = false
-                ),
+                datesBannerInfo = CoreMocks.mockCourseDatesBannerInfo,
                 useRelativeDates = true,
                 courseVideos = mapOf(),
                 courseAssignments = emptyList(),

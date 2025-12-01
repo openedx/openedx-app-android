@@ -24,8 +24,8 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.R
 import org.openedx.core.domain.model.Pagination
+import org.openedx.discussion.DiscussionMocks
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
-import org.openedx.discussion.domain.model.DiscussionType
 import org.openedx.discussion.domain.model.ThreadsData
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
@@ -47,44 +47,6 @@ class DiscussionSearchThreadViewModelTest {
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
-
-    //region thread
-
-    private val mockThread = org.openedx.discussion.domain.model.Thread(
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        false,
-        true,
-        20,
-        emptyList(),
-        false,
-        "",
-        "",
-        "",
-        "",
-        DiscussionType.DISCUSSION,
-        "",
-        "",
-        "Discussion title long Discussion title long good item",
-        true,
-        false,
-        true,
-        21,
-        4,
-        false,
-        false,
-        mapOf(),
-        0,
-        false,
-        false
-    )
-
-    //endregion
 
     @Before
     fun setUp() {
@@ -171,7 +133,7 @@ class DiscussionSearchThreadViewModelTest {
     fun `search query success with next page and fetch`() = runTest {
         val viewModel = DiscussionSearchThreadViewModel(interactor, resourceManager, notifier, "")
         coEvery { interactor.searchThread(any(), any(), eq(1)) } returns ThreadsData(
-            listOf(mockThread, mockThread),
+            listOf(DiscussionMocks.thread, DiscussionMocks.thread),
             "",
             Pagination(
                 10,
@@ -186,7 +148,7 @@ class DiscussionSearchThreadViewModelTest {
                 any(),
                 not(1)
             )
-        } returns ThreadsData(listOf(mockThread), "", Pagination(10, "", 5, ""))
+        } returns ThreadsData(listOf(DiscussionMocks.thread), "", Pagination(10, "", 5, ""))
 
         viewModel.searchThreads("course")
         delay(1000)
@@ -206,7 +168,7 @@ class DiscussionSearchThreadViewModelTest {
     fun `search query success with next page and fetch, update`() = runTest {
         val viewModel = DiscussionSearchThreadViewModel(interactor, resourceManager, notifier, "")
         coEvery { interactor.searchThread(any(), any(), eq(1)) } returns ThreadsData(
-            listOf(mockThread, mockThread),
+            listOf(DiscussionMocks.thread, DiscussionMocks.thread),
             "",
             Pagination(
                 10,
@@ -221,7 +183,7 @@ class DiscussionSearchThreadViewModelTest {
                 any(),
                 not(1)
             )
-        } returns ThreadsData(listOf(mockThread), "", Pagination(10, "0", 5, ""))
+        } returns ThreadsData(listOf(DiscussionMocks.thread), "", Pagination(10, "0", 5, ""))
 
         viewModel.searchThreads("course")
         delay(1000)
@@ -242,7 +204,7 @@ class DiscussionSearchThreadViewModelTest {
     fun `search query update in empty state`() = runTest {
         val viewModel = DiscussionSearchThreadViewModel(interactor, resourceManager, notifier, "")
         coEvery { interactor.searchThread(any(), any(), eq(1)) } returns ThreadsData(
-            listOf(mockThread, mockThread),
+            listOf(DiscussionMocks.thread, DiscussionMocks.thread),
             "",
             Pagination(
                 10,
@@ -271,7 +233,7 @@ class DiscussionSearchThreadViewModelTest {
             notifier.notifier
         } returns flow {
             delay(100)
-            emit(DiscussionThreadDataChanged(mockThread.copy(id = "1")))
+            emit(DiscussionThreadDataChanged(DiscussionMocks.thread.copy(id = "1")))
         }
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
@@ -289,7 +251,7 @@ class DiscussionSearchThreadViewModelTest {
     fun `notifier DiscussionThreadDataChanged with list`() = runTest {
         val viewModel = DiscussionSearchThreadViewModel(interactor, resourceManager, notifier, "")
         coEvery { interactor.searchThread(any(), any(), any()) } returns ThreadsData(
-            listOf(mockThread.copy(id = "id")),
+            listOf(DiscussionMocks.thread.copy(id = "id")),
             "",
             Pagination(
                 10,
@@ -303,7 +265,7 @@ class DiscussionSearchThreadViewModelTest {
             notifier.notifier
         } returns flow {
             delay(1000)
-            emit(DiscussionThreadDataChanged(mockThread.copy(id = "id")))
+            emit(DiscussionThreadDataChanged(DiscussionMocks.thread.copy(id = "id")))
         }
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()

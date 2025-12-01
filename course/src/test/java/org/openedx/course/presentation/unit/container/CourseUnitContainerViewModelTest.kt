@@ -18,20 +18,14 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.BlockType
+import org.openedx.core.CoreMocks
 import org.openedx.core.config.Config
 import org.openedx.core.domain.helper.VideoPreviewHelper
-import org.openedx.core.domain.model.AssignmentProgress
-import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.BlockCounts
-import org.openedx.core.domain.model.CourseStructure
-import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import java.net.UnknownHostException
-import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseUnitContainerViewModelTest {
@@ -47,118 +41,6 @@ class CourseUnitContainerViewModelTest {
     private val analytics = mockk<CourseAnalytics>()
     private val networkConnection = mockk<NetworkConnection>()
     private val videoPreviewHelper = mockk<VideoPreviewHelper>()
-
-    private val assignmentProgress = AssignmentProgress(
-        assignmentType = "Homework",
-        numPointsEarned = 1f,
-        numPointsPossible = 3f,
-        shortLabel = "HW1",
-    )
-
-    private val blocks = listOf(
-        Block(
-            id = "id",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.HTML,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = listOf("id2", "id1"),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        ),
-        Block(
-            id = "id1",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.VERTICAL,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = listOf("id2", "id"),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        ),
-        Block(
-            id = "id2",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.SEQUENTIAL,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = emptyList(),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        ),
-        Block(
-            id = "id3",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.HTML,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = emptyList(),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        )
-
-    )
-
-    private val courseStructure = CourseStructure(
-        root = "",
-        blockData = blocks,
-        id = "id",
-        name = "Course name",
-        number = "",
-        org = "Org",
-        start = Date(),
-        startDisplay = "",
-        startType = "",
-        end = Date(),
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
-        media = null,
-        certificate = null,
-        isSelfPaced = false,
-        progress = null
-    )
 
     @Before
     fun setUp() {
@@ -234,8 +116,8 @@ class CourseUnitContainerViewModelTest {
             videoPreviewHelper
         )
 
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
         viewModel.loadBlocks()
 
@@ -259,8 +141,8 @@ class CourseUnitContainerViewModelTest {
             networkConnection,
             videoPreviewHelper
         )
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
         viewModel.loadBlocks("id")
         advanceUntilIdle()
@@ -283,8 +165,8 @@ class CourseUnitContainerViewModelTest {
             networkConnection,
             videoPreviewHelper
         )
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
         viewModel.loadBlocks("id")
 
@@ -309,8 +191,8 @@ class CourseUnitContainerViewModelTest {
             networkConnection,
             videoPreviewHelper
         )
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
         viewModel.loadBlocks("id3")
 
@@ -335,8 +217,8 @@ class CourseUnitContainerViewModelTest {
             networkConnection,
             videoPreviewHelper
         )
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
         viewModel.loadBlocks("id1")
 
@@ -361,8 +243,8 @@ class CourseUnitContainerViewModelTest {
             networkConnection,
             videoPreviewHelper
         )
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
         viewModel.loadBlocks("id3")
 
@@ -387,8 +269,8 @@ class CourseUnitContainerViewModelTest {
             networkConnection,
             videoPreviewHelper
         )
-        coEvery { interactor.getCourseStructure("") } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos("") } returns courseStructure
+        coEvery { interactor.getCourseStructure("") } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos("") } returns CoreMocks.mockCourseStructure
 
         viewModel.loadBlocks("id")
 
@@ -413,8 +295,8 @@ class CourseUnitContainerViewModelTest {
             networkConnection,
             videoPreviewHelper
         )
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
         viewModel.loadBlocks("id3")
 

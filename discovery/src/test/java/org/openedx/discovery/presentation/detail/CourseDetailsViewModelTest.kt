@@ -24,13 +24,12 @@ import org.junit.rules.TestRule
 import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.domain.model.Media
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.worker.CalendarSyncScheduler
+import org.openedx.discovery.DiscoveryMocks
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
-import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalyticsEvent
 import org.openedx.foundation.presentation.UIMessage
@@ -56,30 +55,6 @@ class CourseDetailsViewModelTest {
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
-
-    private val mockCourse = Course(
-        id = "id",
-        blocksUrl = "blocksUrl",
-        courseId = "courseId",
-        effort = "effort",
-        enrollmentStart = null,
-        enrollmentEnd = null,
-        hidden = false,
-        invitationOnly = false,
-        media = Media(),
-        mobileAvailable = true,
-        name = "Test course",
-        number = "number",
-        org = "EdX",
-        pacing = "pacing",
-        shortDescription = "shortDescription",
-        start = "start",
-        end = "end",
-        startDisplay = "startDisplay",
-        startType = "startType",
-        overview = "",
-        isEnrolled = false
-    )
 
     @Before
     fun setUp() {
@@ -216,7 +191,7 @@ class CourseDetailsViewModelTest {
         coEvery { interactor.enrollInACourse(any()) } throws UnknownHostException()
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseDetails(any()) } returns mockCourse
+        coEvery { interactor.getCourseDetails(any()) } returns DiscoveryMocks.course
         every { analytics.logEvent(any(), any()) } returns Unit
 
         viewModel.enrollInACourse("", "")
@@ -248,7 +223,7 @@ class CourseDetailsViewModelTest {
         coEvery { interactor.enrollInACourse(any()) } throws Exception()
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseDetails(any()) } returns mockCourse
+        coEvery { interactor.getCourseDetails(any()) } returns DiscoveryMocks.course
         every {
             analytics.logEvent(
                 DiscoveryAnalyticsEvent.COURSE_ENROLL_CLICKED.eventName,
@@ -302,7 +277,7 @@ class CourseDetailsViewModelTest {
         coEvery { interactor.enrollInACourse(any()) } returns Unit
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseDetails(any()) } returns mockCourse
+        coEvery { interactor.getCourseDetails(any()) } returns DiscoveryMocks.course
 
         delay(200)
         viewModel.enrollInACourse("", "")

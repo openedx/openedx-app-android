@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.progress
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,20 +52,25 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.openedx.core.CoreMocks
 import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
 
 @Composable
@@ -586,4 +592,36 @@ fun CurrentOverallGradeText(
         },
         style = MaterialTheme.appTypography.labelMedium,
     )
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun CourseProgressScreenPreview() {
+    OpenEdXTheme {
+        CourseProgressContent(
+            uiState = CourseProgressUIState.Data(
+                progress = CoreMocks.mockCourseProgress,
+                courseStructure = CoreMocks.mockCourseStructure
+            ),
+            uiMessage = null,
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact)
+        )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.NEXUS_9)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, device = Devices.NEXUS_9)
+@Composable
+private fun CourseProgressScreenTabletPreview() {
+    OpenEdXTheme {
+        CourseProgressContent(
+            uiState = CourseProgressUIState.Data(
+                progress = CoreMocks.mockCourseProgress,
+                courseStructure = CoreMocks.mockCourseStructure
+            ),
+            uiMessage = null,
+            windowSize = WindowSize(WindowType.Medium, WindowType.Medium)
+        )
+    }
 }

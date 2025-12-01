@@ -52,17 +52,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
-import org.openedx.core.BlockType
-import org.openedx.core.domain.model.AssignmentProgress
+import org.openedx.core.CoreMocks
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.BlockCounts
-import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
+import org.openedx.course.CourseMocks
 import org.openedx.course.R
 import org.openedx.course.presentation.contenttab.CourseContentAssignmentEmptyState
 import org.openedx.course.presentation.ui.CourseProgress
@@ -78,9 +76,6 @@ private const val POINTER_ICON_SIZE_DP = 10
 private const val POINTER_ICON_PADDING_TOP_DP = 4
 private const val PROGRESS_HEIGHT_DP = 6
 private const val ASSIGNMENT_BUTTON_CARD_BACKGROUND_ALPHA = 0.5f
-private const val COMPLETED_ASSIGNMENTS_COUNT = 1
-private const val COMPLETED_ASSIGNMENTS_COUNT_TABLET = 2
-private const val TOTAL_ASSIGNMENTS_COUNT = 3
 
 @Composable
 fun CourseContentAssignmentScreen(
@@ -524,11 +519,11 @@ private fun CourseContentAssignmentScreenPreview() {
         CourseContentAssignmentScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseAssignmentUIState.CourseData(
-                progress = Progress(COMPLETED_ASSIGNMENTS_COUNT, TOTAL_ASSIGNMENTS_COUNT),
+                progress = CourseMocks.assignmentProgress,
                 groupedAssignments = mapOf(
-                    "Homework" to listOf(mockChapterBlock, mockSequentialBlock)
+                    "Homework" to listOf(CoreMocks.mockChapterBlock, CourseMocks.sequentialBlock)
                 ),
-                courseProgress = mockCourseProgress,
+                courseProgress = CoreMocks.mockCourseProgress,
                 sectionNames = mapOf()
             ),
             onAssignmentClick = {},
@@ -557,12 +552,12 @@ private fun CourseContentAssignmentScreenTabletPreview() {
         CourseContentAssignmentScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseAssignmentUIState.CourseData(
-                progress = Progress(COMPLETED_ASSIGNMENTS_COUNT_TABLET, TOTAL_ASSIGNMENTS_COUNT),
+                progress = CourseMocks.assignmentProgressTablet,
                 groupedAssignments = mapOf(
-                    "Homework" to listOf(mockChapterBlock),
-                    "Quiz" to listOf(mockSequentialBlock)
+                    "Homework" to listOf(CoreMocks.mockChapterBlock),
+                    "Quiz" to listOf(CourseMocks.sequentialBlock)
                 ),
-                courseProgress = mockCourseProgress,
+                courseProgress = CoreMocks.mockCourseProgress,
                 sectionNames = mapOf()
             ),
             onAssignmentClick = {},
@@ -570,138 +565,3 @@ private fun CourseContentAssignmentScreenTabletPreview() {
         )
     }
 }
-
-private val mockCourseProgress = CourseProgress(
-    verifiedMode = "verified",
-    accessExpiration = "2024-12-31",
-    certificateData = CourseProgress.CertificateData(
-        certStatus = "downloadable",
-        certWebViewUrl = "https://example.com/cert",
-        downloadUrl = "https://example.com/cert.pdf",
-        certificateAvailableDate = "2024-06-01"
-    ),
-    completionSummary = CourseProgress.CompletionSummary(
-        completeCount = 5,
-        incompleteCount = 3,
-        lockedCount = 1
-    ),
-    courseGrade = CourseProgress.CourseGrade(
-        letterGrade = "B+",
-        percent = 85.5,
-        isPassing = true
-    ),
-    creditCourseRequirements = "Complete all assignments",
-    end = "2024-12-31",
-    enrollmentMode = "verified",
-    gradingPolicy = CourseProgress.GradingPolicy(
-        assignmentPolicies = listOf(
-            CourseProgress.GradingPolicy.AssignmentPolicy(
-                numDroppable = 1,
-                numTotal = 5,
-                shortLabel = "HW",
-                type = "Homework",
-                weight = 0.4
-            ),
-            CourseProgress.GradingPolicy.AssignmentPolicy(
-                numDroppable = 0,
-                numTotal = 3,
-                shortLabel = "Quiz",
-                type = "Quiz",
-                weight = 0.6
-            )
-        ),
-        gradeRange = mapOf(
-            "A" to 0.9f,
-            "B" to 0.8f,
-            "C" to 0.7f,
-            "D" to 0.6f
-        ),
-        assignmentColors = listOf(Color(0xFF2196F3), Color(0xFF4CAF50))
-    ),
-    hasScheduledContent = false,
-    sectionScores = listOf(
-        CourseProgress.SectionScore(
-            displayName = "Week 1",
-            subsections = listOf(
-                CourseProgress.SectionScore.Subsection(
-                    assignmentType = "Homework",
-                    blockKey = "block1",
-                    displayName = "Homework 1",
-                    hasGradedAssignment = true,
-                    override = "",
-                    learnerHasAccess = true,
-                    numPointsEarned = 8f,
-                    numPointsPossible = 10f,
-                    percentGraded = 80.0,
-                    problemScores = listOf(
-                        CourseProgress.SectionScore.Subsection.ProblemScore(
-                            earned = 8.0,
-                            possible = 10.0
-                        )
-                    ),
-                    showCorrectness = "always",
-                    showGrades = true,
-                    url = "https://example.com/hw1"
-                )
-            )
-        )
-    ),
-    studioUrl = "https://studio.example.com",
-    username = "testuser",
-    userHasPassingGrade = true,
-    verificationData = CourseProgress.VerificationData(
-        link = "https://example.com/verify",
-        status = "approved",
-        statusDate = "2024-01-15"
-    ),
-    disableProgressGraph = false
-)
-
-private val mockAssignmentProgress = AssignmentProgress(
-    assignmentType = "Home",
-    numPointsEarned = 1f,
-    numPointsPossible = 3f,
-    shortLabel = "HM1"
-)
-
-private val mockChapterBlock = Block(
-    id = "id",
-    blockId = "blockId",
-    lmsWebUrl = "lmsWebUrl",
-    legacyWebUrl = "legacyWebUrl",
-    studentViewUrl = "studentViewUrl",
-    type = BlockType.CHAPTER,
-    displayName = "Chapter",
-    graded = false,
-    studentViewData = null,
-    studentViewMultiDevice = false,
-    blockCounts = BlockCounts(1),
-    descendants = emptyList(),
-    descendantsType = BlockType.CHAPTER,
-    completion = 0.0,
-    containsGatedContent = false,
-    assignmentProgress = mockAssignmentProgress,
-    due = Date(),
-    offlineDownload = null
-)
-
-private val mockSequentialBlock = Block(
-    id = "id",
-    blockId = "blockId",
-    lmsWebUrl = "lmsWebUrl",
-    legacyWebUrl = "legacyWebUrl",
-    studentViewUrl = "studentViewUrl",
-    type = BlockType.SEQUENTIAL,
-    displayName = "Sequential",
-    graded = false,
-    studentViewData = null,
-    studentViewMultiDevice = false,
-    blockCounts = BlockCounts(1),
-    descendants = emptyList(),
-    descendantsType = BlockType.SEQUENTIAL,
-    completion = 0.0,
-    containsGatedContent = false,
-    assignmentProgress = mockAssignmentProgress,
-    due = Date(),
-    offlineDownload = null
-)

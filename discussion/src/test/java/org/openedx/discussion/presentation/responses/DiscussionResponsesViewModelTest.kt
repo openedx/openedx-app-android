@@ -22,9 +22,9 @@ import org.junit.rules.TestRule
 import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Pagination
+import org.openedx.discussion.DiscussionMocks
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.domain.model.CommentsData
-import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
@@ -47,38 +47,9 @@ class DiscussionResponsesViewModelTest {
     private val somethingWrong = "Something went wrong"
     private val commentAddedSuccessfully = "Comment Successfully added"
 
-    //region mockComment
-
-    private val mockComment = DiscussionComment(
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        false,
-        true,
-        20,
-        emptyList(),
-        false,
-        "",
-        "",
-        false,
-        "",
-        "",
-        "",
-        21,
-        emptyList(),
-        null,
-        emptyMap()
-    )
-
-    //endregion
-
     private val comments = listOf(
-        mockComment.copy(id = "0"),
-        mockComment.copy(id = "1")
+        DiscussionMocks.comment.copy(id = "0"),
+        DiscussionMocks.comment.copy(id = "1")
     )
 
     @Before
@@ -105,7 +76,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         advanceUntilIdle()
 
@@ -125,7 +96,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
 
         advanceUntilIdle()
@@ -148,7 +119,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
 
         advanceUntilIdle()
@@ -171,7 +142,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         advanceUntilIdle()
 
@@ -193,7 +164,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         viewModel.fetchMore()
         advanceUntilIdle()
@@ -216,7 +187,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.getCommentsResponses(any(), eq(2)) } returns CommentsData(
             comments,
@@ -243,7 +214,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.setCommentVoted(any(), any()) } throws UnknownHostException()
         viewModel.setCommentUpvoted("", false)
@@ -265,7 +236,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.setCommentVoted(any(), any()) } throws Exception()
         viewModel.setCommentUpvoted("", false)
@@ -287,9 +258,14 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.setCommentVoted(any(), any()) } returns mockComment.copy(id = "0")
+        coEvery {
+            interactor.setCommentVoted(
+                any(),
+                any()
+            )
+        } returns DiscussionMocks.comment.copy(id = "0")
         viewModel.updateCommentResponses()
         viewModel.setCommentUpvoted("", false)
         advanceUntilIdle()
@@ -310,9 +286,14 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.setCommentVoted(any(), any()) } returns mockComment.copy(id = "2")
+        coEvery {
+            interactor.setCommentVoted(
+                any(),
+                any()
+            )
+        } returns DiscussionMocks.comment.copy(id = "2")
         viewModel.updateCommentResponses()
         viewModel.setCommentUpvoted("", false)
         advanceUntilIdle()
@@ -333,7 +314,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.setCommentFlagged(any(), any()) } throws UnknownHostException()
         viewModel.setCommentReported("", false)
@@ -355,7 +336,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.setCommentFlagged(any(), any()) } throws Exception()
         viewModel.setCommentReported("", false)
@@ -377,9 +358,11 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.setCommentFlagged(any(), any()) } returns mockComment.copy(id = "0")
+        coEvery { interactor.setCommentFlagged(any(), any()) } returns DiscussionMocks.comment.copy(
+            id = "0"
+        )
         viewModel.setCommentReported("", false)
         advanceUntilIdle()
 
@@ -399,9 +382,11 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.setCommentFlagged(any(), any()) } returns mockComment.copy(id = "0")
+        coEvery { interactor.setCommentFlagged(any(), any()) } returns DiscussionMocks.comment.copy(
+            id = "0"
+        )
 
         viewModel.updateCommentResponses()
         viewModel.setCommentReported("", false)
@@ -423,7 +408,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.createComment(any(), any(), any()) } throws UnknownHostException()
 
@@ -446,7 +431,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.createComment(any(), any(), any()) } throws Exception()
 
@@ -469,9 +454,9 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
+        coEvery { interactor.createComment(any(), any(), any()) } returns DiscussionMocks.comment
 
         viewModel.createComment("")
         advanceUntilIdle()
@@ -492,9 +477,9 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
+        coEvery { interactor.createComment(any(), any(), any()) } returns DiscussionMocks.comment
         every { preferencesManager.user?.username } returns ""
 
         viewModel.createComment("")
@@ -513,9 +498,9 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
+        coEvery { interactor.createComment(any(), any(), any()) } returns DiscussionMocks.comment
         every { preferencesManager.user?.username } returns ""
 
         viewModel.createComment("")

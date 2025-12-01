@@ -19,10 +19,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.R
-import org.openedx.core.domain.model.ProfileImage
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
+import org.openedx.profile.ProfileMocks
 import org.openedx.profile.domain.interactor.ProfileInteractor
+import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.anothersaccount.AnothersProfileUIState
 import org.openedx.profile.presentation.anothersaccount.AnothersProfileViewModel
 import java.net.UnknownHostException
@@ -38,25 +39,6 @@ class AnothersProfileViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<ProfileInteractor>()
     private val username = "username"
-
-    private val account = org.openedx.profile.domain.model.Account(
-        username = "",
-        bio = "",
-        requiresParentalConsent = false,
-        name = "",
-        country = "",
-        isActive = true,
-        profileImage = ProfileImage("", "", "", "", false),
-        yearOfBirth = 2000,
-        levelOfEducation = "",
-        goals = "",
-        languageProficiencies = emptyList(),
-        gender = "",
-        mailingAddress = "",
-        email = "",
-        dateJoined = null,
-        accountPrivacy = org.openedx.profile.domain.model.Account.Privacy.PRIVATE
-    )
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -114,7 +96,9 @@ class AnothersProfileViewModelTest {
             resourceManager,
             username
         )
-        coEvery { interactor.getAccount(username) } returns account
+        coEvery { interactor.getAccount(username) } returns ProfileMocks.account.copy(
+            accountPrivacy = Account.Privacy.PRIVATE
+        )
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getAccount(username) }

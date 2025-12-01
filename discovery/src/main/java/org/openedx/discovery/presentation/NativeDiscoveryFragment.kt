@@ -57,7 +57,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.domain.model.Media
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
@@ -70,6 +69,7 @@ import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.discovery.DiscoveryMocks
 import org.openedx.discovery.R
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.NativeDiscoveryFragment.Companion.LOAD_MORE_THRESHOLD
@@ -440,7 +440,7 @@ private fun CourseItemPreview() {
     OpenEdXTheme {
         DiscoveryCourseItem(
             apiHostUrl = "",
-            course = mockCourse,
+            course = DiscoveryMocks.course,
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             onClick = {}
         )
@@ -455,17 +455,7 @@ private fun DiscoveryScreenPreview() {
         DiscoveryScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             state = DiscoveryUIState.Courses(
-                listOf(
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                )
+                DiscoveryMocks.courses(1)
             ),
             uiMessage = null,
             apiHostUrl = "",
@@ -496,17 +486,7 @@ private fun DiscoveryScreenTabletPreview() {
         DiscoveryScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             state = DiscoveryUIState.Courses(
-                listOf(
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                )
+                DiscoveryMocks.courses(1)
             ),
             uiMessage = null,
             apiHostUrl = "",
@@ -528,27 +508,3 @@ private fun DiscoveryScreenTabletPreview() {
         )
     }
 }
-
-private val mockCourse = Course(
-    id = "id",
-    blocksUrl = "blocksUrl",
-    courseId = "courseId",
-    effort = "effort",
-    enrollmentStart = null,
-    enrollmentEnd = null,
-    hidden = false,
-    invitationOnly = false,
-    media = Media(),
-    mobileAvailable = true,
-    name = "Test course",
-    number = "number",
-    org = "EdX",
-    pacing = "pacing",
-    shortDescription = "shortDescription",
-    start = "start",
-    end = "end",
-    startDisplay = "startDisplay",
-    startType = "startType",
-    overview = "",
-    isEnrolled = false
-)
