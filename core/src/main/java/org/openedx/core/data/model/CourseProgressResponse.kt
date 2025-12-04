@@ -107,7 +107,6 @@ data class CourseProgressResponse(
             )
         }
 
-
         fun mapToRoomEntity() = GradingPolicyDb(
             assignmentPolicies = assignmentPolicies?.map { it.mapToRoomEntity() } ?: emptyList(),
             gradeRange = gradeRange ?: emptyMap(),
