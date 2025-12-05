@@ -1,21 +1,27 @@
 package org.openedx.course.presentation.unit.html
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -76,6 +82,15 @@ class HtmlUnitFragment : Fragment() {
     private var offlineUrl: String = ""
     private var lastModified: String = ""
     private var fromDownloadedContent: Boolean = false
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
+
+    private val fileChooserLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val uris = WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data)
+                ?: extractUrisFromResult(result.resultCode, result.data)
+            filePathCallback?.onReceiveValue(uris)
+            filePathCallback = null
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,9 +112,82 @@ class HtmlUnitFragment : Fragment() {
                 blockUrl = blockUrl,
                 offlineUrl = offlineUrl,
                 fromDownloadedContent = fromDownloadedContent,
-                isFragmentAdded = isAdded
+                isFragmentAdded = isAdded,
+                onShowFileChooser = ::openFileChooser
             )
         }
+    }
+
+    override fun onDestroyView() {
+        filePathCallback?.onReceiveValue(null)
+        filePathCallback = null
+        super.onDestroyView()
+    }
+
+    private fun openFileChooser(
+        callback: ValueCallback<Array<Uri>>,
+        fileChooserParams: WebChromeClient.FileChooserParams?,
+    ): Boolean {
+        filePathCallback?.onReceiveValue(null)
+        filePathCallback = callback
+        val intent = try {
+            fileChooserParams?.createIntent()
+        } catch (_: Exception) {
+            null
+        } ?: Intent(Intent.ACTION_GET_CONTENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            val mimeTypes = fileChooserParams?.acceptTypes
+                ?.filter { it.isNotBlank() }
+                ?.toTypedArray()
+            if (!mimeTypes.isNullOrEmpty()) {
+                type = mimeTypes.first()
+                putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+            } else {
+                type = "*/*"
+            }
+            putExtra(
+                Intent.EXTRA_ALLOW_MULTIPLE,
+                fileChooserParams?.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE
+            )
+        }
+
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        if (intent.action == Intent.ACTION_CHOOSER) {
+            val extraIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra(Intent.EXTRA_INTENT)
+            }
+            extraIntent?.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        return try {
+            fileChooserLauncher.launch(intent)
+            true
+        } catch (_: ActivityNotFoundException) {
+            filePathCallback?.onReceiveValue(null)
+            filePathCallback = null
+            false
+        }
+    }
+
+    private fun extractUrisFromResult(resultCode: Int, data: Intent?): Array<Uri>? {
+        if (resultCode != Activity.RESULT_OK || data == null) return null
+
+        val clipUris = data.clipData?.let { clipData ->
+            (0 until clipData.itemCount).mapNotNull { clipData.getItemAt(it)?.uri }
+        }.orEmpty()
+
+        val singleUri = data.data
+
+        val result = when {
+            clipUris.isNotEmpty() -> clipUris.toTypedArray()
+            singleUri != null -> arrayOf(singleUri)
+            else -> null
+        }
+
+        return result
     }
 
     companion object {
@@ -135,6 +223,7 @@ fun HtmlUnitView(
     offlineUrl: String,
     fromDownloadedContent: Boolean,
     isFragmentAdded: Boolean,
+    onShowFileChooser: (ValueCallback<Array<Uri>>, WebChromeClient.FileChooserParams?) -> Boolean,
 ) {
     OpenEdXTheme {
         val context = LocalContext.current
@@ -216,6 +305,7 @@ fun HtmlUnitView(
                             saveXBlockProgress = { jsonProgress ->
                                 viewModel.saveXBlockProgress(jsonProgress)
                             },
+                            onShowFileChooser = onShowFileChooser
                         )
                     } else {
                         viewModel.onWebPageLoadError()
@@ -257,6 +347,7 @@ private fun HTMLContentView(
     onWebPageLoaded: () -> Unit,
     onWebPageLoadError: () -> Unit,
     saveXBlockProgress: (String) -> Unit,
+    onShowFileChooser: (ValueCallback<Array<Uri>>, WebChromeClient.FileChooserParams?) -> Boolean,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -299,6 +390,15 @@ private fun HTMLContentView(
                     ),
                     "AndroidBridge"
                 )
+                webChromeClient = object : WebChromeClient() {
+                    override fun onShowFileChooser(
+                        view: WebView?,
+                        filePathCallback: ValueCallback<Array<Uri>>,
+                        fileChooserParams: FileChooserParams?
+                    ): Boolean {
+                        return onShowFileChooser(filePathCallback, fileChooserParams)
+                    }
+                }
                 webViewClient = object : WebViewClient() {
 
                     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
