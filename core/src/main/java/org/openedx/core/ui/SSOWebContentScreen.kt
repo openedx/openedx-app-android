@@ -40,6 +40,7 @@ fun SSOWebContentScreen(
     url: String,
     uriScheme: String,
     title: String,
+    ssoFinishedUrl: String,
     onBackClick: () -> Unit,
     onWebPageLoaded: () -> Unit,
     onWebPageUpdated: (String) -> Unit = {},
@@ -47,6 +48,7 @@ fun SSOWebContentScreen(
     val webView = SSOWebView(
         url = url,
         uriScheme = uriScheme,
+        ssoFinishedUrl = ssoFinishedUrl,
         onWebPageLoaded = onWebPageLoaded,
         onWebPageUpdated = onWebPageUpdated
     )
@@ -111,6 +113,7 @@ fun SSOWebContentScreen(
 fun SSOWebView(
     url: String,
     uriScheme: String,
+    ssoFinishedUrl: String,
     onWebPageLoaded: () -> Unit,
     onWebPageUpdated: (String) -> Unit = {},
 ): WebView {
@@ -119,11 +122,21 @@ fun SSOWebView(
     return remember {
         WebView(context).apply {
             webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    url?.let {
-                        val jwtToken = getCookie(url, "edx-jwt-cookie-header-payload")  + getCookie(url, "edx-jwt-cookie-signature")
-                        onWebPageUpdated(jwtToken)
+                override fun onPageFinished(view: WebView?, pageUrl: String?) {
+                    super.onPageFinished(view, pageUrl)
+
+                    if (pageUrl == null) return
+
+                    if (pageUrl.contains(ssoFinishedUrl)) {
+
+                        val header = getCookie(pageUrl, "edx-jwt-cookie-header-payload") ?: ""
+                        val signature = getCookie(pageUrl, "edx-jwt-cookie-signature") ?: ""
+
+                        val token = "$header.$signature"
+
+                        if (token.isNotEmpty()) {
+                            onWebPageUpdated(token)
+                        }
                     }
                 }
 
@@ -170,18 +183,21 @@ fun SSOWebView(
 
 fun getCookie(siteName: String?, cookieName: String?): String? {
     var cookieValue: String? = ""
-
-    val cookieManager = CookieManager.getInstance()
-    val cookies = cookieManager.getCookie(siteName)
-    val temp = cookies.split(";".toRegex()).dropLastWhile { it.isEmpty() }
-        .toTypedArray()
-    for (ar1 in temp) {
-        if (ar1.contains(cookieName!!)) {
-            val temp1 = ar1.split("=".toRegex()).dropLastWhile { it.isEmpty() }
-                .toTypedArray()
-            cookieValue = temp1[1]
-            break
+    if (siteName != null && cookieName != null) {
+        val cookieManager = CookieManager.getInstance()
+        val cookies = cookieManager.getCookie(siteName)
+        val temp = cookies.split(";".toRegex()).dropLastWhile { it.isEmpty() }
+            .toTypedArray()
+        for (ar1 in temp) {
+            if (ar1.contains(cookieName)) {
+                val temp1 = ar1.split("=".toRegex()).dropLastWhile { it.isEmpty() }
+                    .toTypedArray()
+                cookieValue = temp1[1]
+                break
+            }
         }
+        return cookieValue
     }
+
     return cookieValue
 }

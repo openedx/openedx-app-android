@@ -32,6 +32,9 @@ class Config(context: Context) {
         return getString(SSO_URL, "")
     }
 
+    fun getSSOFinishedURL(): String {
+        return getString(SSO_FINISHED_URL, "")
+    }
     fun getUriScheme(): String {
         return getString(URI_SCHEME)
     }
@@ -125,8 +128,10 @@ class Config(context: Context) {
     }
 
     fun getSSOButtonTitle(key: String, defaultValue: String): String {
+        print("getSSOButtonTitle")
         val element = getObject(SSO_BUTTON_TITLE)
-        return element?.asJsonObject?.get(key)?.asString ?: defaultValue
+        print("element: $element, key: ${key.uppercase()}")
+        return element?.asJsonObject?.get(key.uppercase())?.asString ?: defaultValue
     }
 
     fun getCourseUIConfig(): UIConfig {

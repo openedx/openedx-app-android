@@ -2,6 +2,7 @@ package org.openedx.auth.presentation.signin
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,9 +45,7 @@ class SignInFragment : Fragment() {
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
 
                 if (appUpgradeEvent == null) {
-                    setFragmentResultListener("requestKey") { requestKey, bundle ->
-                        viewModel.ssoLogin(token = requestKey)
-                    }
+
                     LoginScreen(
                         windowSize = windowSize,
                         state = state,
@@ -94,6 +93,13 @@ class SignInFragment : Fragment() {
         }
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setFragmentResultListener("requestKey") { _, bundle ->
+            val token = bundle.getString("bundleKey")
+            viewModel.ssoLogin(token = "$token")
+        }
+    }
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_INFO_TYPE = "info_type"

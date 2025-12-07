@@ -337,7 +337,7 @@ private fun AuthForm(
     }
     if (state.isSSOLoginEnabled) {
         Spacer(modifier = Modifier.height(18.dp))
-        if (state.isLoginRegistrationFormEnabled) {
+        if (!state.isLoginRegistrationFormEnabled) {
             Text(
                 modifier =
                     Modifier
@@ -396,7 +396,7 @@ private fun AuthForm(
                         buttonWidth
                             .testTag("btn_sso")
                             .fillMaxWidth(),
-                    text = stringResource(id = coreR.string.core_sso_sign_in),
+                    text = state.ssoButtonTitle,
                     borderColor = MaterialTheme.appColors.primary,
                     textColor = MaterialTheme.appColors.textPrimary,
                     onClick = { onEvent(AuthEvent.SsoSignIn(jwtToken = "")) },

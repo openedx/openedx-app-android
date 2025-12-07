@@ -34,10 +34,8 @@ class AuthRepository(
     suspend fun ssoLogin(
         jwtToken: String
     ) {
-        if (preferencesManager.accessToken.isBlank() ||
-            preferencesManager.refreshToken.isBlank()){
+        if (preferencesManager.accessToken.isBlank()){
             preferencesManager.accessToken = jwtToken
-            preferencesManager.refreshToken = jwtToken
         }
         val user = api.getProfile()
         preferencesManager.user = user

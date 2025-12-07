@@ -67,7 +67,7 @@ class SignInViewModel(
         SignInUIState(
             isLoginRegistrationFormEnabled = config.isLoginRegistrationEnabled(),
             isSSOLoginEnabled = config.isSSOLoginEnabled(),
-            ssoButtonTitle = currentLang,
+            ssoButtonTitle = config.getSSOButtonTitle(currentLang, "Login"),
             isSSODefaultLoginButton = config.isSSODefaultLoginButton(),
             isFacebookAuthEnabled = config.getFacebookConfig().isEnabled(),
             isGoogleAuthEnabled = config.getGoogleConfig().isEnabled(),
@@ -157,19 +157,10 @@ class SignInViewModel(
         _uiState.update { it.copy(showProgress = true) }
         viewModelScope.launch {
             try {
-                interactor.ssoLogin("JWT $token")
+                interactor.ssoLogin(token)
                 _uiState.update { it.copy(loginSuccess = true) }
-
                 setUserId()
-                logEvent(
-                    AuthAnalyticsEvent.SIGN_IN_SUCCESS,
-                    buildMap {
-                        put(
-                            AuthAnalyticsKey.METHOD.key,
-                            AuthType.PASSWORD.methodName.lowercase()
-                        )
-                    }
-                )
+
             } catch (e: Exception) {
                 if (e is EdxError.InvalidGrantException) {
                     _uiMessage.value =
