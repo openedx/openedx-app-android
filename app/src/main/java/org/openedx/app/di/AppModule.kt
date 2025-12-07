@@ -34,6 +34,7 @@ import org.openedx.core.data.model.CourseEnrollments
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
+import org.openedx.core.domain.helper.VideoPreviewHelper
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
 import org.openedx.core.module.download.DownloadHelper
@@ -214,6 +215,7 @@ val appModule = module {
     factory { GoogleAuthHelper(get()) }
     factory { MicrosoftAuthHelper() }
     factory { OAuthHelper(get(), get(), get()) }
+    factory { VideoPreviewHelper(get(), get()) }
 
     factory { FileUtil(get(), get<ResourceManager>().getString(R.string.app_name)) }
     single { DownloadHelper(get(), get()) }

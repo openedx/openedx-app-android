@@ -26,9 +26,9 @@ import org.junit.rules.TestRule
 import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.AgreementUrls
-import org.openedx.core.domain.model.ProfileImage
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
+import org.openedx.profile.ProfileMocks
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
@@ -50,25 +50,6 @@ class ProfileViewModelTest {
     private val notifier = mockk<ProfileNotifier>()
     private val analytics = mockk<ProfileAnalytics>()
     private val router = mockk<ProfileRouter>()
-
-    private val account = org.openedx.profile.domain.model.Account(
-        username = "",
-        bio = "",
-        requiresParentalConsent = false,
-        name = "",
-        country = "",
-        isActive = true,
-        profileImage = ProfileImage("", "", "", "", false),
-        yearOfBirth = 2000,
-        levelOfEducation = "",
-        goals = "",
-        languageProficiencies = emptyList(),
-        gender = "",
-        mailingAddress = "",
-        email = "",
-        dateJoined = null,
-        accountPrivacy = org.openedx.profile.domain.model.Account.Privacy.PRIVATE
-    )
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -118,7 +99,9 @@ class ProfileViewModelTest {
             analytics,
             router
         )
-        coEvery { interactor.getCachedAccount() } returns account
+        coEvery { interactor.getCachedAccount() } returns ProfileMocks.account.copy(
+            accountPrivacy = org.openedx.profile.domain.model.Account.Privacy.PRIVATE
+        )
         coEvery { interactor.getAccount() } throws UnknownHostException()
         advanceUntilIdle()
 
@@ -159,7 +142,9 @@ class ProfileViewModelTest {
             router
         )
         coEvery { interactor.getCachedAccount() } returns null
-        coEvery { interactor.getAccount() } returns account
+        coEvery { interactor.getAccount() } returns ProfileMocks.account.copy(
+            accountPrivacy = org.openedx.profile.domain.model.Account.Privacy.PRIVATE
+        )
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getAccount() }

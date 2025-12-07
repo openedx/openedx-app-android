@@ -11,9 +11,9 @@ import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.FragmentViewType
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.handouts.HandoutsType
+import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.catalog.WebViewLink

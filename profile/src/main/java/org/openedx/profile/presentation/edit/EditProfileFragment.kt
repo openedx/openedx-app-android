@@ -106,7 +106,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.AppDataConstants.DEFAULT_MIME_TYPE
 import org.openedx.core.domain.model.LanguageProficiency
-import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.BackBtn
@@ -133,6 +132,7 @@ import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
+import org.openedx.profile.ProfileMocks
 import org.openedx.profile.R
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.edit.EditProfileFragment.Companion.LEAVE_PROFILE_WIDTH_FACTOR
@@ -1284,7 +1284,7 @@ private fun EditProfileScreenPreview() {
     OpenEdXTheme {
         EditProfileScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = EditProfileUIState(account = mockAccount, isUpdating = false, false),
+            uiState = EditProfileUIState(account = ProfileMocks.account, isUpdating = false, false),
             selectedImageUri = null,
             uiMessage = null,
             isImageDeleted = true,
@@ -1307,7 +1307,7 @@ private fun EditProfileScreenTabletPreview() {
     OpenEdXTheme {
         EditProfileScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = EditProfileUIState(account = mockAccount, isUpdating = false, false),
+            uiState = EditProfileUIState(account = ProfileMocks.account, isUpdating = false, false),
             selectedImageUri = null,
             uiMessage = null,
             isImageDeleted = true,
@@ -1322,22 +1322,3 @@ private fun EditProfileScreenTabletPreview() {
         )
     }
 }
-
-private val mockAccount = Account(
-    username = "thom84",
-    bio = "designer",
-    requiresParentalConsent = true,
-    name = "Thomas",
-    country = "Ukraine",
-    isActive = true,
-    profileImage = ProfileImage("", "", "", "", false),
-    yearOfBirth = 2000,
-    levelOfEducation = "Bachelor",
-    goals = "130",
-    languageProficiencies = emptyList(),
-    gender = "male",
-    mailingAddress = "",
-    "",
-    null,
-    accountPrivacy = Account.Privacy.ALL_USERS
-)

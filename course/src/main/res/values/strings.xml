@@ -45,6 +45,14 @@
     <string name="course_container_content_tab_video">Videos</string>
     <string name="course_container_content_tab_assignment">Assignments</string>
 
+    <!-- Course Completion UI -->
+    <string name="course_completion_title">Course Completion</string>
+    <string name="course_completion_progress_label">Progress</string>
+    <string name="course_completion_progress_description">You have completed %1$s%% of the course content</string>
+    <string name="course_completion_completed">Completed</string>
+    <string name="course_completion_next_sequence">Next Sequence</string>
+    <string name="course_completion_view_all_content">View All Content</string>
+
     <!-- Accessibility -->
     <string name="course_accessibility_video_player">Video player</string>
     <string name="course_accessibility_remove_course_section">Remove course section</string>
@@ -77,8 +85,33 @@
     <string name="course_completed_of">%1$s/%2$s Completed</string>
     <string name="course_complete_points">Complete - %1$s points</string>
     <string name="course_past_due">Past Due - %1$s points</string>
-    <string name="course_in_progress">In Progress - %1$s points</string>
+    <string name="course_in_progress">- %1$s points</string>
     <string name="course_of_grade">%1$s %% of Grade</string>
     <string name="course_review_grading_policy">Review Course Grading Policy</string>
     <string name="course_return_to_course_home">Return to Course Home</string>
+
+    <!-- Videos UI -->
+    <string name="course_continue_watching">Continue Watching</string>
+    <string name="course_next_video">Next Video</string>
+    <string name="course_view_all_videos">View All Videos</string>
+    <string name="course_video_time_remaining">%1$s left</string>
+    <string name="course_videos_completed">Videos\ncompleted</string>
+
+    <!-- Assignments UI -->
+    <string name="course_assignments_completed">Assignments\ncompleted</string>
+    <string name="course_view_all_assignments">View All Assignments</string>
+    <string name="course_next_assignment">Next Assignment</string>
+    <string name="course_due_today">Due Today: %1$s</string>
+    <string name="course_days_past_due">%1$d Days Past Due: %2$s</string>
+    <string name="course_due_in_days">Due in %1$d Days: %2$s</string>
+    <string name="course_section">Section: %1$s</string>
+
+    <!-- Grades UI -->
+    <string name="course_grades_title">Grades</string>
+    <string name="course_grades_description">This represents your weighted grade against the grade needed to pass this course.</string>
+    <string name="course_view_progress">View Progress</string>
+
+    <!-- Caught Up Messages -->
+    <string name="course_videos_caught_up">You\'re all caught up on videos!</string>
+    <string name="course_assignments_caught_up">You\'re all caught up on assignments!</string>
 </resources>

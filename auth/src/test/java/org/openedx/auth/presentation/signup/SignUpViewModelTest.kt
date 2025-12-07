@@ -32,12 +32,12 @@ import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
+import org.openedx.core.CoreMocks
 import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.config.FacebookConfig
 import org.openedx.core.config.GoogleConfig
 import org.openedx.core.config.MicrosoftConfig
-import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.core.domain.model.RegistrationField
@@ -98,8 +98,6 @@ class SignUpViewModelTest {
         )
     )
 
-    private val user = User(0, "", "", "")
-
     //endregion
 
     private val noInternet = "Slow or no internet connection"
@@ -149,7 +147,7 @@ class SignUpViewModelTest {
         every { analytics.logEvent(any(), any()) } returns Unit
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery { interactor.login("", "") } returns Unit
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.getRegistrationFields()
         advanceUntilIdle()
@@ -198,7 +196,7 @@ class SignUpViewModelTest {
             )
         } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.getRegistrationFields()
         advanceUntilIdle()
@@ -242,7 +240,7 @@ class SignUpViewModelTest {
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery { interactor.login("", "") } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.register()
         advanceUntilIdle()
@@ -288,7 +286,7 @@ class SignUpViewModelTest {
                 parametersMap.getValue(ApiConstants.PASSWORD)
             )
         } returns Unit
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.getRegistrationFields()
         advanceUntilIdle()

@@ -49,9 +49,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
+import org.openedx.core.CoreMocks
 import org.openedx.core.R
 import org.openedx.core.module.db.DownloadModel
-import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
@@ -155,13 +155,17 @@ private fun CourseOfflineUI(
                         } else {
                             NoDownloadableBlocksProgress()
                         }
-                        if (uiState.progressBarValue != 1f && !uiState.isDownloading && hasInternetConnection) {
+                        if (
+                            uiState.progressBarValue != 1f &&
+                            !uiState.isDownloading &&
+                            hasInternetConnection &&
+                            !uiState.isAllDownloaded
+                        ) {
                             Spacer(modifier = Modifier.height(20.dp))
                             OpenEdXButton(
                                 text = stringResource(R.string.core_download_all),
                                 backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
                                 onClick = onDownloadAllClick,
-                                enabled = uiState.isHaveDownloadableBlocks,
                                 content = {
                                     val textColor = if (uiState.isHaveDownloadableBlocks) {
                                         MaterialTheme.appColors.primaryButtonText
@@ -365,15 +369,17 @@ private fun DownloadProgress(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = uiState.downloadedSize,
+                text = uiState.downloadedSize.toFileSize(1, false),
                 style = MaterialTheme.appTypography.titleLarge,
                 color = MaterialTheme.appColors.successGreen
             )
-            Text(
-                text = uiState.readyToDownloadSize,
-                style = MaterialTheme.appTypography.titleLarge,
-                color = MaterialTheme.appColors.textDark
-            )
+            if (uiState.readyToDownloadSize > 0) {
+                Text(
+                    text = uiState.readyToDownloadSize.toFileSize(1, false),
+                    style = MaterialTheme.appTypography.titleLarge,
+                    color = MaterialTheme.appColors.textDark
+                )
+            }
         }
         Spacer(modifier = Modifier.height(4.dp))
         Row(
@@ -388,20 +394,22 @@ private fun DownloadProgress(
                 color = MaterialTheme.appColors.successGreen,
                 textStyle = MaterialTheme.appTypography.labelLarge
             )
-            if (!uiState.isDownloading) {
-                IconText(
-                    text = stringResource(R.string.core_ready_to_download),
-                    icon = Icons.Outlined.CloudDownload,
-                    color = MaterialTheme.appColors.textDark,
-                    textStyle = MaterialTheme.appTypography.labelLarge
-                )
-            } else {
-                IconText(
-                    text = stringResource(R.string.core_downloading),
-                    icon = Icons.Outlined.CloudDownload,
-                    color = MaterialTheme.appColors.textDark,
-                    textStyle = MaterialTheme.appTypography.labelLarge
-                )
+            if (uiState.readyToDownloadSize > 0) {
+                if (!uiState.isDownloading) {
+                    IconText(
+                        text = stringResource(R.string.core_ready_to_download),
+                        icon = Icons.Outlined.CloudDownload,
+                        color = MaterialTheme.appColors.textDark,
+                        textStyle = MaterialTheme.appTypography.labelLarge
+                    )
+                } else {
+                    IconText(
+                        text = stringResource(R.string.core_downloading),
+                        icon = Icons.Outlined.CloudDownload,
+                        color = MaterialTheme.appColors.textDark,
+                        textStyle = MaterialTheme.appTypography.labelLarge
+                    )
+                }
             }
         }
         if (uiState.progressBarValue != 0f) {
@@ -462,22 +470,13 @@ private fun CourseOfflineUIPreview() {
             hasInternetConnection = true,
             uiState = CourseOfflineUIState(
                 isHaveDownloadableBlocks = true,
-                readyToDownloadSize = "159MB",
-                downloadedSize = "0MB",
+                readyToDownloadSize = 100000L,
+                downloadedSize = 0L,
                 progressBarValue = 0f,
                 isDownloading = true,
+                isAllDownloaded = true,
                 largestDownloads = listOf(
-                    DownloadModel(
-                        "",
-                        "",
-                        "",
-                        0,
-                        "",
-                        "",
-                        FileType.X_BLOCK,
-                        DownloadedState.DOWNLOADED,
-                        null
-                    )
+                    CoreMocks.mockDownloadModel
                 ),
             ),
             onDownloadAllClick = {},

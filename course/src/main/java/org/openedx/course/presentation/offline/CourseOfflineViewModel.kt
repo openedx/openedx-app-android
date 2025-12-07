@@ -28,7 +28,6 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureGot
 import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.foundation.extension.toFileSize
 import org.openedx.foundation.utils.FileUtil
 
 class CourseOfflineViewModel(
@@ -56,8 +55,9 @@ class CourseOfflineViewModel(
             isHaveDownloadableBlocks = false,
             largestDownloads = emptyList(),
             isDownloading = false,
-            readyToDownloadSize = "",
-            downloadedSize = "",
+            isAllDownloaded = false,
+            readyToDownloadSize = 0L,
+            downloadedSize = 0L,
             progressBarValue = 0f,
         )
     )
@@ -163,20 +163,27 @@ class CourseOfflineViewModel(
         viewModelScope.launch {
             val courseStructure = courseInteractor.getCourseStructureFromCache(courseId)
             val totalDownloadableSize = getFilesSize(courseStructure.blockData)
-
-            if (totalDownloadableSize == 0L) return@launch
-
             courseInteractor.getDownloadModels().collect { downloadModels ->
+                val courseDownloadModels = downloadModels.filter { it.courseId == courseId }
                 val completedDownloads =
-                    downloadModels.filter { it.downloadedState.isDownloaded && it.courseId == courseId }
-                val completedDownloadIds = completedDownloads.map { it.id }
-                val downloadedBlocks =
-                    courseStructure.blockData.filter { it.id in completedDownloadIds }
+                    courseDownloadModels.filter { it.downloadedState.isDownloaded }
+                val downloadedBlocks = courseStructure.blockData.filter {
+                    it.id in completedDownloads.map { it.id }
+                }
+                val allDownloadableBlocks = courseStructure.blockData.filter { it.isDownloadable }
+                val courseDownloadModelsMap = courseDownloadModels.associateBy { it.id }
+                val isAllDownloaded = allDownloadableBlocks.isNotEmpty() &&
+                        allDownloadableBlocks.all { block ->
+                            courseDownloadModelsMap[block.id]?.downloadedState?.isDownloaded == true
+                        }
+                val isHaveDownloadableBlocks = allDownloadableBlocks.isNotEmpty()
 
                 updateUIState(
                     totalDownloadableSize,
                     completedDownloads,
-                    downloadedBlocks
+                    downloadedBlocks,
+                    isAllDownloaded,
+                    isHaveDownloadableBlocks
                 )
             }
         }
@@ -185,7 +192,9 @@ class CourseOfflineViewModel(
     private fun updateUIState(
         totalDownloadableSize: Long,
         completedDownloads: List<DownloadModel>,
-        downloadedBlocks: List<Block>
+        downloadedBlocks: List<Block>,
+        isAllDownloaded: Boolean,
+        isHaveDownloadableBlocks: Boolean,
     ) {
         val downloadedSize = getFilesSize(downloadedBlocks).toFloat()
         val realDownloadedSize = completedDownloads.sumOf { it.size }
@@ -200,10 +209,11 @@ class CourseOfflineViewModel(
         }
         _uiState.update {
             it.copy(
-                isHaveDownloadableBlocks = true,
+                isHaveDownloadableBlocks = isHaveDownloadableBlocks,
+                isAllDownloaded = isAllDownloaded,
                 largestDownloads = largestDownloads,
-                readyToDownloadSize = readyToDownloadSize.toFileSize(1, false),
-                downloadedSize = realDownloadedSize.toFileSize(1, false),
+                readyToDownloadSize = readyToDownloadSize,
+                downloadedSize = realDownloadedSize,
                 progressBarValue = progressBarValue
             )
         }

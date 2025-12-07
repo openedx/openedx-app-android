@@ -20,6 +20,7 @@ object TimeUtils {
 
     private const val FORMAT_ISO_8601 = "yyyy-MM-dd'T'HH:mm:ss'Z'"
     private const val FORMAT_ISO_8601_WITH_TIME_ZONE = "yyyy-MM-dd'T'HH:mm:ssXXX"
+    private const val FORMAT_MONTH_DAY = "MMM dd"
     private const val SEVEN_DAYS_IN_MILLIS = 604800000L
 
     fun formatToString(context: Context, date: Date, useRelativeDates: Boolean): String {
@@ -95,6 +96,11 @@ object TimeUtils {
             daysDifference == 0 -> context.getString(R.string.core_date_type_today)
             else -> context.getString(R.string.core_date_format_due_in_days, daysDifference)
         }
+    }
+
+    fun formatToMonthDay(date: Date): String {
+        val sdf = SimpleDateFormat(FORMAT_MONTH_DAY, Locale.getDefault())
+        return sdf.format(date)
     }
 
     fun getCurrentTime(): Long {

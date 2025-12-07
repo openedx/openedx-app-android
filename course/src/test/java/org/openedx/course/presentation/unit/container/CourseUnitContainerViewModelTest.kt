@@ -18,20 +18,14 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.BlockType
+import org.openedx.core.CoreMocks
 import org.openedx.core.config.Config
-import org.openedx.core.domain.model.AssignmentProgress
-import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.BlockCounts
-import org.openedx.core.domain.model.CourseStructure
-import org.openedx.core.domain.model.CoursewareAccess
-import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.domain.helper.VideoPreviewHelper
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import java.net.UnknownHostException
-import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseUnitContainerViewModelTest {
@@ -46,122 +40,12 @@ class CourseUnitContainerViewModelTest {
     private val notifier = mockk<CourseNotifier>()
     private val analytics = mockk<CourseAnalytics>()
     private val networkConnection = mockk<NetworkConnection>()
-
-    private val assignmentProgress = AssignmentProgress(
-        assignmentType = "Homework",
-        numPointsEarned = 1f,
-        numPointsPossible = 3f,
-        shortLabel = "HW1",
-    )
-
-    private val blocks = listOf(
-        Block(
-            id = "id",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.HTML,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = listOf("id2", "id1"),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        ),
-        Block(
-            id = "id1",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.VERTICAL,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = listOf("id2", "id"),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        ),
-        Block(
-            id = "id2",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.SEQUENTIAL,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = emptyList(),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        ),
-        Block(
-            id = "id3",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.HTML,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = emptyList(),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        )
-
-    )
-
-    private val courseStructure = CourseStructure(
-        root = "",
-        blockData = blocks,
-        id = "id",
-        name = "Course name",
-        number = "",
-        org = "Org",
-        start = Date(),
-        startDisplay = "",
-        startType = "",
-        end = Date(),
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
-        media = null,
-        certificate = null,
-        isSelfPaced = false,
-        progress = null
-    )
+    private val videoPreviewHelper = mockk<VideoPreviewHelper>()
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
+        every { videoPreviewHelper.getVideoPreviews(any(), any()) } returns emptyMap()
     }
 
     @After
@@ -172,13 +56,22 @@ class CourseUnitContainerViewModelTest {
     @Test
     fun `getBlocks no internet connection exception`() = runTest {
         every { notifier.notifier } returns MutableSharedFlow()
-        val viewModel =
-            CourseUnitContainerViewModel("", "", config, interactor, notifier, analytics, networkConnection)
+        val viewModel = CourseUnitContainerViewModel(
+            "",
+            "",
+            CourseViewMode.FULL,
+            config,
+            interactor,
+            notifier,
+            analytics,
+            networkConnection,
+            videoPreviewHelper
+        )
 
         coEvery { interactor.getCourseStructure(any()) } throws UnknownHostException()
         coEvery { interactor.getCourseStructureForVideos(any()) } throws UnknownHostException()
 
-        viewModel.loadBlocks(CourseViewMode.FULL)
+        viewModel.loadBlocks()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
@@ -187,13 +80,22 @@ class CourseUnitContainerViewModelTest {
     @Test
     fun `getBlocks unknown exception`() = runTest {
         every { notifier.notifier } returns MutableSharedFlow()
-        val viewModel =
-            CourseUnitContainerViewModel("", "", config, interactor, notifier, analytics, networkConnection)
+        val viewModel = CourseUnitContainerViewModel(
+            "",
+            "",
+            CourseViewMode.FULL,
+            config,
+            interactor,
+            notifier,
+            analytics,
+            networkConnection,
+            videoPreviewHelper
+        )
 
         coEvery { interactor.getCourseStructure(any()) } throws UnknownHostException()
         coEvery { interactor.getCourseStructureForVideos(any()) } throws UnknownHostException()
 
-        viewModel.loadBlocks(CourseViewMode.FULL)
+        viewModel.loadBlocks()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
@@ -202,13 +104,22 @@ class CourseUnitContainerViewModelTest {
     @Test
     fun `getBlocks unknown success`() = runTest {
         every { notifier.notifier } returns MutableSharedFlow()
-        val viewModel =
-            CourseUnitContainerViewModel("", "", config, interactor, notifier, analytics, networkConnection)
+        val viewModel = CourseUnitContainerViewModel(
+            "",
+            "",
+            CourseViewMode.VIDEOS,
+            config,
+            interactor,
+            notifier,
+            analytics,
+            networkConnection,
+            videoPreviewHelper
+        )
 
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
-        viewModel.loadBlocks(CourseViewMode.VIDEOS)
+        viewModel.loadBlocks()
 
         advanceUntilIdle()
 
@@ -219,12 +130,21 @@ class CourseUnitContainerViewModelTest {
     @Test
     fun setupCurrentIndex() = runTest {
         every { notifier.notifier } returns MutableSharedFlow()
-        val viewModel =
-            CourseUnitContainerViewModel("", "", config, interactor, notifier, analytics, networkConnection)
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        val viewModel = CourseUnitContainerViewModel(
+            "",
+            "",
+            CourseViewMode.VIDEOS,
+            config,
+            interactor,
+            notifier,
+            analytics,
+            networkConnection,
+            videoPreviewHelper
+        )
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
-        viewModel.loadBlocks(CourseViewMode.VIDEOS, "id")
+        viewModel.loadBlocks("id")
         advanceUntilIdle()
 
         coVerify(exactly = 0) { interactor.getCourseStructure(any()) }
@@ -234,12 +154,21 @@ class CourseUnitContainerViewModelTest {
     @Test
     fun `getCurrentBlock test`() = runTest {
         every { notifier.notifier } returns MutableSharedFlow()
-        val viewModel =
-            CourseUnitContainerViewModel("", "", config, interactor, notifier, analytics, networkConnection)
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        val viewModel = CourseUnitContainerViewModel(
+            "",
+            "",
+            CourseViewMode.VIDEOS,
+            config,
+            interactor,
+            notifier,
+            analytics,
+            networkConnection,
+            videoPreviewHelper
+        )
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
-        viewModel.loadBlocks(CourseViewMode.VIDEOS, "id")
+        viewModel.loadBlocks("id")
 
         advanceUntilIdle()
 
@@ -251,12 +180,21 @@ class CourseUnitContainerViewModelTest {
     @Test
     fun `moveToPrevBlock null`() = runTest {
         every { notifier.notifier } returns MutableSharedFlow()
-        val viewModel =
-            CourseUnitContainerViewModel("", "", config, interactor, notifier, analytics, networkConnection)
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        val viewModel = CourseUnitContainerViewModel(
+            "",
+            "",
+            CourseViewMode.VIDEOS,
+            config,
+            interactor,
+            notifier,
+            analytics,
+            networkConnection,
+            videoPreviewHelper
+        )
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
-        viewModel.loadBlocks(CourseViewMode.VIDEOS, "id")
+        viewModel.loadBlocks("id3")
 
         advanceUntilIdle()
 
@@ -268,12 +206,21 @@ class CourseUnitContainerViewModelTest {
     @Test
     fun `moveToPrevBlock not null`() = runTest {
         every { notifier.notifier } returns MutableSharedFlow()
-        val viewModel =
-            CourseUnitContainerViewModel("", "id", config, interactor, notifier, analytics, networkConnection)
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        val viewModel = CourseUnitContainerViewModel(
+            "",
+            "id",
+            CourseViewMode.VIDEOS,
+            config,
+            interactor,
+            notifier,
+            analytics,
+            networkConnection,
+            videoPreviewHelper
+        )
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
-        viewModel.loadBlocks(CourseViewMode.VIDEOS, "id1")
+        viewModel.loadBlocks("id1")
 
         advanceUntilIdle()
 
@@ -285,12 +232,21 @@ class CourseUnitContainerViewModelTest {
     @Test
     fun `moveToNextBlock null`() = runTest {
         every { notifier.notifier } returns MutableSharedFlow()
-        val viewModel =
-            CourseUnitContainerViewModel("", "", config, interactor, notifier, analytics, networkConnection)
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        val viewModel = CourseUnitContainerViewModel(
+            "",
+            "",
+            CourseViewMode.VIDEOS,
+            config,
+            interactor,
+            notifier,
+            analytics,
+            networkConnection,
+            videoPreviewHelper
+        )
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
-        viewModel.loadBlocks(CourseViewMode.VIDEOS, "id3")
+        viewModel.loadBlocks("id3")
 
         advanceUntilIdle()
 
@@ -302,12 +258,21 @@ class CourseUnitContainerViewModelTest {
     @Test
     fun `moveToNextBlock not null`() = runTest {
         every { notifier.notifier } returns MutableSharedFlow()
-        val viewModel =
-            CourseUnitContainerViewModel("", "id", config, interactor, notifier, analytics, networkConnection)
-        coEvery { interactor.getCourseStructure("") } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos("") } returns courseStructure
+        val viewModel = CourseUnitContainerViewModel(
+            "",
+            "id",
+            CourseViewMode.VIDEOS,
+            config,
+            interactor,
+            notifier,
+            analytics,
+            networkConnection,
+            videoPreviewHelper
+        )
+        coEvery { interactor.getCourseStructure("") } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos("") } returns CoreMocks.mockCourseStructure
 
-        viewModel.loadBlocks(CourseViewMode.VIDEOS, "id")
+        viewModel.loadBlocks("id")
 
         advanceUntilIdle()
 
@@ -319,12 +284,21 @@ class CourseUnitContainerViewModelTest {
     @Test
     fun `currentIndex isLastIndex`() = runTest {
         every { notifier.notifier } returns MutableSharedFlow()
-        val viewModel =
-            CourseUnitContainerViewModel("", "", config, interactor, notifier, analytics, networkConnection)
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        val viewModel = CourseUnitContainerViewModel(
+            "",
+            "",
+            CourseViewMode.VIDEOS,
+            config,
+            interactor,
+            notifier,
+            analytics,
+            networkConnection,
+            videoPreviewHelper
+        )
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
-        viewModel.loadBlocks(CourseViewMode.VIDEOS, "id3")
+        viewModel.loadBlocks("id3")
 
         advanceUntilIdle()
 

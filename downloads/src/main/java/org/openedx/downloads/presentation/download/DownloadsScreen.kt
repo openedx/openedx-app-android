@@ -70,6 +70,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import org.openedx.core.CoreMocks
 import org.openedx.core.domain.model.DownloadCoursePreview
 import org.openedx.core.extension.safeDivBy
 import org.openedx.core.module.db.DownloadModel
@@ -554,8 +555,8 @@ private fun DownloadsScreenPreview() {
 private fun CourseItemPreview() {
     OpenEdXTheme {
         CourseItem(
-            downloadCoursePreview = DownloadCoursePreview("", "name", "", 100),
-            downloadModels = emptyList(),
+            downloadCoursePreview = CoreMocks.coursePreview,
+            downloadModels = listOf(CoreMocks.mockDownloadModel),
             apiHostUrl = "",
             downloadedState = DownloadedState.NOT_DOWNLOADED,
             onCourseClick = {},

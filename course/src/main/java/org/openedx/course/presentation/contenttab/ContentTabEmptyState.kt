@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -34,15 +32,16 @@ import org.openedx.course.R
 
 @Composable
 fun ContentTabEmptyState(
+    modifier: Modifier = Modifier,
     message: String,
-    onReturnToCourseClick: () -> Unit
+    onReturnToCourseClick: () -> Unit,
+    showReturnButton: Boolean = true
 ) {
     val configuration = LocalConfiguration.current
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 24.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(vertical = 24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -64,52 +63,78 @@ fun ContentTabEmptyState(
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center
         )
-        Spacer(Modifier.height(16.dp))
-        OpenEdXButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            textColor = MaterialTheme.appColors.secondaryButtonText,
-            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
-            onClick = onReturnToCourseClick
-        ) {
-            IconText(
-                text = stringResource(id = R.string.course_return_to_course_home),
-                icon = Icons.AutoMirrored.Filled.ArrowBack,
-                color = MaterialTheme.appColors.secondaryButtonText,
-                textStyle = MaterialTheme.appTypography.labelLarge
-            )
+        if (showReturnButton) {
+            Spacer(Modifier.height(16.dp))
+            OpenEdXButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                textColor = MaterialTheme.appColors.secondaryButtonText,
+                backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                onClick = onReturnToCourseClick
+            ) {
+                IconText(
+                    text = stringResource(id = R.string.course_return_to_course_home),
+                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    color = MaterialTheme.appColors.secondaryButtonText,
+                    textStyle = MaterialTheme.appTypography.labelLarge
+                )
+            }
         }
     }
 }
 
 @Composable
 fun CourseContentAllEmptyState(
-    onReturnToCourseClick: () -> Unit
+    modifier: Modifier = Modifier,
+    onReturnToCourseClick: () -> Unit,
+    showReturnButton: Boolean = true
 ) {
     ContentTabEmptyState(
+        modifier = modifier,
         message = stringResource(id = org.openedx.core.R.string.core_no_course_content),
-        onReturnToCourseClick = onReturnToCourseClick
+        onReturnToCourseClick = onReturnToCourseClick,
+        showReturnButton = showReturnButton
     )
 }
 
 @Composable
 fun CourseContentVideoEmptyState(
-    onReturnToCourseClick: () -> Unit
+    modifier: Modifier = Modifier,
+    onReturnToCourseClick: () -> Unit,
+    showReturnButton: Boolean = true
 ) {
     ContentTabEmptyState(
+        modifier = modifier,
         message = stringResource(id = org.openedx.core.R.string.core_no_videos),
-        onReturnToCourseClick = onReturnToCourseClick
+        onReturnToCourseClick = onReturnToCourseClick,
+        showReturnButton = showReturnButton
     )
 }
 
 @Composable
 fun CourseContentAssignmentEmptyState(
-    onReturnToCourseClick: () -> Unit
+    modifier: Modifier = Modifier,
+    onReturnToCourseClick: () -> Unit,
+    showReturnButton: Boolean = true
 ) {
     ContentTabEmptyState(
+        modifier = modifier,
         message = stringResource(id = org.openedx.core.R.string.core_no_assignments),
-        onReturnToCourseClick = onReturnToCourseClick
+        onReturnToCourseClick = onReturnToCourseClick,
+        showReturnButton = showReturnButton
+    )
+}
+
+@Composable
+fun CourseHomeGradesEmptyState(
+    modifier: Modifier = Modifier,
+) {
+    ContentTabEmptyState(
+        modifier = modifier,
+        message = stringResource(id = R.string.course_progress_no_assignments),
+        onReturnToCourseClick = {},
+        showReturnButton = false
     )
 }
 
@@ -117,6 +142,14 @@ fun CourseContentAssignmentEmptyState(
 @Composable
 private fun CourseContentAllEmptyStatePreview() {
     OpenEdXTheme {
-        CourseContentAllEmptyState({})
+        CourseContentAllEmptyState(onReturnToCourseClick = {})
+    }
+}
+
+@Preview
+@Composable
+private fun CourseHomeGradesEmptyStatePreview() {
+    OpenEdXTheme {
+        CourseHomeGradesEmptyState()
     }
 }

@@ -1,7 +1,6 @@
 package org.openedx.course.presentation.progress
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -9,10 +8,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.CourseProgressLoaded
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.RefreshProgress
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -33,30 +33,34 @@ class CourseProgressViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
-    private var progressJob: Job? = null
-
     init {
-        loadCourseProgress(false)
+        collectData(false)
         collectCourseNotifier()
     }
 
-    fun loadCourseProgress(isRefresh: Boolean) {
-        progressJob?.cancel()
-        progressJob = viewModelScope.launch {
-            if (!isRefresh) {
-                _uiState.value = CourseProgressUIState.Loading
+    private fun collectData(isRefresh: Boolean) {
+        viewModelScope.launch {
+            val courseProgressFlow = interactor.getCourseProgress(courseId, isRefresh, false)
+            val courseStructureFlow = interactor.getCourseStructureFlow(courseId)
+
+            combine(
+                courseProgressFlow,
+                courseStructureFlow
+            ) { courseProgress, courseStructure ->
+                courseProgress to courseStructure
+            }.catch { e ->
+                if (_uiState.value !is CourseProgressUIState.Data) {
+                    _uiState.value = CourseProgressUIState.Error
+                }
+                courseNotifier.send(CourseLoading(false))
+            }.collect { (courseProgress, courseStructure) ->
+                _uiState.value = CourseProgressUIState.Data(
+                    courseProgress,
+                    courseStructure
+                )
+                courseNotifier.send(CourseLoading(false))
+                courseNotifier.send(CourseProgressLoaded)
             }
-            interactor.getCourseProgress(courseId, isRefresh)
-                .catch { e ->
-                    if (_uiState.value !is CourseProgressUIState.Data) {
-                        _uiState.value = CourseProgressUIState.Error
-                    }
-                    courseNotifier.send(CourseLoading(false))
-                }
-                .collectLatest { progress ->
-                    _uiState.value = CourseProgressUIState.Data(progress)
-                    courseNotifier.send(CourseLoading(false))
-                }
         }
     }
 
@@ -64,7 +68,7 @@ class CourseProgressViewModel(
         viewModelScope.launch {
             courseNotifier.notifier.collect { event ->
                 when (event) {
-                    is RefreshProgress, is CourseStructureUpdated -> loadCourseProgress(true)
+                    is RefreshProgress, is CourseStructureUpdated -> collectData(true)
                 }
             }
         }

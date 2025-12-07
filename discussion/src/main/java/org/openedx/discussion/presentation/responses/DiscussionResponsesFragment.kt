@@ -75,7 +75,6 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -85,6 +84,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.discussion.DiscussionMocks
 import org.openedx.discussion.R
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.presentation.DiscussionRouter
@@ -532,10 +532,10 @@ private fun DiscussionResponsesScreenPreview() {
         DiscussionResponsesScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DiscussionResponsesUIState.Success(
-                mockComment,
+                DiscussionMocks.comment,
                 listOf(
-                    mockComment,
-                    mockComment
+                    DiscussionMocks.comment,
+                    DiscussionMocks.comment
                 )
             ),
             uiMessage = null,
@@ -560,10 +560,10 @@ private fun DiscussionResponsesScreenTabletPreview() {
         DiscussionResponsesScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DiscussionResponsesUIState.Success(
-                mockComment,
+                DiscussionMocks.comment,
                 listOf(
-                    mockComment,
-                    mockComment
+                    DiscussionMocks.comment,
+                    DiscussionMocks.comment
                 )
             ),
             uiMessage = null,
@@ -579,28 +579,3 @@ private fun DiscussionResponsesScreenTabletPreview() {
         )
     }
 }
-
-private val mockComment = DiscussionComment(
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    false,
-    true,
-    20,
-    emptyList(),
-    false,
-    "",
-    "",
-    false,
-    "",
-    "",
-    "",
-    21,
-    emptyList(),
-    ProfileImage("", "", "", "", false),
-    mapOf()
-)

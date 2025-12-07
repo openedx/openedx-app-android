@@ -88,7 +88,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.discussion.domain.model.DiscussionType
+import org.openedx.discussion.DiscussionMocks
 import org.openedx.discussion.presentation.DiscussionRouter
 import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.discussion.presentation.ui.ThreadItem
@@ -693,7 +693,13 @@ private fun DiscussionThreadsScreenPreview() {
         DiscussionThreadsScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             "All posts",
-            uiState = DiscussionThreadsUIState.Threads(listOf(mockThread, mockThread, mockThread)),
+            uiState = DiscussionThreadsUIState.Threads(
+                listOf(
+                    DiscussionMocks.thread,
+                    DiscussionMocks.thread,
+                    DiscussionMocks.thread
+                )
+            ),
             uiMessage = null,
             onItemClick = {},
             onBackClick = {},
@@ -717,7 +723,13 @@ private fun DiscussionThreadsScreenTabletPreview() {
         DiscussionThreadsScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             "All posts",
-            uiState = DiscussionThreadsUIState.Threads(listOf(mockThread, mockThread, mockThread)),
+            uiState = DiscussionThreadsUIState.Threads(
+                listOf(
+                    DiscussionMocks.thread,
+                    DiscussionMocks.thread,
+                    DiscussionMocks.thread
+                )
+            ),
             uiMessage = null,
             onItemClick = {},
             onBackClick = {},
@@ -732,37 +744,3 @@ private fun DiscussionThreadsScreenTabletPreview() {
         )
     }
 }
-
-private val mockThread = org.openedx.discussion.domain.model.Thread(
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    false,
-    true,
-    20,
-    emptyList(),
-    false,
-    "",
-    "",
-    "",
-    "",
-    DiscussionType.DISCUSSION,
-    "",
-    "",
-    "Discussion title long Discussion title long good item",
-    true,
-    false,
-    true,
-    21,
-    4,
-    false,
-    false,
-    mapOf(),
-    10,
-    false,
-    false
-)

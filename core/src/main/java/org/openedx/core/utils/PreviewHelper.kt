@@ -7,6 +7,9 @@ import android.media.MediaMetadataRetriever
 import java.io.File
 import java.io.FileOutputStream
 import java.security.MessageDigest
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 data class VideoPreview(
     val link: String? = null,
@@ -24,6 +27,9 @@ data class VideoPreview(
 }
 
 object PreviewHelper {
+
+    private const val TIMEOUT_MS = 5000L // 5 seconds
+    private val executor = Executors.newSingleThreadExecutor()
 
     fun getYouTubeThumbnailUrl(url: String): String {
         val videoId = extractYouTubeVideoId(url)
@@ -49,13 +55,32 @@ object PreviewHelper {
                 try {
                     BitmapFactory.decodeFile(cacheFile.absolutePath)
                 } catch (_: Exception) {
-                    extractBitmapFromVideo(videoUrl, context)
+                    // If cache file is corrupted, try to extract from video with timeout
+                    extractBitmapFromVideoWithTimeout(videoUrl, context)
                 }
             } else {
-                extractBitmapFromVideo(videoUrl, context)
+                // Extract from video with timeout
+                extractBitmapFromVideoWithTimeout(videoUrl, context)
             }
         }
         return result
+    }
+
+    private fun extractBitmapFromVideoWithTimeout(videoUrl: String, context: Context): Bitmap? {
+        return try {
+            val future = executor.submit<Bitmap?> {
+                extractBitmapFromVideo(videoUrl, context)
+            }
+            future.get(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        } catch (e: TimeoutException) {
+            // Server didn't respond within timeout, return null immediately
+            e.printStackTrace()
+            null
+        } catch (e: Exception) {
+            // Any other exception, return null immediately
+            e.printStackTrace()
+            null
+        }
     }
 
     private fun extractBitmapFromVideo(videoUrl: String, context: Context): Bitmap? {

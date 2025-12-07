@@ -42,9 +42,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.CoreMocks
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
-import org.openedx.core.module.db.FileType
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.statusBarsInset
@@ -226,30 +226,18 @@ private fun DownloadQueueScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DownloadQueueUIState.Models(
                 listOf(
-                    DownloadModel(
-                        courseId = "",
-                        id = "",
-                        title = "1",
-                        size = 0,
-                        path = "",
-                        url = "",
-                        type = FileType.VIDEO,
-                        downloadedState = DownloadedState.DOWNLOADING,
+                    CoreMocks.mockDownloadModel.copy(
+                        title = "Video 1",
+                        downloadedState = DownloadedState.DOWNLOADING
                     ),
-                    DownloadModel(
-                        courseId = "",
-                        id = "",
-                        title = "2",
-                        size = 0,
-                        path = "",
-                        url = "",
-                        type = FileType.VIDEO,
-                        downloadedState = DownloadedState.DOWNLOADING,
+                    CoreMocks.mockDownloadModel.copy(
+                        title = "Video 2",
+                        downloadedState = DownloadedState.DOWNLOADING
                     )
                 ),
-                currentProgressId = "",
-                currentProgressValue = 0,
-                currentProgressSize = 1
+                currentProgressId = CoreMocks.mockDownloadModel.id,
+                currentProgressValue = 50,
+                currentProgressSize = 100
             ),
             onBackClick = {},
             onDownloadClick = {}

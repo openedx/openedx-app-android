@@ -41,7 +41,6 @@ import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.R
-import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.statusBarsInset
@@ -53,7 +52,7 @@ import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
-import org.openedx.profile.domain.model.Account
+import org.openedx.profile.ProfileMocks
 import org.openedx.profile.presentation.ui.ProfileInfoSection
 import org.openedx.profile.presentation.ui.ProfileTopic
 
@@ -219,7 +218,7 @@ private fun ProfileScreenPreview() {
     OpenEdXTheme {
         AnothersProfileScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = AnothersProfileUIState.Data(mockAccount),
+            uiState = AnothersProfileUIState.Data(ProfileMocks.account),
             uiMessage = null,
             onBackClick = {}
         )
@@ -233,29 +232,9 @@ private fun ProfileScreenTabletPreview() {
     OpenEdXTheme {
         AnothersProfileScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = AnothersProfileUIState.Data(mockAccount),
+            uiState = AnothersProfileUIState.Data(ProfileMocks.account),
             uiMessage = null,
             onBackClick = {}
         )
     }
 }
-
-private val mockAccount = Account(
-    username = "thom84",
-    bio = "He as compliment unreserved projecting. Between had observe pretend delight for believe. Do newspaper " +
-            "questions consulted sweetness do. Our sportsman his unwilling fulfilled departure law.",
-    requiresParentalConsent = true,
-    name = "Thomas",
-    country = "Ukraine",
-    isActive = true,
-    profileImage = ProfileImage("", "", "", "", false),
-    yearOfBirth = 2000,
-    levelOfEducation = "Bachelor",
-    goals = "130",
-    languageProficiencies = emptyList(),
-    gender = "male",
-    mailingAddress = "",
-    "",
-    null,
-    accountPrivacy = Account.Privacy.ALL_USERS
-)

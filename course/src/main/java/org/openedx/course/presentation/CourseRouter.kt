@@ -1,8 +1,8 @@
 package org.openedx.course.presentation
 
 import androidx.fragment.app.FragmentManager
-import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.course.presentation.handouts.HandoutsType
+import org.openedx.course.presentation.unit.container.CourseViewMode
 
 interface CourseRouter {
 

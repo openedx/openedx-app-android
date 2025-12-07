@@ -73,14 +73,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.domain.model.Certificate
-import org.openedx.core.domain.model.CourseAssignments
-import org.openedx.core.domain.model.CourseSharingUtmParameters
-import org.openedx.core.domain.model.CourseStatus
-import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
-import org.openedx.core.domain.model.EnrolledCourseData
-import org.openedx.core.domain.model.Progress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -90,6 +83,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
+import org.openedx.dashboard.DashboardMocks
 import org.openedx.dashboard.R
 import org.openedx.dashboard.presentation.DashboardListFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.foundation.extension.toImageLink
@@ -513,7 +507,7 @@ private fun CourseItemPreview() {
     OpenEdXTheme {
         CourseItem(
             "http://localhost:8000",
-            mockCourseEnrolled,
+            DashboardMocks.enrolledCourse,
             WindowSize(WindowType.Compact, WindowType.Compact),
             onClick = {}
         )
@@ -529,14 +523,7 @@ private fun DashboardListViewPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             apiHostUrl = "http://localhost:8000",
             state = DashboardUIState.Courses(
-                listOf(
-                    mockCourseEnrolled,
-                    mockCourseEnrolled,
-                    mockCourseEnrolled,
-                    mockCourseEnrolled,
-                    mockCourseEnrolled,
-                    mockCourseEnrolled
-                )
+                DashboardMocks.enrolledCourses(1)
             ),
             uiMessage = null,
             onSwipeRefresh = {},
@@ -559,14 +546,7 @@ private fun DashboardListViewTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             apiHostUrl = "http://localhost:8000",
             state = DashboardUIState.Courses(
-                listOf(
-                    mockCourseEnrolled,
-                    mockCourseEnrolled,
-                    mockCourseEnrolled,
-                    mockCourseEnrolled,
-                    mockCourseEnrolled,
-                    mockCourseEnrolled
-                )
+                DashboardMocks.enrolledCourses(1)
             ),
             uiMessage = null,
             onSwipeRefresh = {},
@@ -600,44 +580,3 @@ private fun EmptyStatePreview() {
         )
     }
 }
-
-private val mockCourseAssignments = CourseAssignments(null, emptyList())
-private val mockCourseEnrolled = EnrolledCourse(
-    auditAccessExpires = Date(),
-    created = "created",
-    certificate = Certificate(""),
-    mode = "mode",
-    isActive = true,
-    progress = Progress.DEFAULT_PROGRESS,
-    courseStatus = CourseStatus("", emptyList(), "", ""),
-    courseAssignments = mockCourseAssignments,
-    course = EnrolledCourseData(
-        id = "id",
-        name = "name",
-        number = "",
-        org = "Org",
-        start = Date(),
-        startDisplay = "",
-        startType = "",
-        end = Date(),
-        dynamicUpgradeDeadline = "",
-        subscriptionId = "",
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
-        media = null,
-        courseImage = "",
-        courseAbout = "",
-        courseSharingUtmParameters = CourseSharingUtmParameters("", ""),
-        courseUpdates = "",
-        courseHandouts = "",
-        discussionUrl = "",
-        videoOutline = "",
-        isSelfPaced = false
-    )
-)

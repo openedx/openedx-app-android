@@ -28,31 +28,15 @@ data class CourseProgress(
     val requiredGrade = gradingPolicy?.gradeRange?.values?.firstOrNull() ?: 0f
     val requiredGradePercent = (requiredGrade * 100f).toInt()
 
-    fun getEarnedAssignmentProblems(
-        policy: GradingPolicy.AssignmentPolicy
-    ) = sectionScores
-        .flatMap { section ->
-            section.subsections.filter { it.assignmentType == policy.type }
-        }.sumOf { subsection ->
-            subsection.problemScores.sumOf { it.earned }
-        }
-
-    fun getPossibleAssignmentProblems(
-        policy: GradingPolicy.AssignmentPolicy
-    ) = sectionScores
-        .flatMap { section ->
-            section.subsections.filter { it.assignmentType == policy.type }
-        }.sumOf { subsection ->
-            subsection.problemScores.sumOf { it.possible }
-        }
-
     fun getAssignmentGradedPercent(type: String): Float {
-        val assignmentSections = sectionScores
-            .flatMap { it.subsections }
-            .filter { it.assignmentType == type }
+        val assignmentSections = getAssignmentSections(type)
         if (assignmentSections.isEmpty()) return 0f
         return assignmentSections.sumOf { it.percentGraded }.toFloat() / assignmentSections.size
     }
+
+    fun getAssignmentSections(type: String) = sectionScores
+        .flatMap { it.subsections }
+        .filter { it.assignmentType == type }
 
     fun getAssignmentWeightedGradedPercent(assignmentPolicy: GradingPolicy.AssignmentPolicy): Float {
         return (assignmentPolicy.weight * getAssignmentGradedPercent(assignmentPolicy.type) * 100f).toFloat()
@@ -66,6 +50,25 @@ data class CourseProgress(
         val totalWeightedPercent = getTotalWeightPercent()
         val notCompletedPercent = 100.0 - totalWeightedPercent
         return if (notCompletedPercent < 0.0) 0f else notCompletedPercent.toFloat()
+    }
+
+    fun getNotEmptyGradingPolicies() = gradingPolicy?.assignmentPolicies?.mapNotNull {
+        if (getAssignmentSections(it.type).isNotEmpty()) {
+            it
+        } else {
+            null
+        }
+    }
+
+    fun getCompletedAssignmentCount(
+        policy: GradingPolicy.AssignmentPolicy,
+        courseStructure: CourseStructure? = null
+    ): Int {
+        val assignments = getAssignmentSections(policy.type)
+        return courseStructure?.blockData
+            ?.filter { it.id in assignments.map { assignment -> assignment.blockKey } }
+            ?.filter { it.isCompleted() }
+            ?.size ?: 0
     }
 
     data class CertificateData(

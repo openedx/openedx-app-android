@@ -6,6 +6,7 @@ import okhttp3.MultipartBody
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
+import org.openedx.core.data.model.room.CourseProgressEntity
 import org.openedx.core.data.model.room.OfflineXBlockProgress
 import org.openedx.core.data.model.room.VideoProgressEntity
 import org.openedx.core.data.model.room.XBlockProgressData
@@ -253,19 +254,26 @@ class CourseRepository(
 
     suspend fun getVideoProgress(blockId: String): VideoProgressEntity {
         return courseDao.getVideoProgressByBlockId(blockId)
-            ?: VideoProgressEntity(blockId, "", 0L, 0L)
+            ?: VideoProgressEntity(blockId, "", null, null)
     }
 
-    fun getCourseProgress(courseId: String, isRefresh: Boolean): Flow<CourseProgress> =
+    fun getCourseProgress(
+        courseId: String,
+        isRefresh: Boolean,
+        getOnlyCacheIfExist: Boolean // If true, only returns cached data if available, otherwise fetches from network
+    ): Flow<CourseProgress> =
         channelFlowWithAwait {
+            var courseProgress: CourseProgressEntity? = null
             if (!isRefresh) {
-                val cached = courseDao.getCourseProgressById(courseId)
-                if (cached != null) {
-                    trySend(cached.mapToDomain())
+                courseProgress = courseDao.getCourseProgressById(courseId)
+                if (courseProgress != null) {
+                    trySend(courseProgress.mapToDomain())
                 }
             }
-            val response = api.getCourseProgress(courseId)
-            courseDao.insertCourseProgressEntity(response.mapToRoomEntity(courseId))
-            trySend(response.mapToDomain())
+            if (networkConnection.isOnline() && (!getOnlyCacheIfExist || courseProgress == null)) {
+                val response = api.getCourseProgress(courseId)
+                courseDao.insertCourseProgressEntity(response.mapToRoomEntity(courseId))
+                trySend(response.mapToDomain())
+            }
         }
 }

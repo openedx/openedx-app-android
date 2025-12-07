@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.RenderHtmlContent
@@ -53,6 +52,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
+import org.openedx.discussion.DiscussionMocks
 import org.openedx.discussion.R
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.DiscussionType
@@ -665,7 +665,7 @@ fun TopicItem(
 private fun TopicItemPreview() {
     OpenEdXTheme {
         TopicItem(
-            topic = mockTopic,
+            topic = DiscussionMocks.topic,
             onClick = { _, _ -> }
         )
     }
@@ -677,7 +677,7 @@ private fun TopicItemPreview() {
 private fun ThreadItemPreview() {
     OpenEdXTheme {
         ThreadItem(
-            thread = mockThread,
+            thread = DiscussionMocks.thread,
             onClick = {}
         )
     }
@@ -689,7 +689,7 @@ private fun CommentItemPreview() {
     OpenEdXTheme {
         CommentItem(
             modifier = Modifier.fillMaxWidth(),
-            comment = mockComment,
+            comment = DiscussionMocks.comment,
             onClick = { _, _, _ -> },
             onUserPhotoClick = {}
         )
@@ -701,74 +701,8 @@ private fun CommentItemPreview() {
 private fun ThreadMainItemPreview() {
     ThreadMainItem(
         modifier = Modifier.fillMaxWidth(),
-        thread = mockThread,
+        thread = DiscussionMocks.thread,
         onClick = { _, _ -> },
         onUserPhotoClick = {}
     )
 }
-
-private val mockComment = DiscussionComment(
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    false,
-    true,
-    20,
-    emptyList(),
-    false,
-    "",
-    "",
-    false,
-    "",
-    "",
-    "",
-    21,
-    emptyList(),
-    ProfileImage("", "", "", "", false),
-    mapOf()
-)
-
-private val mockThread = org.openedx.discussion.domain.model.Thread(
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    false,
-    true,
-    20,
-    emptyList(),
-    false,
-    "",
-    "",
-    "",
-    "",
-    DiscussionType.DISCUSSION,
-    "",
-    "",
-    "Discussion title long Discussion title long good item",
-    true,
-    false,
-    true,
-    21,
-    4,
-    false,
-    false,
-    mapOf(),
-    10,
-    false,
-    false
-)
-
-private val mockTopic = Topic(
-    id = "",
-    name = "All Topics",
-    threadListUrl = "",
-    children = emptyList()
-)

@@ -48,10 +48,10 @@ import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
+import org.openedx.profile.ProfileMocks
 import org.openedx.profile.presentation.profile.ProfileUIState
 import org.openedx.profile.presentation.ui.ProfileInfoSection
 import org.openedx.profile.presentation.ui.ProfileTopic
-import org.openedx.profile.presentation.ui.mockAccount
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -178,7 +178,9 @@ private fun ProfileScreenPreview() {
     OpenEdXTheme {
         ProfileView(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = mockUiState,
+            uiState = ProfileUIState.Data(
+                account = ProfileMocks.account
+            ),
             uiMessage = null,
             refreshing = false,
             onAction = {},
@@ -194,7 +196,9 @@ private fun ProfileScreenTabletPreview() {
     OpenEdXTheme {
         ProfileView(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = mockUiState,
+            uiState = ProfileUIState.Data(
+                account = ProfileMocks.account
+            ),
             uiMessage = null,
             refreshing = false,
             onAction = {},
@@ -202,10 +206,6 @@ private fun ProfileScreenTabletPreview() {
         )
     }
 }
-
-private val mockUiState = ProfileUIState.Data(
-    account = mockAccount
-)
 
 internal interface ProfileViewAction {
     object EditAccountClick : ProfileViewAction

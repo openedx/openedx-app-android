@@ -6,9 +6,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -16,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
@@ -31,16 +45,18 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
-import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.domain.model.Block
 import org.openedx.core.presentation.global.InsetHolder
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseUnitContainerBinding
 import org.openedx.course.presentation.ChapterEndFragmentDialog
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.DialogListener
 import org.openedx.course.presentation.ui.CourseUnitToolbar
+import org.openedx.course.presentation.ui.CourseVideoItem
 import org.openedx.course.presentation.ui.HorizontalPageIndicator
 import org.openedx.course.presentation.ui.NavigationUnitsButtons
 import org.openedx.course.presentation.ui.SubSectionUnitsList
@@ -57,7 +73,8 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     private val viewModel by viewModel<CourseUnitContainerViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
-            requireArguments().getString(UNIT_ID, "")
+            requireArguments().getString(UNIT_ID, ""),
+            requireArguments().serializable(ARG_MODE)
         )
     }
 
@@ -96,7 +113,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                         fm = requireActivity().supportFragmentManager,
                         courseId = viewModel.courseId,
                         unitId = it.id,
-                        mode = requireArguments().serializable(ARG_MODE)!!
+                        mode = viewModel.mode
                     )
                 }
             }
@@ -133,7 +150,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
         componentId = requireArguments().getString(ARG_COMPONENT_ID, "")
-        viewModel.loadBlocks(requireArguments().serializable(ARG_MODE)!!, componentId)
+        viewModel.loadBlocks(componentId)
         viewModel.courseUnitContainerShowedEvent()
     }
 
@@ -157,6 +174,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         setupProgressIndicators()
         setupBackButton()
         setupSubSectionUnits()
+        setupVideoList()
         checkUnitsListShown()
         setupChapterEndDialogListener()
     }
@@ -210,7 +228,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                         blocks = descendantsBlocks,
                         selectedPage = index,
                         completedAndSelectedColor =
-                        MaterialTheme.appColors.componentHorizontalProgressCompletedAndSelected,
+                            MaterialTheme.appColors.componentHorizontalProgressCompletedAndSelected,
                         completedColor = MaterialTheme.appColors.componentHorizontalProgressCompleted,
                         selectedColor = MaterialTheme.appColors.componentHorizontalProgressSelected,
                         defaultColor = MaterialTheme.appColors.componentHorizontalProgressDefault
@@ -294,7 +312,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                                     fm = requireActivity().supportFragmentManager,
                                     courseId = viewModel.courseId,
                                     unitId = unit.id,
-                                    mode = requireArguments().serializable(ARG_MODE)!!
+                                    mode = viewModel.mode
                                 )
                             } else {
                                 handleUnitsClick()
@@ -306,6 +324,41 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         } else {
             binding.subSectionUnitsTitle.isGone = true
         }
+    }
+
+    private fun setupVideoList() {
+        binding.videoList?.setContent {
+            OpenEdXTheme {
+                Column {
+                    VideoList(
+                        onVideoClick = { block ->
+                            val currentBlock = viewModel.currentBlock.value
+                            if (currentBlock?.id != block.id) {
+                                viewModel.setSelectedVideoBlock(block)
+                                updateViewPagerAdapter()
+                                val blockIndex =
+                                    viewModel.getUnitBlocks().indexOfFirst { it.id == block.id }
+                                if (blockIndex != -1) {
+                                    binding.viewPager.currentItem = blockIndex
+                                }
+                            }
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Divider()
+                    if (viewModel.mode == CourseViewMode.VIDEOS) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        HierarchyPathText()
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+    }
+
+    private fun updateViewPagerAdapter() {
+        adapter = CourseUnitContainerAdapter(this, viewModel.getUnitBlocks(), viewModel)
+        binding.viewPager.adapter = adapter
     }
 
     private fun checkUnitsListShown() {
@@ -435,42 +488,173 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
     @Composable
     private fun NavigationBar() {
-        OpenEdXTheme {
-            var nextButtonText by rememberSaveable {
-                mutableStateOf(viewModel.nextButtonText)
-            }
-            var hasNextBlock by rememberSaveable {
-                mutableStateOf(viewModel.hasNextBlock)
-            }
-            var hasPrevBlock by rememberSaveable {
-                mutableStateOf(viewModel.hasNextBlock)
-            }
-
-            updateNavigationButtons { next, hasPrev, hasNext ->
-                nextButtonText = next
-                hasPrevBlock = hasPrev
-                hasNextBlock = hasNext
-            }
-
-            NavigationUnitsButtons(
-                hasPrevBlock = hasPrevBlock,
-                nextButtonText = nextButtonText,
-                hasNextBlock = hasNextBlock,
-                isVerticalNavigation = !viewModel.isCourseUnitProgressEnabled,
-                onPrevClick = {
-                    handlePrevClick { next, hasPrev, hasNext ->
-                        nextButtonText = next
-                        hasPrevBlock = hasPrev
-                        hasNextBlock = hasNext
-                    }
-                },
-                onNextClick = {
-                    handleNextClick { next, hasPrev, hasNext ->
-                        nextButtonText = next
-                        hasPrevBlock = hasPrev
-                        hasNextBlock = hasNext
-                    }
+        if (viewModel.mode == CourseViewMode.VIDEOS) {
+            OpenEdXTheme {
+                val videoBlocks by viewModel.videoList.collectAsState()
+                val currentBlock by viewModel.currentBlock.collectAsState()
+                val hasNextBlock = videoBlocks.lastOrNull()?.id != currentBlock?.id
+                val nextButtonText = if (hasNextBlock) {
+                    getString(R.string.course_navigation_next)
+                } else {
+                    getString(R.string.course_navigation_finish)
                 }
+                NavigationUnitsButtons(
+                    hasPrevBlock = videoBlocks.firstOrNull()?.id != currentBlock?.id,
+                    nextButtonText = nextButtonText,
+                    hasNextBlock = hasNextBlock,
+                    isVerticalNavigation = false,
+                    showFinishButton = false,
+                    onPrevClick = {
+                        if (!restrictDoubleClick()) {
+                            val currentIndex =
+                                videoBlocks.indexOfFirst { it.id == currentBlock?.id }
+                            if (currentIndex > 0) {
+                                val target = videoBlocks[currentIndex - 1]
+                                viewModel.setSelectedVideoBlock(target)
+                                updateViewPagerAdapter()
+                                val blockIndex =
+                                    viewModel.getUnitBlocks().indexOfFirst { it.id == target.id }
+                                if (blockIndex != -1) {
+                                    binding.viewPager.setCurrentItem(blockIndex, true)
+                                }
+                            }
+                        }
+                    },
+                    onNextClick = {
+                        if (!restrictDoubleClick()) {
+                            val currentIndex =
+                                videoBlocks.indexOfFirst { it.id == currentBlock?.id }
+                            if (currentIndex != -1 && currentIndex < videoBlocks.lastIndex) {
+                                val target = videoBlocks[currentIndex + 1]
+                                viewModel.setSelectedVideoBlock(target)
+                                updateViewPagerAdapter()
+                                val blockIndex =
+                                    viewModel.getUnitBlocks().indexOfFirst { it.id == target.id }
+                                if (blockIndex != -1) {
+                                    binding.viewPager.setCurrentItem(blockIndex, true)
+                                }
+                            }
+                        }
+                    }
+                )
+            }
+        } else {
+            OpenEdXTheme {
+                var nextButtonText by rememberSaveable {
+                    mutableStateOf(viewModel.nextButtonText)
+                }
+                var hasNextBlock by rememberSaveable {
+                    mutableStateOf(viewModel.hasNextBlock)
+                }
+                var hasPrevBlock by rememberSaveable {
+                    mutableStateOf(viewModel.hasNextBlock)
+                }
+
+                updateNavigationButtons { next, hasPrev, hasNext ->
+                    nextButtonText = next
+                    hasPrevBlock = hasPrev
+                    hasNextBlock = hasNext
+                }
+
+                NavigationUnitsButtons(
+                    hasPrevBlock = hasPrevBlock,
+                    nextButtonText = nextButtonText,
+                    hasNextBlock = hasNextBlock,
+                    isVerticalNavigation = !viewModel.isCourseUnitProgressEnabled,
+                    onPrevClick = {
+                        handlePrevClick { next, hasPrev, hasNext ->
+                            nextButtonText = next
+                            hasPrevBlock = hasPrev
+                            hasNextBlock = hasNext
+                        }
+                    },
+                    onNextClick = {
+                        handleNextClick { next, hasPrev, hasNext ->
+                            nextButtonText = next
+                            hasPrevBlock = hasPrev
+                            hasNextBlock = hasNext
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun VideoList(
+        onVideoClick: (Block) -> Unit
+    ) {
+        val videoBlocks by viewModel.videoList.collectAsState()
+        val videoPreview by viewModel.videoPreview.collectAsState()
+        val videoProgress by viewModel.videoProgress.collectAsState()
+        val currentBlock by viewModel.currentBlock.collectAsState()
+        val rowState = rememberLazyListState()
+
+        LaunchedEffect(currentBlock) {
+            rowState.animateScrollToItem(videoBlocks.indexOf(currentBlock))
+        }
+
+        if (videoBlocks.isNotEmpty()) {
+            LazyRow(
+                state = rowState,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                items(videoBlocks) { block ->
+                    val isSelectedBlock = block.id == currentBlock?.id
+                    val playButtonSize = if (isSelectedBlock) {
+                        0.dp
+                    } else {
+                        14.dp
+                    }
+                    val borderColor = if (isSelectedBlock) {
+                        MaterialTheme.appColors.primary
+                    } else {
+                        null
+                    }
+                    val borderWidth = if (isSelectedBlock) {
+                        3.dp
+                    } else {
+                        1.dp
+                    }
+                    CourseVideoItem(
+                        modifier = Modifier
+                            .width(112.dp)
+                            .height(63.dp),
+                        videoBlock = block,
+                        preview = videoPreview[block.id],
+                        progress = if (isSelectedBlock) {
+                            0f
+                        } else {
+                            videoProgress[block.id] ?: 0f
+                        },
+                        onClick = {
+                            onVideoClick(block)
+                        },
+                        titleStyle = MaterialTheme.appTypography.labelSmall,
+                        playButtonSize = playButtonSize,
+                        borderColor = borderColor,
+                        borderWidth = borderWidth
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun HierarchyPathText() {
+        val hierarchyPath by viewModel.hierarchyPath.collectAsState()
+
+        if (hierarchyPath.isNotEmpty()) {
+            Text(
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                text = hierarchyPath,
+                style = MaterialTheme.appTypography.bodySmall,
+                color = MaterialTheme.appColors.textDark,
+                maxLines = 2,
             )
         }
     }

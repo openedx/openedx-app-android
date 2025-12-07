@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -27,15 +29,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
-import org.openedx.core.BlockType
-import org.openedx.core.domain.model.AssignmentProgress
+import org.openedx.core.CoreMocks
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.BlockCounts
-import org.openedx.core.domain.model.CourseStructure
-import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.Progress
-import org.openedx.core.module.download.DownloadModelsSize
-import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -45,11 +41,11 @@ import org.openedx.course.R
 import org.openedx.course.presentation.contenttab.CourseContentVideoEmptyState
 import org.openedx.course.presentation.ui.CourseProgress
 import org.openedx.course.presentation.ui.CourseVideoSection
+import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
-import java.util.Date
 
 @Composable
 fun CourseContentVideoScreen(
@@ -142,6 +138,7 @@ private fun CourseVideosUI(
                         when (uiState) {
                             is CourseVideoUIState.Empty -> {
                                 CourseContentVideoEmptyState(
+                                    modifier = Modifier.verticalScroll(rememberScrollState()),
                                     onReturnToCourseClick = onNavigateToHome
                                 )
                             }
@@ -179,7 +176,7 @@ private fun CourseVideosUI(
                                                 null
                                             },
                                             description = stringResource(
-                                                R.string.course_completed,
+                                                R.string.course_completed_of,
                                                 progress.completed,
                                                 progress.total
                                             )
@@ -243,17 +240,11 @@ private fun CourseVideosScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiMessage = null,
             uiState = CourseVideoUIState.CourseData(
-                mockCourseStructure,
+                CoreMocks.mockCourseStructure,
                 emptyMap(),
                 mapOf(),
                 mapOf(),
-                DownloadModelsSize(
-                    isAllBlocksDownloadedOrDownloading = false,
-                    remainingCount = 0,
-                    remainingSize = 0,
-                    allCount = 1,
-                    allSize = 0
-                ),
+                CoreMocks.mockDownloadModelsSize,
                 isCompletedSectionsShown = false,
                 videoPreview = mapOf(),
                 videoProgress = mapOf(),
@@ -292,16 +283,12 @@ private fun CourseVideosScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiMessage = null,
             uiState = CourseVideoUIState.CourseData(
-                mockCourseStructure,
+                CoreMocks.mockCourseStructure,
                 emptyMap(),
                 mapOf(),
                 mapOf(),
-                DownloadModelsSize(
-                    isAllBlocksDownloadedOrDownloading = false,
-                    remainingCount = 0,
-                    remainingSize = 0,
-                    allCount = 0,
-                    allSize = 0
+                CoreMocks.mockDownloadModelsSize.copy(
+                    allCount = 0
                 ),
                 isCompletedSectionsShown = true,
                 videoPreview = mapOf(),
@@ -314,77 +301,3 @@ private fun CourseVideosScreenTabletPreview() {
         )
     }
 }
-
-private val mockAssignmentProgress = AssignmentProgress(
-    assignmentType = "Home",
-    numPointsEarned = 1f,
-    numPointsPossible = 3f,
-    shortLabel = "HM1"
-)
-
-private val mockChapterBlock = Block(
-    id = "id",
-    blockId = "blockId",
-    lmsWebUrl = "lmsWebUrl",
-    legacyWebUrl = "legacyWebUrl",
-    studentViewUrl = "studentViewUrl",
-    type = BlockType.CHAPTER,
-    displayName = "Chapter",
-    graded = false,
-    studentViewData = null,
-    studentViewMultiDevice = false,
-    blockCounts = BlockCounts(1),
-    descendants = emptyList(),
-    descendantsType = BlockType.CHAPTER,
-    completion = 0.0,
-    containsGatedContent = false,
-    assignmentProgress = mockAssignmentProgress,
-    due = Date(),
-    offlineDownload = null
-)
-
-private val mockSequentialBlock = Block(
-    id = "id",
-    blockId = "blockId",
-    lmsWebUrl = "lmsWebUrl",
-    legacyWebUrl = "legacyWebUrl",
-    studentViewUrl = "studentViewUrl",
-    type = BlockType.SEQUENTIAL,
-    displayName = "Sequential",
-    graded = false,
-    studentViewData = null,
-    studentViewMultiDevice = false,
-    blockCounts = BlockCounts(1),
-    descendants = emptyList(),
-    descendantsType = BlockType.SEQUENTIAL,
-    completion = 0.0,
-    containsGatedContent = false,
-    assignmentProgress = mockAssignmentProgress,
-    due = Date(),
-    offlineDownload = null
-)
-
-private val mockCourseStructure = CourseStructure(
-    root = "",
-    blockData = listOf(mockSequentialBlock, mockChapterBlock),
-    id = "id",
-    name = "Course name",
-    number = "",
-    org = "Org",
-    start = Date(),
-    startDisplay = "",
-    startType = "",
-    end = Date(),
-    coursewareAccess = CoursewareAccess(
-        true,
-        "",
-        "",
-        "",
-        "",
-        ""
-    ),
-    media = null,
-    certificate = null,
-    isSelfPaced = false,
-    progress = Progress(1, 3),
-)

@@ -23,11 +23,13 @@ import org.openedx.course.presentation.container.CourseContainerViewModel
 import org.openedx.course.presentation.contenttab.ContentTabViewModel
 import org.openedx.course.presentation.dates.CourseDatesViewModel
 import org.openedx.course.presentation.handouts.HandoutsViewModel
+import org.openedx.course.presentation.home.CourseHomeViewModel
 import org.openedx.course.presentation.offline.CourseOfflineViewModel
 import org.openedx.course.presentation.outline.CourseContentAllViewModel
 import org.openedx.course.presentation.progress.CourseProgressViewModel
 import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel
+import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.course.presentation.unit.html.HtmlUnitViewModel
 import org.openedx.course.presentation.unit.video.BaseVideoViewModel
 import org.openedx.course.presentation.unit.video.EncodedVideoUnitViewModel
@@ -310,6 +312,27 @@ val screenModule = module {
             get(),
         )
     }
+    viewModel { (courseId: String, courseTitle: String) ->
+        CourseHomeViewModel(
+            courseId,
+            courseTitle,
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel { (courseId: String) ->
         CourseSectionViewModel(
             courseId,
@@ -319,10 +342,12 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String, unitId: String) ->
+    viewModel { (courseId: String, unitId: String, mode: CourseViewMode) ->
         CourseUnitContainerViewModel(
             courseId,
             unitId,
+            mode,
+            get(),
             get(),
             get(),
             get(),

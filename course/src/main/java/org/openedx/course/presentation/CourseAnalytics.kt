@@ -178,6 +178,34 @@ enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
         "Course:Assignment Tab.Assignment Clicked",
         "edx.bi.app.course.assignment_tab.assignment.clicked"
     ),
+    COURSE_HOME_SECTION_SUBSECTION_CLICK(
+        "Course Home.Section/Subsection Click",
+        "edx.bi.app.course.home.section_subsection.clicked"
+    ),
+    COURSE_HOME_VIEW_ALL_CONTENT(
+        "Course Home.View All Content",
+        "edx.bi.app.course.home.view_all_content.clicked"
+    ),
+    COURSE_HOME_VIEW_ALL_VIDEOS(
+        "Course Home.View All Videos",
+        "edx.bi.app.course.home.view_all_videos.clicked"
+    ),
+    COURSE_HOME_VIEW_ALL_ASSIGNMENTS(
+        "Course Home.View All Assignments",
+        "edx.bi.app.course.home.view_all_assignments.clicked"
+    ),
+    COURSE_HOME_GRADES_VIEW_PROGRESS(
+        "Course Home.Grades.View Progress",
+        "edx.bi.app.course.home.grades.view_progress.clicked"
+    ),
+    COURSE_HOME_VIDEO_CLICK(
+        "Course Home.Video Click",
+        "edx.bi.app.course.home.video.clicked"
+    ),
+    COURSE_HOME_ASSIGNMENT_CLICK(
+        "Course Home.Assignment Click",
+        "edx.bi.app.course.home.assignment.clicked"
+    ),
 }
 
 enum class CourseAnalyticsKey(val key: String) {

@@ -52,8 +52,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import org.openedx.core.AppUpdateState
 import org.openedx.core.R
-import org.openedx.core.domain.model.AgreementUrls
-import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.Toolbar
@@ -67,7 +65,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
-import org.openedx.profile.domain.model.Configuration
+import org.openedx.profile.ProfileMocks
 import org.openedx.profile.presentation.ui.SettingsDivider
 import org.openedx.profile.presentation.ui.SettingsItem
 import org.openedx.profile.R as profileR
@@ -622,29 +620,12 @@ fun AppVersionItemUpgradeRequired(
     }
 }
 
-private val mockAppData = AppData(
-    appName = "openedx",
-    versionName = "1.0.0",
-    applicationId = "org.example.com"
-)
-
-private val mockConfiguration = Configuration(
-    agreementUrls = AgreementUrls(),
-    faqUrl = "https://example.com/faq",
-    supportEmail = "test@example.com",
-    versionName = mockAppData.versionName,
-)
-
-private val mockUiState = SettingsUIState.Data(
-    configuration = mockConfiguration
-)
-
 @Preview
 @Composable
 private fun AppVersionItemAppToDatePreview() {
     OpenEdXTheme {
         AppVersionItem(
-            versionName = mockAppData.versionName,
+            versionName = ProfileMocks.appData.versionName,
             appUpgradeEvent = null,
             onClick = {}
         )
@@ -656,7 +637,7 @@ private fun AppVersionItemAppToDatePreview() {
 private fun AppVersionItemUpgradeRecommendedPreview() {
     OpenEdXTheme {
         AppVersionItem(
-            versionName = mockAppData.versionName,
+            versionName = ProfileMocks.appData.versionName,
             appUpgradeEvent = AppUpgradeEvent.UpgradeRecommendedEvent("1.0.1"),
             onClick = {}
         )
@@ -668,7 +649,7 @@ private fun AppVersionItemUpgradeRecommendedPreview() {
 private fun AppVersionItemUpgradeRequiredPreview() {
     OpenEdXTheme {
         AppVersionItem(
-            versionName = mockAppData.versionName,
+            versionName = ProfileMocks.appData.versionName,
             appUpgradeEvent = AppUpgradeEvent.UpgradeRequiredEvent,
             onClick = {}
         )
@@ -688,7 +669,9 @@ private fun SettingsScreenPreview() {
         SettingsScreen(
             onBackClick = {},
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = mockUiState,
+            uiState = SettingsUIState.Data(
+                configuration = ProfileMocks.configuration
+            ),
             onAction = {},
         )
     }
