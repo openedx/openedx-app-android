@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
+import org.openedx.core.domain.model.CalendarType
 import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.notifier.calendar.CalendarNotifier
 import org.openedx.core.system.notifier.calendar.CalendarSyncDisabled
@@ -34,7 +35,10 @@ class DisableCalendarSyncDialogViewModel(
                     calendarManager.deleteEvents(eventIds)
                     _deletionState.value = DeletionState.DELETED
                     calendarInteractor.clearCalendarCachedData()
-                    calendarManager.deleteCalendar(calendarPreferences.calendarId)
+                    val calendarId = calendarPreferences.calendarId
+                    if (calendarPreferences.calendarType == CalendarType.LOCAL) {
+                        calendarManager.deleteCalendar(calendarId)
+                    }
                     calendarPreferences.clearCalendarPreferences()
                     calendarNotifier.send(CalendarSyncDisabled)
                 }

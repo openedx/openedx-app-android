@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,6 +40,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import org.koin.androidx.compose.koinViewModel
+import org.openedx.core.domain.model.UserCalendar
 import org.openedx.core.presentation.dialog.DefaultDialogBox
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
@@ -108,14 +111,24 @@ class NewCalendarDialogFragment : DialogFragment() {
                     }
                 }
 
+                val googleCalendars by viewModel.googleCalendars.collectAsState()
+                val showLocalCalendarSection by viewModel.showLocalCalendarSection.collectAsState()
+
                 NewCalendarDialog(
-                    newCalendarDialogType = requireArguments().parcelable<NewCalendarDialogType>(ARG_DIALOG_TYPE)
+                    newCalendarDialogType = requireArguments().parcelable<NewCalendarDialogType>(
+                        ARG_DIALOG_TYPE
+                    )
                         ?: NewCalendarDialogType.CREATE_NEW,
+                    googleCalendars = googleCalendars,
+                    showLocalCalendarSection = showLocalCalendarSection,
                     onCancelClick = {
                         dismiss()
                     },
                     onBeginSyncingClick = { calendarTitle, calendarColor ->
                         viewModel.createCalendar(calendarTitle, calendarColor)
+                    },
+                    onGoogleCalendarClick = {
+                        viewModel.syncWithGoogleCalendar(it)
                     }
                 )
             }
@@ -147,8 +160,11 @@ class NewCalendarDialogFragment : DialogFragment() {
 private fun NewCalendarDialog(
     modifier: Modifier = Modifier,
     newCalendarDialogType: NewCalendarDialogType,
+    googleCalendars: List<UserCalendar>,
+    showLocalCalendarSection: Boolean,
     onCancelClick: () -> Unit,
-    onBeginSyncingClick: (calendarTitle: String, calendarColor: CalendarColor) -> Unit
+    onBeginSyncingClick: (calendarTitle: String, calendarColor: CalendarColor) -> Unit,
+    onGoogleCalendarClick: (Long) -> Unit
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -162,6 +178,7 @@ private fun NewCalendarDialog(
     var calendarColor by rememberSaveable {
         mutableStateOf(CalendarColor.ACCENT)
     }
+    var selectedCalendar by remember { mutableStateOf<SelectedCalendar?>(null) }
     DefaultDialogBox(
         modifier = modifier,
         onDismissClick = onCancelClick
@@ -186,51 +203,199 @@ private fun NewCalendarDialog(
                 Icon(
                     modifier = Modifier
                         .size(24.dp)
-                        .clickable {
-                            onCancelClick()
-                        },
+                        .clickable { onCancelClick() },
                     imageVector = Icons.Default.Close,
                     contentDescription = null,
                     tint = MaterialTheme.appColors.primary
                 )
             }
-            CalendarTitleTextField(
-                onValueChanged = {
-                    calendarTitle = it
+            CalendarDropdown(
+                calendars = googleCalendars,
+                showLocalCalendarOption = showLocalCalendarSection,
+                selectedCalendar = selectedCalendar,
+                onLocalCalendarClick = { selectedCalendar = SelectedCalendar.Local },
+                onGoogleCalendarClick = {
+                    selectedCalendar = SelectedCalendar.Google(it)
                 }
             )
-            ColorDropdown(
-                onValueChanged = {
-                    calendarColor = it
-                }
-            )
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.profile_new_calendar_description),
-                style = MaterialTheme.appTypography.bodyMedium,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.appColors.textDark
-            )
+            if (googleCalendars.isEmpty() && !showLocalCalendarSection) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.profile_no_google_calendars),
+                    style = MaterialTheme.appTypography.bodyMedium,
+                    color = MaterialTheme.appColors.textFieldHint
+                )
+            }
+            if (selectedCalendar == SelectedCalendar.Local) {
+                LocalCalendarSection(
+                    onCalendarTitleChange = { calendarTitle = it },
+                    onCalendarColorChange = { calendarColor = it },
+                )
+            }
+            if (selectedCalendar != null) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.profile_new_calendar_description),
+                    style = MaterialTheme.appTypography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.appColors.textDark
+                )
+                OpenEdXButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.profile_begin_syncing),
+                    onClick = {
+                        when (val selectedCalendar = selectedCalendar) {
+                            is SelectedCalendar.Google -> {
+                                onGoogleCalendarClick(selectedCalendar.calendar.id)
+                            }
+
+                            SelectedCalendar.Local -> {
+                                onBeginSyncingClick(
+                                    calendarTitle.ifEmpty {
+                                        NewCalendarDialogFragment.getDefaultCalendarTitle(context)
+                                    },
+                                    calendarColor
+                                )
+                            }
+
+                            else -> {}
+                        }
+                    }
+                )
+            }
             OpenEdXOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = CoreR.string.core_cancel),
                 backgroundColor = MaterialTheme.appColors.background,
                 borderColor = MaterialTheme.appColors.primaryButtonBackground,
                 textColor = MaterialTheme.appColors.primaryButtonBackground,
-                onClick = {
-                    onCancelClick()
-                }
+                onClick = onCancelClick
             )
-            OpenEdXButton(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.profile_begin_syncing),
-                onClick = {
-                    onBeginSyncingClick(
-                        calendarTitle.ifEmpty { NewCalendarDialogFragment.getDefaultCalendarTitle(context) },
-                        calendarColor
+        }
+    }
+}
+
+@Composable
+private fun LocalCalendarSection(
+    onCalendarTitleChange: (String) -> Unit,
+    onCalendarColorChange: (CalendarColor) -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        CalendarTitleTextField(
+            onValueChanged = onCalendarTitleChange
+        )
+        ColorDropdown(
+            onValueChanged = onCalendarColorChange
+        )
+    }
+}
+
+@Composable
+private fun CalendarDropdown(
+    calendars: List<UserCalendar>,
+    showLocalCalendarOption: Boolean,
+    selectedCalendar: SelectedCalendar?,
+    onLocalCalendarClick: () -> Unit,
+    onGoogleCalendarClick: (UserCalendar) -> Unit
+) {
+    val density = LocalDensity.current
+    var expanded by remember { mutableStateOf(false) }
+    var dropdownWidth by remember { mutableStateOf(300.dp) }
+
+    val selectedLabel = when (selectedCalendar) {
+        SelectedCalendar.Local -> stringResource(id = R.string.profile_local_calendar_option)
+        is SelectedCalendar.Google -> selectedCalendar.calendar.title
+        null -> stringResource(id = R.string.profile_select_calendar)
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .clip(MaterialTheme.appShapes.textFieldShape)
+                .border(
+                    1.dp,
+                    MaterialTheme.appColors.textFieldBorder,
+                    MaterialTheme.appShapes.textFieldShape
+                )
+                .onSizeChanged { dropdownWidth = with(density) { it.width.toDp() } }
+                .clickable { expanded = true },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp),
+                text = selectedLabel,
+                color = MaterialTheme.appColors.textDark,
+                style = MaterialTheme.appTypography.bodyMedium
+            )
+            Icon(
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .rotate(if (expanded) 180f else 0f),
+                imageVector = Icons.Default.ExpandMore,
+                tint = MaterialTheme.appColors.textDark,
+                contentDescription = null
+            )
+        }
+
+        MaterialTheme(
+            colors = MaterialTheme.colors.copy(surface = MaterialTheme.appColors.background),
+            shapes = MaterialTheme.shapes.copy(MaterialTheme.appShapes.textFieldShape)
+        ) {
+            DropdownMenu(
+                modifier = Modifier
+                    .crop(vertical = 8.dp)
+                    .height(180.dp)
+                    .width(dropdownWidth)
+                    .border(
+                        1.dp,
+                        MaterialTheme.appColors.textFieldBorder,
+                        MaterialTheme.appShapes.textFieldShape
+                    )
+                    .crop(vertical = 8.dp),
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                if (showLocalCalendarOption) {
+                    CalendarOptionItem(
+                        text = stringResource(id = R.string.profile_local_calendar_option),
+                        contentColor = MaterialTheme.appColors.textDark
+                    ) {
+                        expanded = false
+                        onLocalCalendarClick()
+                    }
+                    Divider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.appColors.divider
                     )
                 }
-            )
+
+                calendars.forEachIndexed { index, calendar ->
+                    CalendarOptionItem(
+                        text = calendar.title,
+                        contentColor = MaterialTheme.appColors.textDark,
+                        leadingColor = ComposeColor(calendar.color)
+                    ) {
+                        expanded = false
+                        onGoogleCalendarClick(calendar)
+                    }
+                    if (index < calendars.lastIndex) {
+                        Divider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.appColors.divider
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -421,6 +586,37 @@ private fun ColorCircle(
     )
 }
 
+@Composable
+private fun CalendarOptionItem(
+    text: String,
+    contentColor: ComposeColor,
+    leadingColor: ComposeColor? = null,
+    onClick: () -> Unit
+) {
+    DropdownMenuItem(
+        modifier = Modifier.background(MaterialTheme.appColors.background),
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier.padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            leadingColor?.let { ColorCircle(color = it) }
+            Text(
+                text = text,
+                style = MaterialTheme.appTypography.titleSmall,
+                color = contentColor
+            )
+        }
+    }
+}
+
+private sealed class SelectedCalendar {
+    object Local : SelectedCalendar()
+    data class Google(val calendar: UserCalendar) : SelectedCalendar()
+}
+
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -428,8 +624,14 @@ private fun NewCalendarDialogPreview() {
     OpenEdXTheme {
         NewCalendarDialog(
             newCalendarDialogType = NewCalendarDialogType.CREATE_NEW,
+            googleCalendars = listOf(
+                UserCalendar(1, "Work", CalendarColor.BLUE.color.toInt()),
+                UserCalendar(2, "Personal", CalendarColor.GREEN.color.toInt())
+            ),
+            showLocalCalendarSection = true,
             onCancelClick = { },
-            onBeginSyncingClick = { _, _ -> }
+            onBeginSyncingClick = { _, _ -> },
+            onGoogleCalendarClick = { }
         )
     }
 }

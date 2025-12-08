@@ -8,6 +8,7 @@ import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.domain.model.AppConfig
+import org.openedx.core.domain.model.CalendarType
 import org.openedx.core.domain.model.VideoQuality
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.system.CalendarManager
@@ -69,6 +70,7 @@ class PreferencesManager(context: Context) :
     override fun clearCalendarPreferences() {
         sharedPreferences.edit().apply {
             remove(CALENDAR_ID)
+            remove(CALENDAR_TYPE)
             remove(IS_CALENDAR_SYNC_ENABLED)
             remove(HIDE_INACTIVE_COURSES)
         }.apply()
@@ -103,6 +105,17 @@ class PreferencesManager(context: Context) :
             saveLong(CALENDAR_ID, value)
         }
         get() = getLong(CALENDAR_ID, CalendarManager.CALENDAR_DOES_NOT_EXIST)
+
+    override var calendarType: CalendarType
+        set(value) {
+            saveString(CALENDAR_TYPE, value.name)
+        }
+        get() {
+            val storedType = getString(CALENDAR_TYPE, CalendarType.LOCAL.name)
+            return runCatching {
+                CalendarType.valueOf(storedType)
+            }.getOrDefault(CalendarType.LOCAL)
+        }
 
     override var user: User?
         set(value) {
@@ -234,6 +247,7 @@ class PreferencesManager(context: Context) :
         private const val VIDEO_SETTINGS_DOWNLOAD_QUALITY = "video_settings_download_quality"
         private const val APP_CONFIG = "app_config"
         private const val CALENDAR_ID = "CALENDAR_ID"
+        private const val CALENDAR_TYPE = "CALENDAR_TYPE"
         private const val RESET_APP_DIRECTORY = "reset_app_directory"
         private const val IS_CALENDAR_SYNC_ENABLED = "IS_CALENDAR_SYNC_ENABLED"
         private const val IS_RELATIVE_DATES_ENABLED = "IS_RELATIVE_DATES_ENABLED"

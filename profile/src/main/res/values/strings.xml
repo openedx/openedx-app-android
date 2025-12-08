@@ -74,5 +74,10 @@
     <string name="profile_no_sync_courses">No courses are currently being synced to your calendar.</string>
     <string name="profile_no_courses_with_current_filter">No courses match the current filter.</string>
     <string name="profile_show_full_dates">Show full dates like “%1$s”</string>
+    <string name="profile_select_google_calendar_title">Select Google Calendar</string>
+    <string name="profile_change_google_calendar_title">Change Google Calendar</string>
+    <string name="profile_no_google_calendars">No Google calendars available</string>
+    <string name="profile_select_calendar">Select calendar</string>
+    <string name="profile_local_calendar_option">Local calendar</string>
 
 </resources>

@@ -37,6 +37,7 @@ import org.openedx.core.config.MicrosoftConfig
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
+import org.openedx.core.domain.model.CalendarType
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.notifier.app.AppNotifier
@@ -91,6 +92,7 @@ class SignInViewModelTest {
         every { config.getGoogleConfig() } returns GoogleConfig()
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
         every { calendarPreferences.calendarUser } returns ""
+        every { calendarPreferences.calendarType } returns CalendarType.LOCAL
         every { calendarPreferences.clearCalendarPreferences() } returns Unit
         coEvery { calendarInteractor.clearCalendarCachedData() } returns Unit
         every { analytics.logScreenEvent(any(), any()) } returns Unit
