@@ -18,9 +18,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,18 +59,28 @@ class DisableCalendarSyncDialogFragment : DialogFragment() {
         savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.setCancelable(false)
+        dialog?.setCanceledOnTouchOutside(false)
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
                 val viewModel: DisableCalendarSyncDialogViewModel = koinViewModel()
+                val isDeleting by viewModel.deletionState.collectAsState()
+
+                LaunchedEffect(isDeleting) {
+                    if (isDeleting == DeletionState.DELETED) {
+                        dismiss()
+                    }
+                }
+
                 DisableCalendarSyncDialogView(
                     calendarData = requireArguments().parcelable<CalendarData>(ARG_CALENDAR_DATA),
+                    isDeleting = isDeleting == DeletionState.DELETING,
                     onCancelClick = {
                         dismiss()
                     },
                     onDisableSyncingClick = {
                         viewModel.disableSyncingClick()
-                        dismiss()
                     }
                 )
             }
@@ -93,13 +107,18 @@ class DisableCalendarSyncDialogFragment : DialogFragment() {
 private fun DisableCalendarSyncDialogView(
     modifier: Modifier = Modifier,
     calendarData: CalendarData?,
+    isDeleting: Boolean,
     onCancelClick: () -> Unit,
     onDisableSyncingClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     DefaultDialogBox(
         modifier = modifier,
-        onDismissClick = onCancelClick
+        onDismissClick = {
+            if (!isDeleting) {
+                onCancelClick()
+            }
+        }
     ) {
         Column(
             modifier = Modifier
@@ -159,23 +178,42 @@ private fun DisableCalendarSyncDialogView(
                 style = MaterialTheme.appTypography.bodyMedium,
                 color = MaterialTheme.appColors.textDark
             )
-            OpenEdXOutlinedButton(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.profile_disable_syncing),
-                backgroundColor = MaterialTheme.appColors.background,
-                borderColor = MaterialTheme.appColors.primaryButtonBackground,
-                textColor = MaterialTheme.appColors.primaryButtonBackground,
-                onClick = {
-                    onDisableSyncingClick()
+
+            if (isDeleting) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.appColors.primary
+                    )
+                    Text(
+                        text = stringResource(id = R.string.profile_deleting_events),
+                        style = MaterialTheme.appTypography.bodyMedium,
+                        color = MaterialTheme.appColors.textDark
+                    )
                 }
-            )
-            OpenEdXButton(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = coreR.string.core_cancel),
-                onClick = {
-                    onCancelClick()
-                }
-            )
+            } else {
+                OpenEdXOutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.profile_disable_syncing),
+                    backgroundColor = MaterialTheme.appColors.background,
+                    borderColor = MaterialTheme.appColors.primaryButtonBackground,
+                    textColor = MaterialTheme.appColors.primaryButtonBackground,
+                    onClick = {
+                        onDisableSyncingClick()
+                    }
+                )
+                OpenEdXButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = coreR.string.core_cancel),
+                    onClick = {
+                        onCancelClick()
+                    }
+                )
+            }
         }
     }
 }
@@ -187,8 +225,9 @@ private fun DisableCalendarSyncDialogPreview() {
     OpenEdXTheme {
         DisableCalendarSyncDialogView(
             calendarData = CalendarData("calendar", Color.GREEN),
+            isDeleting = true,
             onCancelClick = { },
-            onDisableSyncingClick = { }
+            onDisableSyncingClick = { },
         )
     }
 }

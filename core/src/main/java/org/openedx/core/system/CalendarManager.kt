@@ -11,6 +11,8 @@ import androidx.core.content.ContextCompat
 import io.branch.indexing.BranchUniversalObject
 import io.branch.referral.util.ContentMetadata
 import io.branch.referral.util.LinkProperties
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CalendarData
 import org.openedx.core.domain.model.CourseDateBlock
@@ -181,31 +183,60 @@ class CalendarManager(
         courseName: String,
         courseDateBlock: CourseDateBlock
     ): Long {
-        val date = courseDateBlock.date.toCalendar()
-        val startMillis = date.timeInMillis - TimeUnit.HOURS.toMillis(1)
-        val endMillis = date.timeInMillis
+        var eventId = EVENT_DOES_NOT_EXIST
+        var attempts = 0
 
-        val values = ContentValues().apply {
-            put(CalendarContract.Events.DTSTART, startMillis)
-            put(CalendarContract.Events.DTEND, endMillis)
-            put(
-                CalendarContract.Events.TITLE,
-                "${courseDateBlock.title} : $courseName"
-            )
-            put(
-                CalendarContract.Events.DESCRIPTION,
-                getEventDescription(
-                    courseId = courseId,
-                    courseDateBlock = courseDateBlock,
-                    isDeeplinkEnabled = corePreferences.appConfig.courseDatesCalendarSync.isDeepLinkEnabled
-                )
-            )
-            put(CalendarContract.Events.CALENDAR_ID, calendarId)
-            put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().id)
+        while (eventId == EVENT_DOES_NOT_EXIST && attempts < EVENT_ATTEMPTS) {
+            attempts++
+            try {
+                val date = courseDateBlock.date.toCalendar()
+                val startMillis = date.timeInMillis - TimeUnit.HOURS.toMillis(1)
+                val endMillis = date.timeInMillis
+
+                val values = ContentValues().apply {
+                    put(CalendarContract.Events.DTSTART, startMillis)
+                    put(CalendarContract.Events.DTEND, endMillis)
+                    put(
+                        CalendarContract.Events.TITLE,
+                        "${courseDateBlock.title} : $courseName"
+                    )
+                    put(
+                        CalendarContract.Events.DESCRIPTION,
+                        getEventDescription(
+                            courseId = courseId,
+                            courseDateBlock = courseDateBlock,
+                            isDeeplinkEnabled = corePreferences.appConfig.courseDatesCalendarSync.isDeepLinkEnabled
+                        )
+                    )
+                    put(CalendarContract.Events.CALENDAR_ID, calendarId)
+                    put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().id)
+                }
+                val uri =
+                    context.contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
+                val insertedEventId = uri?.lastPathSegment?.toLong() ?: EVENT_DOES_NOT_EXIST
+
+                if (insertedEventId != EVENT_DOES_NOT_EXIST && isEventExists(insertedEventId)) {
+                    uri?.let { addReminderToEvent(uri = it) }
+                    eventId = insertedEventId
+                    logger.d { "Event created successfully: $eventId (attempt $attempts)" }
+                } else {
+                    logger.d { "Event creation failed, retrying... (attempt $attempts/$EVENT_ATTEMPTS)" }
+                    if (attempts < EVENT_ATTEMPTS) {
+                        runBlocking { delay(ACTION_RETRY_DELAY) }
+                    }
+                }
+            } catch (e: Exception) {
+                logger.d { "Event creation error on attempt $attempts: ${e.message}" }
+                if (attempts < EVENT_ATTEMPTS) {
+                    runBlocking { delay(ACTION_RETRY_DELAY) }
+                }
+            }
         }
-        val uri = context.contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
-        uri?.let { addReminderToEvent(uri = it) }
-        val eventId = uri?.lastPathSegment?.toLong() ?: EVENT_DOES_NOT_EXIST
+
+        if (eventId == EVENT_DOES_NOT_EXIST) {
+            logger.d { "Failed to create event after $EVENT_ATTEMPTS attempts" }
+        }
+
         return eventId
     }
 
@@ -254,11 +285,9 @@ class CalendarManager(
     }
 
     fun deleteCalendar(calendarId: Long) {
-        deleteAllEventsInCalendar(calendarId)
-
         val calendarAccount = getCalendarAccountById(calendarId)
         if (calendarAccount?.type == GOOGLE_ACCOUNT_TYPE) {
-            logger.d { "Cannot delete Google Calendar, only events were removed" }
+            logger.d { "Cannot delete Google Calendar" }
             return
         }
 
@@ -276,16 +305,60 @@ class CalendarManager(
         }
     }
 
-    private fun deleteAllEventsInCalendar(calendarId: Long) {
-        val selection = "${CalendarContract.Events.CALENDAR_ID} = ?"
-        val selectionArgs = arrayOf(calendarId.toString())
+    suspend fun deleteEvents(eventIds: List<Long>) {
+        val deletedCount = eventIds.count { eventId ->
+            var deleted = false
+            var attempts = 0
 
-        val rowsDeleted = context.contentResolver.delete(
-            CalendarContract.Events.CONTENT_URI,
-            selection,
-            selectionArgs
-        )
-        logger.d { "Deleted $rowsDeleted events from calendar $calendarId" }
+            while (!deleted && attempts < EVENT_ATTEMPTS) {
+                attempts++
+                try {
+                    deleted = deleteEventWithRetry(eventId)
+                    if (!deleted && attempts < EVENT_ATTEMPTS) {
+                        delay(ACTION_RETRY_DELAY)
+                    }
+                } catch (e: Exception) {
+                    logger.d { "Failed to delete event $eventId on attempt $attempts: ${e.message}" }
+                    if (attempts < EVENT_ATTEMPTS) {
+                        delay(ACTION_RETRY_DELAY)
+                    }
+                }
+            }
+
+            if (!deleted) {
+                logger.d { "Failed to delete event $eventId after $EVENT_ATTEMPTS attempts" }
+            }
+
+            deleted
+        }
+        logger.d { "Successfully deleted $deletedCount out of ${eventIds.size} events" }
+    }
+
+    private fun deleteEventWithRetry(eventId: Long): Boolean {
+        val deleteUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventId)
+        val rows = context.contentResolver.delete(deleteUri, null, null)
+
+        if (rows > 0) {
+            // Verify event is actually deleted
+            val stillExists = isEventExists(eventId)
+            if (!stillExists) {
+                logger.d { "Event $eventId deleted successfully" }
+                return true
+            } else {
+                logger.d { "Event $eventId deletion reported success but event still exists" }
+                return false
+            }
+        } else {
+            // Check if event doesn't exist (might have been already deleted)
+            val exists = isEventExists(eventId)
+            if (!exists) {
+                logger.d { "Event $eventId doesn't exist (already deleted)" }
+                return true
+            } else {
+                logger.d { "Event $eventId deletion failed" }
+                return false
+            }
+        }
     }
 
     private fun getCalendarOwnerAccount(): CalendarAccount {
@@ -408,11 +481,34 @@ class CalendarManager(
         }
     }
 
+    private fun isEventExists(eventId: Long): Boolean {
+        if (eventId == EVENT_DOES_NOT_EXIST) return false
+
+        val projection = arrayOf(CalendarContract.Events._ID)
+        val selection = "${CalendarContract.Events._ID} = ?"
+        val selectionArgs = arrayOf(eventId.toString())
+
+        val cursor = context.contentResolver.query(
+            CalendarContract.Events.CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            null
+        )
+
+        return cursor?.use {
+            it.count > 0
+        } ?: false
+    }
+
     companion object {
         const val CALENDAR_DOES_NOT_EXIST = -1L
         const val EVENT_DOES_NOT_EXIST = -1L
         private const val TAG = "CalendarManager"
         private const val LOCAL_USER = "local_user"
         private const val GOOGLE_ACCOUNT_TYPE = "com.google"
+
+        private const val ACTION_RETRY_DELAY = 500L
+        private const val EVENT_ATTEMPTS = 3
     }
 }
