@@ -3,15 +3,11 @@ package org.openedx.dates.presentation.dates
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseDate
 import org.openedx.core.domain.model.CourseDatesResponse
@@ -26,9 +22,7 @@ import org.openedx.dates.presentation.DatesAnalytics
 import org.openedx.dates.presentation.DatesAnalyticsEvent
 import org.openedx.dates.presentation.DatesAnalyticsKey
 import org.openedx.dates.presentation.DatesRouter
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.util.Calendar
 import java.util.Date
@@ -41,15 +35,11 @@ class DatesViewModel(
     private val analytics: DatesAnalytics,
     private val calendarSyncScheduler: CalendarSyncScheduler,
     corePreferences: CorePreferences,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val _uiState = MutableStateFlow(DatesUIState())
     val uiState: StateFlow<DatesUIState>
         get() = _uiState.asStateFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
@@ -78,7 +68,7 @@ class DatesViewModel(
             } catch (e: Exception) {
                 page = -1
                 updateUIWithCachedResponse()
-                handleFetchException(e)
+                handleErrorUiMessage(e)
             } finally {
                 clearLoadingState()
             }
@@ -133,18 +123,6 @@ class DatesViewModel(
         }
     }
 
-    private suspend fun handleFetchException(e: Throwable) {
-        if (e.isInternetError()) {
-            _uiMessage.emit(
-                UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-            )
-        } else {
-            _uiMessage.emit(
-                UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-            )
-        }
-    }
-
     private fun clearLoadingState() {
         _uiState.update { state ->
             state.copy(
@@ -167,7 +145,7 @@ class DatesViewModel(
                 refreshData()
                 calendarSyncScheduler.requestImmediateSync()
             } catch (e: Exception) {
-                handleFetchException(e)
+                handleErrorUiMessage(e)
             } finally {
                 _uiState.update { state ->
                     state.copy(

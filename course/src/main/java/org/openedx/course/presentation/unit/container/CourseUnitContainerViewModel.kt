@@ -29,6 +29,7 @@ import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.foundation.extension.clearAndAddAll
 import org.openedx.foundation.extension.indexOfFirstFromIndex
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 
 class CourseUnitContainerViewModel(
     val courseId: String,
@@ -40,7 +41,8 @@ class CourseUnitContainerViewModel(
     private val analytics: CourseAnalytics,
     private val networkConnection: NetworkConnection,
     private val videoPreviewHelper: VideoPreviewHelper,
-) : BaseViewModel() {
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     private val blocks = ArrayList<Block>()
 

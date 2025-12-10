@@ -8,11 +8,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
@@ -54,7 +51,6 @@ import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.SingleEventLiveData
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR
@@ -73,7 +69,7 @@ class CourseContainerViewModel(
     private val imageProcessor: ImageProcessor,
     private val calendarSyncScheduler: CalendarSyncScheduler,
     val courseRouter: CourseRouter,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val _dataReady = MutableLiveData<Boolean?>()
     val dataReady: LiveData<Boolean?>
@@ -98,10 +94,6 @@ class CourseContainerViewModel(
     private val _isNavigationEnabled = MutableStateFlow(false)
     val isNavigationEnabled: StateFlow<Boolean> =
         _isNavigationEnabled.asStateFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
 
     private var _courseDetails: CourseEnrollmentDetails? = null
     val courseDetails: CourseEnrollmentDetails?
@@ -150,7 +142,7 @@ class CourseContainerViewModel(
 
                     is CourseDatesShifted -> {
                         calendarSyncScheduler.requestImmediateSync(courseId)
-                        _uiMessage.emit(DatesShiftedSnackBar())
+                        sendMessage(DatesShiftedSnackBar())
                     }
 
                     is CourseLoading -> {
@@ -249,7 +241,9 @@ class CourseContainerViewModel(
     private fun handleFetchError(e: Throwable) {
         e.printStackTrace()
         if (isNetworkRelatedError(e)) {
-            _errorMessage.value = resourceManager.getString(CoreR.string.core_error_no_connection)
+            _errorMessage.value = resolveErrorMessage(
+                throwable = e,
+            )
         } else {
             _courseAccessStatus.value = CourseAccessError.UNKNOWN
         }
@@ -320,9 +314,10 @@ class CourseContainerViewModel(
         viewModelScope.launch {
             try {
                 interactor.getCourseStructure(courseId, isNeedRefresh = true)
-            } catch (_: Exception) {
-                _errorMessage.value =
-                    resourceManager.getString(CoreR.string.core_error_unknown_error)
+            } catch (e: Exception) {
+                _errorMessage.value = resolveErrorMessage(
+                    throwable = e,
+                )
             }
             _refreshing.value = false
             courseNotifier.send(CourseStructureUpdated(courseId))

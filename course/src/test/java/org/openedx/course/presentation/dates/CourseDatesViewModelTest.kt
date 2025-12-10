@@ -44,6 +44,7 @@ import org.openedx.course.presentation.CourseRouter
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseDatesViewModelTest {
@@ -72,8 +73,8 @@ class CourseDatesViewModelTest {
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(id = R.string.platform_name) } returns openEdx
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every { resourceManager.getString(foundationR.string.foundation_error_no_connection) } returns noInternet
+        every { resourceManager.getString(foundationR.string.foundation_error_unknown_error) } returns somethingWrong
         coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
         every { corePreferences.user } returns CoreMocks.mockUser
         every { corePreferences.appConfig } returns CoreMocks.mockAppConfig
@@ -102,7 +103,6 @@ class CourseDatesViewModelTest {
             "",
             notifier,
             interactor,
-            resourceManager,
             analytics,
             config,
             calendarInteractor,
@@ -110,6 +110,7 @@ class CourseDatesViewModelTest {
             preferencesManager,
             courseRouter,
             calendarRouter,
+            resourceManager,
         )
         coEvery { interactor.getCourseDates(any()) } throws UnknownHostException()
         val message = async {
@@ -132,7 +133,6 @@ class CourseDatesViewModelTest {
             "",
             notifier,
             interactor,
-            resourceManager,
             analytics,
             config,
             calendarInteractor,
@@ -140,6 +140,7 @@ class CourseDatesViewModelTest {
             preferencesManager,
             courseRouter,
             calendarRouter,
+            resourceManager,
         )
         coEvery { interactor.getCourseDates(any()) } throws Exception()
         val message = async {
@@ -162,7 +163,6 @@ class CourseDatesViewModelTest {
             "",
             notifier,
             interactor,
-            resourceManager,
             analytics,
             config,
             calendarInteractor,
@@ -170,6 +170,7 @@ class CourseDatesViewModelTest {
             preferencesManager,
             courseRouter,
             calendarRouter,
+            resourceManager,
         )
         coEvery { interactor.getCourseDates(any()) } returns CourseMocks.courseDatesResultWithData
         val message = async {
@@ -192,7 +193,6 @@ class CourseDatesViewModelTest {
             "",
             notifier,
             interactor,
-            resourceManager,
             analytics,
             config,
             calendarInteractor,
@@ -200,6 +200,7 @@ class CourseDatesViewModelTest {
             preferencesManager,
             courseRouter,
             calendarRouter,
+            resourceManager,
         )
         coEvery { interactor.getCourseDates(any()) } returns CourseDatesResult(
             datesSection = linkedMapOf(),

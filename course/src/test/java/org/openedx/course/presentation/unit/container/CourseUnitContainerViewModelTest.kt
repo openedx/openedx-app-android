@@ -25,6 +25,7 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -41,6 +42,7 @@ class CourseUnitContainerViewModelTest {
     private val analytics = mockk<CourseAnalytics>()
     private val networkConnection = mockk<NetworkConnection>()
     private val videoPreviewHelper = mockk<VideoPreviewHelper>()
+    private val resourceManager = mockk<ResourceManager>()
 
     @Before
     fun setUp() {
@@ -65,7 +67,8 @@ class CourseUnitContainerViewModelTest {
             notifier,
             analytics,
             networkConnection,
-            videoPreviewHelper
+            videoPreviewHelper,
+            resourceManager
         )
 
         coEvery { interactor.getCourseStructure(any()) } throws UnknownHostException()
@@ -89,7 +92,8 @@ class CourseUnitContainerViewModelTest {
             notifier,
             analytics,
             networkConnection,
-            videoPreviewHelper
+            videoPreviewHelper,
+            resourceManager
         )
 
         coEvery { interactor.getCourseStructure(any()) } throws UnknownHostException()
@@ -113,7 +117,8 @@ class CourseUnitContainerViewModelTest {
             notifier,
             analytics,
             networkConnection,
-            videoPreviewHelper
+            videoPreviewHelper,
+            resourceManager
         )
 
         coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
@@ -139,7 +144,8 @@ class CourseUnitContainerViewModelTest {
             notifier,
             analytics,
             networkConnection,
-            videoPreviewHelper
+            videoPreviewHelper,
+            resourceManager
         )
         coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
@@ -163,7 +169,8 @@ class CourseUnitContainerViewModelTest {
             notifier,
             analytics,
             networkConnection,
-            videoPreviewHelper
+            videoPreviewHelper,
+            resourceManager
         )
         coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
@@ -189,7 +196,8 @@ class CourseUnitContainerViewModelTest {
             notifier,
             analytics,
             networkConnection,
-            videoPreviewHelper
+            videoPreviewHelper,
+            resourceManager
         )
         coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
@@ -215,7 +223,8 @@ class CourseUnitContainerViewModelTest {
             notifier,
             analytics,
             networkConnection,
-            videoPreviewHelper
+            videoPreviewHelper,
+            resourceManager
         )
         coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
@@ -241,7 +250,8 @@ class CourseUnitContainerViewModelTest {
             notifier,
             analytics,
             networkConnection,
-            videoPreviewHelper
+            videoPreviewHelper,
+            resourceManager
         )
         coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
@@ -267,7 +277,8 @@ class CourseUnitContainerViewModelTest {
             notifier,
             analytics,
             networkConnection,
-            videoPreviewHelper
+            videoPreviewHelper,
+            resourceManager
         )
         coEvery { interactor.getCourseStructure("") } returns CoreMocks.mockCourseStructure
         coEvery { interactor.getCourseStructureForVideos("") } returns CoreMocks.mockCourseStructure
@@ -293,7 +304,8 @@ class CourseUnitContainerViewModelTest {
             notifier,
             analytics,
             networkConnection,
-            videoPreviewHelper
+            videoPreviewHelper,
+            resourceManager
         )
         coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure

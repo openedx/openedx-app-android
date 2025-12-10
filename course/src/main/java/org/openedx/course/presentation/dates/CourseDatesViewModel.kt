@@ -1,11 +1,8 @@
 package org.openedx.course.presentation.dates
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -35,24 +32,22 @@ import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
-import org.openedx.core.R as CoreR
 
 class CourseDatesViewModel(
     val courseId: String,
     private val enrollmentMode: String,
     private val courseNotifier: CourseNotifier,
     private val interactor: CourseInteractor,
-    private val resourceManager: ResourceManager,
     private val courseAnalytics: CourseAnalytics,
     private val config: Config,
     private val calendarInteractor: CalendarInteractor,
     private val calendarNotifier: CalendarNotifier,
     private val corePreferences: CorePreferences,
     val courseRouter: CourseRouter,
-    val calendarRouter: CalendarRouter
-) : BaseViewModel() {
+    val calendarRouter: CalendarRouter,
+    resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     var isSelfPaced = true
     var useRelativeDates = corePreferences.isRelativeDatesEnabled
@@ -60,10 +55,6 @@ class CourseDatesViewModel(
     private val _uiState = MutableStateFlow<CourseDatesUIState>(CourseDatesUIState.Loading)
     val uiState: StateFlow<CourseDatesUIState>
         get() = _uiState.asStateFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
 
     private var courseBannerType: CourseBannerType = CourseBannerType.BLANK
     private var courseStructure: CourseStructure? = null
@@ -112,8 +103,8 @@ class CourseDatesViewModel(
             } catch (e: Exception) {
                 _uiState.value = CourseDatesUIState.Error
                 if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection))
+                    handleErrorUiMessage(
+                        throwable = e,
                     )
                 }
             } finally {
@@ -130,17 +121,10 @@ class CourseDatesViewModel(
                 courseNotifier.send(CourseDatesShifted)
                 onResetDates(true)
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection))
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg)
-                        )
-                    )
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                    defaultErrorRes = R.string.core_dates_shift_dates_unsuccessful_msg,
+                )
                 onResetDates(false)
             }
         }

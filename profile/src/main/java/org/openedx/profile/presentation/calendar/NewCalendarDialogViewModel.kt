@@ -20,7 +20,9 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.calendar.CalendarCreated
 import org.openedx.core.system.notifier.calendar.CalendarNotifier
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
+import java.net.UnknownHostException
 
 class NewCalendarDialogViewModel(
     private val calendarManager: CalendarManager,
@@ -29,12 +31,7 @@ class NewCalendarDialogViewModel(
     private val calendarInteractor: CalendarInteractor,
     private val networkConnection: NetworkConnection,
     private val resourceManager: ResourceManager,
-) : BaseViewModel() {
-
-    private val _uiMessage = MutableSharedFlow<String>()
-    val uiMessage: SharedFlow<String>
-        get() = _uiMessage.asSharedFlow()
-
+) : BaseViewModel(resourceManager) {
     private val _isSuccess = MutableSharedFlow<Boolean>()
     val isSuccess: SharedFlow<Boolean>
         get() = _isSuccess.asSharedFlow()
@@ -86,10 +83,14 @@ class NewCalendarDialogViewModel(
                     }
                     _isSuccess.emit(true)
                 } else {
-                    _uiMessage.emit(resourceManager.getString(R.string.core_error_unknown_error))
+                    handleErrorUiMessage(
+                        throwable = null,
+                    )
                 }
             } else {
-                _uiMessage.emit(resourceManager.getString(R.string.core_error_no_connection))
+                handleErrorUiMessage(
+                    throwable = UnknownHostException(),
+                )
             }
         }
     }
@@ -97,12 +98,22 @@ class NewCalendarDialogViewModel(
     fun syncWithGoogleCalendar(calendarId: Long) {
         viewModelScope.launch {
             if (!networkConnection.isOnline()) {
-                _uiMessage.emit(resourceManager.getString(R.string.core_error_no_connection))
+                sendMessage(
+                    UIMessage.SnackBarMessage(
+                        resourceManager.getString(R.string.core_error_no_connection)
+                    )
+                )
                 return@launch
             }
 
             if (!calendarManager.isCalendarExist(calendarId)) {
-                _uiMessage.emit(resourceManager.getString(R.string.core_error_unknown_error))
+                sendMessage(
+                    UIMessage.SnackBarMessage(
+                        resourceManager.getString(
+                            R.string.core_error_unknown_error
+                        )
+                    )
+                )
                 return@launch
             }
 

@@ -41,7 +41,6 @@ import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.unit.container.CourseViewMode
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
@@ -69,7 +68,8 @@ class CourseContentAllViewModel(
     preferencesManager,
     workerController,
     coreAnalytics,
-    downloadHelper
+    downloadHelper,
+    resourceManager,
 ) {
     val isCourseDropdownNavigationEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
@@ -77,10 +77,6 @@ class CourseContentAllViewModel(
         MutableStateFlow<CourseContentAllUIState>(CourseContentAllUIState.Loading)
     val uiState: StateFlow<CourseContentAllUIState>
         get() = _uiState.asStateFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
 
     private val _resumeBlockId = MutableSharedFlow<String>()
     val resumeBlockId: SharedFlow<String>
@@ -138,7 +134,7 @@ class CourseContentAllViewModel(
                 super.saveDownloadModels(folder, courseId, id)
             } else {
                 viewModelScope.launch {
-                    _uiMessage.emit(
+                    sendMessage(
                         UIMessage.ToastMessage(
                             resourceManager.getString(courseR.string.course_can_download_only_with_wifi)
                         )
@@ -236,11 +232,9 @@ class CourseContentAllViewModel(
 
     private suspend fun handleCourseDataError(e: Throwable?) {
         _uiState.value = CourseContentAllUIState.Error
-        val errorMessage = when {
-            e?.isInternetError() == true -> R.string.core_error_no_connection
-            else -> R.string.core_error_unknown_error
-        }
-        _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(errorMessage)))
+        handleErrorUiMessage(
+            throwable = e,
+        )
     }
 
     private fun sortBlocks(blocks: List<Block>): List<Block> {
@@ -291,19 +285,10 @@ class CourseContentAllViewModel(
                 getCourseData()
                 courseNotifier.send(CourseDatesShifted)
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg)
-                        )
-                    )
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                    defaultErrorRes = R.string.core_dates_shift_dates_unsuccessful_msg,
+                )
             }
         }
     }

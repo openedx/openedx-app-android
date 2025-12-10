@@ -32,6 +32,7 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -105,7 +106,7 @@ class CourseSearchFragment : Fragment() {
                         0
                     )
                 )
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
                 val querySearch = arguments?.getString(ARG_SEARCH_QUERY, "") ?: ""

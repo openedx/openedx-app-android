@@ -29,6 +29,7 @@ import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.core.utils.Directories
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.SingleEventLiveData
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 
 @SuppressLint("StaticFieldLeak")
@@ -42,8 +43,9 @@ class AppViewModel(
     private val deepLinkRouter: DeepLinkRouter,
     private val fileUtil: FileUtil,
     private val downloadNotifier: DownloadNotifier,
-    private val context: Context
-) : BaseViewModel() {
+    private val context: Context,
+    resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     private val _logoutUser = SingleEventLiveData<Unit>()
     val logoutUser: LiveData<Unit>

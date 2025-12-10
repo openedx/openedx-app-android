@@ -1,11 +1,8 @@
 package org.openedx.course.presentation.progress
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
@@ -17,21 +14,18 @@ import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.RefreshProgress
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 
 class CourseProgressViewModel(
     val courseId: String,
     private val interactor: CourseInteractor,
     private val courseNotifier: CourseNotifier,
-) : BaseViewModel() {
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     private val _uiState = MutableStateFlow<CourseProgressUIState>(CourseProgressUIState.Loading)
     val uiState: StateFlow<CourseProgressUIState>
         get() = _uiState.asStateFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
 
     init {
         collectData(false)

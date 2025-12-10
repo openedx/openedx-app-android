@@ -46,6 +46,7 @@ import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 import java.net.UnknownHostException
 import org.openedx.course.R as courseR
+import org.openedx.foundation.R as foundationR
 
 @Suppress("LargeClass")
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -79,9 +80,8 @@ class CourseHomeViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every { resourceManager.getString(foundationR.string.foundation_error_no_connection) } returns noInternet
+        every { resourceManager.getString(foundationR.string.foundation_error_unknown_error) } returns somethingWrong
         every {
             resourceManager.getString(courseR.string.course_can_download_only_with_wifi)
         } returns cantDownload

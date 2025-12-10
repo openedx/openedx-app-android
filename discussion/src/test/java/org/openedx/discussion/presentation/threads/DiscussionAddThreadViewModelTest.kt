@@ -18,7 +18,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.R
 import org.openedx.discussion.DiscussionMocks
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.system.notifier.DiscussionNotifier
@@ -26,6 +25,7 @@ import org.openedx.discussion.system.notifier.DiscussionThreadAdded
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DiscussionAddThreadViewModelTest {
@@ -57,14 +57,22 @@ class DiscussionAddThreadViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
         clearAllMocks()
+    }
+
+    private fun DiscussionAddThreadViewModel.lastUiMessage(): UIMessage? {
+        return uiMessage.replayCache.lastOrNull()
     }
 
     @Test
@@ -86,7 +94,7 @@ class DiscussionAddThreadViewModelTest {
 
         coVerify(exactly = 1) { interactor.createThread(any(), any(), any(), any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as? UIMessage.SnackBarMessage
         assert(noInternet == message?.message)
         assert(viewModel.newThread.value == null)
         assert(viewModel.isLoading.value == false)
@@ -111,7 +119,7 @@ class DiscussionAddThreadViewModelTest {
 
         coVerify(exactly = 1) { interactor.createThread(any(), any(), any(), any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as? UIMessage.SnackBarMessage
         assert(somethingWrong == message?.message)
         assert(viewModel.newThread.value == null)
         assert(viewModel.isLoading.value == false)
@@ -136,7 +144,7 @@ class DiscussionAddThreadViewModelTest {
 
         coVerify(exactly = 1) { interactor.createThread(any(), any(), any(), any(), any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.lastUiMessage() == null)
         assert(viewModel.newThread.value != null)
         assert(viewModel.isLoading.value == false)
     }

@@ -34,7 +34,7 @@ class ProfileFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
                 val uiState by viewModel.uiState.collectAsState()
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
 
                 ProfileView(

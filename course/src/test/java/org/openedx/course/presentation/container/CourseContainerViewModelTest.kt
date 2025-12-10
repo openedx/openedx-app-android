@@ -40,6 +40,7 @@ import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.utils.ImageProcessor
 import org.openedx.foundation.system.ResourceManager
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseContainerViewModelTest {
@@ -70,8 +71,12 @@ class CourseContainerViewModelTest {
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(id = R.string.platform_name) } returns openEdx
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
         every { corePreferences.user } returns CoreMocks.mockUser
         every { corePreferences.appConfig } returns CoreMocks.mockAppConfig
         every { courseNotifier.notifier } returns emptyFlow()

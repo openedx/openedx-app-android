@@ -30,6 +30,7 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.foundation.system.ResourceManager
 import java.util.concurrent.Executors
 
 @SuppressLint("StaticFieldLeak")
@@ -44,6 +45,7 @@ class EncodedVideoUnitViewModel(
     networkConnection: NetworkConnection,
     transcriptManager: TranscriptManager,
     courseAnalytics: CourseAnalytics,
+    resourceManager: ResourceManager,
 ) : VideoUnitViewModel(
     courseId,
     videoUrl,
@@ -52,7 +54,8 @@ class EncodedVideoUnitViewModel(
     notifier,
     networkConnection,
     transcriptManager,
-    courseAnalytics
+    courseAnalytics,
+    resourceManager,
 ) {
 
     private val _isVideoEnded = MutableLiveData(false)

@@ -14,13 +14,15 @@ import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.notifier.calendar.CalendarNotifier
 import org.openedx.core.system.notifier.calendar.CalendarSyncDisabled
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 
 class DisableCalendarSyncDialogViewModel(
     private val calendarNotifier: CalendarNotifier,
     private val calendarManager: CalendarManager,
     private val calendarPreferences: CalendarPreferences,
     private val calendarInteractor: CalendarInteractor,
-) : BaseViewModel() {
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     private val _deletionState = MutableStateFlow<DeletionState?>(null)
     val deletionState: StateFlow<DeletionState?> = _deletionState.asStateFlow()

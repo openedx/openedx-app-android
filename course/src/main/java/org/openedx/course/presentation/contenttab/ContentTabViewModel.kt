@@ -5,12 +5,14 @@ import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.container.CourseContentTab
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 
 class ContentTabViewModel(
     val courseId: String,
     private val courseTitle: String,
     private val analytics: CourseAnalytics,
-) : BaseViewModel() {
+    resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     fun logTabClickEvent(contentTab: CourseContentTab) {
         analytics.logEvent(

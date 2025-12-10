@@ -31,6 +31,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -102,7 +103,7 @@ class CourseSectionFragment : Fragment() {
                 val windowSize = rememberWindowSize()
 
                 val uiState by viewModel.uiState.observeAsState(CourseSectionUIState.Loading)
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 CourseSectionScreen(
                     windowSize = windowSize,
                     uiState = uiState,

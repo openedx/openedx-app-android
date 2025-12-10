@@ -24,7 +24,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.R
 import org.openedx.core.domain.model.Pagination
 import org.openedx.discussion.DiscussionMocks
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
@@ -37,6 +36,7 @@ import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DiscussionThreadsViewModelTest {
@@ -65,14 +65,22 @@ class DiscussionThreadsViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
         clearAllMocks()
+    }
+
+    private fun DiscussionThreadsViewModel.lastUiMessage(): UIMessage? {
+        return uiMessage.replayCache.lastOrNull()
     }
 
     @Test
@@ -97,7 +105,7 @@ class DiscussionThreadsViewModelTest {
 
         coVerify(exactly = 1) { interactor.getAllThreads(any(), any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as? UIMessage.SnackBarMessage
         assertEquals(noInternet, message?.message)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is DiscussionThreadsUIState.Loading)
@@ -118,7 +126,7 @@ class DiscussionThreadsViewModelTest {
 
         coVerify(exactly = 1) { interactor.getAllThreads(any(), any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is DiscussionThreadsUIState.Loading)
@@ -148,7 +156,7 @@ class DiscussionThreadsViewModelTest {
 
         coVerify(exactly = 1) { interactor.getAllThreads(any(), any(), any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.lastUiMessage() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is DiscussionThreadsUIState.Threads)
     }
@@ -176,7 +184,7 @@ class DiscussionThreadsViewModelTest {
 
         coVerify(exactly = 1) { interactor.getFollowingThreads(any(), any(), any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as? UIMessage.SnackBarMessage
         assertEquals(noInternet, message?.message)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is DiscussionThreadsUIState.Loading)
@@ -205,7 +213,7 @@ class DiscussionThreadsViewModelTest {
 
         coVerify(exactly = 1) { interactor.getFollowingThreads(any(), any(), any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is DiscussionThreadsUIState.Loading)
@@ -251,7 +259,7 @@ class DiscussionThreadsViewModelTest {
 
         coVerify(exactly = 1) { interactor.getFollowingThreads(any(), any(), any(), any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.lastUiMessage() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is DiscussionThreadsUIState.Threads)
     }
@@ -279,7 +287,7 @@ class DiscussionThreadsViewModelTest {
 
         coVerify(exactly = 1) { interactor.getThreads(any(), any(), any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as? UIMessage.SnackBarMessage
         assertEquals(noInternet, message?.message)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is DiscussionThreadsUIState.Loading)
@@ -300,7 +308,7 @@ class DiscussionThreadsViewModelTest {
 
         coVerify(exactly = 1) { interactor.getThreads(any(), any(), any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is DiscussionThreadsUIState.Loading)
@@ -330,7 +338,7 @@ class DiscussionThreadsViewModelTest {
 
         coVerify(exactly = 1) { interactor.getThreads(any(), any(), any(), any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.lastUiMessage() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is DiscussionThreadsUIState.Threads)
     }
@@ -420,7 +428,7 @@ class DiscussionThreadsViewModelTest {
 
         coVerify(exactly = 2) { interactor.getThreads(any(), any(), any(), any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.lastUiMessage() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is DiscussionThreadsUIState.Threads)
     }

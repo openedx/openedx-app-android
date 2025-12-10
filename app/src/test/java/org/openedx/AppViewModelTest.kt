@@ -32,6 +32,7 @@ import org.openedx.core.config.FirebaseConfig
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 
 @ExperimentalCoroutinesApi
@@ -51,6 +52,7 @@ class AppViewModelTest {
     private val deepLinkRouter = mockk<DeepLinkRouter>()
     private val context = mockk<Context>()
     private val downloadNotifier = mockk<DownloadNotifier>()
+    private val resourceManager = mockk<ResourceManager>()
 
     @Before
     fun before() {
@@ -82,6 +84,7 @@ class AppViewModelTest {
             fileUtil,
             downloadNotifier,
             context,
+            resourceManager,
         )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
@@ -118,6 +121,7 @@ class AppViewModelTest {
             fileUtil,
             downloadNotifier,
             context,
+            resourceManager,
         )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
@@ -156,6 +160,7 @@ class AppViewModelTest {
             fileUtil,
             downloadNotifier,
             context,
+            resourceManager,
         )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()

@@ -32,7 +32,7 @@ buildscript {
         play_services_ads_identifier_version = '18.2.0'
         install_referrer_version = '2.2'
         snakeyaml_version = '2.4'
-        openedx_foundation_version = '1.0.2'
+        openedx_foundation_version = '1.1.0'
         openedx_firebase_analytics_version = '1.0.1'
         braze_sdk_version = '37.0.0'
 

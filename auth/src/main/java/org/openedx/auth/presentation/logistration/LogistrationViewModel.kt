@@ -13,6 +13,7 @@ import org.openedx.core.config.Config
 import org.openedx.core.utils.Logger
 import org.openedx.foundation.extension.takeIfNotEmpty
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 
 class LogistrationViewModel(
     private val courseId: String,
@@ -20,7 +21,8 @@ class LogistrationViewModel(
     private val config: Config,
     private val analytics: AuthAnalytics,
     private val browserAuthHelper: BrowserAuthHelper,
-) : BaseViewModel() {
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     private val logger = Logger("LogistrationViewModel")
 

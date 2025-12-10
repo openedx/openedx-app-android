@@ -58,6 +58,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateMapOf
@@ -172,7 +173,7 @@ class EditProfileFragment : Fragment() {
                         isLimited = viewModel.isLimitedProfile
                     )
                 )
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val selectedImageUri by viewModel.selectedImageUri.observeAsState()
                 val isImageDeleted by viewModel.deleteImage.observeAsState(false)
                 val leaveDialog by viewModel.showLeaveDialog.observeAsState(false)

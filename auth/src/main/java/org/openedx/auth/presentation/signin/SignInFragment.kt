@@ -40,7 +40,7 @@ class SignInFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
                 val state by viewModel.uiState.collectAsState()
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
 
                 if (appUpgradeEvent == null) {

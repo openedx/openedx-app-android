@@ -45,6 +45,7 @@ import androidx.compose.material.icons.outlined.Report
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
@@ -126,7 +127,7 @@ class CourseDetailsFragment : Fragment() {
                 val windowSize = rememberWindowSize()
 
                 val uiState by viewModel.uiState.observeAsState()
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
 
                 val colorBackgroundValue = MaterialTheme.appColors.background.value
                 val colorTextValue = MaterialTheme.appColors.textPrimary.value

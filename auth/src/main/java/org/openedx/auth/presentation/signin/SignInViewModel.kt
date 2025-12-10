@@ -35,10 +35,7 @@ import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.core.utils.Logger
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.SingleEventLiveData
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.core.R as CoreRes
 
@@ -60,7 +57,7 @@ class SignInViewModel(
     val courseId: String?,
     val infoType: String?,
     val authCode: String,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val logger = Logger("SignInViewModel")
 
@@ -79,10 +76,6 @@ class SignInViewModel(
     )
     internal val uiState: StateFlow<SignInUIState> = _uiState
 
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
-
     private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent>()
     val appUpgradeEvent: LiveData<AppUpgradeEvent>
         get() = _appUpgradeEvent
@@ -95,13 +88,21 @@ class SignInViewModel(
     fun login(username: String, password: String) {
         logEvent(AuthAnalyticsEvent.USER_SIGN_IN_CLICKED)
         if (!validator.isEmailOrUserNameValid(username)) {
-            _uiMessage.value =
-                UIMessage.SnackBarMessage(resourceManager.getString(R.string.auth_invalid_email_username))
+            viewModelScope.launch {
+                handleErrorUiMessage(
+                    throwable = null,
+                    defaultErrorRes = R.string.auth_invalid_email_username,
+                )
+            }
             return
         }
         if (!validator.isPasswordValid(password)) {
-            _uiMessage.value =
-                UIMessage.SnackBarMessage(resourceManager.getString(R.string.auth_invalid_password))
+            viewModelScope.launch {
+                handleErrorUiMessage(
+                    throwable = null,
+                    defaultErrorRes = R.string.auth_invalid_password,
+                )
+            }
             return
         }
 
@@ -126,15 +127,15 @@ class SignInViewModel(
                 )
                 appNotifier.send(SignInEvent())
             } catch (e: Exception) {
-                if (e is EdxError.InvalidGrantException) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_invalid_grant))
-                } else if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_unknown_error))
+                when (e) {
+                    is EdxError.InvalidGrantException -> handleErrorUiMessage(
+                        throwable = null,
+                        defaultErrorRes = CoreRes.string.core_error_invalid_grant,
+                    )
+
+                    else -> handleErrorUiMessage(
+                        throwable = e,
+                    )
                 }
             }
             _uiState.update { it.copy(showProgress = false) }
@@ -228,9 +229,11 @@ class SignInViewModel(
         message?.let {
             logger.e { it() }
         }
-        _uiMessage.value = UIMessage.SnackBarMessage(
-            resourceManager.getString(CoreRes.string.core_error_unknown_error)
-        )
+        viewModelScope.launch {
+            handleErrorUiMessage(
+                throwable = null,
+            )
+        }
         _uiState.update { it.copy(showProgress = false) }
     }
 

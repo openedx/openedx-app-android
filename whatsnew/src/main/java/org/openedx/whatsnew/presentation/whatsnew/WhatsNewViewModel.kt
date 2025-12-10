@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.presentation.global.AppData
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
@@ -21,7 +22,8 @@ class WhatsNewViewModel(
     private val router: WhatsNewRouter,
     private val preferencesManager: WhatsNewPreferences,
     private val appData: AppData,
-) : BaseViewModel() {
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     private val _whatsNewItem = mutableStateOf<WhatsNewItem?>(null)
     val whatsNewItem: State<WhatsNewItem?>

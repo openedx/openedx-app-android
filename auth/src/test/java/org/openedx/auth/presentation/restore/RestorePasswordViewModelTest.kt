@@ -22,12 +22,13 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
-import org.openedx.core.R
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.captureUiMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RestorePasswordViewModelTest {
@@ -56,8 +57,12 @@ class RestorePasswordViewModelTest {
     @Before
     fun before() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
         every { resourceManager.getString(org.openedx.auth.R.string.auth_invalid_email) } returns invalidEmail
         every { resourceManager.getString(org.openedx.auth.R.string.auth_invalid_password) } returns invalidPassword
         every { appNotifier.notifier } returns emptyFlow()
@@ -80,10 +85,10 @@ class RestorePasswordViewModelTest {
         verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
 
         assertEquals(true, viewModel.uiState.value is RestorePasswordUIState.Initial)
-        assertEquals(invalidEmail, message?.message)
+        assertEquals(invalidEmail, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -98,10 +103,10 @@ class RestorePasswordViewModelTest {
         verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
 
         assertEquals(true, viewModel.uiState.value is RestorePasswordUIState.Initial)
-        assertEquals(invalidEmail, message?.message)
+        assertEquals(invalidEmail, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -116,10 +121,9 @@ class RestorePasswordViewModelTest {
         verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-
+        val message = captureUiMessage(viewModel)
         assertEquals(true, viewModel.uiState.value is RestorePasswordUIState.Initial)
-        assertEquals("error", message?.message)
+        assertEquals("error", (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -134,10 +138,10 @@ class RestorePasswordViewModelTest {
         verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
 
         assertEquals(true, viewModel.uiState.value is RestorePasswordUIState.Initial)
-        assertEquals(noInternet, message?.message)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -152,10 +156,10 @@ class RestorePasswordViewModelTest {
         verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
 
         assertEquals(true, viewModel.uiState.value is RestorePasswordUIState.Initial)
-        assertEquals(somethingWrong, message?.message)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -170,10 +174,10 @@ class RestorePasswordViewModelTest {
         verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
 
         assertEquals(true, viewModel.uiState.value is RestorePasswordUIState.Initial)
-        assertEquals(somethingWrong, message?.message)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -189,10 +193,10 @@ class RestorePasswordViewModelTest {
         verify(exactly = 1) { appNotifier.notifier }
 
         val state = viewModel.uiState.value as? RestorePasswordUIState.Success
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
 
         assertEquals(correctEmail, state?.email)
         assertEquals(true, viewModel.uiState.value is RestorePasswordUIState.Success)
-        assertEquals(null, message)
+        assertEquals(null, message.await())
     }
 }

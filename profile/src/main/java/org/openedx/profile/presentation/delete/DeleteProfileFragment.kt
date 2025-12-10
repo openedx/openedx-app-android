@@ -98,7 +98,7 @@ class DeleteProfileFragment : Fragment() {
                 val windowSize = rememberWindowSize()
 
                 val uiState by viewModel.uiState.observeAsState(DeleteProfileFragmentUIState.Initial)
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val logoutSuccess by logoutViewModel.successLogout.collectAsState(false)
 
                 DeleteProfileScreen(

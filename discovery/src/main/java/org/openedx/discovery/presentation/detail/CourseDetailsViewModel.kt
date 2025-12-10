@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.connection.NetworkConnection
@@ -16,10 +15,7 @@ import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalyticsEvent
 import org.openedx.discovery.presentation.DiscoveryAnalyticsKey
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.SingleEventLiveData
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 
 class CourseDetailsViewModel(
@@ -32,7 +28,7 @@ class CourseDetailsViewModel(
     private val notifier: DiscoveryNotifier,
     private val analytics: DiscoveryAnalytics,
     private val calendarSyncScheduler: CalendarSyncScheduler,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
     val apiHostUrl get() = config.getApiHostURL()
     val isUserLoggedIn get() = corePreferences.user != null
     val isRegistrationEnabled: Boolean get() = config.isRegistrationEnabled()
@@ -40,9 +36,6 @@ class CourseDetailsViewModel(
     private val _uiState = MutableLiveData<CourseDetailsUIState>(CourseDetailsUIState.Loading)
     val uiState: LiveData<CourseDetailsUIState>
         get() = _uiState
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
 
     private var course: Course? = null
 
@@ -68,17 +61,14 @@ class CourseDetailsViewModel(
                         isUserLoggedIn = isUserLoggedIn
                     )
                 } ?: run {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                    handleErrorUiMessage(
+                        throwable = null,
+                    )
                 }
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }
@@ -99,13 +89,9 @@ class CourseDetailsViewModel(
                     notifier.send(CourseDashboardUpdate())
                 }
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }

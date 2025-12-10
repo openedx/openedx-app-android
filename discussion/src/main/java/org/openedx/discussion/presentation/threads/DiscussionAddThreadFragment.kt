@@ -43,6 +43,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -109,7 +110,7 @@ class DiscussionAddThreadFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
 
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val isLoading by viewModel.isLoading.observeAsState(false)
                 val success by viewModel.newThread.observeAsState()
 

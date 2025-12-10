@@ -25,7 +25,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseDate
 import org.openedx.core.domain.model.CourseDatesResponse
@@ -39,6 +38,7 @@ import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 import java.util.Date
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DatesViewModelTest {
@@ -62,9 +62,8 @@ class DatesViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
-        // By default, assume we have an internet connection
+        every { resourceManager.getString(foundationR.string.foundation_error_no_connection) } returns noInternet
+        every { resourceManager.getString(foundationR.string.foundation_error_unknown_error) } returns somethingWrong
         every { networkConnection.isOnline() } returns true
         every { corePreferences.isRelativeDatesEnabled } returns true
         every { analytics.logEvent(any(), any()) } returns Unit

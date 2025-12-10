@@ -46,6 +46,7 @@ import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @ExperimentalCoroutinesApi
 class SignUpViewModelTest {
@@ -107,8 +108,12 @@ class SignUpViewModelTest {
     fun before() {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(R.string.core_error_invalid_grant) } returns "Invalid credentials"
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
         every { appNotifier.notifier } returns emptyFlow()
         every { agreementProvider.getAgreement(false) } returns null
         every { config.isSocialAuthEnabled() } returns false

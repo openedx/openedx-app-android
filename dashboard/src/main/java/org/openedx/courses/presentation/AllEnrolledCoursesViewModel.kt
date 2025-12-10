@@ -3,15 +3,11 @@ package org.openedx.courses.presentation
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.system.connection.NetworkConnection
@@ -21,9 +17,7 @@ import org.openedx.dashboard.domain.CourseStatusFilter
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardRouter
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 
 class AllEnrolledCoursesViewModel(
@@ -34,7 +28,7 @@ class AllEnrolledCoursesViewModel(
     private val discoveryNotifier: DiscoveryNotifier,
     private val analytics: DashboardAnalytics,
     private val dashboardRouter: DashboardRouter
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     val apiHostUrl get() = config.getApiHostURL()
     val hasInternetConnection: Boolean
@@ -47,10 +41,6 @@ class AllEnrolledCoursesViewModel(
     private val _uiState = MutableStateFlow(AllEnrolledCoursesUIState())
     val uiState: StateFlow<AllEnrolledCoursesUIState>
         get() = _uiState.asStateFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
 
     private val currentFilter: MutableStateFlow<CourseStatusFilter> = MutableStateFlow(CourseStatusFilter.ALL)
 
@@ -98,19 +88,9 @@ class AllEnrolledCoursesViewModel(
                 coursesList.addAll(response.courses)
                 _uiState.update { it.copy(courses = coursesList.toList()) }
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_unknown_error)
-                        )
-                    )
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
             _uiState.update { it.copy(refreshing = false, showProgress = false) }
             isLoading = false
@@ -148,19 +128,9 @@ class AllEnrolledCoursesViewModel(
                 }
                 _uiState.update { it.copy(courses = coursesList.toList()) }
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_unknown_error)
-                        )
-                    )
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
             _uiState.update { it.copy(refreshing = false, showProgress = false) }
             isLoading = false

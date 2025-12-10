@@ -1,6 +1,6 @@
 package org.openedx.app.di
 
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.openedx.app.AppViewModel
@@ -87,19 +87,20 @@ val screenModule = module {
 
     viewModel {
         AppViewModel(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(named("IODispatcher")),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
+            config = get(),
+            appNotifier = get(),
+            room = get(),
+            preferencesManager = get(),
+            dispatcher = get(named("IODispatcher")),
+            analytics = get(),
+            deepLinkRouter = get(),
+            fileUtil = get(),
+            downloadNotifier = get(),
+            context = get(),
+            resourceManager = get(),
         )
     }
-    viewModel { MainViewModel(get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get()) }
 
     factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
@@ -108,6 +109,7 @@ val screenModule = module {
     viewModel { (courseId: String) ->
         LogistrationViewModel(
             courseId,
+            get(),
             get(),
             get(),
             get(),
@@ -159,20 +161,30 @@ val screenModule = module {
     viewModel { DashboardListViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { (windowSize: WindowSize) ->
         DashboardGalleryViewModel(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            windowSize
+            config = get(),
+            interactor = get(),
+            resourceManager = get(),
+            discoveryNotifier = get(),
+            networkConnection = get(),
+            fileUtil = get(),
+            dashboardRouter = get(),
+            corePreferences = get(),
+            windowSize = windowSize
         )
     }
-    viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel {
+        AllEnrolledCoursesViewModel(
+            config = get(),
+            networkConnection = get(),
+            interactor = get(),
+            resourceManager = get(),
+            discoveryNotifier = get(),
+            analytics = get(),
+            dashboardRouter = get(),
+        )
+    }
     viewModel { (openTab: String) ->
-        LearnViewModel(openTab, get(), get(), get())
+        LearnViewModel(openTab, get(), get(), get(), get())
     }
 
     factory { DiscoveryRepository(get(), get(), get()) }
@@ -180,13 +192,14 @@ val screenModule = module {
     viewModel { NativeDiscoveryViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { (querySearch: String) ->
         WebViewDiscoveryViewModel(
-            querySearch,
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
+            querySearch = querySearch,
+            appData = get(),
+            config = get(),
+            networkConnection = get(),
+            corePreferences = get(),
+            router = get(),
+            analytics = get(),
+            resourceManager = get(),
         )
     }
 
@@ -211,8 +224,16 @@ val screenModule = module {
             account
         )
     }
-    viewModel { VideoSettingsViewModel(get(), get(), get(), get()) }
-    viewModel { (qualityType: String) -> VideoQualityViewModel(qualityType, get(), get(), get()) }
+    viewModel { VideoSettingsViewModel(get(), get(), get(), get(), get()) }
+    viewModel { (qualityType: String) ->
+        VideoQualityViewModel(
+            qualityType,
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get(), get()) }
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
     viewModel {
@@ -230,11 +251,19 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
-    viewModel { CalendarViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel {
+        ManageAccountViewModel(
+            interactor = get(),
+            resourceManager = get(),
+            notifier = get(),
+            analytics = get(),
+            profileRouter = get(),
+        )
+    }
+    viewModel { CalendarViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { CoursesToSyncViewModel(get(), get(), get(), get()) }
     viewModel { NewCalendarDialogViewModel(get(), get(), get(), get(), get(), get()) }
-    viewModel { DisableCalendarSyncDialogViewModel(get(), get(), get(), get()) }
+    viewModel { DisableCalendarSyncDialogViewModel(get(), get(), get(), get(), get()) }
     factory { CalendarRepository(get(), get(), get()) }
     factory { CalendarInteractor(get()) }
 
@@ -312,6 +341,7 @@ val screenModule = module {
             courseId,
             courseTitle,
             get(),
+            get(),
         )
     }
     viewModel { (courseId: String, courseTitle: String) ->
@@ -355,30 +385,31 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
         )
     }
     viewModel { (courseId: String) ->
         CourseVideoViewModel(
-            courseId,
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
+            courseId = courseId,
+            config = get(),
+            interactor = get(),
+            resourceManager = get(),
+            networkConnection = get(),
+            preferencesManager = get(),
+            courseNotifier = get(),
+            downloadDialogManager = get(),
+            fileUtil = get(),
+            courseRouter = get(),
+            analytics = get(),
+            videoPreviewHelper = get(),
+            coreAnalytics = get(),
+            downloadDao = get(),
+            workerController = get(),
+            downloadHelper = get(),
         )
     }
-    viewModel { (courseId: String) -> BaseVideoViewModel(courseId, get()) }
-    viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get(), get()) }
+    viewModel { (courseId: String) -> BaseVideoViewModel(courseId, get(), get()) }
+    viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get(), get(), get()) }
     viewModel { (courseId: String, videoUrl: String, blockId: String) ->
         VideoUnitViewModel(
             courseId,
@@ -388,7 +419,8 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
     viewModel { (courseId: String, videoUrl: String, blockId: String) ->
@@ -403,35 +435,37 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get()
         )
     }
     viewModel { (courseId: String, enrollmentMode: String) ->
         CourseDatesViewModel(
-            courseId,
-            enrollmentMode,
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
+            courseId = courseId,
+            enrollmentMode = enrollmentMode,
+            courseNotifier = get(),
+            interactor = get(),
+            courseAnalytics = get(),
+            config = get(),
+            calendarInteractor = get(),
+            calendarNotifier = get(),
+            corePreferences = get(),
+            courseRouter = get(),
+            calendarRouter = get(),
+            resourceManager = get(),
         )
     }
     viewModel { (courseId: String, handoutsType: String) ->
         HandoutsViewModel(
             courseId,
             handoutsType,
-            get(),
-            get(),
-            get(),
+            config = get(),
+            interactor = get(),
+            courseAnalytics = get(),
+            resourceManager = get(),
         )
     }
     viewModel { CourseSearchViewModel(get(), get(), get(), get(), get()) }
-    viewModel { SelectDialogViewModel(get()) }
+    viewModel { SelectDialogViewModel(get(), get()) }
 
     single { DiscussionRepository(get(), get(), get()) }
     factory { DiscussionInteractor(get()) }
@@ -439,11 +473,11 @@ val screenModule = module {
         DiscussionTopicsViewModel(
             courseId,
             courseTitle,
-            get(),
-            get(),
-            get(),
-            get(),
-            get()
+            interactor = get(),
+            resourceManager = get(),
+            analytics = get(),
+            courseNotifier = get(),
+            discussionRouter = get(),
         )
     }
     viewModel { (courseId: String, topicId: String, threadType: String) ->
@@ -491,6 +525,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
         )
     }
 
@@ -503,6 +538,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get()
         )
     }
     viewModel { (blockId: String, courseId: String) ->
@@ -515,15 +551,28 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get()
         )
     }
 
-    viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel {
+        ProgramViewModel(
+            appData = get(),
+            config = get(),
+            networkConnection = get(),
+            router = get(),
+            notifier = get(),
+            edxCookieManager = get(),
+            resourceManager = get(),
+            interactor = get(),
+        )
+    }
 
     viewModel { (courseId: String, courseTitle: String) ->
         CourseOfflineViewModel(
             courseId,
             courseTitle,
+            get(),
             get(),
             get(),
             get(),
@@ -540,7 +589,8 @@ val screenModule = module {
         CourseProgressViewModel(
             courseId,
             get(),
-            get()
+            get(),
+            get(),
         )
     }
 
@@ -562,19 +612,19 @@ val screenModule = module {
             downloadsRouter = get(),
             networkConnection = get(),
             interactor = get(),
+            downloadDialogManager = get(),
             resourceManager = get(),
+            fileUtil = get(),
             config = get(),
+            analytics = get(),
+            discoveryNotifier = get(),
+            courseNotifier = get(),
+            router = get(),
             preferencesManager = get(),
             coreAnalytics = get(),
             downloadDao = get(),
             workerController = get(),
             downloadHelper = get(),
-            downloadDialogManager = get(),
-            fileUtil = get(),
-            analytics = get(),
-            discoveryNotifier = get(),
-            courseNotifier = get(),
-            router = get()
         )
     }
     viewModel { (courseId: String) ->

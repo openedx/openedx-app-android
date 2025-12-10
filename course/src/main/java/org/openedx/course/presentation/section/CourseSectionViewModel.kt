@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
-import org.openedx.core.R
 import org.openedx.core.domain.model.Block
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSectionChanged
@@ -15,10 +14,7 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.unit.container.CourseViewMode
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.SingleEventLiveData
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 
 class CourseSectionViewModel(
@@ -27,15 +23,11 @@ class CourseSectionViewModel(
     private val resourceManager: ResourceManager,
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val _uiState = MutableLiveData<CourseSectionUIState>(CourseSectionUIState.Loading)
     val uiState: LiveData<CourseSectionUIState>
         get() = _uiState
-
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
 
     var mode = CourseViewMode.FULL
 
@@ -68,13 +60,9 @@ class CourseSectionViewModel(
                         sectionName = sequentialBlock.displayName
                     )
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }

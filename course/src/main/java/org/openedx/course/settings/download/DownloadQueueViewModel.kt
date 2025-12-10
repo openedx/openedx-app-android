@@ -12,6 +12,7 @@ import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.DownloadProgressChanged
+import org.openedx.foundation.system.ResourceManager
 
 class DownloadQueueViewModel(
     private val descendants: List<String>,
@@ -21,12 +22,14 @@ class DownloadQueueViewModel(
     private val downloadNotifier: DownloadNotifier,
     coreAnalytics: CoreAnalytics,
     downloadHelper: DownloadHelper,
+    private val resourceManager: ResourceManager,
 ) : BaseDownloadViewModel(
     downloadDao,
     preferencesManager,
     workerController,
     coreAnalytics,
-    downloadHelper
+    downloadHelper,
+    resourceManager,
 ) {
 
     private val _uiState = MutableStateFlow<DownloadQueueUIState>(DownloadQueueUIState.Loading)

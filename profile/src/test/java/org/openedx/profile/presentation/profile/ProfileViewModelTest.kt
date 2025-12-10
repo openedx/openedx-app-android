@@ -23,10 +23,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.captureUiMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.profile.ProfileMocks
 import org.openedx.profile.domain.interactor.ProfileInteractor
@@ -35,6 +35,7 @@ import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.account.AccountUpdated
 import org.openedx.profile.system.notifier.profile.ProfileNotifier
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModelTest {
@@ -57,8 +58,12 @@ class ProfileViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
         every { config.isPreLoginExperienceEnabled() } returns false
         every { config.getFeedbackEmailAddress() } returns ""
         every { config.getAgreement(Locale.current.language) } returns AgreementUrls()
@@ -85,9 +90,9 @@ class ProfileViewModelTest {
 
         coVerify(exactly = 1) { interactor.getAccount() }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         assert(viewModel.uiState.value is ProfileUIState.Loading)
-        assertEquals(noInternet, message?.message)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -107,9 +112,9 @@ class ProfileViewModelTest {
 
         coVerify(exactly = 1) { interactor.getAccount() }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         assert(viewModel.uiState.value is ProfileUIState.Data)
-        assertEquals(noInternet, message?.message)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -127,9 +132,9 @@ class ProfileViewModelTest {
 
         coVerify(exactly = 1) { interactor.getAccount() }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         assert(viewModel.uiState.value is ProfileUIState.Loading)
-        assertEquals(somethingWrong, message?.message)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -150,7 +155,8 @@ class ProfileViewModelTest {
         coVerify(exactly = 1) { interactor.getAccount() }
 
         assert(viewModel.uiState.value is ProfileUIState.Data)
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
     }
 
     @Test

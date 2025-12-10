@@ -23,6 +23,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,7 +79,7 @@ class AnothersProfileFragment : Fragment() {
                 val windowSize = rememberWindowSize()
 
                 val uiState by viewModel.uiState
-                val uiMessage by viewModel.uiMessage
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
 
                 AnothersProfileScreen(
                     windowSize = windowSize,

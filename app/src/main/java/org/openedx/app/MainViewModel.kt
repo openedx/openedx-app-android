@@ -18,13 +18,15 @@ import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.discovery.presentation.DiscoveryNavigator
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 
 class MainViewModel(
     private val config: Config,
     private val notifier: DiscoveryNotifier,
     private val analytics: AppAnalytics,
     private val appNotifier: AppNotifier,
-) : BaseViewModel() {
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     private val _isBottomBarEnabled = MutableLiveData(true)
     val isBottomBarEnabled: LiveData<Boolean>

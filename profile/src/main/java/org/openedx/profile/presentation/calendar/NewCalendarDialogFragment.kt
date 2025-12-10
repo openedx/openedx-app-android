@@ -96,10 +96,8 @@ class NewCalendarDialogFragment : DialogFragment() {
                 val viewModel: NewCalendarDialogViewModel = koinViewModel()
 
                 LaunchedEffect(Unit) {
-                    viewModel.uiMessage.collect { message ->
-                        if (message.isNotEmpty()) {
-                            context.toastMessage(message)
-                        }
+                    viewModel.uiMessage.collect { uiMessage ->
+                        context.toastMessage(uiMessage.message)
                     }
                 }
 
@@ -115,9 +113,8 @@ class NewCalendarDialogFragment : DialogFragment() {
                 val showLocalCalendarSection by viewModel.showLocalCalendarSection.collectAsState()
 
                 NewCalendarDialog(
-                    newCalendarDialogType = requireArguments().parcelable<NewCalendarDialogType>(
-                        ARG_DIALOG_TYPE
-                    )
+                    newCalendarDialogType = requireArguments()
+                        .parcelable<NewCalendarDialogType>(ARG_DIALOG_TYPE)
                         ?: NewCalendarDialogType.CREATE_NEW,
                     googleCalendars = googleCalendars,
                     showLocalCalendarSection = showLocalCalendarSection,

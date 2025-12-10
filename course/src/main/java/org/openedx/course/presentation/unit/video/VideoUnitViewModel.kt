@@ -17,6 +17,7 @@ import org.openedx.core.system.notifier.CourseSubtitleLanguageChanged
 import org.openedx.core.system.notifier.CourseVideoPositionChanged
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.foundation.system.ResourceManager
 import subtitleFile.TimedTextObject
 
 open class VideoUnitViewModel(
@@ -28,7 +29,8 @@ open class VideoUnitViewModel(
     private val networkConnection: NetworkConnection,
     private val transcriptManager: TranscriptManager,
     courseAnalytics: CourseAnalytics,
-) : BaseVideoViewModel(courseId, courseAnalytics) {
+    resourceManager: ResourceManager,
+) : BaseVideoViewModel(courseId, courseAnalytics, resourceManager) {
 
     var transcripts = emptyMap<String, String>()
     var isPlaying = true
