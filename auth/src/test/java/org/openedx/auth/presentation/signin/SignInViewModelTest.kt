@@ -96,6 +96,7 @@ class SignInViewModelTest {
         every { config.isLoginRegistrationEnabled() } returns true
         every { config.isSSOLoginEnabled() } returns false
         every { config.isSSODefaultLoginButton() } returns false
+        every { config.getSSOButtonTitle(any(), any()) } returns "SSO Login"
     }
 
     @After

@@ -70,13 +70,6 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val authCode: String?
         get() {
             val data = intent?.data
-            if (
-                data is Uri &&
-                data.scheme == BuildConfig.APPLICATION_ID &&
-                data.host == ApiConstants.BrowserLogin.REDIRECT_HOST
-            ) {
-                return data.getQueryParameter(ApiConstants.BrowserLogin.CODE_QUERY_PARAM)
-            }
             return null
         }
 
@@ -172,7 +165,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                     val fragment = if (viewModel.isLogistrationEnabled && authCode == null) {
                         LogistrationFragment()
                     } else {
-                        SignInFragment.newInstance(null, null, authCode = authCode)
+                        SignInFragment.newInstance(null, null)
                     }
                     addFragment(fragment)
                 }
@@ -220,7 +213,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         this.intent = intent
 
         if (authCode != null) {
-            addFragment(SignInFragment.newInstance(null, null, authCode = authCode))
+            addFragment(SignInFragment.newInstance(null, null))
         }
 
         val extras = intent.extras
