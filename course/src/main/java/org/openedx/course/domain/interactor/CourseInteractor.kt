@@ -1,6 +1,7 @@
 package org.openedx.course.domain.interactor
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import org.openedx.core.BlockType
 import org.openedx.core.domain.interactor.CourseInteractor
 import org.openedx.core.domain.model.Block
@@ -13,9 +14,13 @@ class CourseInteractor(
     private val repository: CourseRepository
 ) : CourseInteractor {
 
-    suspend fun getCourseStructureFlow(
+    fun startCourseSession(courseId: String) {
+        repository.startCourseSession(courseId)
+    }
+
+    fun getCourseStructureFlow(
         courseId: String,
-        forceRefresh: Boolean = true
+        forceRefresh: Boolean = false
     ): Flow<CourseStructure?> {
         return repository.getCourseStructureFlow(courseId, forceRefresh)
     }
@@ -24,15 +29,18 @@ class CourseInteractor(
         courseId: String,
         isNeedRefresh: Boolean
     ): CourseStructure {
-        return repository.getCourseStructure(courseId, isNeedRefresh)
+        return repository.getCourseStructureFlow(courseId, isNeedRefresh).first()
     }
 
     override suspend fun getCourseStructureFromCache(courseId: String): CourseStructure {
         return repository.getCourseStructureFromCache(courseId)
     }
 
-    suspend fun getEnrollmentDetailsFlow(courseId: String): Flow<CourseEnrollmentDetails?> {
-        return repository.getEnrollmentDetailsFlow(courseId)
+    fun getEnrollmentDetailsFlow(
+        courseId: String,
+        forceRefresh: Boolean = false
+    ): Flow<CourseEnrollmentDetails?> {
+        return repository.getEnrollmentDetailsFlow(courseId, forceRefresh)
     }
 
     suspend fun getEnrollmentDetails(courseId: String): CourseEnrollmentDetails {
@@ -43,7 +51,7 @@ class CourseInteractor(
         courseId: String,
         isNeedRefresh: Boolean = false
     ): CourseStructure {
-        val courseStructure = repository.getCourseStructure(courseId, isNeedRefresh)
+        val courseStructure = getCourseStructure(courseId, isNeedRefresh)
         val blocks = courseStructure.blockData
         val videoBlocks = blocks.filter { it.type == BlockType.VIDEO }
         val resultBlocks = mutableListOf<Block>()
@@ -87,13 +95,20 @@ class CourseInteractor(
         }
     }
 
-    suspend fun getCourseStatusFlow(courseId: String) = repository.getCourseStatusFlow(courseId)
+    fun getCourseStatusFlow(
+        courseId: String,
+        forceRefresh: Boolean = false
+    ) = repository.getCourseStatusFlow(courseId, forceRefresh)
 
     suspend fun getCourseStatus(courseId: String) = repository.getCourseStatus(courseId)
 
-    suspend fun getCourseDatesFlow(courseId: String) = repository.getCourseDatesFlow(courseId)
+    fun getCourseDatesFlow(
+        courseId: String,
+        forceRefresh: Boolean = false
+    ) = repository.getCourseDatesFlow(courseId, forceRefresh)
 
-    suspend fun getCourseDates(courseId: String) = repository.getCourseDates(courseId)
+    suspend fun getCourseDates(courseId: String, forceRefresh: Boolean = false) =
+        repository.getCourseDates(courseId, forceRefresh)
 
     suspend fun resetCourseDates(courseId: String) = repository.resetCourseDates(courseId)
 

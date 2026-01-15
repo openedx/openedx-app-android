@@ -143,13 +143,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         observe()
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (viewModel.courseAccessStatus.value == CourseAccessError.NONE) {
-            viewModel.updateData()
-        }
-    }
-
     override fun onDestroyView() {
         snackBar?.dismiss()
         super.onDestroyView()

@@ -164,13 +164,18 @@ class CourseContainerViewModel(
 
         _showProgress.value = true
 
+        interactor.startCourseSession(courseId)
+
         viewModelScope.launch {
             val courseStructureFlow = interactor.getCourseStructureFlow(courseId)
                 .catch { e ->
                     handleFetchError(e)
                     emit(null)
                 }
-            val courseDetailsFlow = interactor.getEnrollmentDetailsFlow(courseId)
+            val courseDetailsFlow = interactor.getEnrollmentDetailsFlow(
+                courseId,
+                forceRefresh = true
+            )
                 .catch { emit(null) }
             courseStructureFlow.combine(courseDetailsFlow) { courseStructure, courseEnrollmentDetails ->
                 courseStructure to courseEnrollmentDetails

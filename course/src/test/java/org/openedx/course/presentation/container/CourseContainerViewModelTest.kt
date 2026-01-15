@@ -5,6 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
@@ -81,6 +82,7 @@ class CourseContainerViewModelTest {
         every { corePreferences.appConfig } returns CoreMocks.mockAppConfig
         every { courseNotifier.notifier } returns emptyFlow()
         every { config.getApiHostURL() } returns "baseUrl"
+        justRun { interactor.startCourseSession(any()) }
         coEvery { interactor.getEnrollmentDetails(any()) } returns CoreMocks.mockCourseEnrollmentDetails
         every { imageProcessor.loadImage(any(), any(), any()) } returns Unit
         every { imageProcessor.applyBlur(any(), any()) } returns mockBitmap
@@ -114,7 +116,7 @@ class CourseContainerViewModelTest {
             interactor.getCourseStructureFlow(any(), any())
         } returns flowOf(null)
         coEvery {
-            interactor.getEnrollmentDetailsFlow(any())
+            interactor.getEnrollmentDetailsFlow(any(), any())
         } returns flow { throw Exception() }
         every {
             analytics.logScreenEvent(
@@ -131,7 +133,7 @@ class CourseContainerViewModelTest {
         viewModel.fetchCourseDetails()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getEnrollmentDetailsFlow(any()) }
+        coVerify(exactly = 1) { interactor.getEnrollmentDetailsFlow(any(), any()) }
         verify(exactly = 1) {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
@@ -169,7 +171,7 @@ class CourseContainerViewModelTest {
         coEvery { interactor.getCourseStructureFlow(any(), any()) } returns flowOf(
             CoreMocks.mockCourseStructure
         )
-        coEvery { interactor.getEnrollmentDetailsFlow(any()) } returns flowOf(
+        coEvery { interactor.getEnrollmentDetailsFlow(any(), any()) } returns flowOf(
             CoreMocks.mockCourseEnrollmentDetails
         )
         every {
@@ -187,7 +189,7 @@ class CourseContainerViewModelTest {
         viewModel.fetchCourseDetails()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getEnrollmentDetailsFlow(any()) }
+        coVerify(exactly = 1) { interactor.getEnrollmentDetailsFlow(any(), any()) }
         verify(exactly = 1) {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
@@ -226,7 +228,7 @@ class CourseContainerViewModelTest {
         coEvery { interactor.getCourseStructureFlow(any(), any()) } returns flowOf(
             CoreMocks.mockCourseStructure
         )
-        coEvery { interactor.getEnrollmentDetailsFlow(any()) } returns flowOf(
+        coEvery { interactor.getEnrollmentDetailsFlow(any(), any()) } returns flowOf(
             CoreMocks.mockCourseEnrollmentDetails
         )
         every {

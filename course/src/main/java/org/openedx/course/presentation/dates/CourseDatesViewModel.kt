@@ -66,7 +66,7 @@ class CourseDatesViewModel(
             courseNotifier.notifier.collect { event ->
                 when (event) {
                     is RefreshDates -> {
-                        loadingCourseDatesInternal()
+                        loadingCourseDatesInternal(forceRefresh = true)
                     }
                 }
             }
@@ -82,15 +82,23 @@ class CourseDatesViewModel(
             }
         }
 
-        loadingCourseDatesInternal()
+        loadingCourseDatesInternal(forceRefresh = false)
     }
 
-    private fun loadingCourseDatesInternal() {
+    private fun loadingCourseDatesInternal(forceRefresh: Boolean) {
         viewModelScope.launch {
             try {
-                courseStructure = interactor.getCourseStructure(courseId = courseId)
+                courseStructure = if (forceRefresh) {
+                    interactor.getCourseStructure(courseId = courseId, isNeedRefresh = true)
+                } else {
+                    interactor.getCourseStructure(courseId = courseId)
+                }
                 isSelfPaced = courseStructure?.isSelfPaced ?: false
-                val datesResponse = interactor.getCourseDates(courseId = courseId)
+                val datesResponse = if (forceRefresh) {
+                    interactor.getCourseDates(courseId = courseId, forceRefresh = true)
+                } else {
+                    interactor.getCourseDates(courseId = courseId)
+                }
                 if (datesResponse.datesSection.isEmpty()) {
                     _uiState.value = CourseDatesUIState.Error
                 } else {
@@ -117,7 +125,7 @@ class CourseDatesViewModel(
         viewModelScope.launch {
             try {
                 interactor.resetCourseDates(courseId = courseId)
-                loadingCourseDatesInternal()
+                loadingCourseDatesInternal(forceRefresh = true)
                 courseNotifier.send(CourseDatesShifted)
                 onResetDates(true)
             } catch (e: Exception) {
