@@ -19,6 +19,8 @@ import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.signin.compose.LoginScreen
 import org.openedx.core.AppUpdateState
 import org.openedx.core.presentation.global.appupgrade.AppUpgradeRequiredScreen
+import org.openedx.core.presentation.global.webview.SSOWebContentFragment
+import org.openedx.core.ui.SSOWebContentScreen
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.foundation.presentation.rememberWindowSize
 
@@ -95,9 +97,11 @@ class SignInFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setFragmentResultListener("requestKey") { _, bundle ->
-            val token = bundle.getString("bundleKey")
-            viewModel.ssoLogin(token = "$token")
+        setFragmentResultListener(SSOWebContentFragment.REQUEST_KEY_SSO) { _, bundle ->
+            val token = bundle.getString(SSOWebContentFragment.BUNDLE_KEY_TOKEN).orEmpty()
+            if (token.isNotEmpty()) {
+                viewModel.ssoLogin(token)
+            }
         }
     }
     companion object {

@@ -43,7 +43,7 @@ class SSOWebContentFragment : Fragment() {
                     onWebPageUpdated = {
                         val token = it
                         if (token.isNotEmpty()){
-                            setFragmentResult("requestKey", bundleOf("bundleKey" to token))
+                            setFragmentResult(REQUEST_KEY_SSO, bundleOf(BUNDLE_KEY_TOKEN to token))
                             requireActivity().supportFragmentManager.popBackStack()
                         }
                     })
@@ -59,6 +59,8 @@ class SSOWebContentFragment : Fragment() {
     companion object {
         private const val ARG_TITLE = "argTitle"
         private const val ARG_URL = "argUrl"
+        const val REQUEST_KEY_SSO = "requestKey"
+        const val BUNDLE_KEY_TOKEN = "bundleKey"
 
         fun newInstance(title: String, url: String): SSOWebContentFragment {
             val fragment = SSOWebContentFragment()

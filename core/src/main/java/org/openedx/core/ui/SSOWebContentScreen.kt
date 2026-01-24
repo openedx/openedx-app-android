@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import org.openedx.core.presentation.global.ErrorType
+import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.ui.theme.appColors
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.windowSizeValue
@@ -50,7 +52,12 @@ fun SSOWebContentScreen(
         uriScheme = uriScheme,
         ssoFinishedUrl = ssoFinishedUrl,
         onWebPageLoaded = onWebPageLoaded,
-        onWebPageUpdated = onWebPageUpdated
+        onWebPageUpdated = onWebPageUpdated,
+        onWebPageError = {
+            WebViewUIState.Error(
+                ErrorType.UNKNOWN_ERROR
+            )
+        }
     )
     val screenWidth by remember(key1 = windowSize) {
         mutableStateOf(
@@ -116,6 +123,7 @@ fun SSOWebView(
     ssoFinishedUrl: String,
     onWebPageLoaded: () -> Unit,
     onWebPageUpdated: (String) -> Unit = {},
+    onWebPageError: () -> Unit,
 ): WebView {
     val context = LocalContext.current
 
@@ -129,13 +137,13 @@ fun SSOWebView(
 
                     if (pageUrl.contains(ssoFinishedUrl)) {
 
-                        val header = getCookie(pageUrl, "edx-jwt-cookie-header-payload") ?: ""
-                        val signature = getCookie(pageUrl, "edx-jwt-cookie-signature") ?: ""
+                        val header = getCookie(pageUrl, "edx-jwt-cookie-header-payload")
+                        val signature = getCookie(pageUrl, "edx-jwt-cookie-signature")
 
-                        val token = "$header.$signature"
-
-                        if (token.isNotEmpty()) {
-                            onWebPageUpdated(token)
+                        if (!header.isNullOrEmpty() && !signature.isNullOrEmpty()) {
+                            onWebPageUpdated("$header.$signature")
+                        } else {
+                            onWebPageError()
                         }
                     }
                 }
@@ -182,22 +190,12 @@ fun SSOWebView(
 }
 
 fun getCookie(siteName: String?, cookieName: String?): String? {
-    var cookieValue: String? = ""
-    if (siteName != null && cookieName != null) {
-        val cookieManager = CookieManager.getInstance()
-        val cookies = cookieManager.getCookie(siteName)
-        val temp = cookies.split(";".toRegex()).dropLastWhile { it.isEmpty() }
-            .toTypedArray()
-        for (ar1 in temp) {
-            if (ar1.contains(cookieName)) {
-                val temp1 = ar1.split("=".toRegex()).dropLastWhile { it.isEmpty() }
-                    .toTypedArray()
-                cookieValue = temp1[1]
-                break
-            }
-        }
-        return cookieValue
-    }
+    if (siteName.isNullOrEmpty() || cookieName.isNullOrEmpty()) return null
 
-    return cookieValue
+    val cookies = CookieManager.getInstance().getCookie(siteName) ?: return null
+
+    return cookies
+        .split(";")
+        .firstOrNull { it.trim().startsWith("$cookieName=") }
+        ?.substringAfter("=")
 }
