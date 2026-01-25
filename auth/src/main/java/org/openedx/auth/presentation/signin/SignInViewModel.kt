@@ -1,6 +1,5 @@
 package org.openedx.auth.presentation.signin
 
-import android.content.res.Resources
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
@@ -29,7 +28,6 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.domain.model.createHonorCodeField
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
-import org.openedx.core.R as CoreRes
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
@@ -40,7 +38,7 @@ import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.SingleEventLiveData
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
-
+import org.openedx.core.R as CoreRes
 
 class SignInViewModel(
     private val interactor: AuthInteractor,
@@ -154,14 +152,12 @@ class SignInViewModel(
     fun ssoLogin(token: String) {
         logEvent(AuthAnalyticsEvent.USER_SIGN_IN_CLICKED)
 
-
         _uiState.update { it.copy(showProgress = true) }
         viewModelScope.launch {
             try {
                 interactor.ssoLogin(token)
                 _uiState.update { it.copy(loginSuccess = true) }
                 setUserId()
-
             } catch (e: Exception) {
                 if (e is EdxError.InvalidGrantException) {
                     _uiMessage.value =

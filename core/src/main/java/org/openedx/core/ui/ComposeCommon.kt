@@ -985,8 +985,8 @@ fun OfflineModeDialog(
 @Composable
 fun HorizontalLine() {
     Divider(
-        color = Color.LightGray.copy(alpha = 0.5f),    // Set the color of the line
-        thickness = 1.dp,      // Set the thickness of the line
+        color = Color.LightGray.copy(alpha = 0.5f), // Set the color of the line
+        thickness = 1.dp, // Set the thickness of the line
         modifier = Modifier.fillMaxWidth() // Make it span the entire width
     )
 }

@@ -34,22 +34,19 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SSOWebContentScreen(
     windowSize: WindowSize,
     url: String,
-    uriScheme: String,
     title: String,
     ssoFinishedUrl: String,
     onBackClick: () -> Unit,
     onWebPageLoaded: () -> Unit,
     onWebPageUpdated: (String) -> Unit = {},
-){
+) {
     val webView = SSOWebView(
         url = url,
-        uriScheme = uriScheme,
         ssoFinishedUrl = ssoFinishedUrl,
         onWebPageLoaded = onWebPageLoaded,
         onWebPageUpdated = onWebPageUpdated,
@@ -92,7 +89,6 @@ fun SSOWebContentScreen(
                 Modifier.fillMaxSize(),
                 color = MaterialTheme.appColors.background
             ) {
-
                 val webViewAlpha by rememberSaveable { mutableFloatStateOf(1f) }
                 Surface(
                     Modifier.alpha(webViewAlpha),
@@ -106,20 +102,15 @@ fun SSOWebContentScreen(
                         }
                     )
                 }
-
             }
         }
     }
-
-
-
 }
 
 @SuppressLint("SetJavaScriptEnabled", "ComposableNaming")
 @Composable
 fun SSOWebView(
     url: String,
-    uriScheme: String,
     ssoFinishedUrl: String,
     onWebPageLoaded: () -> Unit,
     onWebPageUpdated: (String) -> Unit = {},
@@ -132,14 +123,10 @@ fun SSOWebView(
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, pageUrl: String?) {
                     super.onPageFinished(view, pageUrl)
-
                     if (pageUrl == null) return
-
                     if (pageUrl.contains(ssoFinishedUrl)) {
-
                         val header = getCookie(pageUrl, "edx-jwt-cookie-header-payload")
                         val signature = getCookie(pageUrl, "edx-jwt-cookie-signature")
-
                         if (!header.isNullOrEmpty() && !signature.isNullOrEmpty()) {
                             onWebPageUpdated("$header.$signature")
                         } else {
@@ -168,9 +155,7 @@ fun SSOWebView(
                     super.onPageCommitVisible(view, url)
                     onWebPageLoaded()
                 }
-
             }
-
             with(settings) {
                 javaScriptEnabled = true
                 useWideViewPort = true
@@ -179,23 +164,24 @@ fun SSOWebView(
                 setSupportZoom(true)
                 loadsImagesAutomatically = true
                 domStorageEnabled = true
-
             }
             isVerticalScrollBarEnabled = true
             isHorizontalScrollBarEnabled = true
-
             loadUrl(url)
         }
     }
 }
 
 fun getCookie(siteName: String?, cookieName: String?): String? {
-    if (siteName.isNullOrEmpty() || cookieName.isNullOrEmpty()) return null
-
-    val cookies = CookieManager.getInstance().getCookie(siteName) ?: return null
-
-    return cookies
-        .split(";")
-        .firstOrNull { it.trim().startsWith("$cookieName=") }
-        ?.substringAfter("=")
+    val cookieValue = siteName
+        ?.takeIf { it.isNotEmpty() }
+        ?.let { sn ->
+            cookieName?.takeIf { it.isNotEmpty() }?.let { cn ->
+                CookieManager.getInstance().getCookie(sn)
+                    ?.split(";")
+                    ?.firstOrNull { it.trim().startsWith("$cn=") }
+                    ?.substringAfter("=")
+            }
+        }
+    return cookieValue
 }

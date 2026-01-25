@@ -20,7 +20,6 @@ import org.openedx.auth.presentation.signin.compose.LoginScreen
 import org.openedx.core.AppUpdateState
 import org.openedx.core.presentation.global.appupgrade.AppUpgradeRequiredScreen
 import org.openedx.core.presentation.global.webview.SSOWebContentFragment
-import org.openedx.core.ui.SSOWebContentScreen
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.foundation.presentation.rememberWindowSize
 
@@ -47,7 +46,6 @@ class SignInFragment : Fragment() {
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
 
                 if (appUpgradeEvent == null) {
-
                     LoginScreen(
                         windowSize = windowSize,
                         state = state,

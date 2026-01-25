@@ -9,11 +9,10 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.config.Config
 import org.openedx.core.ui.SSOWebContentScreen
-import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.foundation.presentation.rememberWindowSize
 
 class SSOWebContentFragment : Fragment() {
 
@@ -31,7 +30,6 @@ class SSOWebContentFragment : Fragment() {
                 SSOWebContentScreen(
                     windowSize = windowSize,
                     url = config.getSSOURL(),
-                    uriScheme = requireArguments().getString(ARG_TITLE, ""),
                     title = "",
                     ssoFinishedUrl = config.getSSOFinishedURL().toString(),
                     onBackClick = {
@@ -42,11 +40,12 @@ class SSOWebContentFragment : Fragment() {
                     },
                     onWebPageUpdated = {
                         val token = it
-                        if (token.isNotEmpty()){
+                        if (token.isNotEmpty()) {
                             setFragmentResult(REQUEST_KEY_SSO, bundleOf(BUNDLE_KEY_TOKEN to token))
                             requireActivity().supportFragmentManager.popBackStack()
                         }
-                    })
+                    }
+                )
             }
         }
     }
