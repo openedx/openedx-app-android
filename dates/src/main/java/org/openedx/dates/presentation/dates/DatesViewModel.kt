@@ -58,6 +58,7 @@ class DatesViewModel(
 
     private var page = 1
     private var fetchDataJob: Job? = null
+    private var lastNavigationTime = 0L
 
     init {
         preloadFirstPageCachedDates()
@@ -199,6 +200,11 @@ class DatesViewModel(
         fragmentManager: FragmentManager,
         courseDate: CourseDate,
     ) {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastNavigationTime < NAVIGATION_DEBOUNCE_MS) {
+            return
+        }
+        lastNavigationTime = currentTime
         logEvent(DatesAnalyticsEvent.ASSIGNMENT_CLICK)
         datesRouter.navigateToCourseOutline(
             fm = fragmentManager,
@@ -207,6 +213,10 @@ class DatesViewModel(
             openTab = "",
             resumeBlockId = courseDate.firstComponentBlockId
         )
+    }
+
+    companion object {
+        private const val NAVIGATION_DEBOUNCE_MS = 500L
     }
 
     private fun groupCourseDates(dates: List<CourseDate>): Map<DatesSection, List<CourseDate>> {

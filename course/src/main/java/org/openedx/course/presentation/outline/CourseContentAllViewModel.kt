@@ -34,7 +34,6 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
@@ -106,10 +105,6 @@ class CourseContentAllViewModel(
                         if (event.courseId == courseId) {
                             getCourseData()
                         }
-                    }
-
-                    is CourseOpenBlock -> {
-                        _resumeBlockId.emit(event.blockId)
                     }
                 }
             }

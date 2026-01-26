@@ -30,6 +30,7 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -183,10 +184,12 @@ fun DatesScreen(
                         val lastVisibleItemIndex =
                             layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
                         val totalItemsCount = layoutInfo.totalItemsCount
-                        if (totalItemsCount > 0 &&
+                        val shouldLoadMore = totalItemsCount > 0 &&
                             lastVisibleItemIndex >= (totalItemsCount * LOAD_MORE_THRESHOLD).toInt()
-                        ) {
-                            onAction(DatesViewActions.LoadMore)
+                        LaunchedEffect(shouldLoadMore) {
+                            if (shouldLoadMore) {
+                                onAction(DatesViewActions.LoadMore)
+                            }
                         }
                     }
                 }

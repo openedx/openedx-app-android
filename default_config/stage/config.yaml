@@ -68,7 +68,7 @@ EXPERIMENTAL_FEATURES:
   APP_LEVEL_DOWNLOADS:
     ENABLED: false
   APP_LEVEL_DATES:
-    ENABLED: true
+    ENABLED: false
 
 #Platform names
 PLATFORM_NAME: "OpenEdX"
