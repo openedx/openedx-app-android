@@ -47,8 +47,6 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.course.R
 import org.openedx.course.presentation.contenttab.CourseContentAllEmptyState
-import org.openedx.course.presentation.ui.CourseDatesBanner
-import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseMessage
 import org.openedx.course.presentation.ui.CourseProgress
 import org.openedx.course.presentation.ui.CourseSection
@@ -130,9 +128,6 @@ fun CourseContentAllScreen(
                 fragmentManager = fragmentManager,
             )
         },
-        onResetDatesClick = {
-            viewModel.resetCourseDatesBanner()
-        },
         onCertificateClick = {
             viewModel.viewCertificateTappedEvent()
             it.takeIfNotEmpty()
@@ -151,7 +146,6 @@ private fun CourseContentAllUI(
     onSubSectionClick: (Block) -> Unit,
     onResumeClick: (String) -> Unit,
     onDownloadClick: (blockIds: List<String>) -> Unit,
-    onResetDatesClick: () -> Unit,
     onCertificateClick: (String) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -214,27 +208,6 @@ private fun CourseContentAllUI(
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = listBottomPadding
                                 ) {
-                                    if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
-                                        item {
-                                            Box(
-                                                modifier = Modifier
-                                                    .padding(all = 8.dp)
-                                            ) {
-                                                if (windowSize.isTablet) {
-                                                    CourseDatesBannerTablet(
-                                                        banner = uiState.datesBannerInfo,
-                                                        resetDates = onResetDatesClick,
-                                                    )
-                                                } else {
-                                                    CourseDatesBanner(
-                                                        banner = uiState.datesBannerInfo,
-                                                        resetDates = onResetDatesClick,
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-
                                     val certificate = uiState.courseStructure.certificate
                                     if (certificate?.isCertificateEarned() == true) {
                                         item {
@@ -363,7 +336,6 @@ private fun CourseOutlineScreenPreview() {
                 mapOf(),
                 mapOf(),
                 mapOf(),
-                CoreMocks.mockCourseDatesBannerInfo,
                 true
             ),
             uiMessage = null,
@@ -371,7 +343,6 @@ private fun CourseOutlineScreenPreview() {
             onSubSectionClick = {},
             onResumeClick = {},
             onDownloadClick = {},
-            onResetDatesClick = {},
             onCertificateClick = {},
             onNavigateToHome = {},
         )
@@ -393,7 +364,6 @@ private fun CourseContentAllScreenTabletPreview() {
                 mapOf(),
                 mapOf(),
                 mapOf(),
-                CoreMocks.mockCourseDatesBannerInfo,
                 true
             ),
             uiMessage = null,
@@ -401,7 +371,6 @@ private fun CourseContentAllScreenTabletPreview() {
             onSubSectionClick = {},
             onResumeClick = {},
             onDownloadClick = {},
-            onResetDatesClick = {},
             onCertificateClick = {},
             onNavigateToHome = {},
         )

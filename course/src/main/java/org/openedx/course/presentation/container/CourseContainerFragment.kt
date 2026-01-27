@@ -477,9 +477,6 @@ private fun DashboardPager(
                     ),
                     fragmentManager = fragmentManager,
                     homePagerState = homePagerState,
-                    onResetDatesClick = {
-                        viewModel.onRefresh(CourseContainerTab.DATES)
-                    },
                     onNavigateToContent = { contentTab ->
                         scope.launch {
                             // First scroll to CONTENT tab

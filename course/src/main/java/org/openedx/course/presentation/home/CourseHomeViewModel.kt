@@ -14,13 +14,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.helper.VideoPreviewHelper
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
-import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.extension.getChapterBlocks
@@ -34,7 +32,6 @@ import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseProgressLoaded
@@ -129,7 +126,6 @@ class CourseHomeViewModel(
                         resumeUnitTitle = resumeVerticalBlock?.displayName ?: "",
                         courseSubSections = courseSubSections,
                         subSectionsDownloadsCount = subSectionsDownloadsCount,
-                        datesBannerInfo = state.datesBannerInfo,
                         useRelativeDates = preferencesManager.isRelativeDatesEnabled,
                         next = state.next,
                         courseProgress = state.courseProgress,
@@ -182,13 +178,11 @@ class CourseHomeViewModel(
             ) { courseStructure, courseStatus, courseDatesResult, courseProgress ->
                 if (courseStructure == null) return@combine
                 val blocks = courseStructure.blockData
-                val datesBannerInfo = courseDatesResult.courseBanner
 
                 initializeCourseData(
                     blocks,
                     courseStructure,
                     courseStatus,
-                    datesBannerInfo,
                     courseProgress
                 )
             }.catch { e ->
@@ -201,7 +195,6 @@ class CourseHomeViewModel(
         blocks: List<Block>,
         courseStructure: CourseStructure,
         courseStatus: CourseComponentStatus,
-        datesBannerInfo: CourseDatesBannerInfo,
         courseProgress: CourseProgress
     ) {
         setBlocks(blocks)
@@ -253,7 +246,6 @@ class CourseHomeViewModel(
             resumeUnitTitle = resumeVerticalBlock?.displayName ?: "",
             courseSubSections = courseSubSections,
             subSectionsDownloadsCount = subSectionsDownloadsCount,
-            datesBannerInfo = datesBannerInfo,
             useRelativeDates = preferencesManager.isRelativeDatesEnabled,
             courseProgress = courseProgress,
             courseVideos = courseVideos,
@@ -363,23 +355,6 @@ class CourseHomeViewModel(
             blocks.find { it.id == descendantId && it.type == BlockType.SEQUENTIAL }
         }
         return sequentialBlocks.find { !it.isCompleted() }
-    }
-
-    fun resetCourseDatesBanner(onResetDates: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            try {
-                interactor.resetCourseDates(courseId = courseId)
-                getCourseData()
-                courseNotifier.send(CourseDatesShifted)
-                onResetDates(true)
-            } catch (e: Exception) {
-                handleErrorUiMessage(
-                    throwable = e,
-                    defaultErrorRes = R.string.core_dates_shift_dates_unsuccessful_msg,
-                )
-                onResetDates(false)
-            }
-        }
     }
 
     fun openBlock(fragmentManager: FragmentManager, blockId: String) {

@@ -62,8 +62,6 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.openedx.course.presentation.container.CourseContentTab
-import org.openedx.course.presentation.ui.CourseDatesBanner
-import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseMessage
 import org.openedx.course.presentation.ui.ResumeCourseButton
 import org.openedx.course.presentation.unit.container.CourseViewMode
@@ -80,7 +78,6 @@ fun CourseHomeScreen(
     viewModel: CourseHomeViewModel,
     fragmentManager: FragmentManager,
     homePagerState: PagerState,
-    onResetDatesClick: () -> Unit,
     onNavigateToContent: (CourseContentTab) -> Unit = {},
     onNavigateToProgress: () -> Unit = {},
 ) {
@@ -136,13 +133,6 @@ fun CourseHomeScreen(
                 fragmentManager = fragmentManager,
             )
         },
-        onResetDatesClick = {
-            viewModel.resetCourseDatesBanner(
-                onResetDates = {
-                    onResetDatesClick()
-                }
-            )
-        },
         onCertificateClick = {
             viewModel.viewCertificateTappedEvent()
             it.takeIfNotEmpty()
@@ -185,7 +175,6 @@ private fun CourseHomeUI(
     onSubSectionClick: (Block) -> Unit,
     onResumeClick: (String) -> Unit,
     onDownloadClick: (blockIds: List<String>) -> Unit,
-    onResetDatesClick: () -> Unit,
     onCertificateClick: (String) -> Unit,
     onVideoClick: (Block) -> Unit,
     onAssignmentClick: (Block) -> Unit,
@@ -234,25 +223,6 @@ private fun CourseHomeUI(
                                 .fillMaxSize()
                                 .verticalScroll(rememberScrollState()),
                         ) {
-                            if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
-                                Box(
-                                    modifier = Modifier
-                                        .padding(all = 8.dp)
-                                ) {
-                                    if (windowSize.isTablet) {
-                                        CourseDatesBannerTablet(
-                                            banner = uiState.datesBannerInfo,
-                                            resetDates = onResetDatesClick,
-                                        )
-                                    } else {
-                                        CourseDatesBanner(
-                                            banner = uiState.datesBannerInfo,
-                                            resetDates = onResetDatesClick,
-                                        )
-                                    }
-                                }
-                            }
-
                             val certificate = uiState.courseStructure.certificate
                             if (certificate?.isCertificateEarned() == true) {
                                 CourseMessage(
@@ -459,7 +429,6 @@ private fun CourseHomeScreenPreview() {
                 resumeUnitTitle = "Resumed Unit",
                 courseSubSections = mapOf(),
                 subSectionsDownloadsCount = mapOf(),
-                datesBannerInfo = CoreMocks.mockCourseDatesBannerInfo,
                 useRelativeDates = true,
                 courseVideos = mapOf(),
                 courseAssignments = emptyList(),
@@ -471,7 +440,6 @@ private fun CourseHomeScreenPreview() {
             onSubSectionClick = {},
             onResumeClick = {},
             onDownloadClick = {},
-            onResetDatesClick = {},
             onCertificateClick = {},
             onVideoClick = {},
             onAssignmentClick = {},
@@ -506,7 +474,6 @@ private fun CourseHomeScreenTabletPreview() {
                 resumeUnitTitle = "Resumed Unit",
                 courseSubSections = mapOf(),
                 subSectionsDownloadsCount = mapOf(),
-                datesBannerInfo = CoreMocks.mockCourseDatesBannerInfo,
                 useRelativeDates = true,
                 courseVideos = mapOf(),
                 courseAssignments = emptyList(),
@@ -518,7 +485,6 @@ private fun CourseHomeScreenTabletPreview() {
             onSubSectionClick = {},
             onResumeClick = {},
             onDownloadClick = {},
-            onResetDatesClick = {},
             onCertificateClick = {},
             onVideoClick = {},
             onAssignmentClick = {},

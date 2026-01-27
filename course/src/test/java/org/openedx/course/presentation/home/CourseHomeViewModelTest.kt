@@ -32,7 +32,6 @@ import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseProgressLoaded
@@ -103,7 +102,6 @@ class CourseHomeViewModelTest {
         every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
 
         every { courseNotifier.notifier } returns flow { }
-        coEvery { courseNotifier.send(any<CourseDatesShifted>()) } returns Unit
 
         every { analytics.logEvent(any(), any()) } returns Unit
         every { coreAnalytics.logEvent(any(), any()) } returns Unit
@@ -332,120 +330,6 @@ class CourseHomeViewModelTest {
         viewModel.saveDownloadModels("/test/path", courseId, "test-block-id")
 
         coVerify(exactly = 0) { workerController.saveModels(any()) }
-    }
-
-    @Test
-    fun `resetCourseDatesBanner success`() = runTest {
-        coEvery { interactor.resetCourseDates(courseId) } returns CoreMocks.mockResetCourseDates
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                CoreMocks.mockCourseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                CoreMocks.mockCourseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(CoreMocks.mockCourseProgress) }
-
-        val viewModel = CourseHomeViewModel(
-            courseId = courseId,
-            courseTitle = courseTitle,
-            config = config,
-            interactor = interactor,
-            resourceManager = resourceManager,
-            courseNotifier = courseNotifier,
-            networkConnection = networkConnection,
-            preferencesManager = preferencesManager,
-            analytics = analytics,
-            downloadDialogManager = downloadDialogManager,
-            fileUtil = fileUtil,
-            courseRouter = courseRouter,
-            videoPreviewHelper = videoPreviewHelper,
-            coreAnalytics = coreAnalytics,
-            downloadDao = downloadDao,
-            workerController = workerController,
-            downloadHelper = downloadHelper
-        )
-
-        advanceUntilIdle()
-
-        var resetResult: Boolean? = null
-
-        viewModel.resetCourseDatesBanner { success ->
-            resetResult = success
-        }
-
-        advanceUntilIdle()
-
-        coVerify { interactor.resetCourseDates(courseId) }
-        coVerify { courseNotifier.send(CourseDatesShifted) }
-        assertEquals(true, resetResult)
-    }
-
-    @Test
-    fun `resetCourseDatesBanner with internet error`() = runTest {
-        coEvery { interactor.resetCourseDates(courseId) } throws UnknownHostException()
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                CoreMocks.mockCourseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                CoreMocks.mockCourseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(CoreMocks.mockCourseProgress) }
-
-        val viewModel = CourseHomeViewModel(
-            courseId = courseId,
-            courseTitle = courseTitle,
-            config = config,
-            interactor = interactor,
-            resourceManager = resourceManager,
-            courseNotifier = courseNotifier,
-            networkConnection = networkConnection,
-            preferencesManager = preferencesManager,
-            analytics = analytics,
-            downloadDialogManager = downloadDialogManager,
-            fileUtil = fileUtil,
-            courseRouter = courseRouter,
-            videoPreviewHelper = videoPreviewHelper,
-            coreAnalytics = coreAnalytics,
-            downloadDao = downloadDao,
-            workerController = workerController,
-            downloadHelper = downloadHelper
-        )
-
-        advanceUntilIdle()
-
-        var resetResult: Boolean? = null
-
-        viewModel.resetCourseDatesBanner { success ->
-            resetResult = success
-        }
-
-        advanceUntilIdle()
-
-        coVerify { interactor.resetCourseDates(courseId) }
-        coVerify(exactly = 0) { courseNotifier.send(CourseDatesShifted) }
-        assertEquals(false, resetResult)
     }
 
     @Test

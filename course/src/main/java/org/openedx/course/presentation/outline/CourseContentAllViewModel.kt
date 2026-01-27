@@ -12,13 +12,11 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
 import org.openedx.core.domain.model.CourseDateBlock
-import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.extension.getChapterBlocks
 import org.openedx.core.extension.getSequentialBlocks
@@ -32,7 +30,6 @@ import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogManager
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
-import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -118,7 +115,6 @@ class CourseContentAllViewModel(
                         courseSubSections = courseSubSections,
                         courseSectionsState = state.courseSectionsState,
                         subSectionsDownloadsCount = subSectionsDownloadsCount,
-                        datesBannerInfo = state.datesBannerInfo,
                         useRelativeDates = preferencesManager.isRelativeDatesEnabled
                     )
                 }
@@ -164,7 +160,6 @@ class CourseContentAllViewModel(
                 courseSubSections = courseSubSections,
                 courseSectionsState = courseSectionsState,
                 subSectionsDownloadsCount = subSectionsDownloadsCount,
-                datesBannerInfo = state.datesBannerInfo,
                 useRelativeDates = preferencesManager.isRelativeDatesEnabled
             )
 
@@ -191,12 +186,11 @@ class CourseContentAllViewModel(
             }.collect { (courseStructure, courseStatus, courseDates) ->
                 if (courseStructure == null) return@collect
                 val blocks = courseStructure.blockData
-                val datesBannerInfo = courseDates.courseBanner
 
                 checkIfCalendarOutOfDate(courseDates.datesSection.values.flatten())
                 updateOutdatedOfflineXBlocks(courseStructure)
 
-                initializeCourseData(blocks, courseStructure, courseStatus, datesBannerInfo)
+                initializeCourseData(blocks, courseStructure, courseStatus)
             }
         }
     }
@@ -205,7 +199,6 @@ class CourseContentAllViewModel(
         blocks: List<Block>,
         courseStructure: CourseStructure,
         courseStatus: CourseComponentStatus,
-        datesBannerInfo: CourseDatesBannerInfo
     ) {
         setBlocks(blocks)
         courseSubSections.clear()
@@ -225,7 +218,6 @@ class CourseContentAllViewModel(
             courseSubSections = courseSubSections,
             courseSectionsState = courseSectionsState,
             subSectionsDownloadsCount = subSectionsDownloadsCount,
-            datesBannerInfo = datesBannerInfo,
             useRelativeDates = preferencesManager.isRelativeDatesEnabled
         )
     }
@@ -276,21 +268,6 @@ class CourseContentAllViewModel(
         resumeSectionBlock =
             blocks.getSequentialBlocks().find { it.descendants.contains(resumeVerticalBlock?.id) }
         return resumeBlock
-    }
-
-    fun resetCourseDatesBanner() {
-        viewModelScope.launch {
-            try {
-                interactor.resetCourseDates(courseId = courseId)
-                getCourseData()
-                courseNotifier.send(CourseDatesShifted)
-            } catch (e: Exception) {
-                handleErrorUiMessage(
-                    throwable = e,
-                    defaultErrorRes = R.string.core_dates_shift_dates_unsuccessful_msg,
-                )
-            }
-        }
     }
 
     fun openBlock(fragmentManager: FragmentManager, blockId: String) {

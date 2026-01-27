@@ -142,7 +142,6 @@ private fun CourseCompletionHomePagerCardContentPreview() {
                 resumeUnitTitle = "Resumed Unit",
                 courseSubSections = mapOf(),
                 subSectionsDownloadsCount = mapOf(),
-                datesBannerInfo = CoreMocks.mockCourseDatesBannerInfo,
                 useRelativeDates = true,
                 courseVideos = mapOf(),
                 courseAssignments = emptyList(),
