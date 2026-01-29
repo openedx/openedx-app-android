@@ -10,10 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -168,7 +167,6 @@ fun HandoutsEmptyScreen(
             NoContentScreenType.COURSE_ANNOUNCEMENTS
         }
 
-    val scaffoldState = rememberScaffoldState()
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -176,8 +174,7 @@ fun HandoutsEmptyScreen(
             .semantics {
                 testTagsAsResourceId = true
             },
-        scaffoldState = scaffoldState,
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background
     ) {
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(

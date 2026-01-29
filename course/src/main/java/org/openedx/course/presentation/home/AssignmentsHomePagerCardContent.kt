@@ -12,20 +12,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -117,9 +119,12 @@ fun AssignmentsHomePagerCardContent(
                 .fillMaxWidth()
                 .height(4.dp)
                 .clip(CircleShape),
-            progress = if (totalAssignments > 0) completedAssignments.toFloat() / totalAssignments else 0f,
+            progress = { if (totalAssignments > 0) completedAssignments.toFloat() / totalAssignments else 0f },
             color = MaterialTheme.appColors.progressBarColor,
-            backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
+            trackColor = MaterialTheme.appColors.progressBarBackgroundColor,
+            strokeCap = StrokeCap.Square,
+            gapSize = 0.dp,
+            drawStopIndicator = { }
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -202,10 +207,12 @@ private fun AssignmentCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onAssignmentClick(assignment) },
-        backgroundColor = background,
+        colors = CardDefaults.cardColors(
+            containerColor = background
+        ),
         border = BorderStroke(1.dp, MaterialTheme.appColors.cardViewBorder),
         shape = RoundedCornerShape(8.dp),
-        elevation = 0.dp
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier

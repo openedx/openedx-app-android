@@ -25,22 +25,22 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -150,7 +151,7 @@ fun AllEnrolledCoursesView(
 }
 
 @Suppress("MaximumLineLength")
-@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun AllEnrolledCoursesView(
     apiHostUrl: String,
@@ -161,13 +162,10 @@ private fun AllEnrolledCoursesView(
 ) {
     val windowSize = rememberWindowSize()
     val layoutDirection = LocalLayoutDirection.current
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
     val scrollState = rememberLazyGridState()
     val columns = if (windowSize.isTablet) TABLET_GRID_COLUMNS else MOBILE_GRID_COLUMNS
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = state.refreshing,
-        onRefresh = { onAction(AllEnrolledCoursesAction.SwipeRefresh) }
-    )
+    val pullToRefreshState = rememberPullToRefreshState()
     val tabPagerState = rememberPagerState(pageCount = {
         CourseStatusFilter.entries.size
     })
@@ -179,14 +177,13 @@ private fun AllEnrolledCoursesView(
     }
 
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding()
             .semantics {
                 testTagsAsResourceId = true
             },
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background
     ) { paddingValues ->
         val contentPaddings by remember(key1 = windowSize) {
             mutableStateOf(
@@ -230,7 +227,7 @@ private fun AllEnrolledCoursesView(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -255,10 +252,11 @@ private fun AllEnrolledCoursesView(
                     color = MaterialTheme.appColors.background,
                     shape = MaterialTheme.appShapes.screenBackgroundShape
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .pullRefresh(pullRefreshState),
+                    PullToRefreshBox(
+                        isRefreshing = state.refreshing,
+                        onRefresh = { onAction(AllEnrolledCoursesAction.SwipeRefresh) },
+                        state = pullToRefreshState,
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Column(
                             modifier = Modifier
@@ -370,11 +368,6 @@ private fun AllEnrolledCoursesView(
                                 }
                             }
                         }
-                        PullRefreshIndicator(
-                            state.refreshing,
-                            pullRefreshState,
-                            Modifier.align(Alignment.TopCenter)
-                        )
 
                         if (!isInternetConnectionShown && !hasInternetConnection) {
                             OfflineModeDialog(
@@ -411,9 +404,9 @@ fun CourseItem(
             .clickable {
                 onClick(course)
             },
-        backgroundColor = MaterialTheme.appColors.background,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.background),
         shape = MaterialTheme.appShapes.courseImageShape,
-        elevation = 4.dp
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box {
             Column {
@@ -433,9 +426,12 @@ fun CourseItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp),
-                    progress = course.progress.value,
+                    progress = { course.progress.value },
                     color = MaterialTheme.appColors.primary,
-                    backgroundColor = MaterialTheme.appColors.divider
+                    trackColor = MaterialTheme.appColors.divider,
+                    strokeCap = StrokeCap.Square,
+                    gapSize = 0.dp,
+                    drawStopIndicator = { }
                 )
 
                 Text(

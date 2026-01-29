@@ -23,16 +23,16 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -98,14 +98,13 @@ private fun CourseProgressContent(
     uiMessage: UIMessage?,
     windowSize: WindowSize
 ) {
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
     val gradingPolicy = uiState.progress.gradingPolicy
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        scaffoldState = scaffoldState,
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background
     ) {
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -160,7 +159,7 @@ private fun CourseProgressContent(
                                     MaterialTheme.appColors.primary
                                 }
                             )
-                            Divider(
+                            HorizontalDivider(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 8.dp)
@@ -186,7 +185,7 @@ private fun CourseProgressContent(
                 }
             }
 
-            HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+            HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
         }
     }
 }
@@ -449,9 +448,9 @@ fun CourseCompletionCircularProgress(
                     shape = CircleShape
                 )
                 .padding(3.dp),
-            progress = progress,
+            progress = { progress },
             color = MaterialTheme.appColors.primary,
-            backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor,
+            trackColor = MaterialTheme.appColors.progressBarBackgroundColor,
             strokeWidth = 10.dp,
             strokeCap = StrokeCap.Round
         )

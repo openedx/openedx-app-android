@@ -28,20 +28,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -197,7 +197,7 @@ class DiscussionResponsesFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DiscussionResponsesScreen(
     windowSize: WindowSize,
@@ -213,7 +213,6 @@ private fun DiscussionResponsesScreen(
     onBackClick: () -> Unit,
     onUserPhotoClick: (String) -> Unit
 ) {
-    val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -222,8 +221,8 @@ private fun DiscussionResponsesScreen(
         mutableIntStateOf(scrollState.firstVisibleItemIndex)
     }
     val isShouldLoadMore = scrollState.shouldLoadMore(firstVisibleIndex, LOAD_MORE_THRESHOLD)
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
+    val pullToRefreshState = rememberPullToRefreshState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var commentValue by rememberSaveable {
         mutableStateOf("")
@@ -241,11 +240,11 @@ private fun DiscussionResponsesScreen(
     }
 
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding(),
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -274,7 +273,7 @@ private fun DiscussionResponsesScreen(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         Column(
             Modifier
@@ -316,7 +315,11 @@ private fun DiscussionResponsesScreen(
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.appColors.background
             ) {
-                Box(Modifier.pullRefresh(pullRefreshState)) {
+                PullToRefreshBox(
+                    isRefreshing = refreshing,
+                    onRefresh = { onSwipeRefresh() },
+                    state = pullToRefreshState
+                ) {
                     when (uiState) {
                         is DiscussionResponsesUIState.Success -> {
                             Column(
@@ -428,7 +431,7 @@ private fun DiscussionResponsesScreen(
                                     }
                                 }
                                 if (!isSystemInDarkTheme()) {
-                                    Divider(color = MaterialTheme.appColors.cardViewBorder)
+                                    HorizontalDivider(color = MaterialTheme.appColors.cardViewBorder)
                                 }
                                 Box(
                                     Modifier
@@ -466,10 +469,12 @@ private fun DiscussionResponsesScreen(
                                                     style = MaterialTheme.appTypography.labelLarge,
                                                 )
                                             },
-                                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                                backgroundColor = MaterialTheme.appColors.textFieldBackgroundVariant,
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                unfocusedContainerColor = MaterialTheme.appColors.textFieldBackgroundVariant,
+                                                focusedContainerColor = MaterialTheme.appColors.textFieldBackgroundVariant,
                                                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                                                textColor = MaterialTheme.appColors.textFieldText
+                                                unfocusedTextColor = MaterialTheme.appColors.textFieldText,
+                                                focusedTextColor = MaterialTheme.appColors.textFieldText
                                             ),
                                             enabled = !isClosed
                                         )
@@ -512,11 +517,6 @@ private fun DiscussionResponsesScreen(
                             }
                         }
                     }
-                    PullRefreshIndicator(
-                        refreshing,
-                        pullRefreshState,
-                        Modifier.align(Alignment.TopCenter)
-                    )
                 }
             }
         }

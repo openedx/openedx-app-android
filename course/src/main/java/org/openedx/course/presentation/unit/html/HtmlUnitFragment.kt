@@ -30,9 +30,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -267,7 +267,7 @@ fun HtmlUnitView(
         Surface(
             modifier = Modifier
                 .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
-            color = MaterialTheme.colors.background
+            color = MaterialTheme.appColors.background
         ) {
             Box(
                 modifier = Modifier

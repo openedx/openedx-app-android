@@ -15,13 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -114,14 +113,11 @@ private fun DownloadQueueScreen(
     onBackClick: () -> Unit,
     onDownloadClick: (DownloadModel) -> Unit
 ) {
-    val scaffoldState = rememberScaffoldState()
-
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding(),
-        scaffoldState = scaffoldState,
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background
     ) { paddingValues ->
 
         val contentWidth by remember(key1 = windowSize) {
@@ -201,7 +197,7 @@ private fun DownloadQueueScreen(
                                             progressSize = progressSize,
                                             onDownloadClick = onDownloadClick
                                         )
-                                        Divider()
+                                        HorizontalDivider()
                                     }
                                 }
                             }

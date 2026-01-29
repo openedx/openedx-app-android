@@ -37,18 +37,6 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.ScaffoldState
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
@@ -56,6 +44,18 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
@@ -258,17 +258,16 @@ fun SearchBar(
                 textFieldValue = it
             }
         },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            textColor = MaterialTheme.appColors.textPrimary,
-            backgroundColor = if (isFocused) {
-                MaterialTheme.appColors.background
-            } else {
-                MaterialTheme.appColors.textFieldBackground
-            },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = MaterialTheme.appColors.textPrimary,
+            unfocusedTextColor = MaterialTheme.appColors.textPrimary,
+            focusedContainerColor = MaterialTheme.appColors.background,
+            unfocusedContainerColor = MaterialTheme.appColors.textFieldBackground,
             focusedBorderColor = MaterialTheme.appColors.primary,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
             cursorColor = MaterialTheme.appColors.primary,
-            leadingIconColor = MaterialTheme.appColors.textPrimary
+            focusedLeadingIconColor = MaterialTheme.appColors.textPrimary,
+            unfocusedLeadingIconColor = MaterialTheme.appColors.textPrimary
         ),
         placeholder = {
             Text(
@@ -353,17 +352,16 @@ fun SearchBarStateless(
                 onValueChanged(it)
             }
         },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            textColor = MaterialTheme.appColors.textPrimary,
-            backgroundColor = if (isFocused) {
-                MaterialTheme.appColors.background
-            } else {
-                MaterialTheme.appColors.textFieldBackground
-            },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = MaterialTheme.appColors.textPrimary,
+            unfocusedTextColor = MaterialTheme.appColors.textPrimary,
+            focusedContainerColor = MaterialTheme.appColors.background,
+            unfocusedContainerColor = MaterialTheme.appColors.textFieldBackground,
             focusedBorderColor = MaterialTheme.appColors.primary,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
             cursorColor = MaterialTheme.appColors.primary,
-            leadingIconColor = MaterialTheme.appColors.textPrimary
+            focusedLeadingIconColor = MaterialTheme.appColors.textPrimary,
+            unfocusedLeadingIconColor = MaterialTheme.appColors.textPrimary
         ),
         placeholder = {
             Text(
@@ -409,13 +407,13 @@ fun SearchBarStateless(
 @NonRestartableComposable
 fun HandleUIMessage(
     uiMessage: UIMessage?,
-    scaffoldState: ScaffoldState,
+    snackbarHostState: SnackbarHostState,
 ) {
     val context = LocalContext.current
     LaunchedEffect(uiMessage) {
         when (uiMessage) {
             is UIMessage.SnackBarMessage -> {
-                scaffoldState.snackbarHostState.showSnackbar(
+                snackbarHostState.showSnackbar(
                     message = uiMessage.message,
                     duration = uiMessage.duration
                 )
@@ -567,7 +565,7 @@ fun SheetContent(
                     style = MaterialTheme.appTypography.bodyLarge,
                     textAlign = TextAlign.Center
                 )
-                Divider(modifier = Modifier.padding(horizontal = 16.dp))
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             }
         }
     }
@@ -633,7 +631,7 @@ fun SheetContent(
                     style = MaterialTheme.appTypography.bodyLarge,
                     textAlign = TextAlign.Center
                 )
-                Divider(modifier = Modifier.padding(horizontal = 16.dp))
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             }
         }
     }
@@ -684,10 +682,13 @@ fun OpenEdXOutlinedTextField(
                 inputFieldValue = it
                 onValueChanged(it.text)
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = MaterialTheme.appColors.textFieldText,
+                unfocusedTextColor = MaterialTheme.appColors.textFieldText,
+                focusedContainerColor = MaterialTheme.appColors.textFieldBackground,
+                unfocusedContainerColor = MaterialTheme.appColors.textFieldBackground,
+                focusedBorderColor = MaterialTheme.appColors.primary,
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                textColor = MaterialTheme.appColors.textFieldText,
-                backgroundColor = MaterialTheme.appColors.textFieldBackground,
                 errorBorderColor = MaterialTheme.appColors.error,
             ),
             shape = MaterialTheme.appShapes.textFieldShape,
@@ -966,7 +967,7 @@ fun OpenEdXButton(
             .then(modifier),
         shape = MaterialTheme.appShapes.buttonShape,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = backgroundColor
+            containerColor = backgroundColor
         ),
         enabled = enabled,
         onClick = onClick
@@ -1004,7 +1005,7 @@ fun OpenEdXOutlinedButton(
         enabled = enabled,
         border = BorderStroke(1.dp, borderColor),
         shape = MaterialTheme.appShapes.buttonShape,
-        colors = ButtonDefaults.outlinedButtonColors(backgroundColor = backgroundColor)
+        colors = ButtonDefaults.outlinedButtonColors(containerColor = backgroundColor)
     ) {
         if (content == null) {
             Text(

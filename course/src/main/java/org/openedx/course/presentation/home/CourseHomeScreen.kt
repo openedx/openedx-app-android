@@ -20,16 +20,17 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -186,13 +187,12 @@ private fun CourseHomeUI(
     onViewAllAssignmentsClick: () -> Unit,
     onViewProgressClick: () -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        scaffoldState = scaffoldState,
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background
     ) {
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -203,7 +203,7 @@ private fun CourseHomeUI(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         Box(
             modifier = Modifier
@@ -263,13 +263,15 @@ private fun CourseHomeUI(
                             ) { tab ->
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
-                                    backgroundColor = MaterialTheme.appColors.cardViewBackground,
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.appColors.cardViewBackground
+                                    ),
                                     border = BorderStroke(
                                         1.dp,
                                         MaterialTheme.appColors.cardViewBorder
                                     ),
                                     shape = MaterialTheme.appShapes.cardShape,
-                                    elevation = 0.dp,
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                                 ) {
                                     when (tab) {
                                         CourseHomePagerTab.COURSE_COMPLETION -> {

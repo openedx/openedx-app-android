@@ -27,17 +27,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -344,53 +344,49 @@ private fun CalendarDropdown(
             )
         }
 
-        MaterialTheme(
-            colors = MaterialTheme.colors.copy(surface = MaterialTheme.appColors.background),
-            shapes = MaterialTheme.shapes.copy(MaterialTheme.appShapes.textFieldShape)
+        DropdownMenu(
+            modifier = Modifier
+                .crop(vertical = 8.dp)
+                .height(180.dp)
+                .width(dropdownWidth)
+                .background(MaterialTheme.appColors.background)
+                .border(
+                    1.dp,
+                    MaterialTheme.appColors.textFieldBorder,
+                    MaterialTheme.appShapes.textFieldShape
+                )
+                .crop(vertical = 8.dp),
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
         ) {
-            DropdownMenu(
-                modifier = Modifier
-                    .crop(vertical = 8.dp)
-                    .height(180.dp)
-                    .width(dropdownWidth)
-                    .border(
-                        1.dp,
-                        MaterialTheme.appColors.textFieldBorder,
-                        MaterialTheme.appShapes.textFieldShape
-                    )
-                    .crop(vertical = 8.dp),
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                if (showLocalCalendarOption) {
-                    CalendarOptionItem(
-                        text = stringResource(id = R.string.profile_local_calendar_option),
-                        contentColor = MaterialTheme.appColors.textDark
-                    ) {
-                        expanded = false
-                        onLocalCalendarClick()
-                    }
-                    Divider(
+            if (showLocalCalendarOption) {
+                CalendarOptionItem(
+                    text = stringResource(id = R.string.profile_local_calendar_option),
+                    contentColor = MaterialTheme.appColors.textDark
+                ) {
+                    expanded = false
+                    onLocalCalendarClick()
+                }
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.appColors.divider
+                )
+            }
+
+            calendars.forEachIndexed { index, calendar ->
+                CalendarOptionItem(
+                    text = calendar.title,
+                    contentColor = MaterialTheme.appColors.textDark,
+                    leadingColor = ComposeColor(calendar.color)
+                ) {
+                    expanded = false
+                    onGoogleCalendarClick(calendar)
+                }
+                if (index < calendars.lastIndex) {
+                    HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.appColors.divider
                     )
-                }
-
-                calendars.forEachIndexed { index, calendar ->
-                    CalendarOptionItem(
-                        text = calendar.title,
-                        contentColor = MaterialTheme.appColors.textDark,
-                        leadingColor = ComposeColor(calendar.color)
-                    ) {
-                        expanded = false
-                        onGoogleCalendarClick(calendar)
-                    }
-                    if (index < calendars.lastIndex) {
-                        Divider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.appColors.divider
-                        )
-                    }
                 }
             }
         }
@@ -426,9 +422,10 @@ private fun CalendarTitleTextField(
                 if (it.text.length <= MAX_CALENDAR_TITLE_LENGTH) textFieldValue = it
                 onValueChanged(it.text.trim())
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                textColor = MaterialTheme.appColors.textPrimary
+                focusedTextColor = MaterialTheme.appColors.textPrimary,
+                unfocusedTextColor = MaterialTheme.appColors.textPrimary
             ),
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
@@ -516,35 +513,32 @@ private fun ColorDropdown(
             )
         }
 
-        MaterialTheme(
-            colors = MaterialTheme.colors.copy(surface = MaterialTheme.appColors.background),
-            shapes = MaterialTheme.shapes.copy(MaterialTheme.appShapes.textFieldShape)
+        Spacer(modifier = Modifier.padding(top = 4.dp))
+        DropdownMenu(
+            modifier = Modifier
+                .crop(vertical = 8.dp)
+                .height(240.dp)
+                .width(dropdownWidth)
+                .background(MaterialTheme.appColors.background)
+                .border(
+                    1.dp,
+                    MaterialTheme.appColors.textFieldBorder,
+                    MaterialTheme.appShapes.textFieldShape
+                )
+                .crop(vertical = 8.dp),
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
         ) {
-            Spacer(modifier = Modifier.padding(top = 4.dp))
-            DropdownMenu(
-                modifier = Modifier
-                    .crop(vertical = 8.dp)
-                    .height(240.dp)
-                    .width(dropdownWidth)
-                    .border(
-                        1.dp,
-                        MaterialTheme.appColors.textFieldBorder,
-                        MaterialTheme.appShapes.textFieldShape
-                    )
-                    .crop(vertical = 8.dp),
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                for ((index, calendarColor) in CalendarColor.entries.withIndex()) {
-                    DropdownMenuItem(
-                        modifier = Modifier
-                            .background(MaterialTheme.appColors.background),
-                        onClick = {
-                            currentValue = calendarColor
-                            expanded = false
-                            onValueChanged(CalendarColor.entries[index])
-                        }
-                    ) {
+            for ((index, calendarColor) in CalendarColor.entries.withIndex()) {
+                DropdownMenuItem(
+                    modifier = Modifier
+                        .background(MaterialTheme.appColors.background),
+                    onClick = {
+                        currentValue = calendarColor
+                        expanded = false
+                        onValueChanged(CalendarColor.entries[index])
+                    },
+                    text = {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
@@ -558,12 +552,12 @@ private fun ColorDropdown(
                             )
                         }
                     }
-                    if (index < CalendarColor.entries.lastIndex) {
-                        Divider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.appColors.divider
-                        )
-                    }
+                )
+                if (index < CalendarColor.entries.lastIndex) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.appColors.divider
+                    )
                 }
             }
         }
@@ -592,21 +586,22 @@ private fun CalendarOptionItem(
 ) {
     DropdownMenuItem(
         modifier = Modifier.background(MaterialTheme.appColors.background),
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier.padding(vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            leadingColor?.let { ColorCircle(color = it) }
-            Text(
-                text = text,
-                style = MaterialTheme.appTypography.titleSmall,
-                color = contentColor
-            )
+        onClick = onClick,
+        text = {
+            Row(
+                modifier = Modifier.padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                leadingColor?.let { ColorCircle(color = it) }
+                Text(
+                    text = text,
+                    style = MaterialTheme.appTypography.titleSmall,
+                    color = contentColor
+                )
+            }
         }
-    }
+    )
 }
 
 private sealed class SelectedCalendar {

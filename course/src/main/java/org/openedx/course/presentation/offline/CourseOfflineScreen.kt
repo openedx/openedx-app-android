@@ -15,13 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
 import androidx.compose.material.icons.filled.CloudDone
@@ -29,7 +22,13 @@ import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -105,12 +104,9 @@ private fun CourseOfflineUI(
     onDeleteClick: (downloadModel: DownloadModel) -> Unit,
     onDeleteAllClick: () -> Unit
 ) {
-    val scaffoldState = rememberScaffoldState()
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        scaffoldState = scaffoldState,
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background
     ) {
         val modifierScreenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -351,7 +347,7 @@ private fun DownloadItem(
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
-        Divider()
+        HorizontalDivider()
         Spacer(modifier = Modifier.height(12.dp))
     }
 }
@@ -418,10 +414,12 @@ private fun DownloadProgress(
                     .fillMaxWidth()
                     .height(6.dp)
                     .clip(CircleShape),
-                progress = uiState.progressBarValue,
-                strokeCap = StrokeCap.Round,
+                progress = { uiState.progressBarValue },
                 color = MaterialTheme.appColors.successGreen,
-                backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
+                trackColor = MaterialTheme.appColors.progressBarBackgroundColor,
+                strokeCap = StrokeCap.Square,
+                gapSize = 0.dp,
+                drawStopIndicator = { }
             )
         } else {
             Text(

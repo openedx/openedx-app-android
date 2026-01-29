@@ -16,19 +16,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -64,7 +65,7 @@ import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatesScreen(
     uiState: DatesUIState,
@@ -73,7 +74,7 @@ fun DatesScreen(
     useRelativeDates: Boolean,
     onAction: (DatesViewActions) -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
     val windowSize = rememberWindowSize()
     val contentWidth by remember(key1 = windowSize) {
         mutableStateOf(
@@ -83,10 +84,7 @@ fun DatesScreen(
             )
         )
     }
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = uiState.isRefreshing,
-        onRefresh = { onAction(DatesViewActions.SwipeRefresh) }
-    )
+    val pullToRefreshState = rememberPullToRefreshState()
     var isInternetConnectionShown by rememberSaveable {
         mutableStateOf(false)
     }
@@ -94,10 +92,10 @@ fun DatesScreen(
     val layoutInfo by remember { derivedStateOf { scrollState.layoutInfo } }
 
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize(),
-        backgroundColor = MaterialTheme.appColors.background,
+        containerColor = MaterialTheme.appColors.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             MainScreenToolbar(
                 modifier = Modifier
@@ -113,94 +111,94 @@ fun DatesScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .pullRefresh(pullRefreshState)
             ) {
-                if (uiState.isLoading && uiState.dates.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                    }
-                } else if (uiState.dates.isEmpty()) {
-                    EmptyState()
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .displayCutoutForLandscape()
-                            .padding(paddingValues)
-                            .padding(horizontal = 16.dp),
-                        contentAlignment = Alignment.TopCenter
-                    ) {
-                        LazyColumn(
-                            modifier = contentWidth.fillMaxSize(),
-                            state = scrollState,
-                            contentPadding = PaddingValues(bottom = 48.dp, top = 24.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                PullToRefreshBox(
+                    isRefreshing = uiState.isRefreshing,
+                    onRefresh = { onAction(DatesViewActions.SwipeRefresh) },
+                    state = pullToRefreshState,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    if (uiState.isLoading && uiState.dates.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            uiState.dates.keys.forEach { sectionKey ->
-                                val dates = uiState.dates[sectionKey].orEmpty()
-                                dates.isNotEmptyThenLet { sectionDates ->
-                                    val isHavePastRelatedDates =
-                                        sectionKey == DatesSection.PAST_DUE && dates.any { it.relative }
-                                    if (isHavePastRelatedDates) {
+                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                        }
+                    } else if (uiState.dates.isEmpty()) {
+                        EmptyState()
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .displayCutoutForLandscape()
+                                .padding(paddingValues)
+                                .padding(horizontal = 16.dp),
+                            contentAlignment = Alignment.TopCenter
+                        ) {
+                            LazyColumn(
+                                modifier = contentWidth.fillMaxSize(),
+                                state = scrollState,
+                                contentPadding = PaddingValues(bottom = 48.dp, top = 24.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                uiState.dates.keys.forEach { sectionKey ->
+                                    val dates = uiState.dates[sectionKey].orEmpty()
+                                    dates.isNotEmptyThenLet { sectionDates ->
+                                        val isHavePastRelatedDates =
+                                            sectionKey == DatesSection.PAST_DUE && dates.any { it.relative }
+                                        if (isHavePastRelatedDates) {
+                                            item {
+                                                ShiftDueDatesCard(
+                                                    isButtonEnabled = !uiState.isShiftDueDatesPressed,
+                                                    onClick = {
+                                                        onAction(DatesViewActions.ShiftDueDate)
+                                                    }
+                                                )
+                                            }
+                                        }
                                         item {
-                                            ShiftDueDatesCard(
-                                                isButtonEnabled = !uiState.isShiftDueDatesPressed,
-                                                onClick = {
-                                                    onAction(DatesViewActions.ShiftDueDate)
-                                                }
+                                            CourseDateBlockSection(
+                                                sectionKey = sectionKey,
+                                                sectionDates = sectionDates,
+                                                onItemClick = {
+                                                    onAction(DatesViewActions.OpenEvent(it))
+                                                },
+                                                useRelativeDates = useRelativeDates
                                             )
                                         }
                                     }
+                                }
+                                if (uiState.canLoadMore) {
                                     item {
-                                        CourseDateBlockSection(
-                                            sectionKey = sectionKey,
-                                            sectionDates = sectionDates,
-                                            onItemClick = {
-                                                onAction(DatesViewActions.OpenEvent(it))
-                                            },
-                                            useRelativeDates = useRelativeDates
-                                        )
+                                        Box(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .height(42.dp)
+                                                .padding(16.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                        }
                                     }
                                 }
                             }
-                            if (uiState.canLoadMore) {
-                                item {
-                                    Box(
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .height(42.dp)
-                                            .padding(16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                                    }
+                            val lastVisibleItemIndex =
+                                layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                            val totalItemsCount = layoutInfo.totalItemsCount
+                            val shouldLoadMore = totalItemsCount > 0 &&
+                                    lastVisibleItemIndex >= (totalItemsCount * LOAD_MORE_THRESHOLD).toInt()
+                            LaunchedEffect(shouldLoadMore) {
+                                if (shouldLoadMore) {
+                                    onAction(DatesViewActions.LoadMore)
                                 }
-                            }
-                        }
-                        val lastVisibleItemIndex =
-                            layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                        val totalItemsCount = layoutInfo.totalItemsCount
-                        val shouldLoadMore = totalItemsCount > 0 &&
-                            lastVisibleItemIndex >= (totalItemsCount * LOAD_MORE_THRESHOLD).toInt()
-                        LaunchedEffect(shouldLoadMore) {
-                            if (shouldLoadMore) {
-                                onAction(DatesViewActions.LoadMore)
                             }
                         }
                     }
                 }
 
-                HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
-
-                PullRefreshIndicator(
-                    uiState.isRefreshing,
-                    pullRefreshState,
-                    Modifier.align(Alignment.TopCenter)
-                )
+                HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
                 if (!isInternetConnectionShown && !hasInternetConnection) {
                     OfflineModeDialog(
@@ -230,7 +228,7 @@ private fun ShiftDueDatesCard(
     Card(
         modifier = modifier
             .fillMaxWidth(),
-        backgroundColor = MaterialTheme.appColors.cardViewBackground,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground),
         shape = MaterialTheme.appShapes.cardShape,
     ) {
         Column(

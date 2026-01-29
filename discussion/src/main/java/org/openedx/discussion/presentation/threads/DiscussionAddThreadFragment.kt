@@ -23,24 +23,25 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -79,7 +80,6 @@ import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedTextField
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.isImeVisibleState
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -159,6 +159,7 @@ class DiscussionAddThreadFragment : Fragment() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DiscussionAddThreadScreen(
     windowSize: WindowSize,
@@ -169,53 +170,37 @@ private fun DiscussionAddThreadScreen(
     onPostDiscussionClick: (String, String, String, String, Boolean) -> Unit,
     onBackClick: () -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val bottomSheetScaffoldState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutine = rememberCoroutineScope()
-    var currentPage by rememberSaveable {
-        mutableStateOf(0)
-    }
-    var titleValue by rememberSaveable {
-        mutableStateOf("")
-    }
-    var discussionValue by rememberSaveable {
-        mutableStateOf("")
-    }
-    var discussionType by rememberSaveable {
-        mutableStateOf(DiscussionType.DISCUSSION.value)
-    }
-    var postToTopic by rememberSaveable {
-        mutableStateOf(topicData)
-    }
-    var followPost by rememberSaveable {
-        mutableStateOf(false)
-    }
-    val expandedList by rememberSaveable {
-        mutableStateOf(topics)
-    }
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var currentPage by rememberSaveable { mutableStateOf(0) }
+    var titleValue by rememberSaveable { mutableStateOf("") }
+    var discussionValue by rememberSaveable { mutableStateOf("") }
+    var discussionType by rememberSaveable { mutableStateOf(DiscussionType.DISCUSSION.value) }
+    var postToTopic by rememberSaveable { mutableStateOf(topicData) }
+    var followPost by rememberSaveable { mutableStateOf(false) }
+    val expandedList by rememberSaveable { mutableStateOf(topics) }
     var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue())
     }
-    val isImeVisible by isImeVisibleState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(bottomSheetScaffoldState.isVisible) {
-        if (!bottomSheetScaffoldState.isVisible) {
+    LaunchedEffect(showBottomSheet) {
+        if (!showBottomSheet) {
             focusManager.clearFocus()
             searchValue = TextFieldValue()
         }
     }
+
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding(),
-        backgroundColor = MaterialTheme.appColors.background
-    ) {
+        containerColor = MaterialTheme.appColors.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -243,21 +228,181 @@ private fun DiscussionAddThreadScreen(
             )
         }
 
-        ModalBottomSheetLayout(
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
+
+        Box(
             modifier = Modifier
-                .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
-                .noRippleClickable {
-                    if (bottomSheetScaffoldState.isVisible) {
-                        coroutine.launch {
-                            bottomSheetScaffoldState.hide()
+                .fillMaxSize()
+                .padding(paddingValues)
+                .statusBarsInset()
+                .displayCutoutForLandscape(),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            Column(screenWidth) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.CenterStart,
+                    ) {
+                        BackBtn { onBackClick() }
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 48.dp),
+                            text = if (currentPage == 0) {
+                                stringResource(id = discussionR.string.discussion_create_post)
+                            } else {
+                                stringResource(id = discussionR.string.discussion_create_question)
+                            },
+                            color = MaterialTheme.appColors.textPrimary,
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.appTypography.titleMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                Surface(
+                    modifier = Modifier.padding(top = 6.dp),
+                    color = MaterialTheme.appColors.background,
+                    shape = MaterialTheme.appShapes.screenBackgroundShape
+                ) {
+                    Column(
+                        Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.appColors.background)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Column(
+                            Modifier.padding(horizontal = contentPadding, vertical = 32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(id = discussionR.string.discussion_select_post_type),
+                                style = MaterialTheme.appTypography.titleMedium,
+                                color = MaterialTheme.appColors.textPrimary
+                            )
+                            Spacer(Modifier.height(16.dp))
+                            Tabs(
+                                tabs = listOf(
+                                    stringResource(id = discussionR.string.discussion_discussion),
+                                    stringResource(id = discussionR.string.discussion_question)
+                                ),
+                                currentPage = currentPage,
+                                onItemClick = { bool ->
+                                    if (bool) {
+                                        discussionType = DiscussionType.QUESTION.value
+                                        currentPage = 1
+                                    } else {
+                                        discussionType = DiscussionType.DISCUSSION.value
+                                        currentPage = 0
+                                    }
+                                }
+                            )
+                            Spacer(Modifier.height(24.dp))
+                            SelectableField(
+                                text = postToTopic.first,
+                                onClick = { showBottomSheet = true }
+                            )
+                            Spacer(Modifier.height(24.dp))
+                            OpenEdXOutlinedTextField(
+                                modifier = Modifier.fillMaxWidth(),
+                                stringResource(id = discussionR.string.discussion_title),
+                                isSingleLine = true,
+                                withRequiredMark = true,
+                                imeAction = ImeAction.Next,
+                                keyboardActions = { fm -> fm.clearFocus() },
+                                onValueChanged = { value -> titleValue = value }
+                            )
+                            Spacer(Modifier.height(24.dp))
+                            OpenEdXOutlinedTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(150.dp),
+                                title = if (currentPage == 0) {
+                                    stringResource(id = discussionR.string.discussion_discussion)
+                                } else {
+                                    stringResource(id = discussionR.string.discussion_question)
+                                },
+                                isSingleLine = false,
+                                withRequiredMark = true,
+                                imeAction = ImeAction.Default,
+                                keyboardActions = { fm ->
+                                    fm.clearFocus()
+                                    keyboardController?.hide()
+                                },
+                                onValueChanged = { value -> discussionValue = value }
+                            )
+                            Spacer(Modifier.height(16.dp))
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    modifier = Modifier.size(24.dp),
+                                    colors = CheckboxDefaults.colors(
+                                        checkedColor = MaterialTheme.appColors.primary,
+                                        uncheckedColor = MaterialTheme.appColors.textFieldText
+                                    ),
+                                    checked = followPost,
+                                    onCheckedChange = { followPost = it }
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    text = if (currentPage == 0) {
+                                        stringResource(id = discussionR.string.discussion_follow_discussion)
+                                    } else {
+                                        stringResource(id = discussionR.string.discussion_follow_question)
+                                    },
+                                    color = MaterialTheme.appColors.textFieldText,
+                                    style = MaterialTheme.appTypography.labelLarge,
+                                    modifier = Modifier.noRippleClickable {
+                                        followPost = !followPost
+                                    }
+                                )
+                            }
+                            Spacer(Modifier.height(44.dp))
+                            if (isLoading) {
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                            } else {
+                                OpenEdXButton(
+                                    modifier = buttonWidth,
+                                    text = if (currentPage == 0) {
+                                        stringResource(id = discussionR.string.discussion_create_post)
+                                    } else {
+                                        stringResource(id = discussionR.string.discussion_create_question)
+                                    },
+                                    onClick = {
+                                        onPostDiscussionClick(
+                                            discussionType,
+                                            postToTopic.second,
+                                            titleValue,
+                                            discussionValue,
+                                            followPost
+                                        )
+                                    }
+                                )
+                            }
+                            Spacer(Modifier.height(40.dp))
                         }
                     }
-                },
-            sheetState = bottomSheetScaffoldState,
-            sheetShape = MaterialTheme.appShapes.screenBackgroundShape,
-            scrimColor = Color.Black.copy(alpha = 0.4f),
-            sheetBackgroundColor = MaterialTheme.appColors.background,
-            sheetContent = {
+                }
+            }
+        }
+
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false },
+                sheetState = sheetState,
+                shape = MaterialTheme.appShapes.screenBackgroundShape,
+                containerColor = MaterialTheme.appColors.background,
+                scrimColor = Color.Black.copy(alpha = 0.4f),
+            ) {
                 SheetContent(
                     title = stringResource(id = discussionR.string.discussion_topic),
                     searchValue = searchValue,
@@ -265,205 +410,12 @@ private fun DiscussionAddThreadScreen(
                     onItemClick = { item ->
                         postToTopic = item
                         coroutine.launch {
-                            bottomSheetScaffoldState.hide()
+                            sheetState.hide()
+                            showBottomSheet = false
                         }
                     },
-                    searchValueChanged = {
-                        searchValue = TextFieldValue(it)
-                    }
+                    searchValueChanged = { searchValue = TextFieldValue(it) }
                 )
-            }
-        ) {
-            HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it)
-                    .statusBarsInset()
-                    .displayCutoutForLandscape(),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                Column(
-                    screenWidth
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            contentAlignment = Alignment.CenterStart,
-                        ) {
-                            BackBtn {
-                                onBackClick()
-                            }
-                            Text(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 48.dp),
-                                text = if (currentPage == 0) {
-                                    stringResource(id = discussionR.string.discussion_create_post)
-                                } else {
-                                    stringResource(id = discussionR.string.discussion_create_question)
-                                },
-                                color = MaterialTheme.appColors.textPrimary,
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.appTypography.titleMedium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                    Surface(
-                        modifier = Modifier.padding(top = 6.dp),
-                        color = MaterialTheme.appColors.background,
-                        shape = MaterialTheme.appShapes.screenBackgroundShape
-                    ) {
-                        Column(
-                            Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.appColors.background)
-                                .verticalScroll(rememberScrollState())
-                        ) {
-                            Column(
-                                Modifier.padding(horizontal = contentPadding, vertical = 32.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = stringResource(id = discussionR.string.discussion_select_post_type),
-                                    style = MaterialTheme.appTypography.titleMedium,
-                                    color = MaterialTheme.appColors.textPrimary
-                                )
-                                Spacer(Modifier.height(16.dp))
-                                Tabs(
-                                    tabs = listOf(
-                                        stringResource(id = discussionR.string.discussion_discussion),
-                                        stringResource(id = discussionR.string.discussion_question)
-                                    ),
-                                    currentPage = currentPage,
-                                    onItemClick = { bool ->
-                                        if (bool) {
-                                            discussionType = DiscussionType.QUESTION.value
-                                            currentPage = 1
-                                        } else {
-                                            discussionType = DiscussionType.DISCUSSION.value
-                                            currentPage = 0
-                                        }
-                                    }
-                                )
-                                Spacer(Modifier.height(24.dp))
-                                SelectableField(
-                                    text = postToTopic.first,
-                                    onClick = {
-                                        coroutine.launch {
-                                            if (bottomSheetScaffoldState.isVisible) {
-                                                bottomSheetScaffoldState.hide()
-                                            } else {
-                                                bottomSheetScaffoldState.show()
-                                            }
-                                        }
-                                    }
-                                )
-                                Spacer(Modifier.height(24.dp))
-                                OpenEdXOutlinedTextField(
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
-                                    stringResource(id = discussionR.string.discussion_title),
-                                    isSingleLine = true,
-                                    withRequiredMark = true,
-                                    imeAction = ImeAction.Next,
-                                    keyboardActions = { focusManager ->
-                                        focusManager.clearFocus()
-                                    },
-                                    onValueChanged = { value ->
-                                        titleValue = value
-                                    }
-                                )
-                                Spacer(Modifier.height(24.dp))
-                                OpenEdXOutlinedTextField(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(150.dp),
-                                    title = if (currentPage == 0) {
-                                        stringResource(id = discussionR.string.discussion_discussion)
-                                    } else {
-                                        stringResource(
-                                            id = discussionR.string.discussion_question
-                                        )
-                                    },
-                                    isSingleLine = false,
-                                    withRequiredMark = true,
-                                    imeAction = ImeAction.Default,
-                                    keyboardActions = { focusManager ->
-                                        focusManager.clearFocus()
-                                        keyboardController?.hide()
-                                    },
-                                    onValueChanged = { value ->
-                                        discussionValue = value
-                                    }
-                                )
-                                Spacer(Modifier.height(16.dp))
-                                Row(
-                                    Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Checkbox(
-                                        modifier = Modifier.size(24.dp),
-                                        colors = CheckboxDefaults.colors(
-                                            checkedColor = MaterialTheme.appColors.primary,
-                                            uncheckedColor = MaterialTheme.appColors.textFieldText
-                                        ),
-                                        checked = followPost,
-                                        onCheckedChange = {
-                                            followPost = it
-                                        }
-                                    )
-                                    Spacer(Modifier.width(6.dp))
-                                    Text(
-                                        text = if (currentPage == 0) {
-                                            stringResource(id = discussionR.string.discussion_follow_discussion)
-                                        } else {
-                                            stringResource(id = discussionR.string.discussion_follow_question)
-                                        },
-                                        color = MaterialTheme.appColors.textFieldText,
-                                        style = MaterialTheme.appTypography.labelLarge,
-                                        modifier = Modifier.noRippleClickable {
-                                            followPost = !followPost
-                                        }
-                                    )
-                                }
-                                Spacer(Modifier.height(44.dp))
-                                if (isLoading) {
-                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                                } else {
-                                    OpenEdXButton(
-                                        modifier = buttonWidth,
-                                        text = if (currentPage == 0) {
-                                            stringResource(id = discussionR.string.discussion_create_post)
-                                        } else {
-                                            stringResource(id = discussionR.string.discussion_create_question)
-                                        },
-                                        onClick = {
-                                            onPostDiscussionClick(
-                                                discussionType,
-                                                postToTopic.second,
-                                                titleValue,
-                                                discussionValue,
-                                                followPost
-                                            )
-                                        }
-                                    )
-                                }
-                                Spacer(Modifier.height(40.dp))
-                            }
-                        }
-                    }
-                }
             }
         }
     }
@@ -479,7 +431,7 @@ private fun Tabs(
     val isFirstPage = currentPage == 0
     TabRow(
         selectedTabIndex = currentPage,
-        backgroundColor = MaterialTheme.appColors.surface,
+        containerColor = MaterialTheme.appColors.surface,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
@@ -491,7 +443,8 @@ private fun Tabs(
             ),
         indicator = { _ ->
             Box {}
-        }
+        },
+        divider = {}
     ) {
         tabs.forEachIndexed { index, text ->
             val selected = currentPage == index
@@ -543,12 +496,11 @@ private fun SelectableField(
             readOnly = true,
             enabled = false,
             value = text,
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
-                backgroundColor = MaterialTheme.appColors.surface,
-                textColor = MaterialTheme.appColors.textFieldText,
-                unfocusedLabelColor = MaterialTheme.appColors.textFieldText,
-                disabledTextColor = MaterialTheme.appColors.textFieldText
+                disabledContainerColor = MaterialTheme.appColors.surface,
+                disabledTextColor = MaterialTheme.appColors.textFieldText,
+                unfocusedLabelColor = MaterialTheme.appColors.textFieldText
             ),
             shape = MaterialTheme.appShapes.textFieldShape,
             textStyle = MaterialTheme.appTypography.bodyMedium,

@@ -20,13 +20,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -127,21 +128,21 @@ private fun RestorePasswordScreen(
     onBackClick: () -> Unit,
     onRestoreButtonClick: (String) -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()
     var email by rememberSaveable { mutableStateOf("") }
     var isEmailError by rememberSaveable { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = Modifier
             .semantics {
                 testTagsAsResourceId = true
             }
             .fillMaxSize()
             .navigationBarsPadding(),
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
 
         val contentPaddings by remember {
@@ -192,10 +193,7 @@ private fun RestorePasswordScreen(
             contentDescription = null
         )
 
-        HandleUIMessage(
-            uiMessage = uiMessage,
-            scaffoldState = scaffoldState
-        )
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         Column(
             modifier = Modifier

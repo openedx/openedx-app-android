@@ -12,15 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.rounded.CalendarToday
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,7 +60,6 @@ fun CalendarSetUpView(
     onRelativeDateSwitchClick: (Boolean) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()
 
     Scaffold(
@@ -68,8 +67,7 @@ fun CalendarSetUpView(
             .fillMaxSize()
             .semantics {
                 testTagsAsResourceId = true
-            },
-        scaffoldState = scaffoldState
+            }
     ) { paddingValues ->
 
         val contentWidth by remember(key1 = windowSize) {
@@ -137,8 +135,8 @@ fun CalendarSetUpView(
                         Spacer(modifier = Modifier.height(14.dp))
                         Card(
                             shape = MaterialTheme.appShapes.cardShape,
-                            elevation = 0.dp,
-                            backgroundColor = MaterialTheme.appColors.cardViewBackground
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground)
                         ) {
                             Column(
                                 modifier = Modifier

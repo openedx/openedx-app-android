@@ -13,15 +13,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -78,10 +78,9 @@ fun PrevButton(
             .height(42.dp)
             .alpha(prevButtonAnimationFactor),
         colors = ButtonDefaults.outlinedButtonColors(
-            backgroundColor = MaterialTheme.appColors.background
+            containerColor = MaterialTheme.appColors.background
         ),
         border = BorderStroke(1.dp, MaterialTheme.appColors.primary),
-        elevation = null,
         shape = MaterialTheme.appShapes.navigationButtonShape,
         onClick = onPrevClick,
     ) {
@@ -114,9 +113,8 @@ fun NextFinishButton(
             .testTag("btn_next")
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.appColors.primaryButtonBackground
+            containerColor = MaterialTheme.appColors.primaryButtonBackground
         ),
-        elevation = null,
         shape = MaterialTheme.appShapes.navigationButtonShape,
         onClick = onNextClick
     ) {

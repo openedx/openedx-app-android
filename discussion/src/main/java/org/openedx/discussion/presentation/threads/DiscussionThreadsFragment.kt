@@ -26,21 +26,20 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -70,7 +69,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -81,8 +79,6 @@ import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.isImeVisibleState
-import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.shouldLoadMore
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -211,7 +207,7 @@ class DiscussionThreadsFragment : Fragment() {
 }
 
 @Suppress("MaximumLineLength", "MaxLineLength")
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DiscussionThreadsScreen(
     windowSize: WindowSize,
@@ -229,20 +225,15 @@ private fun DiscussionThreadsScreen(
     paginationCallback: () -> Unit,
     onBackClick: () -> Unit
 ) {
-    val scaffoldState = rememberScaffoldState()
-    val bottomSheetScaffoldState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val focusManager = LocalFocusManager.current
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
+    val pullToRefreshState = rememberPullToRefreshState()
+    val snackbarHostState = remember { SnackbarHostState() }
     val coroutine = rememberCoroutineScope()
     val scrollState = rememberLazyListState()
-    val firstVisibleIndex = remember {
-        mutableStateOf(scrollState.firstVisibleItemIndex)
-    }
+    val firstVisibleIndex = remember { mutableStateOf(scrollState.firstVisibleItemIndex) }
     val context = LocalContext.current
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     var sortType by rememberSaveable {
         mutableStateOf(
             Pair(
@@ -259,18 +250,11 @@ private fun DiscussionThreadsScreen(
             )
         )
     }
-    var expandedList by rememberSaveable {
-        mutableStateOf(emptyList<Pair<String, String>>())
-    }
-    var currentSelectedList by rememberSaveable {
-        mutableStateOf("")
-    }
-
+    var expandedList by rememberSaveable { mutableStateOf(emptyList<Pair<String, String>>()) }
+    var currentSelectedList by rememberSaveable { mutableStateOf("") }
     var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue())
     }
-
-    val isImeVisible by isImeVisibleState()
 
     val scaffoldModifier = if (viewType == FragmentViewType.FULL_CONTENT) {
         Modifier
@@ -285,21 +269,20 @@ private fun DiscussionThreadsScreen(
             .fillMaxSize()
             .statusBarsInset()
     } else {
-        Modifier
-            .fillMaxSize()
+        Modifier.fillMaxSize()
     }
 
-    LaunchedEffect(bottomSheetScaffoldState.isVisible) {
-        if (!bottomSheetScaffoldState.isVisible) {
+    LaunchedEffect(showBottomSheet) {
+        if (!showBottomSheet) {
             focusManager.clearFocus()
             searchValue = TextFieldValue()
         }
     }
 
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = scaffoldModifier,
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
         val contentWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -333,353 +316,328 @@ private fun DiscussionThreadsScreen(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
-        ModalBottomSheetLayout(
+        Box(
             modifier = Modifier
-                .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
-                .noRippleClickable {
-                    if (bottomSheetScaffoldState.isVisible) {
-                        coroutine.launch {
-                            bottomSheetScaffoldState.hide()
-                        }
-                    }
-                },
-            sheetShape = MaterialTheme.appShapes.screenBackgroundShape,
-            sheetState = bottomSheetScaffoldState,
-            scrimColor = Color.Black.copy(alpha = 0.4f),
-            sheetBackgroundColor = MaterialTheme.appColors.background,
-            sheetContent = {
-                SheetContent(
-                    searchValue = searchValue,
-                    expandedList = expandedList,
-                    onItemClick = { item ->
-                        when (currentSelectedList) {
-                            FilterType.type -> {
-                                filterType = item
-                                updatedFilter(filterType.second)
-                            }
-
-                            SortType.type -> {
-                                sortType = item
-                                updatedOrder(sortType.second)
-                            }
-                        }
-                        coroutine.launch {
-                            bottomSheetScaffoldState.hide()
-                        }
-                    },
-                    searchValueChanged = {
-                        searchValue = TextFieldValue(it)
-                    }
-                )
-            }
+                .fillMaxSize()
+                .padding(it)
+                .displayCutoutForLandscape()
+                .then(statusBarInsets),
+            contentAlignment = Alignment.TopCenter
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it)
-                    .displayCutoutForLandscape()
-                    .then(statusBarInsets),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                Column(contentWidth) {
-                    if (viewType == FragmentViewType.FULL_CONTENT) {
-                        Column(
+            Column(contentWidth) {
+                if (viewType == FragmentViewType.FULL_CONTENT) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                            contentAlignment = Alignment.CenterStart
                         ) {
-                            Box(
+                            BackBtn {
+                                onBackClick()
+                            }
+                            Text(
                                 modifier = Modifier
-                                    .fillMaxWidth(),
-                                contentAlignment = Alignment.CenterStart
-                            ) {
-                                BackBtn {
-                                    onBackClick()
-                                }
-                                Text(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 48.dp),
-                                    text = title,
-                                    color = MaterialTheme.appColors.textPrimary,
-                                    textAlign = TextAlign.Center,
-                                    style = MaterialTheme.appTypography.titleMedium,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                    }
-                    Surface(
-                        modifier = Modifier.padding(
-                            top = if (viewType == FragmentViewType.FULL_CONTENT) {
-                                6.dp
-                            } else {
-                                0.dp
-                            }
-                        ),
-                        color = MaterialTheme.appColors.background
-                    ) {
-                        Box(Modifier.pullRefresh(pullRefreshState)) {
-                            when (uiState) {
-                                is DiscussionThreadsUIState.Threads -> {
-                                    Box(
-                                        Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.BottomCenter
-                                    ) {
-                                        Column(Modifier.fillMaxSize()) {
-                                            Row(
-                                                Modifier
-                                                    .fillMaxWidth()
-                                                    .background(MaterialTheme.appColors.background)
-                                                    .padding(
-                                                        horizontal = sortButtonsPadding,
-                                                        vertical = 16.dp
-                                                    ),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.SpaceBetween
-                                            ) {
-                                                IconText(
-                                                    text = filterType.first,
-                                                    painter = painterResource(
-                                                        id = discussionR.drawable.discussion_ic_filter
-                                                    ),
-                                                    textStyle = MaterialTheme.appTypography.labelMedium,
-                                                    color = MaterialTheme.appColors.textPrimary,
-                                                    onClick = {
-                                                        currentSelectedList = FilterType.type
-                                                        expandedList = listOf(
-                                                            Pair(
-                                                                context.getString(FilterType.ALL_POSTS.textRes),
-                                                                FilterType.ALL_POSTS.value
-                                                            ),
-                                                            Pair(
-                                                                context.getString(FilterType.UNREAD.textRes),
-                                                                FilterType.UNREAD.value
-                                                            ),
-                                                            Pair(
-                                                                context.getString(FilterType.UNANSWERED.textRes),
-                                                                FilterType.UNANSWERED.value
-                                                            )
-                                                        )
-                                                        coroutine.launch {
-                                                            if (bottomSheetScaffoldState.isVisible) {
-                                                                bottomSheetScaffoldState.hide()
-                                                            } else {
-                                                                bottomSheetScaffoldState.show()
-                                                            }
-                                                        }
-                                                    }
-                                                )
-                                                IconText(
-                                                    text = sortType.first,
-                                                    painter = painterResource(
-                                                        id = discussionR.drawable.discussion_ic_sort
-                                                    ),
-                                                    textStyle = MaterialTheme.appTypography.labelMedium,
-                                                    color = MaterialTheme.appColors.textPrimary,
-                                                    onClick = {
-                                                        currentSelectedList = SortType.type
-                                                        expandedList = listOf(
-                                                            Pair(
-                                                                context.getString(SortType.LAST_ACTIVITY_AT.textRes),
-                                                                SortType.LAST_ACTIVITY_AT.queryParam
-                                                            ),
-                                                            Pair(
-                                                                context.getString(SortType.COMMENT_COUNT.textRes),
-                                                                SortType.COMMENT_COUNT.queryParam
-                                                            ),
-                                                            Pair(
-                                                                context.getString(SortType.VOTE_COUNT.textRes),
-                                                                SortType.VOTE_COUNT.queryParam
-                                                            )
-                                                        )
-                                                        coroutine.launch {
-                                                            if (bottomSheetScaffoldState.isVisible) {
-                                                                bottomSheetScaffoldState.hide()
-                                                            } else {
-                                                                bottomSheetScaffoldState.show()
-                                                            }
-                                                        }
-                                                    }
-                                                )
-                                            }
-                                            Divider()
-                                            if (uiState.data.isNotEmpty()) {
-                                                LazyColumn(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentPadding = listPadding,
-                                                    state = scrollState
-                                                ) {
-                                                    item {
-                                                        Row(
-                                                            modifier = Modifier
-                                                                .fillMaxWidth()
-                                                                .padding(vertical = 8.dp),
-                                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                                            verticalAlignment = Alignment.CenterVertically
-                                                        ) {
-                                                            Text(
-                                                                modifier = Modifier.weight(1f),
-                                                                text = title,
-                                                                color = MaterialTheme.appColors.textPrimary,
-                                                                style = MaterialTheme.appTypography.titleLarge
-                                                            )
-                                                            Box(
-                                                                Modifier
-                                                                    .size(40.dp)
-                                                                    .clip(CircleShape)
-                                                                    .background(
-                                                                        MaterialTheme.appColors.secondaryButtonBackground
-                                                                    )
-                                                                    .clickable {
-                                                                        onCreatePostClick()
-                                                                    },
-                                                                contentAlignment = Alignment.Center
-                                                            ) {
-                                                                Icon(
-                                                                    modifier = Modifier.size(16.dp),
-                                                                    painter = painterResource(
-                                                                        discussionR.drawable.discussion_ic_add_comment
-                                                                    ),
-                                                                    contentDescription = stringResource(
-                                                                        discussionR.string.discussion_add_comment
-                                                                    ),
-                                                                    tint = MaterialTheme.appColors.primaryButtonText
-                                                                )
-                                                            }
-                                                        }
-                                                    }
-                                                    items(uiState.data) { threadItem ->
-                                                        ThreadItem(thread = threadItem, onClick = {
-                                                            onItemClick(it)
-                                                        })
-                                                        Divider()
-                                                    }
-                                                    item {
-                                                        if (canLoadMore) {
-                                                            Box(
-                                                                modifier = Modifier
-                                                                    .fillMaxWidth()
-                                                                    .padding(vertical = 16.dp),
-                                                                contentAlignment = Alignment.Center
-                                                            ) {
-                                                                CircularProgressIndicator(
-                                                                    color = MaterialTheme.appColors.primary
-                                                                )
-                                                            }
-                                                        }
-                                                    }
-                                                    if (scrollState.shouldLoadMore(
-                                                            firstVisibleIndex,
-                                                            LOAD_MORE_THRESHOLD
-                                                        )
-                                                    ) {
-                                                        paginationCallback()
-                                                    }
-                                                }
-                                            } else {
-                                                val noDiscussionsScrollState = rememberScrollState()
-                                                Column(
-                                                    modifier = Modifier
-                                                        .align(Alignment.CenterHorizontally)
-                                                        .verticalScroll(noDiscussionsScrollState)
-                                                        .padding(24.dp),
-                                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                                    verticalArrangement = Arrangement.Center
-                                                ) {
-                                                    Text(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth(),
-                                                        text = title,
-                                                        color = MaterialTheme.appColors.textPrimary,
-                                                        style = MaterialTheme.appTypography.titleLarge
-                                                    )
-                                                    Spacer(modifier = Modifier.height(20.dp))
-                                                    Icon(
-                                                        modifier = Modifier.size(100.dp),
-                                                        painter = painterResource(
-                                                            id = discussionR.drawable.discussion_ic_empty
-                                                        ),
-                                                        contentDescription = null,
-                                                        tint = MaterialTheme.appColors.textPrimary
-                                                    )
-                                                    Spacer(Modifier.height(36.dp))
-                                                    Text(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        text = stringResource(discussionR.string.discussion_no_yet),
-                                                        style = MaterialTheme.appTypography.titleLarge,
-                                                        color = MaterialTheme.appColors.textPrimary,
-                                                        textAlign = TextAlign.Center
-                                                    )
-                                                    Spacer(Modifier.height(12.dp))
-                                                    Text(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        text = stringResource(
-                                                            discussionR.string.discussion_click_button_create_discussion
-                                                        ),
-                                                        style = MaterialTheme.appTypography.bodyLarge,
-                                                        color = MaterialTheme.appColors.textPrimary,
-                                                        textAlign = TextAlign.Center
-                                                    )
-                                                    Spacer(Modifier.height(40.dp))
-                                                    OpenEdXOutlinedButton(
-                                                        modifier = Modifier
-                                                            .widthIn(184.dp, Dp.Unspecified),
-                                                        text = stringResource(
-                                                            id = discussionR.string.discussion_create_post
-                                                        ),
-                                                        onClick = {
-                                                            onCreatePostClick()
-                                                        },
-                                                        content = {
-                                                            Icon(
-                                                                painter = painterResource(
-                                                                    id = discussionR.drawable.discussion_ic_add_comment
-                                                                ),
-                                                                contentDescription = null,
-                                                                tint = MaterialTheme.appColors.primary
-                                                            )
-                                                            Spacer(modifier = Modifier.width(6.dp))
-                                                            Text(
-                                                                text = stringResource(
-                                                                    id = discussionR.string.discussion_create_post
-                                                                ),
-                                                                color = MaterialTheme.appColors.primary,
-                                                                style = MaterialTheme.appTypography.labelLarge
-                                                            )
-                                                        },
-                                                        borderColor = MaterialTheme.appColors.primary,
-                                                        textColor = MaterialTheme.appColors.primary
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                is DiscussionThreadsUIState.Loading -> {
-                                    Box(
-                                        Modifier
-                                            .fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                                    }
-                                }
-                            }
-                            PullRefreshIndicator(
-                                refreshing,
-                                pullRefreshState,
-                                Modifier.align(Alignment.TopCenter)
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 48.dp),
+                                text = title,
+                                color = MaterialTheme.appColors.textPrimary,
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.appTypography.titleMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
                 }
+                Surface(
+                    modifier = Modifier.padding(
+                        top = if (viewType == FragmentViewType.FULL_CONTENT) {
+                            6.dp
+                        } else {
+                            0.dp
+                        }
+                    ),
+                    color = MaterialTheme.appColors.background
+                ) {
+                    PullToRefreshBox(
+                        isRefreshing = refreshing,
+                        onRefresh = { onSwipeRefresh() },
+                        state = pullToRefreshState
+                    ) {
+                        when (uiState) {
+                            is DiscussionThreadsUIState.Threads -> {
+                                Box(
+                                    Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.BottomCenter
+                                ) {
+                                    Column(Modifier.fillMaxSize()) {
+                                        Row(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .background(MaterialTheme.appColors.background)
+                                                .padding(
+                                                    horizontal = sortButtonsPadding,
+                                                    vertical = 16.dp
+                                                ),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            IconText(
+                                                text = filterType.first,
+                                                painter = painterResource(
+                                                    id = discussionR.drawable.discussion_ic_filter
+                                                ),
+                                                textStyle = MaterialTheme.appTypography.labelMedium,
+                                                color = MaterialTheme.appColors.textPrimary,
+                                                onClick = {
+                                                    currentSelectedList = FilterType.type
+                                                    expandedList = listOf(
+                                                        Pair(
+                                                            context.getString(FilterType.ALL_POSTS.textRes),
+                                                            FilterType.ALL_POSTS.value
+                                                        ),
+                                                        Pair(
+                                                            context.getString(FilterType.UNREAD.textRes),
+                                                            FilterType.UNREAD.value
+                                                        ),
+                                                        Pair(
+                                                            context.getString(FilterType.UNANSWERED.textRes),
+                                                            FilterType.UNANSWERED.value
+                                                        )
+                                                    )
+                                                    showBottomSheet = true
+                                                }
+                                            )
+                                            IconText(
+                                                text = sortType.first,
+                                                painter = painterResource(
+                                                    id = discussionR.drawable.discussion_ic_sort
+                                                ),
+                                                textStyle = MaterialTheme.appTypography.labelMedium,
+                                                color = MaterialTheme.appColors.textPrimary,
+                                                onClick = {
+                                                    currentSelectedList = SortType.type
+                                                    expandedList = listOf(
+                                                        Pair(
+                                                            context.getString(SortType.LAST_ACTIVITY_AT.textRes),
+                                                            SortType.LAST_ACTIVITY_AT.queryParam
+                                                        ),
+                                                        Pair(
+                                                            context.getString(SortType.COMMENT_COUNT.textRes),
+                                                            SortType.COMMENT_COUNT.queryParam
+                                                        ),
+                                                        Pair(
+                                                            context.getString(SortType.VOTE_COUNT.textRes),
+                                                            SortType.VOTE_COUNT.queryParam
+                                                        )
+                                                    )
+                                                    showBottomSheet = true
+                                                }
+                                            )
+                                        }
+                                        HorizontalDivider()
+                                        if (uiState.data.isNotEmpty()) {
+                                            LazyColumn(
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentPadding = listPadding,
+                                                state = scrollState
+                                            ) {
+                                                item {
+                                                    Row(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(vertical = 8.dp),
+                                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Text(
+                                                            modifier = Modifier.weight(1f),
+                                                            text = title,
+                                                            color = MaterialTheme.appColors.textPrimary,
+                                                            style = MaterialTheme.appTypography.titleLarge
+                                                        )
+                                                        Box(
+                                                            Modifier
+                                                                .size(40.dp)
+                                                                .clip(CircleShape)
+                                                                .background(
+                                                                    MaterialTheme.appColors.secondaryButtonBackground
+                                                                )
+                                                                .clickable {
+                                                                    onCreatePostClick()
+                                                                },
+                                                            contentAlignment = Alignment.Center
+                                                        ) {
+                                                            Icon(
+                                                                modifier = Modifier.size(16.dp),
+                                                                painter = painterResource(
+                                                                    discussionR.drawable.discussion_ic_add_comment
+                                                                ),
+                                                                contentDescription = stringResource(
+                                                                    discussionR.string.discussion_add_comment
+                                                                ),
+                                                                tint = MaterialTheme.appColors.primaryButtonText
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                                items(uiState.data) { threadItem ->
+                                                    ThreadItem(thread = threadItem, onClick = {
+                                                        onItemClick(it)
+                                                    })
+                                                    HorizontalDivider()
+                                                }
+                                                item {
+                                                    if (canLoadMore) {
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .padding(vertical = 16.dp),
+                                                            contentAlignment = Alignment.Center
+                                                        ) {
+                                                            CircularProgressIndicator(
+                                                                color = MaterialTheme.appColors.primary
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                                if (scrollState.shouldLoadMore(
+                                                        firstVisibleIndex,
+                                                        LOAD_MORE_THRESHOLD
+                                                    )
+                                                ) {
+                                                    paginationCallback()
+                                                }
+                                            }
+                                        } else {
+                                            val noDiscussionsScrollState = rememberScrollState()
+                                            Column(
+                                                modifier = Modifier
+                                                    .align(Alignment.CenterHorizontally)
+                                                    .verticalScroll(noDiscussionsScrollState)
+                                                    .padding(24.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.Center
+                                            ) {
+                                                Text(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth(),
+                                                    text = title,
+                                                    color = MaterialTheme.appColors.textPrimary,
+                                                    style = MaterialTheme.appTypography.titleLarge
+                                                )
+                                                Spacer(modifier = Modifier.height(20.dp))
+                                                Icon(
+                                                    modifier = Modifier.size(100.dp),
+                                                    painter = painterResource(
+                                                        id = discussionR.drawable.discussion_ic_empty
+                                                    ),
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.appColors.textPrimary
+                                                )
+                                                Spacer(Modifier.height(36.dp))
+                                                Text(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    text = stringResource(discussionR.string.discussion_no_yet),
+                                                    style = MaterialTheme.appTypography.titleLarge,
+                                                    color = MaterialTheme.appColors.textPrimary,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                Spacer(Modifier.height(12.dp))
+                                                Text(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    text = stringResource(
+                                                        discussionR.string.discussion_click_button_create_discussion
+                                                    ),
+                                                    style = MaterialTheme.appTypography.bodyLarge,
+                                                    color = MaterialTheme.appColors.textPrimary,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                Spacer(Modifier.height(40.dp))
+                                                OpenEdXOutlinedButton(
+                                                    modifier = Modifier
+                                                        .widthIn(184.dp, Dp.Unspecified),
+                                                    text = stringResource(
+                                                        id = discussionR.string.discussion_create_post
+                                                    ),
+                                                    onClick = {
+                                                        onCreatePostClick()
+                                                    },
+                                                    content = {
+                                                        Icon(
+                                                            painter = painterResource(
+                                                                id = discussionR.drawable.discussion_ic_add_comment
+                                                            ),
+                                                            contentDescription = null,
+                                                            tint = MaterialTheme.appColors.primary
+                                                        )
+                                                        Spacer(modifier = Modifier.width(6.dp))
+                                                        Text(
+                                                            text = stringResource(
+                                                                id = discussionR.string.discussion_create_post
+                                                            ),
+                                                            color = MaterialTheme.appColors.primary,
+                                                            style = MaterialTheme.appTypography.labelLarge
+                                                        )
+                                                    },
+                                                    borderColor = MaterialTheme.appColors.primary,
+                                                    textColor = MaterialTheme.appColors.primary
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            is DiscussionThreadsUIState.Loading -> {
+                                Box(
+                                    Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                }
+                            }
+                        }
+                    }
+                }
             }
+        }
+    }
+
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState,
+            shape = MaterialTheme.appShapes.screenBackgroundShape,
+            containerColor = MaterialTheme.appColors.background,
+            scrimColor = Color.Black.copy(alpha = 0.4f),
+        ) {
+            SheetContent(
+                searchValue = searchValue,
+                expandedList = expandedList,
+                onItemClick = { item ->
+                    when (currentSelectedList) {
+                        FilterType.type -> {
+                            filterType = item
+                            updatedFilter(filterType.second)
+                        }
+
+                        SortType.type -> {
+                            sortType = item
+                            updatedOrder(sortType.second)
+                        }
+                    }
+                    showBottomSheet = false
+                },
+                searchValueChanged = { searchValue = TextFieldValue(it) }
+            )
         }
     }
 }

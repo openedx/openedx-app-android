@@ -22,10 +22,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
@@ -192,8 +192,9 @@ internal fun CollapsingLayout(
                             val yEnd = change.position.y
                             val yDelta = yEnd - yStart
                             val scrollDown = yDelta > 0
-                            val collapsedOffset = -expandedTopHeight.floatValue - backgroundImageHeight.floatValue +
-                                    collapsedTopHeight.floatValue
+                            val collapsedOffset =
+                                -expandedTopHeight.floatValue - backgroundImageHeight.floatValue +
+                                        collapsedTopHeight.floatValue
                             val expandedOffset = 0f
 
                             launch {

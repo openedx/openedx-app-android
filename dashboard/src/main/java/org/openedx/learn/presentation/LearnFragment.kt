@@ -11,13 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -190,47 +190,43 @@ private fun LearnDropdownMenu(
             )
         }
 
-        MaterialTheme(
-            colors = MaterialTheme.colors.copy(surface = MaterialTheme.appColors.background),
-            shapes = MaterialTheme.shapes.copy(
-                medium = RoundedCornerShape(
-                    bottomStart = 8.dp,
-                    bottomEnd = 8.dp
-                )
+        DropdownMenu(
+            modifier = Modifier
+                .crop(vertical = 8.dp)
+                .widthIn(min = 182.dp)
+                .background(MaterialTheme.appColors.background),
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            shape = RoundedCornerShape(
+                bottomStart = 8.dp,
+                bottomEnd = 8.dp
             )
         ) {
-            DropdownMenu(
-                modifier = Modifier
-                    .crop(vertical = 8.dp)
-                    .widthIn(min = 182.dp),
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                for (learnType in LearnType.entries) {
-                    val background: Color
-                    val textColor: Color
-                    if (selectedLearnType == learnType) {
-                        background = MaterialTheme.appColors.primary
-                        textColor = MaterialTheme.appColors.primaryButtonText
-                    } else {
-                        background = Color.Transparent
-                        textColor = MaterialTheme.appColors.textDark
-                    }
-                    DropdownMenuItem(
-                        modifier = Modifier
-                            .background(background),
-                        onClick = {
-                            onUpdateLearnType(learnType)
-                            expanded = false
-                        }
-                    ) {
+            for (learnType in LearnType.entries) {
+                val background: Color
+                val textColor: Color
+                if (selectedLearnType == learnType) {
+                    background = MaterialTheme.appColors.primary
+                    textColor = MaterialTheme.appColors.primaryButtonText
+                } else {
+                    background = Color.Transparent
+                    textColor = MaterialTheme.appColors.textDark
+                }
+                DropdownMenuItem(
+                    modifier = Modifier
+                        .background(background),
+                    onClick = {
+                        onUpdateLearnType(learnType)
+                        expanded = false
+                    },
+                    text = {
                         Text(
                             text = stringResource(id = learnType.title),
                             style = MaterialTheme.appTypography.titleSmall,
                             color = textColor
                         )
                     }
-                }
+                )
             }
         }
     }

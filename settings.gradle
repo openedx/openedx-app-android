@@ -21,6 +21,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        mavenLocal()
         maven {
             url "http://appboy.github.io/appboy-android-sdk/sdk"
             allowInsecureProtocol = true
