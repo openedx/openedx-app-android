@@ -343,6 +343,7 @@ private fun LogoutButton(onClick: () -> Unit) {
     ) {
         Row(
             modifier = Modifier
+                .fillMaxWidth()
                 .clickable {
                     onClick()
                 }

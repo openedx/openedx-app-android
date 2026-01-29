@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -381,7 +382,8 @@ private fun EditProfileScreen(
             .semantics {
                 testTagsAsResourceId = true
             },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets()
     ) { paddingValues ->
 
         val contentWidth by remember(key1 = windowSize) {
@@ -641,8 +643,8 @@ private fun EditProfileScreen(
                                             option.value == mapFields[serverFieldName.value]
                                         }
                                     }
-                                    modalListState.scrollToItem(if (index > 0) index else 0)
                                     showBottomSheet = true
+                                    modalListState.scrollToItem(if (index > 0) index else 0)
                                 }
                             },
                             onValueChanged = {
