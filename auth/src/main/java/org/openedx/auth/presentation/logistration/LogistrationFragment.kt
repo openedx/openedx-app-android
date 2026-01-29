@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -123,15 +124,16 @@ private fun LogistrationScreen(
             .semantics {
                 testTagsAsResourceId = true
             }
-            .fillMaxSize()
-            .navigationBarsPadding(),
-        containerColor = MaterialTheme.appColors.background
+            .fillMaxSize(),
+        containerColor = MaterialTheme.appColors.background,
+        contentWindowInsets = WindowInsets()
     ) {
         Surface(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
                 .verticalScroll(scrollState)
+                .navigationBarsPadding()
                 .displayCutoutForLandscape(),
             color = MaterialTheme.appColors.background
         ) {

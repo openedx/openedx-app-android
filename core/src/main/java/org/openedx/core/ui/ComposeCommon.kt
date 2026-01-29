@@ -1137,14 +1137,16 @@ fun AuthButtonsPanel(
     onSignInClick: () -> Unit,
     showRegisterButton: Boolean,
 ) {
-    Row {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         OpenEdXOutlinedButton(
             modifier = Modifier
                 .testTag("btn_sign_in")
                 .then(
                     if (showRegisterButton) {
                         Modifier
-                            .width(100.dp)
+                            .width(120.dp)
                             .padding(end = 16.dp)
                     } else {
                         Modifier.weight(1f)

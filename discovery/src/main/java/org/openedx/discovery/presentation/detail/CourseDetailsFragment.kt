@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -238,6 +239,7 @@ internal fun CourseDetailsScreen(
             },
         containerColor = MaterialTheme.appColors.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets(),
         bottomBar = {
             if (!isUserLoggedIn) {
                 Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)) {
