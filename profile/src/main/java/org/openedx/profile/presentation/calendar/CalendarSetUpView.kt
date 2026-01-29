@@ -138,7 +138,9 @@ fun CalendarSetUpView(
                         Card(
                             shape = MaterialTheme.appShapes.cardShape,
                             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground)
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.appColors.cardViewBackground
+                            )
                         ) {
                             Column(
                                 modifier = Modifier

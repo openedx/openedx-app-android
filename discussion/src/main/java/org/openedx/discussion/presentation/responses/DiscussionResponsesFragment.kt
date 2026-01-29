@@ -472,8 +472,10 @@ private fun DiscussionResponsesScreen(
                                                 )
                                             },
                                             colors = OutlinedTextFieldDefaults.colors(
-                                                unfocusedContainerColor = MaterialTheme.appColors.textFieldBackgroundVariant,
-                                                focusedContainerColor = MaterialTheme.appColors.textFieldBackgroundVariant,
+                                                unfocusedContainerColor =
+                                                    MaterialTheme.appColors.textFieldBackgroundVariant,
+                                                focusedContainerColor =
+                                                    MaterialTheme.appColors.textFieldBackgroundVariant,
                                                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                                                 unfocusedTextColor = MaterialTheme.appColors.textFieldText,
                                                 focusedTextColor = MaterialTheme.appColors.textFieldText

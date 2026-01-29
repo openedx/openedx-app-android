@@ -128,6 +128,7 @@ data class AppColors(
         val r = red
         val g = green
         val b = blue
+        @Suppress("MagicNumber")
         return 0.299f * r + 0.587f * g + 0.114f * b
     }
 }

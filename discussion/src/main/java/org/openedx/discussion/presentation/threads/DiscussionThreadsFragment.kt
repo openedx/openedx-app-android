@@ -48,7 +48,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -230,7 +229,6 @@ private fun DiscussionThreadsScreen(
     val focusManager = LocalFocusManager.current
     val pullToRefreshState = rememberPullToRefreshState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val coroutine = rememberCoroutineScope()
     val scrollState = rememberLazyListState()
     val firstVisibleIndex = remember { mutableStateOf(scrollState.firstVisibleItemIndex) }
     val context = LocalContext.current
