@@ -1,6 +1,5 @@
 package org.openedx.course.data.repository
 
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -31,7 +30,6 @@ import java.util.concurrent.ConcurrentHashMap
  *
  * When multiple callers request the same data simultaneously,
  * only one network request is made and all callers receive the same result.
- * This is achieved using CompletableDeferred.
  */
 @Suppress("TooManyFunctions")
 class CourseRepository(
@@ -41,33 +39,46 @@ class CourseRepository(
     private val preferencesManager: CorePreferences,
     private val networkConnection: NetworkConnection,
 ) {
-    private val structureCache = ConcurrentHashMap<String, CourseStructure>()
-    private val statusCache = ConcurrentHashMap<String, CourseComponentStatus>()
-    private val datesCache = ConcurrentHashMap<String, CourseDatesResult>()
-    private val progressCache = ConcurrentHashMap<String, CourseProgress>()
-    private val enrollmentCache = ConcurrentHashMap<String, CourseEnrollmentDetails>()
-
-    // Pending requests - when a request is in progress, other callers wait for it
-    private val pendingStructure = ConcurrentHashMap<String, CompletableDeferred<CourseStructure>>()
-    private val pendingStatus =
-        ConcurrentHashMap<String, CompletableDeferred<CourseComponentStatus>>()
-    private val pendingDates = ConcurrentHashMap<String, CompletableDeferred<CourseDatesResult>>()
-    private val pendingProgress = ConcurrentHashMap<String, CompletableDeferred<CourseProgress>>()
-    private val pendingEnrollment =
-        ConcurrentHashMap<String, CompletableDeferred<CourseEnrollmentDetails>>()
-
     // Session tracking - when entering a course, mark that data needs refresh
     private val needsRefresh = ConcurrentHashMap.newKeySet<String>()
 
-    private fun <T> getOrCreateDeferred(
-        cache: ConcurrentHashMap<String, CompletableDeferred<T>>,
-        key: String
-    ): Pair<CompletableDeferred<T>, Boolean> {
-        cache[key]?.let { return it to false }
-        val deferred = CompletableDeferred<T>()
-        val existing = cache.putIfAbsent(key, deferred)
-        return if (existing != null) existing to false else deferred to true
-    }
+    private val structureCache = CoalescingCache<String, CourseStructure>(
+        fetch = { courseId ->
+            val response = api.getCourseStructure(
+                "stale-if-error=0",
+                "v4",
+                preferencesManager.user?.username,
+                courseId
+            )
+            courseDao.insertCourseStructureEntity(response.mapToRoomEntity())
+            response.mapToDomain()
+        },
+        persist = { courseId, _ -> needsRefresh.remove(courseId) }
+    )
+
+    private val statusCache = CoalescingCache<String, CourseComponentStatus>(
+        fetch = { courseId ->
+            val username = preferencesManager.user?.username ?: ""
+            api.getCourseStatus(username, courseId).mapToDomain()
+        }
+    )
+
+    private val datesCache = CoalescingCache<String, CourseDatesResult>(
+        fetch = { courseId -> api.getCourseDates(courseId).getCourseDatesResult() }
+    )
+
+    private val progressCache = CoalescingCache<String, CourseProgress>(
+        fetch = { courseId ->
+            val response = api.getCourseProgress(courseId)
+            courseDao.insertCourseProgressEntity(response.mapToRoomEntity(courseId))
+            response.mapToDomain()
+        }
+    )
+
+    private val enrollmentCache = CoalescingCache<String, CourseEnrollmentDetails>(
+        fetch = { courseId -> api.getEnrollmentDetails(courseId).mapToDomain() },
+        persist = { _, details -> courseDao.insertCourseEnrollmentDetailsEntity(details.mapToEntity()) }
+    )
 
     /**
      * Call when entering a course to mark that data should be refreshed.
@@ -81,57 +92,30 @@ class CourseRepository(
         forceRefresh: Boolean = false
     ): Flow<CourseStructure> = flow {
         if (!forceRefresh) {
-            structureCache[courseId]?.let { emit(it) }
+            structureCache.getCached(courseId)?.let { emit(it) }
 
-            if (structureCache[courseId] == null) {
+            if (structureCache.getCached(courseId) == null) {
                 courseDao.getCourseStructureById(courseId)?.mapToDomain()?.let {
-                    structureCache[courseId] = it
+                    structureCache.setCached(courseId, it)
                     emit(it)
                 }
             }
         }
 
         val shouldRefresh = forceRefresh || needsRefresh.contains(courseId)
-        if (networkConnection.isOnline() && (structureCache[courseId] == null || shouldRefresh)) {
-            emit(fetchOrAwaitStructure(courseId))
+        if (networkConnection.isOnline() && (structureCache.getCached(courseId) == null || shouldRefresh)) {
+            emit(structureCache.getOrFetch(courseId, forceRefresh = true))
         }
 
-        if (structureCache[courseId] == null) {
+        if (structureCache.getCached(courseId) == null) {
             throw NoCachedDataException()
         }
     }
 
-    private suspend fun fetchOrAwaitStructure(courseId: String): CourseStructure {
-        val (deferred, isOwner) = getOrCreateDeferred(pendingStructure, courseId)
-        return if (isOwner) {
-            try {
-                val response = api.getCourseStructure(
-                    "stale-if-error=0",
-                    "v4",
-                    preferencesManager.user?.username,
-                    courseId
-                )
-                courseDao.insertCourseStructureEntity(response.mapToRoomEntity())
-                val structure = response.mapToDomain()
-                structureCache[courseId] = structure
-                needsRefresh.remove(courseId)
-                deferred.complete(structure)
-                structure
-            } catch (e: Exception) {
-                deferred.completeExceptionally(e)
-                throw e
-            } finally {
-                pendingStructure.remove(courseId)
-            }
-        } else {
-            deferred.await()
-        }
-    }
-
     suspend fun getCourseStructureFromCache(courseId: String): CourseStructure {
-        return structureCache[courseId]
+        return structureCache.getCached(courseId)
             ?: courseDao.getCourseStructureById(courseId)?.mapToDomain()?.also {
-                structureCache[courseId] = it
+                structureCache.setCached(courseId, it)
             }
             ?: throw NoCachedDataException()
     }
@@ -141,42 +125,22 @@ class CourseRepository(
         forceRefresh: Boolean = false
     ): Flow<CourseEnrollmentDetails> = flow {
         if (!forceRefresh) {
-            enrollmentCache[courseId]?.let { emit(it) }
+            enrollmentCache.getCached(courseId)?.let { emit(it) }
 
-            if (enrollmentCache[courseId] == null) {
+            if (enrollmentCache.getCached(courseId) == null) {
                 courseDao.getCourseEnrollmentDetailsById(courseId)?.mapToDomain()?.let {
-                    enrollmentCache[courseId] = it
+                    enrollmentCache.setCached(courseId, it)
                     emit(it)
                 }
             }
         }
 
-        if (networkConnection.isOnline() && (enrollmentCache[courseId] == null || forceRefresh)) {
-            emit(fetchOrAwaitEnrollment(courseId))
+        if (networkConnection.isOnline() && (enrollmentCache.getCached(courseId) == null || forceRefresh)) {
+            emit(enrollmentCache.getOrFetch(courseId, forceRefresh = true))
         }
 
-        if (enrollmentCache[courseId] == null) {
+        if (enrollmentCache.getCached(courseId) == null) {
             throw NoCachedDataException()
-        }
-    }
-
-    private suspend fun fetchOrAwaitEnrollment(courseId: String): CourseEnrollmentDetails {
-        val (deferred, isOwner) = getOrCreateDeferred(pendingEnrollment, courseId)
-        return if (isOwner) {
-            try {
-                val details = api.getEnrollmentDetails(courseId).mapToDomain()
-                courseDao.insertCourseEnrollmentDetailsEntity(details.mapToEntity())
-                enrollmentCache[courseId] = details
-                deferred.complete(details)
-                details
-            } catch (e: Exception) {
-                deferred.completeExceptionally(e)
-                throw e
-            } finally {
-                pendingEnrollment.remove(courseId)
-            }
-        } else {
-            deferred.await()
         }
     }
 
@@ -189,41 +153,21 @@ class CourseRepository(
         forceRefresh: Boolean = false
     ): Flow<CourseComponentStatus> = flow {
         if (!forceRefresh) {
-            statusCache[courseId]?.let { emit(it) }
+            statusCache.getCached(courseId)?.let { emit(it) }
         }
 
         val shouldRefresh = forceRefresh || needsRefresh.contains(courseId)
-        if (networkConnection.isOnline() && (statusCache[courseId] == null || shouldRefresh)) {
-            emit(fetchOrAwaitStatus(courseId))
-        } else if (statusCache[courseId] == null) {
+        if (networkConnection.isOnline() && (statusCache.getCached(courseId) == null || shouldRefresh)) {
+            emit(statusCache.getOrFetch(courseId, forceRefresh = true))
+        } else if (statusCache.getCached(courseId) == null) {
             emit(CourseComponentStatus(""))
-        }
-    }
-
-    private suspend fun fetchOrAwaitStatus(courseId: String): CourseComponentStatus {
-        val (deferred, isOwner) = getOrCreateDeferred(pendingStatus, courseId)
-        return if (isOwner) {
-            try {
-                val username = preferencesManager.user?.username ?: ""
-                val status = api.getCourseStatus(username, courseId).mapToDomain()
-                statusCache[courseId] = status
-                deferred.complete(status)
-                status
-            } catch (e: Exception) {
-                deferred.completeExceptionally(e)
-                throw e
-            } finally {
-                pendingStatus.remove(courseId)
-            }
-        } else {
-            deferred.await()
         }
     }
 
     suspend fun getCourseStatus(courseId: String): CourseComponentStatus {
         val username = preferencesManager.user?.username ?: ""
         val status = api.getCourseStatus(username, courseId).mapToDomain()
-        statusCache[courseId] = status
+        statusCache.setCached(courseId, status)
         return status
     }
 
@@ -232,41 +176,22 @@ class CourseRepository(
         forceRefresh: Boolean = false
     ): Flow<CourseDatesResult> = flow {
         if (!forceRefresh) {
-            datesCache[courseId]?.let { emit(it) }
+            datesCache.getCached(courseId)?.let { emit(it) }
         }
 
         val shouldRefresh = forceRefresh || needsRefresh.contains(courseId)
-        if (networkConnection.isOnline() && (datesCache[courseId] == null || shouldRefresh)) {
-            emit(fetchOrAwaitDates(courseId))
-        } else if (datesCache[courseId] == null) {
+        if (networkConnection.isOnline() && (datesCache.getCached(courseId) == null || shouldRefresh)) {
+            emit(datesCache.getOrFetch(courseId, forceRefresh = true))
+        } else if (datesCache.getCached(courseId) == null) {
             emit(emptyCourseDatesResult())
-        }
-    }
-
-    private suspend fun fetchOrAwaitDates(courseId: String): CourseDatesResult {
-        val (deferred, isOwner) = getOrCreateDeferred(pendingDates, courseId)
-        return if (isOwner) {
-            try {
-                val datesResult = api.getCourseDates(courseId).getCourseDatesResult()
-                datesCache[courseId] = datesResult
-                deferred.complete(datesResult)
-                datesResult
-            } catch (e: Exception) {
-                deferred.completeExceptionally(e)
-                throw e
-            } finally {
-                pendingDates.remove(courseId)
-            }
-        } else {
-            deferred.await()
         }
     }
 
     suspend fun getCourseDates(courseId: String, forceRefresh: Boolean = false): CourseDatesResult {
         return when {
-            !forceRefresh && datesCache[courseId] != null -> datesCache[courseId]!!
-            networkConnection.isOnline() -> fetchOrAwaitDates(courseId)
-            else -> datesCache[courseId] ?: throw NoCachedDataException()
+            !forceRefresh && datesCache.getCached(courseId) != null -> datesCache.getCached(courseId)!!
+            networkConnection.isOnline() -> datesCache.getOrFetch(courseId, forceRefresh = true)
+            else -> datesCache.getCached(courseId) ?: throw NoCachedDataException()
         }
     }
 
@@ -287,43 +212,22 @@ class CourseRepository(
         getOnlyCacheIfExist: Boolean
     ): Flow<CourseProgress> = flow {
         if (!isRefresh) {
-            progressCache[courseId]?.let { emit(it) }
+            progressCache.getCached(courseId)?.let { emit(it) }
         }
 
-        if (!isRefresh && progressCache[courseId] == null) {
+        if (!isRefresh && progressCache.getCached(courseId) == null) {
             courseDao.getCourseProgressById(courseId)?.mapToDomain()?.let {
-                progressCache[courseId] = it
+                progressCache.setCached(courseId, it)
                 emit(it)
             }
         }
 
         val shouldRefresh = isRefresh || needsRefresh.contains(courseId)
-        val hasCache = progressCache[courseId] != null
+        val hasCache = progressCache.getCached(courseId) != null
         val shouldFetch = shouldRefresh || !hasCache || !getOnlyCacheIfExist
 
         if (networkConnection.isOnline() && shouldFetch) {
-            emit(fetchOrAwaitProgress(courseId))
-        }
-    }
-
-    private suspend fun fetchOrAwaitProgress(courseId: String): CourseProgress {
-        val (deferred, isOwner) = getOrCreateDeferred(pendingProgress, courseId)
-        return if (isOwner) {
-            try {
-                val response = api.getCourseProgress(courseId)
-                courseDao.insertCourseProgressEntity(response.mapToRoomEntity(courseId))
-                val progress = response.mapToDomain()
-                progressCache[courseId] = progress
-                deferred.complete(progress)
-                progress
-            } catch (e: Exception) {
-                deferred.completeExceptionally(e)
-                throw e
-            } finally {
-                pendingProgress.remove(courseId)
-            }
-        } else {
-            deferred.await()
+            emit(progressCache.getOrFetch(courseId, forceRefresh = true))
         }
     }
 
