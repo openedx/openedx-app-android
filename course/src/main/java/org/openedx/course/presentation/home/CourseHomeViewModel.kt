@@ -165,8 +165,17 @@ class CourseHomeViewModel(
 
     private fun getCourseDataInternal() {
         viewModelScope.launch {
+            if (_uiState.value !is CourseHomeUIState.CourseData) {
+                _uiState.value = CourseHomeUIState.Loading
+            }
+            var hasReceivedData = false
             val courseStructureFlow = interactor.getCourseStructureFlow(courseId, false)
-                .catch { emit(null) }
+                .catch { e ->
+                    if (!hasReceivedData) {
+                        handleCourseDataError(e)
+                    }
+                    emit(null)
+                }
             val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
             val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
             val courseProgressFlow = interactor.getCourseProgress(courseId, false, true)
@@ -177,6 +186,7 @@ class CourseHomeViewModel(
                 courseProgressFlow
             ) { courseStructure, courseStatus, courseDatesResult, courseProgress ->
                 if (courseStructure == null) return@combine
+                hasReceivedData = true
                 val blocks = courseStructure.blockData
 
                 initializeCourseData(

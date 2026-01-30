@@ -91,14 +91,13 @@ class CourseRepository(
         courseId: String,
         forceRefresh: Boolean = false
     ): Flow<CourseStructure> = flow {
-        if (!forceRefresh) {
-            structureCache.getCached(courseId)?.let { emit(it) }
+        // Always emit cached data first if available
+        structureCache.getCached(courseId)?.let { emit(it) }
 
-            if (structureCache.getCached(courseId) == null) {
-                courseDao.getCourseStructureById(courseId)?.mapToDomain()?.let {
-                    structureCache.setCached(courseId, it)
-                    emit(it)
-                }
+        if (structureCache.getCached(courseId) == null) {
+            courseDao.getCourseStructureById(courseId)?.mapToDomain()?.let {
+                structureCache.setCached(courseId, it)
+                emit(it)
             }
         }
 
@@ -124,14 +123,13 @@ class CourseRepository(
         courseId: String,
         forceRefresh: Boolean = false
     ): Flow<CourseEnrollmentDetails> = flow {
-        if (!forceRefresh) {
-            enrollmentCache.getCached(courseId)?.let { emit(it) }
+        // Always emit cached data first if available
+        enrollmentCache.getCached(courseId)?.let { emit(it) }
 
-            if (enrollmentCache.getCached(courseId) == null) {
-                courseDao.getCourseEnrollmentDetailsById(courseId)?.mapToDomain()?.let {
-                    enrollmentCache.setCached(courseId, it)
-                    emit(it)
-                }
+        if (enrollmentCache.getCached(courseId) == null) {
+            courseDao.getCourseEnrollmentDetailsById(courseId)?.mapToDomain()?.let {
+                enrollmentCache.setCached(courseId, it)
+                emit(it)
             }
         }
 
@@ -152,15 +150,13 @@ class CourseRepository(
         courseId: String,
         forceRefresh: Boolean = false
     ): Flow<CourseComponentStatus> = flow {
-        if (!forceRefresh) {
-            statusCache.getCached(courseId)?.let { emit(it) }
-        }
+        // Always emit cached data first if available, otherwise emit empty status
+        val cached = statusCache.getCached(courseId)
+        emit(cached ?: CourseComponentStatus(""))
 
         val shouldRefresh = forceRefresh || needsRefresh.contains(courseId)
-        if (networkConnection.isOnline() && (statusCache.getCached(courseId) == null || shouldRefresh)) {
+        if (networkConnection.isOnline() && (cached == null || shouldRefresh)) {
             emit(statusCache.getOrFetch(courseId, forceRefresh = true))
-        } else if (statusCache.getCached(courseId) == null) {
-            emit(CourseComponentStatus(""))
         }
     }
 
@@ -175,15 +171,13 @@ class CourseRepository(
         courseId: String,
         forceRefresh: Boolean = false
     ): Flow<CourseDatesResult> = flow {
-        if (!forceRefresh) {
-            datesCache.getCached(courseId)?.let { emit(it) }
-        }
+        // Always emit cached data first if available, otherwise emit empty result
+        val cached = datesCache.getCached(courseId)
+        emit(cached ?: emptyCourseDatesResult())
 
         val shouldRefresh = forceRefresh || needsRefresh.contains(courseId)
-        if (networkConnection.isOnline() && (datesCache.getCached(courseId) == null || shouldRefresh)) {
+        if (networkConnection.isOnline() && (cached == null || shouldRefresh)) {
             emit(datesCache.getOrFetch(courseId, forceRefresh = true))
-        } else if (datesCache.getCached(courseId) == null) {
-            emit(emptyCourseDatesResult())
         }
     }
 

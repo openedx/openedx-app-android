@@ -171,8 +171,17 @@ class CourseContentAllViewModel(
 
     private fun getCourseDataInternal() {
         viewModelScope.launch {
+            if (_uiState.value !is CourseContentAllUIState.CourseData) {
+                _uiState.value = CourseContentAllUIState.Loading
+            }
+            var hasReceivedData = false
             val courseStructureFlow = interactor.getCourseStructureFlow(courseId, false)
-                .catch { emit(null) }
+                .catch { e ->
+                    if (!hasReceivedData) {
+                        handleCourseDataError(e)
+                    }
+                    emit(null)
+                }
             val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
             val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
             combine(
@@ -185,6 +194,7 @@ class CourseContentAllViewModel(
                 handleCourseDataError(e)
             }.collect { (courseStructure, courseStatus, courseDates) ->
                 if (courseStructure == null) return@collect
+                hasReceivedData = true
                 val blocks = courseStructure.blockData
 
                 checkIfCalendarOutOfDate(courseDates.datesSection.values.flatten())
