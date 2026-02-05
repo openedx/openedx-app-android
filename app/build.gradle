@@ -133,6 +133,7 @@ dependencies {
     ksp "androidx.room:room-compiler:$room_version"
 
     implementation "androidx.core:core-splashscreen:$core_splashscreen_version"
+    implementation "androidx.datastore:datastore-preferences:1.2.0"
 
     api platform("com.google.firebase:firebase-bom:$firebase_version")
     api "com.google.firebase:firebase-messaging"

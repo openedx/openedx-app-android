@@ -99,7 +99,7 @@ class SignInViewModelTest {
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
         every { calendarPreferences.calendarUser } returns ""
         every { calendarPreferences.calendarType } returns CalendarType.LOCAL
-        every { calendarPreferences.clearCalendarPreferences() } returns Unit
+        coEvery { calendarPreferences.clearCalendarPreferences() } returns Unit
         coEvery { calendarInteractor.clearCalendarCachedData() } returns Unit
         every { analytics.logScreenEvent(any(), any()) } returns Unit
         every { config.isRegistrationEnabled() } returns true

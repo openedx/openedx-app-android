@@ -5,6 +5,8 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -101,7 +103,7 @@ class AppViewModelTest {
         every { notifier.notifier } returns flow {
             emit(LogoutEvent(true))
         }
-        every { preferencesManager.clearCorePreferences() } returns Unit
+        coEvery { preferencesManager.clearCorePreferences() } returns Unit
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { preferencesManager.user } returns CoreMocks.mockUser
         every { room.clearAllTables() } returns Unit
@@ -140,7 +142,7 @@ class AppViewModelTest {
             emit(LogoutEvent(true))
             emit(LogoutEvent(true))
         }
-        every { preferencesManager.clearCorePreferences() } returns Unit
+        coEvery { preferencesManager.clearCorePreferences() } returns Unit
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { preferencesManager.user } returns CoreMocks.mockUser
         every { room.clearAllTables() } returns Unit
@@ -170,7 +172,7 @@ class AppViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) { analytics.logoutEvent(true) }
-        verify(exactly = 1) { preferencesManager.clearCorePreferences() }
+        coVerify(exactly = 1) { preferencesManager.clearCorePreferences() }
         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { preferencesManager.user }
         verify(exactly = 1) { room.clearAllTables() }

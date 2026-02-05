@@ -15,5 +15,5 @@ interface CorePreferences {
     var canResetAppDirectory: Boolean
     var isRelativeDatesEnabled: Boolean
 
-    fun clearCorePreferences()
+    suspend fun clearCorePreferences()
 }
