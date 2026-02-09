@@ -408,7 +408,7 @@ class AppRouter :
             if (isLogistrationEnabled) {
                 replaceFragment(fm, LogistrationFragment())
             } else {
-                replaceFragment(fm, SignInFragment())
+                replaceFragment(fm, SignInFragment.newInstance(null, null))
             }
         }
     }
