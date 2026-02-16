@@ -88,7 +88,7 @@ import org.openedx.core.DatabaseManager as IDatabaseManager
 val appModule = module {
 
     single { Config(get()) }
-    single { PreferencesManager(get()) }
+    single { PreferencesManager(get(), get()) }
     single<CorePreferences> { get<PreferencesManager>() }
     single<ProfilePreferences> { get<PreferencesManager>() }
     single<WhatsNewPreferences> { get<PreferencesManager>() }

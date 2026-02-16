@@ -9,8 +9,12 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CalendarPreferences
@@ -21,15 +25,25 @@ import org.openedx.core.domain.model.CalendarType
 import org.openedx.core.domain.model.VideoQuality
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.system.CalendarManager
+import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.foundation.extension.replaceSpace
 import org.openedx.profile.data.model.Account
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "openedx_prefs")
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "openedx_prefs",
+    produceMigrations = { context ->
+        listOf(SharedPrefsToDataStoreMigration(context))
+    }
+)
 
-class PreferencesManager(private val context: Context) :
+class PreferencesManager(
+    private val context: Context,
+    private val appNotifier: AppNotifier,
+) :
     CorePreferences,
     ProfilePreferences,
     WhatsNewPreferences,
@@ -41,6 +55,11 @@ class PreferencesManager(private val context: Context) :
         get() = context.dataStore
 
     private val encryption = DataStoreEncryption()
+
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    @Volatile
+    private var isKeyInvalidated = false
 
     private object Keys {
         val ACCESS_TOKEN = stringPreferencesKey("access_token")
@@ -71,18 +90,28 @@ class PreferencesManager(private val context: Context) :
             booleanPreferencesKey("calendar_sync_dialog_${courseName.replaceSpace("_")}")
     }
 
-    private fun <T> getValue(key: Preferences.Key<T>, defaultValue: T): T = runBlocking {
-        dataStore.data.map { it[key] ?: defaultValue }.first()
-    }
+    private fun <T> getValue(key: Preferences.Key<T>, defaultValue: T): T =
+        runBlocking(Dispatchers.IO) {
+            dataStore.data.map { it[key] ?: defaultValue }.first()
+        }
 
     private fun <T> setValue(key: Preferences.Key<T>, value: T) {
-        runBlocking { dataStore.edit { it[key] = value } }
+        runBlocking(Dispatchers.IO) { dataStore.edit { it[key] = value } }
     }
 
     private fun getEncryptedString(key: Preferences.Key<String>, defaultValue: String): String {
-        val encrypted = getValue(key, "")
+        val encrypted = if (!isKeyInvalidated) getValue(key, "") else ""
         if (encrypted.isEmpty()) return defaultValue
         val decrypted = encryption.decrypt(encrypted)
+        if (decrypted.isEmpty()) {
+            // Encrypted data exists but decryption failed — keystore likely invalidated.
+            // Clear corrupted data and force re-login.
+            isKeyInvalidated = true
+            scope.launch {
+                clearCorePreferences()
+                appNotifier.send(LogoutEvent(true))
+            }
+        }
         return decrypted.ifEmpty { defaultValue }
     }
 
@@ -148,7 +177,7 @@ class PreferencesManager(private val context: Context) :
             )
         }
         set(value) {
-            runBlocking {
+            runBlocking(Dispatchers.IO) {
                 dataStore.edit { prefs ->
                     prefs[Keys.VIDEO_SETTINGS_WIFI_DOWNLOAD_ONLY] = value.wifiDownloadOnly
                     prefs[Keys.VIDEO_SETTINGS_STREAMING_QUALITY] = value.videoStreamingQuality.name
