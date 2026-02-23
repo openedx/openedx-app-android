@@ -18,6 +18,10 @@ class CourseInteractor(
         repository.startCourseSession(courseId)
     }
 
+    fun endCourseSession() {
+        repository.endCourseSession()
+    }
+
     fun getCourseStructureFlow(
         courseId: String,
         forceRefresh: Boolean = false

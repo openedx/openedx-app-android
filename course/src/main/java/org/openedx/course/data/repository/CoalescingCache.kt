@@ -34,6 +34,13 @@ class CoalescingCache<K, V>(
     }
 
     /**
+     * Removes all cached values.
+     */
+    fun clear() {
+        cache.clear()
+    }
+
+    /**
      * Gets the value from cache or fetches it.
      *
      * If [forceRefresh] is false and a cached value exists, returns it immediately.

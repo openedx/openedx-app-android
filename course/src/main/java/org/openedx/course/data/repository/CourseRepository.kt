@@ -87,6 +87,15 @@ class CourseRepository(
         needsRefresh.add(courseId)
     }
 
+    fun endCourseSession() {
+        structureCache.clear()
+        statusCache.clear()
+        datesCache.clear()
+        progressCache.clear()
+        enrollmentCache.clear()
+        needsRefresh.clear()
+    }
+
     fun getCourseStructureFlow(
         courseId: String,
         forceRefresh: Boolean = false

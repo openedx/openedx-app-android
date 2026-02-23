@@ -414,6 +414,11 @@ class CourseContainerViewModel(
         )
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        interactor.endCourseSession()
+    }
+
     private fun logCalendarSyncEvent(
         event: CourseAnalyticsEvent,
         param: Map<String, Any> = emptyMap(),
