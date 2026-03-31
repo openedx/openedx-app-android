@@ -21,6 +21,9 @@ interface CalendarDao {
     @Query("SELECT * FROM course_calendar_event_table WHERE course_id=:courseId")
     suspend fun readCourseCalendarEventsById(courseId: String): List<CourseCalendarEventEntity>
 
+    @Query("SELECT * FROM course_calendar_event_table")
+    suspend fun readAllCourseCalendarEvents(): List<CourseCalendarEventEntity>
+
     @Query("DELETE FROM course_calendar_event_table")
     suspend fun clearCourseCalendarEventsCachedData()
 

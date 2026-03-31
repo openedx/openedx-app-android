@@ -18,15 +18,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -112,7 +113,7 @@ fun ThreadMainItem(
                 ),
                 modifier = Modifier
                     .size(48.dp)
-                    .clip(MaterialTheme.appShapes.material.medium)
+                    .clip(MaterialTheme.appShapes.material3.medium)
                     .clickable {
                         if (thread.author.isNotEmpty()) {
                             onUserPhotoClick(thread.author)
@@ -192,7 +193,7 @@ fun ThreadMainItem(
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Divider(color = MaterialTheme.appColors.cardViewBorder)
+        HorizontalDivider(color = MaterialTheme.appColors.cardViewBorder)
     }
 }
 
@@ -246,8 +247,8 @@ fun CommentItem(
                 shape
             )
         ),
-        backgroundColor = MaterialTheme.appColors.surface,
-        elevation = 0.dp
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             Modifier
@@ -609,7 +610,7 @@ fun ThreadItemCategory(
                 .clickable { onClick() }
         ),
         shape = MaterialTheme.appShapes.cardShape,
-        backgroundColor = MaterialTheme.appColors.surface
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.surface)
     ) {
         Column(
             modifier = Modifier

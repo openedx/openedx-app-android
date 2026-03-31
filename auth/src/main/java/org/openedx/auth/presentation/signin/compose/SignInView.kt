@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,14 +21,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -91,18 +93,19 @@ internal fun LoginScreen(
     uiMessage: UIMessage?,
     onEvent: (AuthEvent) -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
-        scaffoldState = scaffoldState,
-        modifier =
-            Modifier
-                .semantics {
-                    testTagsAsResourceId = true
-                }.fillMaxSize()
-                .navigationBarsPadding(),
-        backgroundColor = MaterialTheme.appColors.background,
+        modifier = Modifier
+            .semantics {
+                testTagsAsResourceId = true
+            }
+            .fillMaxSize()
+            .navigationBarsPadding(),
+        containerColor = MaterialTheme.appColors.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets()
     ) {
         val contentPaddings by remember {
             mutableStateOf(
@@ -139,10 +142,7 @@ internal fun LoginScreen(
             contentScale = ContentScale.FillBounds,
             contentDescription = null,
         )
-        HandleUIMessage(
-            uiMessage = uiMessage,
-            scaffoldState = scaffoldState,
-        )
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
         if (state.isLogistrationEnabled) {
             Box(
                 modifier =
@@ -438,13 +438,14 @@ private fun PasswordTextField(
             passwordTextFieldValue = it
             onValueChanged(it.text.trim())
         },
-        colors =
-            TextFieldDefaults.outlinedTextFieldColors(
-                textColor = MaterialTheme.appColors.textFieldText,
-                backgroundColor = MaterialTheme.appColors.textFieldBackground,
-                unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                cursorColor = MaterialTheme.appColors.textFieldText,
-            ),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = MaterialTheme.appColors.textFieldText,
+            unfocusedTextColor = MaterialTheme.appColors.textFieldText,
+            focusedContainerColor = MaterialTheme.appColors.textFieldBackground,
+            unfocusedContainerColor = MaterialTheme.appColors.textFieldBackground,
+            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+            cursorColor = MaterialTheme.appColors.textFieldText,
+        ),
         shape = MaterialTheme.appShapes.textFieldShape,
         placeholder = {
             Text(

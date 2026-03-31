@@ -33,7 +33,6 @@ import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.util.concurrent.atomic.AtomicReference
-import org.openedx.core.R as CoreR
 
 class CourseInfoViewModel(
     val pathId: String,
@@ -47,7 +46,7 @@ class CourseInfoViewModel(
     private val resourceManager: ResourceManager,
     private val analytics: DiscoveryAnalytics,
     corePreferences: CorePreferences,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val _uiState =
         MutableStateFlow(
@@ -61,10 +60,6 @@ class CourseInfoViewModel(
     private val _webViewUIState = MutableStateFlow<WebViewUIState>(WebViewUIState.Loading)
     val webViewState
         get() = _webViewUIState.asStateFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
 
     private val _showAlert = MutableSharedFlow<Boolean>()
     val showAlert: SharedFlow<Boolean>
@@ -103,7 +98,7 @@ class CourseInfoViewModel(
                 }.isEnrolled
 
                 if (isCourseEnrolled) {
-                    _uiMessage.emit(
+                    sendMessage(
                         UIMessage.ToastMessage(resourceManager.getString(R.string.discovery_you_are_already_enrolled))
                     )
                     _uiState.update { it.copy(enrollmentSuccess = AtomicReference(courseId)) }
@@ -113,14 +108,14 @@ class CourseInfoViewModel(
                 interactor.enrollInACourse(courseId)
                 courseEnrollSuccessEvent(courseId)
                 notifier.send(CourseDashboardUpdate())
-                _uiMessage.emit(
+                sendMessage(
                     UIMessage.ToastMessage(resourceManager.getString(R.string.discovery_enrolled_successfully))
                 )
                 _uiState.update { it.copy(enrollmentSuccess = AtomicReference(courseId)) }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection))
+                    handleErrorUiMessage(
+                        throwable = e,
                     )
                 } else {
                     _showAlert.emit(true)

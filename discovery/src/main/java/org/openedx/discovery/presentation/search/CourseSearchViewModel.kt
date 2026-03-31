@@ -8,16 +8,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryAnalytics
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.SingleEventLiveData
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 
 class CourseSearchViewModel(
@@ -26,7 +22,7 @@ class CourseSearchViewModel(
     private val interactor: DiscoveryInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscoveryAnalytics
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     val apiHostUrl get() = config.getApiHostURL()
     val isUserLoggedIn get() = corePreferences.user != null
@@ -36,10 +32,6 @@ class CourseSearchViewModel(
         MutableLiveData<CourseSearchUIState>(CourseSearchUIState.Courses(emptyList(), 0))
     val uiState: LiveData<CourseSearchUIState>
         get() = _uiState
-
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
 
     private val _canLoadMore = MutableLiveData<Boolean>()
     val canLoadMore: LiveData<Boolean>
@@ -123,13 +115,9 @@ class CourseSearchViewModel(
                 coursesList.addAll(response.results)
                 _uiState.value = CourseSearchUIState.Courses(coursesList, response.pagination.count)
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             } finally {
                 isLoading = false
                 _isUpdating.value = false

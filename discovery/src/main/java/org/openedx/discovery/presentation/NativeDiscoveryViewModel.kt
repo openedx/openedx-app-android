@@ -4,16 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.domain.model.Course
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.SingleEventLiveData
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 
 class NativeDiscoveryViewModel(
@@ -23,7 +19,7 @@ class NativeDiscoveryViewModel(
     private val resourceManager: ResourceManager,
     private val analytics: DiscoveryAnalytics,
     private val corePreferences: CorePreferences,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     val apiHostUrl get() = config.getApiHostURL()
     val isUserLoggedIn get() = corePreferences.user != null
@@ -33,10 +29,6 @@ class NativeDiscoveryViewModel(
     private val _uiState = MutableLiveData<DiscoveryUIState>(DiscoveryUIState.Loading)
     val uiState: LiveData<DiscoveryUIState>
         get() = _uiState
-
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
 
     private val _canLoadMore = MutableLiveData<Boolean>()
     val canLoadMore: LiveData<Boolean>
@@ -86,13 +78,9 @@ class NativeDiscoveryViewModel(
                 }
                 _uiState.value = DiscoveryUIState.Courses(ArrayList(coursesList))
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             } finally {
                 isLoading = false
             }
@@ -129,13 +117,9 @@ class NativeDiscoveryViewModel(
                 coursesList.addAll(response.results)
                 _uiState.value = DiscoveryUIState.Courses(ArrayList(coursesList))
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             } finally {
                 isLoading = false
                 _isUpdating.value = false

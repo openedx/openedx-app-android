@@ -1,12 +1,12 @@
 package org.openedx.course.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import okhttp3.MultipartBody
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
-import org.openedx.core.data.model.room.CourseProgressEntity
 import org.openedx.core.data.model.room.OfflineXBlockProgress
 import org.openedx.core.data.model.room.VideoProgressEntity
 import org.openedx.core.data.model.room.XBlockProgressData
@@ -19,12 +19,18 @@ import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.exception.NoCachedDataException
-import org.openedx.core.extension.channelFlowWithAwait
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.system.connection.NetworkConnection
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * Repository for course data with request coalescing.
+ *
+ * When multiple callers request the same data simultaneously,
+ * only one network request is made and all callers receive the same result.
+ */
 @Suppress("TooManyFunctions")
 class CourseRepository(
     private val api: CourseApi,
@@ -33,66 +39,11 @@ class CourseRepository(
     private val preferencesManager: CorePreferences,
     private val networkConnection: NetworkConnection,
 ) {
-    private val courseStructure = mutableMapOf<String, CourseStructure>()
+    // Session tracking - when entering a course, mark that data needs refresh
+    private val needsRefresh = ConcurrentHashMap.newKeySet<String>()
 
-    private val courseStatusMap = mutableMapOf<String, CourseComponentStatus>()
-    private val courseDatesMap = mutableMapOf<String, CourseDatesResult>()
-
-    suspend fun removeDownloadModel(id: String) {
-        downloadDao.removeDownloadModel(id)
-    }
-
-    fun getDownloadModels() = downloadDao.getAllDataFlow().map { list ->
-        list.map { it.mapToDomain() }
-    }
-
-    suspend fun getAllDownloadModels() = downloadDao.readAllData().map { it.mapToDomain() }
-
-    suspend fun getCourseStructureFlow(
-        courseId: String,
-        forceRefresh: Boolean = true
-    ): Flow<CourseStructure> =
-        channelFlowWithAwait {
-            var hasCourseStructure = false
-            val cachedCourseStructure = courseStructure[courseId] ?: (
-                    courseDao.getCourseStructureById(courseId)?.mapToDomain()
-                    )
-            if (cachedCourseStructure != null) {
-                hasCourseStructure = true
-                trySend(cachedCourseStructure)
-            }
-            val fetchRemoteCourse = !hasCourseStructure || forceRefresh
-            if (networkConnection.isOnline() && fetchRemoteCourse) {
-                val response = api.getCourseStructure(
-                    "stale-if-error=0",
-                    "v4",
-                    preferencesManager.user?.username,
-                    courseId
-                )
-                courseDao.insertCourseStructureEntity(response.mapToRoomEntity())
-                val courseDomainModel = response.mapToDomain()
-                courseStructure[courseId] = courseDomainModel
-                trySend(courseDomainModel)
-                hasCourseStructure = true
-            }
-            if (!hasCourseStructure) {
-                throw NoCachedDataException()
-            }
-        }
-
-    suspend fun getCourseStructureFromCache(courseId: String): CourseStructure {
-        val cachedCourseStructure = courseDao.getCourseStructureById(courseId)
-        if (cachedCourseStructure != null) {
-            return cachedCourseStructure.mapToDomain()
-        } else {
-            throw NoCachedDataException()
-        }
-    }
-
-    suspend fun getCourseStructure(courseId: String, isNeedRefresh: Boolean): CourseStructure {
-        if (!isNeedRefresh) courseStructure[courseId]?.let { return it }
-
-        if (networkConnection.isOnline()) {
+    private val structureCache = CoalescingCache<String, CourseStructure>(
+        fetch = { courseId ->
             val response = api.getCourseStructure(
                 "stale-if-error=0",
                 "v4",
@@ -100,57 +51,187 @@ class CourseRepository(
                 courseId
             )
             courseDao.insertCourseStructureEntity(response.mapToRoomEntity())
-            courseStructure[courseId] = response.mapToDomain()
-        } else {
-            val cachedCourseStructure = courseDao.getCourseStructureById(courseId)
-            if (cachedCourseStructure != null) {
-                courseStructure[courseId] = cachedCourseStructure.mapToDomain()
-            } else {
-                throw NoCachedDataException()
-            }
-        }
+            response.mapToDomain()
+        },
+        persist = { courseId, _ -> needsRefresh.remove(courseId) }
+    )
 
-        return courseStructure[courseId]!!
+    private val statusCache = CoalescingCache<String, CourseComponentStatus>(
+        fetch = { courseId ->
+            val username = preferencesManager.user?.username ?: ""
+            api.getCourseStatus(username, courseId).mapToDomain()
+        }
+    )
+
+    private val datesCache = CoalescingCache<String, CourseDatesResult>(
+        fetch = { courseId -> api.getCourseDates(courseId).getCourseDatesResult() }
+    )
+
+    private val progressCache = CoalescingCache<String, CourseProgress>(
+        fetch = { courseId ->
+            val response = api.getCourseProgress(courseId)
+            courseDao.insertCourseProgressEntity(response.mapToRoomEntity(courseId))
+            response.mapToDomain()
+        }
+    )
+
+    private val enrollmentCache = CoalescingCache<String, CourseEnrollmentDetails>(
+        fetch = { courseId -> api.getEnrollmentDetails(courseId).mapToDomain() },
+        persist = { _, details -> courseDao.insertCourseEnrollmentDetailsEntity(details.mapToEntity()) }
+    )
+
+    /**
+     * Call when entering a course to mark that data should be refreshed.
+     */
+    fun startCourseSession(courseId: String) {
+        needsRefresh.add(courseId)
     }
 
-    suspend fun getEnrollmentDetailsFlow(courseId: String): Flow<CourseEnrollmentDetails> =
-        channelFlowWithAwait {
-            getCourseEnrollmentDetailsFromCache(courseId)?.let {
-                trySend(it)
+    fun endCourseSession() {
+        structureCache.clear()
+        statusCache.clear()
+        datesCache.clear()
+        progressCache.clear()
+        enrollmentCache.clear()
+        needsRefresh.clear()
+    }
+
+    fun getCourseStructureFlow(
+        courseId: String,
+        forceRefresh: Boolean = false
+    ): Flow<CourseStructure> = flow {
+        // Always emit cached data first if available
+        structureCache.getCached(courseId)?.let { emit(it) }
+
+        if (structureCache.getCached(courseId) == null) {
+            courseDao.getCourseStructureById(courseId)?.mapToDomain()?.let {
+                structureCache.setCached(courseId, it)
+                emit(it)
             }
-            val details = getEnrollmentDetails(courseId)
-            courseDao.insertCourseEnrollmentDetailsEntity(details.mapToEntity())
-            trySend(details)
         }
 
-    private suspend fun getCourseEnrollmentDetailsFromCache(courseId: String): CourseEnrollmentDetails? {
-        return courseDao.getCourseEnrollmentDetailsById(id = courseId)
-            ?.mapToDomain()
+        val shouldRefresh = forceRefresh || needsRefresh.contains(courseId)
+        if (networkConnection.isOnline() && (structureCache.getCached(courseId) == null || shouldRefresh)) {
+            emit(structureCache.getOrFetch(courseId, forceRefresh = true))
+        }
+
+        if (structureCache.getCached(courseId) == null) {
+            throw NoCachedDataException()
+        }
+    }
+
+    suspend fun getCourseStructureFromCache(courseId: String): CourseStructure {
+        return structureCache.getCached(courseId)
+            ?: courseDao.getCourseStructureById(courseId)?.mapToDomain()?.also {
+                structureCache.setCached(courseId, it)
+            }
+            ?: throw NoCachedDataException()
+    }
+
+    fun getEnrollmentDetailsFlow(
+        courseId: String,
+        forceRefresh: Boolean = false
+    ): Flow<CourseEnrollmentDetails> = flow {
+        // Always emit cached data first if available
+        enrollmentCache.getCached(courseId)?.let { emit(it) }
+
+        if (enrollmentCache.getCached(courseId) == null) {
+            courseDao.getCourseEnrollmentDetailsById(courseId)?.mapToDomain()?.let {
+                enrollmentCache.setCached(courseId, it)
+                emit(it)
+            }
+        }
+
+        if (networkConnection.isOnline() && (enrollmentCache.getCached(courseId) == null || forceRefresh)) {
+            emit(enrollmentCache.getOrFetch(courseId, forceRefresh = true))
+        }
+
+        if (enrollmentCache.getCached(courseId) == null) {
+            throw NoCachedDataException()
+        }
     }
 
     suspend fun getEnrollmentDetails(courseId: String): CourseEnrollmentDetails {
-        return api.getEnrollmentDetails(courseId = courseId).mapToDomain()
+        return api.getEnrollmentDetails(courseId).mapToDomain()
     }
 
-    suspend fun getCourseStatusFlow(courseId: String): Flow<CourseComponentStatus> =
-        channelFlowWithAwait {
-            val localStatus = courseStatusMap[courseId]
-            localStatus?.let { trySend(it) }
+    fun getCourseStatusFlow(
+        courseId: String,
+        forceRefresh: Boolean = false
+    ): Flow<CourseComponentStatus> = flow {
+        // Always emit cached data first if available, otherwise emit empty status
+        val cached = statusCache.getCached(courseId)
+        emit(cached ?: CourseComponentStatus(""))
 
-            if (networkConnection.isOnline()) {
-                val username = preferencesManager.user?.username ?: ""
-                val status = api.getCourseStatus(username, courseId).mapToDomain()
-                courseStatusMap[courseId] = status
-                trySend(status)
-            } else {
-                val status = localStatus ?: CourseComponentStatus("")
-                trySend(status)
-            }
+        val shouldRefresh = forceRefresh || needsRefresh.contains(courseId)
+        if (networkConnection.isOnline() && (cached == null || shouldRefresh)) {
+            emit(statusCache.getOrFetch(courseId, forceRefresh = true))
         }
+    }
 
     suspend fun getCourseStatus(courseId: String): CourseComponentStatus {
         val username = preferencesManager.user?.username ?: ""
-        return api.getCourseStatus(username, courseId).mapToDomain()
+        val status = api.getCourseStatus(username, courseId).mapToDomain()
+        statusCache.setCached(courseId, status)
+        return status
+    }
+
+    fun getCourseDatesFlow(
+        courseId: String,
+        forceRefresh: Boolean = false
+    ): Flow<CourseDatesResult> = flow {
+        // Always emit cached data first if available, otherwise emit empty result
+        val cached = datesCache.getCached(courseId)
+        emit(cached ?: emptyCourseDatesResult())
+
+        val shouldRefresh = forceRefresh || needsRefresh.contains(courseId)
+        if (networkConnection.isOnline() && (cached == null || shouldRefresh)) {
+            emit(datesCache.getOrFetch(courseId, forceRefresh = true))
+        }
+    }
+
+    suspend fun getCourseDates(courseId: String, forceRefresh: Boolean = false): CourseDatesResult {
+        return when {
+            !forceRefresh && datesCache.getCached(courseId) != null -> datesCache.getCached(courseId)!!
+            networkConnection.isOnline() -> datesCache.getOrFetch(courseId, forceRefresh = true)
+            else -> datesCache.getCached(courseId) ?: throw NoCachedDataException()
+        }
+    }
+
+    private fun emptyCourseDatesResult() = CourseDatesResult(
+        datesSection = linkedMapOf(),
+        courseBanner = CourseDatesBannerInfo(
+            missedDeadlines = false,
+            missedGatedContent = false,
+            verifiedUpgradeLink = "",
+            contentTypeGatingEnabled = false,
+            hasEnded = false
+        )
+    )
+
+    fun getCourseProgress(
+        courseId: String,
+        isRefresh: Boolean,
+        getOnlyCacheIfExist: Boolean
+    ): Flow<CourseProgress> = flow {
+        if (!isRefresh) {
+            progressCache.getCached(courseId)?.let { emit(it) }
+        }
+
+        if (!isRefresh && progressCache.getCached(courseId) == null) {
+            courseDao.getCourseProgressById(courseId)?.mapToDomain()?.let {
+                progressCache.setCached(courseId, it)
+                emit(it)
+            }
+        }
+
+        val shouldRefresh = isRefresh || needsRefresh.contains(courseId)
+        val hasCache = progressCache.getCached(courseId) != null
+        val shouldFetch = shouldRefresh || !hasCache || !getOnlyCacheIfExist
+
+        if (networkConnection.isOnline() && shouldFetch) {
+            emit(progressCache.getOrFetch(courseId, forceRefresh = true))
+        }
     }
 
     suspend fun markBlocksCompletion(courseId: String, blocksId: List<String>) {
@@ -158,37 +239,10 @@ class CourseRepository(
         val blocksCompletionBody = BlocksCompletionBody(
             username,
             courseId,
-            blocksId.associateWith { "1" }.toMap()
+            blocksId.associateWith { "1" }
         )
-        return api.markBlocksCompletion(blocksCompletionBody)
+        api.markBlocksCompletion(blocksCompletionBody)
     }
-
-    suspend fun getCourseDatesFlow(courseId: String): Flow<CourseDatesResult> =
-        channelFlowWithAwait {
-            val localDates = courseDatesMap[courseId]
-            localDates?.let { trySend(it) }
-
-            if (networkConnection.isOnline()) {
-                val datesResult = api.getCourseDates(courseId).getCourseDatesResult()
-                courseDatesMap[courseId] = datesResult
-                trySend(datesResult)
-            } else {
-                val datesResult = localDates ?: CourseDatesResult(
-                    datesSection = linkedMapOf(),
-                    courseBanner = CourseDatesBannerInfo(
-                        missedDeadlines = false,
-                        missedGatedContent = false,
-                        verifiedUpgradeLink = "",
-                        contentTypeGatingEnabled = false,
-                        hasEnded = false
-                    )
-                )
-                trySend(datesResult)
-            }
-        }
-
-    suspend fun getCourseDates(courseId: String) =
-        api.getCourseDates(courseId).getCourseDatesResult()
 
     suspend fun resetCourseDates(courseId: String) =
         api.resetCourseDates(mapOf(ApiConstants.COURSE_KEY to courseId)).mapToDomain()
@@ -200,6 +254,16 @@ class CourseRepository(
 
     suspend fun getAnnouncements(courseId: String) =
         api.getAnnouncements(courseId).map { it.mapToDomain() }
+
+    suspend fun removeDownloadModel(id: String) {
+        downloadDao.removeDownloadModel(id)
+    }
+
+    fun getDownloadModels() = downloadDao.getAllDataFlow().map { list ->
+        list.map { it.mapToDomain() }
+    }
+
+    suspend fun getAllDownloadModels() = downloadDao.readAllData().map { it.mapToDomain() }
 
     suspend fun saveOfflineXBlockProgress(blockId: String, courseId: String, jsonProgress: String) {
         val offlineXBlockProgress = OfflineXBlockProgress(
@@ -256,24 +320,4 @@ class CourseRepository(
         return courseDao.getVideoProgressByBlockId(blockId)
             ?: VideoProgressEntity(blockId, "", null, null)
     }
-
-    fun getCourseProgress(
-        courseId: String,
-        isRefresh: Boolean,
-        getOnlyCacheIfExist: Boolean // If true, only returns cached data if available, otherwise fetches from network
-    ): Flow<CourseProgress> =
-        channelFlowWithAwait {
-            var courseProgress: CourseProgressEntity? = null
-            if (!isRefresh) {
-                courseProgress = courseDao.getCourseProgressById(courseId)
-                if (courseProgress != null) {
-                    trySend(courseProgress.mapToDomain())
-                }
-            }
-            if (networkConnection.isOnline() && (!getOnlyCacheIfExist || courseProgress == null)) {
-                val response = api.getCourseProgress(courseId)
-                courseDao.insertCourseProgressEntity(response.mapToRoomEntity(courseId))
-                trySend(response.mapToDomain())
-            }
-        }
 }

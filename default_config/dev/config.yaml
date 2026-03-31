@@ -1,19 +1,10 @@
 API_HOST_URL: 'http://localhost:8000'
-SSO_URL: 'http://localhost:8000'
-SSO_FINISHED_URL:  'http://localhost:8000'
 APPLICATION_ID: 'org.openedx.app'
 ENVIRONMENT_DISPLAY_NAME: 'Localhost'
 URI_SCHEME: ''
 FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
 FAQ_URL: ''
 OAUTH_CLIENT_ID: 'OAUTH_CLIENT_ID'
-LOGIN_REGISTRATION_ENABLED: true
-SAML_SSO_LOGIN_ENABLED: false
-SAML_SSO_DEFAULT_LOGIN_BUTTON: false
-
-SSO_BUTTON_TITLE:
-  AR: "الدخول عبر SSO"
-  EN: "Sign in with SSO"
 
 # Keep empty to hide setting
 AGREEMENT_URLS:
@@ -92,6 +83,12 @@ WHATS_NEW_ENABLED: false
 SOCIAL_AUTH_ENABLED: false
 #feature flag to enable registration from app
 REGISTRATION_ENABLED: true
+#Enables the pre login courses discovery experience (LogistrationFragment).
+PRE_LOGIN_EXPERIENCE_ENABLED: false
+#feature flag to do the authentication flow in the browser to log in
+BROWSER_LOGIN: false
+#feature flag to do the registration for in the browser
+BROWSER_REGISTRATION: false
 #Course navigation feature flags
 UI_COMPONENTS:
   COURSE_DROPDOWN_NAVIGATION_ENABLED: false

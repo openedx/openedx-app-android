@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -25,25 +26,23 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarData
-import androidx.compose.material.SnackbarDuration
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarData
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -141,13 +140,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             setUpCourseCalendar()
         }
         observe()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (viewModel.courseAccessStatus.value == CourseAccessError.NONE) {
-            viewModel.updateData()
-        }
     }
 
     override fun onDestroyView() {
@@ -251,7 +243,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CourseDashboard(
     viewModel: CourseContainerViewModel,
@@ -289,21 +281,17 @@ fun CourseDashboard(
     val tabState = rememberLazyListState()
     val snackState = remember { SnackbarHostState() }
     var selectedContentTab by remember { mutableStateOf(CourseContentTab.ALL) }
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = refreshing,
-        onRefresh = { onRefresh(pagerState.currentPage) }
-    )
+    val pullToRefreshState = rememberPullToRefreshState()
 
     OpenEdXTheme {
         val windowSize = rememberWindowSize()
         val scope = rememberCoroutineScope()
-        val scaffoldState = rememberScaffoldState()
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .navigationBarsPadding(),
-            scaffoldState = scaffoldState,
-            backgroundColor = MaterialTheme.appColors.background,
+            containerColor = MaterialTheme.appColors.background,
+            contentWindowInsets = WindowInsets(),
             bottomBar = {
                 val currentPage = CourseContainerTab.entries[pagerState.currentPage]
                 Box {
@@ -343,7 +331,7 @@ fun CourseDashboard(
                     )
                 }
             }
-            HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+            HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackState)
 
             LaunchedEffect(pagerState.currentPage) {
                 tabState.animateScrollToItem(pagerState.currentPage)
@@ -355,79 +343,80 @@ fun CourseDashboard(
                 Box(
                     modifier = Modifier.weight(1f)
                 ) {
-                    CollapsingLayout(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(paddingValues)
-                            .pullRefresh(pullRefreshState),
-                        courseImage = courseImage,
-                        imageHeight = 200,
-                        expandedTop = {
-                            ExpandedHeaderContent(
-                                courseTitle = viewModel.courseName,
-                                org = viewModel.courseDetails?.courseInfoOverview?.org ?: ""
-                            )
-                        },
-                        collapsedTop = {
-                            CollapsedHeaderContent(
-                                courseTitle = viewModel.courseName
-                            )
-                        },
-                        navigation = {
-                            if (isNavigationEnabled) {
-                                RoundTabsBar(
-                                    items = CourseContainerTab.entries,
-                                    contentPadding = PaddingValues(
-                                        horizontal = 12.dp,
-                                        vertical = 16.dp
-                                    ),
-                                    rowState = tabState,
-                                    pagerState = pagerState,
-                                    withPager = true,
-                                    onTabClicked = viewModel::courseContainerTabClickedEvent
+                    PullToRefreshBox(
+                        isRefreshing = refreshing,
+                        onRefresh = { onRefresh(pagerState.currentPage) },
+                        state = pullToRefreshState,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        CollapsingLayout(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(paddingValues),
+                            courseImage = courseImage,
+                            imageHeight = 200,
+                            expandedTop = {
+                                ExpandedHeaderContent(
+                                    courseTitle = viewModel.courseName,
+                                    org = viewModel.courseDetails?.courseInfoOverview?.org ?: ""
                                 )
-                            }
-                        },
-                        isEnabled = CourseAccessError.NONE == accessStatus.value,
-                        onBackClick = {
-                            fragmentManager.popBackStack()
-                        },
-                        bodyContent = {
-                            when (accessStatus.value) {
-                                CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE,
-                                CourseAccessError.NOT_YET_STARTED,
-                                CourseAccessError.UNKNOWN -> {
-                                    CourseAccessErrorView(
-                                        viewModel = viewModel,
-                                        accessError = accessStatus.value,
-                                        fragmentManager = fragmentManager,
-                                    )
-                                }
-
-                                CourseAccessError.NONE -> {
-                                    DashboardPager(
-                                        windowSize = windowSize,
-                                        viewModel = viewModel,
+                            },
+                            collapsedTop = {
+                                CollapsedHeaderContent(
+                                    courseTitle = viewModel.courseName
+                                )
+                            },
+                            navigation = {
+                                if (isNavigationEnabled) {
+                                    RoundTabsBar(
+                                        items = CourseContainerTab.entries,
+                                        contentPadding = PaddingValues(
+                                            horizontal = 12.dp,
+                                            vertical = 16.dp
+                                        ),
+                                        rowState = tabState,
                                         pagerState = pagerState,
-                                        contentTabPagerState = contentTabPagerState,
-                                        homePagerState = homePagerState,
-                                        isResumed = isResumed,
-                                        fragmentManager = fragmentManager,
-                                        onContentTabSelected = { tab ->
-                                            selectedContentTab = tab
-                                        }
+                                        withPager = true,
+                                        onTabClicked = viewModel::courseContainerTabClickedEvent
                                     )
                                 }
+                            },
+                            isEnabled = CourseAccessError.NONE == accessStatus.value,
+                            onBackClick = {
+                                fragmentManager.popBackStack()
+                            },
+                            bodyContent = {
+                                when (accessStatus.value) {
+                                    CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE,
+                                    CourseAccessError.NOT_YET_STARTED,
+                                    CourseAccessError.UNKNOWN -> {
+                                        CourseAccessErrorView(
+                                            viewModel = viewModel,
+                                            accessError = accessStatus.value,
+                                            fragmentManager = fragmentManager,
+                                        )
+                                    }
 
-                                else -> {}
+                                    CourseAccessError.NONE -> {
+                                        DashboardPager(
+                                            windowSize = windowSize,
+                                            viewModel = viewModel,
+                                            pagerState = pagerState,
+                                            contentTabPagerState = contentTabPagerState,
+                                            homePagerState = homePagerState,
+                                            isResumed = isResumed,
+                                            fragmentManager = fragmentManager,
+                                            onContentTabSelected = { tab ->
+                                                selectedContentTab = tab
+                                            }
+                                        )
+                                    }
+
+                                    else -> {}
+                                }
                             }
-                        }
-                    )
-                    PullRefreshIndicator(
-                        refreshing,
-                        pullRefreshState,
-                        Modifier.align(Alignment.TopCenter)
-                    )
+                        )
+                    }
 
                     SnackbarHost(
                         modifier = Modifier.align(Alignment.BottomStart),
@@ -477,9 +466,6 @@ private fun DashboardPager(
                     ),
                     fragmentManager = fragmentManager,
                     homePagerState = homePagerState,
-                    onResetDatesClick = {
-                        viewModel.onRefresh(CourseContainerTab.DATES)
-                    },
                     onNavigateToContent = { contentTab ->
                         scope.launch {
                             // First scroll to CONTENT tab
@@ -794,7 +780,7 @@ private fun AssignmentsBottomBar(
         modifier = Modifier.background(MaterialTheme.appColors.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Divider(modifier = Modifier.fillMaxWidth())
+        HorizontalDivider(modifier = Modifier.fillMaxWidth())
         TextButton(
             onClick = {
                 scrollToProgress(scope, pagerState)

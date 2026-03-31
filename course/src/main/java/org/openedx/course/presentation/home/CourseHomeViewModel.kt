@@ -14,13 +14,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.helper.VideoPreviewHelper
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
-import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.extension.getChapterBlocks
@@ -34,7 +32,6 @@ import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseProgressLoaded
@@ -45,7 +42,6 @@ import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.unit.container.CourseViewMode
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
@@ -74,17 +70,14 @@ class CourseHomeViewModel(
     preferencesManager,
     workerController,
     coreAnalytics,
-    downloadHelper
+    downloadHelper,
+    resourceManager,
 ) {
     val isCourseDropdownNavigationEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
     private val _uiState = MutableStateFlow<CourseHomeUIState>(CourseHomeUIState.Waiting)
     val uiState: StateFlow<CourseHomeUIState>
         get() = _uiState.asStateFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
 
     private val _resumeBlockId = MutableSharedFlow<String>()
     val resumeBlockId: SharedFlow<String>
@@ -133,7 +126,6 @@ class CourseHomeViewModel(
                         resumeUnitTitle = resumeVerticalBlock?.displayName ?: "",
                         courseSubSections = courseSubSections,
                         subSectionsDownloadsCount = subSectionsDownloadsCount,
-                        datesBannerInfo = state.datesBannerInfo,
                         useRelativeDates = preferencesManager.isRelativeDatesEnabled,
                         next = state.next,
                         courseProgress = state.courseProgress,
@@ -155,7 +147,7 @@ class CourseHomeViewModel(
                 super.saveDownloadModels(folder, courseId, id)
             } else {
                 viewModelScope.launch {
-                    _uiMessage.emit(
+                    sendMessage(
                         UIMessage.ToastMessage(
                             resourceManager.getString(courseR.string.course_can_download_only_with_wifi)
                         )
@@ -173,8 +165,17 @@ class CourseHomeViewModel(
 
     private fun getCourseDataInternal() {
         viewModelScope.launch {
+            if (_uiState.value !is CourseHomeUIState.CourseData) {
+                _uiState.value = CourseHomeUIState.Loading
+            }
+            var hasReceivedData = false
             val courseStructureFlow = interactor.getCourseStructureFlow(courseId, false)
-                .catch { emit(null) }
+                .catch { e ->
+                    if (!hasReceivedData) {
+                        handleCourseDataError(e)
+                    }
+                    emit(null)
+                }
             val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
             val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
             val courseProgressFlow = interactor.getCourseProgress(courseId, false, true)
@@ -185,14 +186,13 @@ class CourseHomeViewModel(
                 courseProgressFlow
             ) { courseStructure, courseStatus, courseDatesResult, courseProgress ->
                 if (courseStructure == null) return@combine
+                hasReceivedData = true
                 val blocks = courseStructure.blockData
-                val datesBannerInfo = courseDatesResult.courseBanner
 
                 initializeCourseData(
                     blocks,
                     courseStructure,
                     courseStatus,
-                    datesBannerInfo,
                     courseProgress
                 )
             }.catch { e ->
@@ -205,7 +205,6 @@ class CourseHomeViewModel(
         blocks: List<Block>,
         courseStructure: CourseStructure,
         courseStatus: CourseComponentStatus,
-        datesBannerInfo: CourseDatesBannerInfo,
         courseProgress: CourseProgress
     ) {
         setBlocks(blocks)
@@ -257,7 +256,6 @@ class CourseHomeViewModel(
             resumeUnitTitle = resumeVerticalBlock?.displayName ?: "",
             courseSubSections = courseSubSections,
             subSectionsDownloadsCount = subSectionsDownloadsCount,
-            datesBannerInfo = datesBannerInfo,
             useRelativeDates = preferencesManager.isRelativeDatesEnabled,
             courseProgress = courseProgress,
             courseVideos = courseVideos,
@@ -282,11 +280,9 @@ class CourseHomeViewModel(
 
     private suspend fun handleCourseDataError(e: Throwable?) {
         _uiState.value = CourseHomeUIState.Error
-        val errorMessage = when {
-            e?.isInternetError() == true -> R.string.core_error_no_connection
-            else -> R.string.core_error_unknown_error
-        }
-        _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(errorMessage)))
+        handleErrorUiMessage(
+            throwable = e,
+        )
     }
 
     private fun sortBlocks(blocks: List<Block>): List<Block> {
@@ -369,32 +365,6 @@ class CourseHomeViewModel(
             blocks.find { it.id == descendantId && it.type == BlockType.SEQUENTIAL }
         }
         return sequentialBlocks.find { !it.isCompleted() }
-    }
-
-    fun resetCourseDatesBanner(onResetDates: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            try {
-                interactor.resetCourseDates(courseId = courseId)
-                getCourseData()
-                courseNotifier.send(CourseDatesShifted)
-                onResetDates(true)
-            } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg)
-                        )
-                    )
-                }
-                onResetDates(false)
-            }
-        }
     }
 
     fun openBlock(fragmentManager: FragmentManager, blockId: String) {

@@ -36,20 +36,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Snackbar
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -57,7 +43,20 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.outlined.CloudDownload
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -73,6 +72,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -206,7 +206,7 @@ fun CourseSectionCard(
                         ) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(34.dp),
-                                backgroundColor = Color.LightGray,
+                                trackColor = Color.LightGray,
                                 strokeWidth = 2.dp,
                                 color = MaterialTheme.appColors.primary
                             )
@@ -273,7 +273,10 @@ fun OfflineQueueCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
-                progress = progress
+                progress = { progress },
+                strokeCap = StrokeCap.Square,
+                gapSize = 0.dp,
+                drawStopIndicator = { }
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
@@ -284,7 +287,7 @@ fun OfflineQueueCard(
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.size(28.dp),
-                backgroundColor = Color.LightGray,
+                trackColor = Color.LightGray,
                 strokeWidth = 2.dp,
                 color = MaterialTheme.appColors.primary
             )
@@ -373,10 +376,9 @@ fun NavigationUnitsButtons(
                 modifier = Modifier
                     .height(42.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    backgroundColor = MaterialTheme.appColors.background
+                    containerColor = MaterialTheme.appColors.background
                 ),
                 border = BorderStroke(1.dp, MaterialTheme.appColors.textAccent),
-                elevation = null,
                 shape = MaterialTheme.appShapes.navigationButtonShape,
                 onClick = onPrevClick,
             ) {
@@ -414,9 +416,8 @@ fun NavigationUnitsButtons(
                 modifier = Modifier
                     .height(42.dp),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = MaterialTheme.appColors.primaryButtonBackground
+                    containerColor = MaterialTheme.appColors.primaryButtonBackground
                 ),
-                elevation = null,
                 shape = MaterialTheme.appShapes.navigationButtonShape,
                 onClick = onNextClick
             ) {
@@ -566,9 +567,8 @@ fun VideoSubtitles(
                 listState.animateScrollToItem(currentIndex - 1)
             }
         }
-        val scaffoldState = rememberScaffoldState()
         val subtitles = timedTextObject.captions.values.toList()
-        Scaffold(scaffoldState = scaffoldState) {
+        Scaffold {
             Column(
                 modifier = Modifier
                     .padding(it)
@@ -704,7 +704,7 @@ fun CourseVideoSection(
                 )
             }
         }
-        Divider(modifier = Modifier.fillMaxWidth())
+        HorizontalDivider(modifier = Modifier.fillMaxWidth())
     }
 }
 
@@ -798,13 +798,16 @@ fun CourseVideoItem(
                         modifier = progressModifier
                             .fillMaxWidth()
                             .clip(CircleShape),
-                        progress = progress,
+                        progress = { progress },
                         color = if (videoBlock.isCompleted() && progress > 0.95f) {
                             MaterialTheme.appColors.progressBarColor
                         } else {
                             MaterialTheme.appColors.info
                         },
-                        backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
+                        trackColor = MaterialTheme.appColors.progressBarBackgroundColor,
+                        strokeCap = StrokeCap.Square,
+                        gapSize = 0.dp,
+                        drawStopIndicator = {},
                     )
                 }
                 if (videoBlock.isCompleted()) {
@@ -912,7 +915,7 @@ fun DownloadIcon(
                 if (downloadedState == DownloadedState.DOWNLOADING) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(28.dp),
-                        backgroundColor = Color.LightGray,
+                        trackColor = Color.LightGray,
                         strokeWidth = 2.dp,
                         color = MaterialTheme.appColors.primary
                     )
@@ -995,9 +998,12 @@ fun CourseSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp),
-            progress = progress,
+            progress = { progress },
             color = MaterialTheme.appColors.progressBarColor,
-            backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
+            trackColor = MaterialTheme.appColors.progressBarBackgroundColor,
+            strokeCap = StrokeCap.Square,
+            gapSize = 0.dp,
+            drawStopIndicator = { }
         )
         CourseExpandableChapterCard(
             block = section,
@@ -1245,7 +1251,7 @@ fun SubSectionUnitsList(
             .fillMaxWidth()
             .wrapContentHeight(align = Alignment.Top)
             .displayCutoutForLandscape(),
-        border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
     ) {
         LazyColumn(Modifier.fillMaxWidth()) {
             itemsIndexed(unitBlocks) { index, unit ->
@@ -1321,7 +1327,7 @@ fun SubSectionUnitsList(
                             )
                         }
                     }
-                    Divider()
+                    HorizontalDivider()
                 }
             }
         }
@@ -1337,12 +1343,12 @@ fun CourseDatesBanner(
     val cardModifier = modifier
         .background(
             MaterialTheme.appColors.cardViewBackground,
-            MaterialTheme.appShapes.material.medium
+            MaterialTheme.appShapes.material3.medium
         )
         .border(
             1.dp,
             MaterialTheme.appColors.cardViewBorder,
-            MaterialTheme.appShapes.material.medium
+            MaterialTheme.appShapes.material3.medium
         )
         .padding(16.dp)
 
@@ -1383,12 +1389,12 @@ fun CourseDatesBannerTablet(
     val cardModifier = modifier
         .background(
             MaterialTheme.appColors.cardViewBackground,
-            MaterialTheme.appShapes.material.medium
+            MaterialTheme.appShapes.material3.medium
         )
         .border(
             1.dp,
             MaterialTheme.appColors.cardViewBorder,
-            MaterialTheme.appShapes.material.medium
+            MaterialTheme.appShapes.material3.medium
         )
         .padding(16.dp)
 
@@ -1437,7 +1443,7 @@ fun DatesShiftedSnackBar(
 ) {
     Snackbar(
         modifier = Modifier.padding(16.dp),
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background
     ) {
         Column(modifier = Modifier.padding(4.dp)) {
             Box {
@@ -1519,7 +1525,7 @@ fun CourseMessage(
                 }
             }
         }
-        Divider(
+        HorizontalDivider(
             color = MaterialTheme.appColors.divider
         )
     }
@@ -1554,9 +1560,12 @@ fun CourseProgress(
                 .fillMaxWidth()
                 .height(4.dp)
                 .clip(CircleShape),
-            progress = progress.value,
+            progress = { progress.value },
             color = MaterialTheme.appColors.progressBarColor,
-            backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
+            trackColor = MaterialTheme.appColors.progressBarBackgroundColor,
+            strokeCap = StrokeCap.Square,
+            gapSize = 0.dp,
+            drawStopIndicator = { }
         )
         Row(
             modifier = Modifier

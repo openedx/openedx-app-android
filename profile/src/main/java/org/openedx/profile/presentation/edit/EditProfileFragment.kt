@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,26 +39,29 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Report
-import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateMapOf
@@ -97,6 +101,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.content.FileProvider
+import androidx.core.graphics.scale
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import coil.compose.AsyncImage
@@ -115,7 +120,6 @@ import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.isImeVisibleState
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.rememberSaveableMap
 import org.openedx.core.ui.statusBarsInset
@@ -172,7 +176,7 @@ class EditProfileFragment : Fragment() {
                         isLimited = viewModel.isLimitedProfile
                     )
                 )
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val selectedImageUri by viewModel.selectedImageUri.observeAsState()
                 val isImageDeleted by viewModel.deleteImage.observeAsState(false)
                 val leaveDialog by viewModel.showLeaveDialog.observeAsState(false)
@@ -251,8 +255,7 @@ class EditProfileFragment : Fragment() {
         )
 
         val ratio: Float = originalBitmap.width.toFloat() / TARGET_IMAGE_WIDTH
-        val newBitmap = Bitmap.createScaledBitmap(
-            originalBitmap,
+        val newBitmap = originalBitmap.scale(
             TARGET_IMAGE_WIDTH,
             (originalBitmap.height.toFloat() / ratio).toInt(),
             false
@@ -286,7 +289,7 @@ class EditProfileFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun EditProfileScreen(
     windowSize: WindowSize,
@@ -303,27 +306,15 @@ private fun EditProfileScreen(
     onSelectImageClick: () -> Unit,
     onDeleteImageClick: () -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
     val coroutine = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
-
-    val bottomSheetScaffoldState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val keyboardController = LocalSoftwareKeyboardController.current
-
-    var expandedList by rememberSaveable {
-        mutableStateOf(emptyList<RegistrationField.Option>())
-    }
-    var openWarningMessageDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var bottomDialogTitle by rememberSaveable {
-        mutableStateOf("")
-    }
-
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var expandedList by rememberSaveable { mutableStateOf(emptyList<RegistrationField.Option>()) }
+    var openWarningMessageDialog by rememberSaveable { mutableStateOf(false) }
+    var bottomDialogTitle by rememberSaveable { mutableStateOf("") }
     var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue())
     }
@@ -375,14 +366,10 @@ private fun EditProfileScreen(
     }
 
     val modalListState = rememberLazyListState()
-    var isOpenChangeImageDialogState by rememberSaveable {
-        mutableStateOf(false)
-    }
+    var isOpenChangeImageDialogState by rememberSaveable { mutableStateOf(false) }
 
-    val isImeVisible by isImeVisibleState()
-
-    LaunchedEffect(bottomSheetScaffoldState.isVisible) {
-        if (!bottomSheetScaffoldState.isVisible) {
+    LaunchedEffect(showBottomSheet) {
+        if (!showBottomSheet) {
             focusManager.clearFocus()
             searchValue = TextFieldValue()
         }
@@ -395,7 +382,8 @@ private fun EditProfileScreen(
             .semantics {
                 testTagsAsResourceId = true
             },
-        scaffoldState = scaffoldState
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets()
     ) { paddingValues ->
 
         val contentWidth by remember(key1 = windowSize) {
@@ -433,301 +421,279 @@ private fun EditProfileScreen(
             )
         }
 
-        ModalBottomSheetLayout(
-            modifier = Modifier
-                .testTag("btn_bottom_sheet_edit_profile")
-                .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
-                .noRippleClickable {
-                    if (bottomSheetScaffoldState.isVisible) {
-                        coroutine.launch {
-                            bottomSheetScaffoldState.hide()
-                        }
-                    }
-                },
-            sheetShape = MaterialTheme.appShapes.screenBackgroundShape,
-            sheetState = bottomSheetScaffoldState,
-            scrimColor = Color.Black.copy(alpha = 0.4f),
-            sheetBackgroundColor = MaterialTheme.appColors.background,
-            sheetContent = {
-                SheetContent(
-                    title = bottomDialogTitle,
-                    searchValue = searchValue,
-                    expandedList = expandedList,
-                    listState = modalListState,
-                    onItemClick = { item ->
-                        if (serverFieldName.value == LANGUAGE) {
-                            mapFields[serverFieldName.value] =
-                                listOf(LanguageProficiency(item.value))
-                        } else {
-                            mapFields[serverFieldName.value] = item.value
-                        }
-                        coroutine.launch {
-                            bottomSheetScaffoldState.hide()
-                            modalListState.scrollToItem(0)
-                        }
-                    },
-                    searchValueChanged = {
-                        searchValue = TextFieldValue(it)
-                    }
-                )
-            }
-        ) {
-            HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
-            if (isOpenChangeImageDialogState && uiState.account.isOlderThanMinAge()) {
-                ChangeImageDialog(
-                    onSelectFromGalleryClick = {
-                        isOpenChangeImageDialogState = false
-                        onSelectImageClick()
-                    },
-                    onRemoveImageClick = {
-                        onDeleteImageClick()
-                        isOpenChangeImageDialogState = false
-                    },
-                    onCancelClick = {
-                        isOpenChangeImageDialogState = false
-                    }
+        if (isOpenChangeImageDialogState && uiState.account.isOlderThanMinAge()) {
+            ChangeImageDialog(
+                onSelectFromGalleryClick = {
+                    isOpenChangeImageDialogState = false
+                    onSelectImageClick()
+                },
+                onRemoveImageClick = {
+                    onDeleteImageClick()
+                    isOpenChangeImageDialogState = false
+                },
+                onCancelClick = {
+                    isOpenChangeImageDialogState = false
+                }
+            )
+        } else {
+            isOpenChangeImageDialogState = false
+        }
+
+        if (leaveDialog) {
+            val configuration = LocalConfiguration.current
+            if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT || windowSize.isTablet) {
+                LeaveProfile(
+                    onDismissRequest = { onKeepEdit() },
+                    onLeaveClick = { onBackClick(false) }
                 )
             } else {
-                isOpenChangeImageDialogState = false
+                LeaveProfileLandscape(
+                    onDismissRequest = { onKeepEdit() },
+                    onLeaveClick = { onBackClick(false) }
+                )
             }
+        }
 
-            if (leaveDialog) {
-                val configuration = LocalConfiguration.current
-                if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT || windowSize.isTablet) {
-                    LeaveProfile(
-                        onDismissRequest = {
-                            onKeepEdit()
-                        },
-                        onLeaveClick = {
-                            onBackClick(false)
-                        }
-                    )
-                } else {
-                    LeaveProfileLandscape(
-                        onDismissRequest = {
-                            onKeepEdit()
-                        },
-                        onLeaveClick = {
-                            onBackClick(false)
-                        }
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(paddingValues)
-                    .statusBarsInset()
-                    .displayCutoutForLandscape(),
-                horizontalAlignment = Alignment.CenterHorizontally
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(paddingValues)
+                .statusBarsInset()
+                .displayCutoutForLandscape(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = topBarWidth,
+                contentAlignment = Alignment.CenterStart
             ) {
-                Box(
-                    modifier = topBarWidth,
-                    contentAlignment = Alignment.CenterStart
+                Text(
+                    modifier = Modifier
+                        .testTag("txt_edit_profile_title")
+                        .fillMaxWidth(),
+                    text = stringResource(id = R.string.profile_edit_profile),
+                    color = MaterialTheme.appColors.textPrimary,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.appTypography.titleMedium
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Text(
-                        modifier = Modifier
-                            .testTag("txt_edit_profile_title")
-                            .fillMaxWidth(),
-                        text = stringResource(id = R.string.profile_edit_profile),
-                        color = MaterialTheme.appColors.textPrimary,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.appTypography.titleMedium
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        BackBtn(modifier = Modifier.padding(end = 16.dp)) {
-                            onBackClick(saveButtonEnabled)
-                        }
-                        if (saveButtonEnabled) {
-                            IconText(
-                                modifier = Modifier
-                                    .height(48.dp)
-                                    .padding(end = 24.dp),
-                                text = stringResource(id = R.string.profile_done),
-                                icon = Icons.Filled.Done,
-                                color = MaterialTheme.appColors.primary,
-                                textStyle = MaterialTheme.appTypography.labelLarge,
-                                onClick = {
-                                    onSaveClick(mapFields.toMap())
-                                }
-                            )
-                        }
+                    BackBtn(modifier = Modifier.padding(end = 16.dp)) {
+                        onBackClick(saveButtonEnabled)
+                    }
+                    if (saveButtonEnabled) {
+                        IconText(
+                            modifier = Modifier
+                                .height(48.dp)
+                                .padding(end = 24.dp),
+                            text = stringResource(id = R.string.profile_done),
+                            icon = Icons.Filled.Done,
+                            color = MaterialTheme.appColors.primary,
+                            textStyle = MaterialTheme.appTypography.labelLarge,
+                            onClick = {
+                                onSaveClick(mapFields.toMap())
+                            }
+                        )
                     }
                 }
+            }
 
-                Surface(
-                    modifier = Modifier,
-                    color = MaterialTheme.appColors.background,
-                    shape = MaterialTheme.appShapes.screenBackgroundShape
+            Surface(
+                modifier = Modifier,
+                color = MaterialTheme.appColors.background,
+                shape = MaterialTheme.appShapes.screenBackgroundShape
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.BottomCenter
                 ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.BottomCenter
+                    Column(
+                        Modifier
+                            .fillMaxHeight()
+                            .then(contentWidth)
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Column(
-                            Modifier
-                                .fillMaxHeight()
-                                .then(contentWidth)
-                                .verticalScroll(rememberScrollState()),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                modifier = Modifier.testTag("txt_edit_profile_type_label"),
-                                text = stringResource(
-                                    if (uiState.isLimited) {
-                                        R.string.profile_limited_profile
-                                    } else {
-                                        R.string.profile_full_profile
-                                    }
+                        Text(
+                            modifier = Modifier.testTag("txt_edit_profile_type_label"),
+                            text = stringResource(
+                                if (uiState.isLimited) {
+                                    R.string.profile_limited_profile
+                                } else {
+                                    R.string.profile_full_profile
+                                }
+                            ),
+                            color = MaterialTheme.appColors.textSecondary,
+                            style = MaterialTheme.appTypography.titleSmall
+                        )
+                        Spacer(modifier = Modifier.height(32.dp))
+                        Box(contentAlignment = Alignment.BottomEnd) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(imageRes)
+                                    .error(coreR.drawable.core_ic_default_profile_picture)
+                                    .placeholder(coreR.drawable.core_ic_default_profile_picture)
+                                    .build(),
+                                contentScale = ContentScale.Crop,
+                                contentDescription = stringResource(
+                                    id = coreR.string.core_accessibility_user_profile_image,
+                                    uiState.account.username
                                 ),
-                                color = MaterialTheme.appColors.textSecondary,
-                                style = MaterialTheme.appTypography.titleSmall
-                            )
-                            Spacer(modifier = Modifier.height(32.dp))
-                            Box(contentAlignment = Alignment.BottomEnd) {
-                                AsyncImage(
-                                    model = ImageRequest.Builder(LocalContext.current)
-                                        .data(imageRes)
-                                        .error(coreR.drawable.core_ic_default_profile_picture)
-                                        .placeholder(coreR.drawable.core_ic_default_profile_picture)
-                                        .build(),
-                                    contentScale = ContentScale.Crop,
-                                    contentDescription = stringResource(
-                                        id = coreR.string.core_accessibility_user_profile_image,
-                                        uiState.account.username
-                                    ),
-                                    modifier = Modifier
-                                        .testTag("img_edit_profile_user_image")
-                                        .border(
-                                            2.dp,
-                                            MaterialTheme.appColors.onSurface,
-                                            CircleShape
-                                        )
-                                        .padding(2.dp)
-                                        .size(100.dp)
-                                        .clip(CircleShape)
-                                        .noRippleClickable {
-                                            isOpenChangeImageDialogState = true
-                                            if (!uiState.account.isOlderThanMinAge()) {
-                                                openWarningMessageDialog = true
-                                            }
-                                        }
-                                )
-                                Icon(
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.appColors.primary)
-                                        .padding(5.dp)
-                                        .clickable {
-                                            isOpenChangeImageDialogState = true
-                                            if (!uiState.account.isOlderThanMinAge()) {
-                                                openWarningMessageDialog = true
-                                            }
-                                        },
-                                    painter = painterResource(id = R.drawable.profile_ic_edit_image),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.appColors.onPrimary
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(20.dp))
-                            Text(
-                                modifier = Modifier.testTag("txt_edit_profile_user_name"),
-                                text = uiState.account.name,
-                                style = MaterialTheme.appTypography.headlineSmall,
-                                color = MaterialTheme.appColors.textPrimary
-                            )
-                            Spacer(modifier = Modifier.height(24.dp))
-                            Text(
                                 modifier = Modifier
-                                    .testTag("txt_edit_profile_limited_profile_label")
+                                    .testTag("img_edit_profile_user_image")
+                                    .border(
+                                        2.dp,
+                                        MaterialTheme.appColors.onSurface,
+                                        CircleShape
+                                    )
+                                    .padding(2.dp)
+                                    .size(100.dp)
+                                    .clip(CircleShape)
+                                    .noRippleClickable {
+                                        isOpenChangeImageDialogState = true
+                                        if (!uiState.account.isOlderThanMinAge()) {
+                                            openWarningMessageDialog = true
+                                        }
+                                    }
+                            )
+                            Icon(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.appColors.primary)
+                                    .padding(5.dp)
                                     .clickable {
-                                        if (!LocaleUtils.isProfileLimited(mapFields[YEAR_OF_BIRTH].toString())) {
-                                            val privacy = if (uiState.isLimited) {
-                                                Account.Privacy.ALL_USERS
-                                            } else {
-                                                Account.Privacy.PRIVATE
-                                            }
-                                            mapFields[ACCOUNT_PRIVACY] = privacy
-                                            onLimitedProfileChange(!uiState.isLimited)
-                                        } else {
+                                        isOpenChangeImageDialogState = true
+                                        if (!uiState.account.isOlderThanMinAge()) {
                                             openWarningMessageDialog = true
                                         }
                                     },
-                                text = stringResource(
-                                    if (uiState.isLimited) {
-                                        R.string.profile_switch_to_full
-                                    } else {
-                                        R.string.profile_switch_to_limited
-                                    }
-                                ),
-                                color = MaterialTheme.appColors.textAccent,
-                                style = MaterialTheme.appTypography.labelLarge
+                                painter = painterResource(id = R.drawable.profile_ic_edit_image),
+                                contentDescription = null,
+                                tint = MaterialTheme.appColors.onPrimary
                             )
-                            Spacer(modifier = Modifier.height(20.dp))
-                            ProfileFields(
-                                disabled = uiState.isLimited,
-                                onFieldClick = { field, title ->
-                                    when (field) {
-                                        YEAR_OF_BIRTH -> {
-                                            serverFieldName.value = YEAR_OF_BIRTH
-                                            expandedList = LocaleUtils.getBirthYearsRange()
-                                        }
-
-                                        COUNTRY -> {
-                                            serverFieldName.value = COUNTRY
-                                            expandedList = LocaleUtils.getCountries()
-                                        }
-
-                                        LANGUAGE -> {
-                                            serverFieldName.value = LANGUAGE
-                                            expandedList = LocaleUtils.getLanguages()
-                                        }
-                                    }
-                                    bottomDialogTitle = title
-                                    keyboardController?.hide()
-                                    coroutine.launch {
-                                        val index = expandedList.indexOfFirst { option ->
-                                            if (serverFieldName.value == LANGUAGE) {
-                                                option.value ==
-                                                        (mapFields[serverFieldName.value] as List<LanguageProficiency>)
-                                                            .getOrNull(0)?.code
-                                            } else {
-                                                option.value == mapFields[serverFieldName.value]
-                                            }
-                                        }
-                                        modalListState.scrollToItem(if (index > 0) index else 0)
-                                        if (bottomSheetScaffoldState.isVisible) {
-                                            bottomSheetScaffoldState.hide()
-                                        } else {
-                                            bottomSheetScaffoldState.show()
-                                        }
-                                    }
-                                },
-                                onValueChanged = {
-                                    mapFields[BIO] = it
-                                },
-                                mapFields = mapFields,
-                                onDoneClick = { onSaveClick(mapFields.toMap()) }
-                            )
-                            Spacer(Modifier.height(52.dp))
                         }
-                        if (openWarningMessageDialog) {
-                            LimitedProfileDialog(
-                                modifier = popUpModifier
-                            ) {
-                                openWarningMessageDialog = false
-                            }
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text(
+                            modifier = Modifier.testTag("txt_edit_profile_user_name"),
+                            text = uiState.account.name,
+                            style = MaterialTheme.appTypography.headlineSmall,
+                            color = MaterialTheme.appColors.textPrimary
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            modifier = Modifier
+                                .testTag("txt_edit_profile_limited_profile_label")
+                                .clickable {
+                                    if (!LocaleUtils.isProfileLimited(mapFields[YEAR_OF_BIRTH].toString())) {
+                                        val privacy = if (uiState.isLimited) {
+                                            Account.Privacy.ALL_USERS
+                                        } else {
+                                            Account.Privacy.PRIVATE
+                                        }
+                                        mapFields[ACCOUNT_PRIVACY] = privacy
+                                        onLimitedProfileChange(!uiState.isLimited)
+                                    } else {
+                                        openWarningMessageDialog = true
+                                    }
+                                },
+                            text = stringResource(
+                                if (uiState.isLimited) {
+                                    R.string.profile_switch_to_full
+                                } else {
+                                    R.string.profile_switch_to_limited
+                                }
+                            ),
+                            color = MaterialTheme.appColors.textAccent,
+                            style = MaterialTheme.appTypography.labelLarge
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                        ProfileFields(
+                            disabled = uiState.isLimited,
+                            onFieldClick = { field, title ->
+                                when (field) {
+                                    YEAR_OF_BIRTH -> {
+                                        serverFieldName.value = YEAR_OF_BIRTH
+                                        expandedList = LocaleUtils.getBirthYearsRange()
+                                    }
+
+                                    COUNTRY -> {
+                                        serverFieldName.value = COUNTRY
+                                        expandedList = LocaleUtils.getCountries()
+                                    }
+
+                                    LANGUAGE -> {
+                                        serverFieldName.value = LANGUAGE
+                                        expandedList = LocaleUtils.getLanguages()
+                                    }
+                                }
+                                bottomDialogTitle = title
+                                keyboardController?.hide()
+                                coroutine.launch {
+                                    val index = expandedList.indexOfFirst { option ->
+                                        if (serverFieldName.value == LANGUAGE) {
+                                            option.value ==
+                                                    (mapFields[serverFieldName.value] as List<LanguageProficiency>)
+                                                        .getOrNull(0)?.code
+                                        } else {
+                                            option.value == mapFields[serverFieldName.value]
+                                        }
+                                    }
+                                    showBottomSheet = true
+                                    modalListState.scrollToItem(if (index > 0) index else 0)
+                                }
+                            },
+                            onValueChanged = {
+                                mapFields[BIO] = it
+                            },
+                            mapFields = mapFields,
+                            onDoneClick = { onSaveClick(mapFields.toMap()) }
+                        )
+                        Spacer(Modifier.height(52.dp))
+                    }
+                    if (openWarningMessageDialog) {
+                        LimitedProfileDialog(
+                            modifier = popUpModifier
+                        ) {
+                            openWarningMessageDialog = false
                         }
                     }
                 }
             }
+        }
+    }
+
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState,
+            shape = MaterialTheme.appShapes.screenBackgroundShape,
+            containerColor = MaterialTheme.appColors.background,
+            scrimColor = Color.Black.copy(alpha = 0.4f),
+        ) {
+            SheetContent(
+                title = bottomDialogTitle,
+                searchValue = searchValue,
+                expandedList = expandedList,
+                listState = modalListState,
+                onItemClick = { item ->
+                    if (serverFieldName.value == LANGUAGE) {
+                        mapFields[serverFieldName.value] = listOf(LanguageProficiency(item.value))
+                    } else {
+                        mapFields[serverFieldName.value] = item.value
+                    }
+                    coroutine.launch {
+                        sheetState.hide()
+                        modalListState.scrollToItem(0)
+                        showBottomSheet = false
+                    }
+                },
+                searchValueChanged = { searchValue = TextFieldValue(it) }
+            )
         }
     }
 }
@@ -742,11 +708,11 @@ private fun LimitedProfileDialog(
         modifier
             .shadow(
                 2.dp,
-                MaterialTheme.appShapes.material.medium
+                MaterialTheme.appShapes.material3.medium
             )
             .background(
                 MaterialTheme.appColors.warning,
-                MaterialTheme.appShapes.material.medium
+                MaterialTheme.appShapes.material3.medium
             )
     ) {
         Row(
@@ -808,14 +774,14 @@ private fun ChangeImageDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(Modifier.height(4.dp))
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier
                         .width(32.dp)
                         .background(
                             MaterialTheme.appColors.bottomSheetToggle,
-                            MaterialTheme.appShapes.material.small
+                            MaterialTheme.appShapes.material3.small
                         )
-                        .clip(MaterialTheme.appShapes.material.small),
+                        .clip(MaterialTheme.appShapes.material3.small),
                     thickness = 4.dp
                 )
                 Spacer(Modifier.height(14.dp))
@@ -934,14 +900,16 @@ private fun SelectableField(
     onClick: () -> Unit,
 ) {
     val colors = if (disabled) {
-        TextFieldDefaults.outlinedTextFieldColors(
+        OutlinedTextFieldDefaults.colors(
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-            backgroundColor = MaterialTheme.appColors.textFieldBackground
+            unfocusedContainerColor = MaterialTheme.appColors.textFieldBackground
         )
     } else {
-        TextFieldDefaults.outlinedTextFieldColors(
-            textColor = MaterialTheme.appColors.textFieldText,
-            backgroundColor = MaterialTheme.appColors.textFieldBackground,
+        OutlinedTextFieldDefaults.colors(
+            focusedTextColor = MaterialTheme.appColors.textFieldText,
+            unfocusedTextColor = MaterialTheme.appColors.textFieldText,
+            unfocusedContainerColor = MaterialTheme.appColors.textFieldBackground,
+            focusedContainerColor = MaterialTheme.appColors.textFieldBackground,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
             cursorColor = MaterialTheme.appColors.textFieldText,
             disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
@@ -1021,9 +989,11 @@ private fun InputEditField(
             onValueChange = {
                 onValueChanged(it)
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                textColor = MaterialTheme.appColors.textFieldText,
-                backgroundColor = MaterialTheme.appColors.textFieldBackground,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = MaterialTheme.appColors.textFieldText,
+                unfocusedTextColor = MaterialTheme.appColors.textFieldText,
+                unfocusedContainerColor = MaterialTheme.appColors.textFieldBackground,
+                focusedContainerColor = MaterialTheme.appColors.textFieldBackground,
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                 cursorColor = MaterialTheme.appColors.textFieldText,
             ),
@@ -1156,7 +1126,7 @@ private fun LeaveProfileLandscape(
                     .width(screenWidth * LEAVE_PROFILE_WIDTH_FACTOR)
                     .clip(MaterialTheme.appShapes.courseImageShape)
                     .semantics { testTagsAsResourceId = true },
-                backgroundColor = MaterialTheme.appColors.background,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.background),
                 shape = MaterialTheme.appShapes.courseImageShape
             ) {
                 Row(

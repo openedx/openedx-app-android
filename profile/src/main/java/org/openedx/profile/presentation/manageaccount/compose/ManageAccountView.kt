@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,15 +14,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,7 +59,7 @@ import org.openedx.profile.presentation.manageaccount.ManageAccountUIState
 import org.openedx.profile.presentation.ui.ProfileTopic
 import org.openedx.profile.R as ProfileR
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 internal fun ManageAccountView(
     windowSize: WindowSize,
@@ -67,12 +68,8 @@ internal fun ManageAccountView(
     refreshing: Boolean,
     onAction: (ManageAccountViewAction) -> Unit
 ) {
-    val scaffoldState = rememberScaffoldState()
-
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = refreshing,
-        onRefresh = { onAction(ManageAccountViewAction.SwipeRefresh) }
-    )
+    val snackbarHostState = remember { SnackbarHostState() }
+    val pullRefreshState = rememberPullToRefreshState()
 
     Scaffold(
         modifier = Modifier
@@ -80,7 +77,8 @@ internal fun ManageAccountView(
             .semantics {
                 testTagsAsResourceId = true
             },
-        scaffoldState = scaffoldState
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets()
     ) { paddingValues ->
 
         val contentWidth by remember(key1 = windowSize) {
@@ -104,7 +102,7 @@ internal fun ManageAccountView(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         Column(
             modifier = Modifier
@@ -132,10 +130,11 @@ internal fun ManageAccountView(
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.screenBackgroundShape,
             ) {
-                Box(
-                    modifier = Modifier
-                        .pullRefresh(pullRefreshState),
-                    contentAlignment = Alignment.TopCenter
+                PullToRefreshBox(
+                    modifier = Modifier,
+                    state = pullRefreshState,
+                    isRefreshing = refreshing,
+                    onRefresh = { onAction(ManageAccountViewAction.SwipeRefresh) }
                 ) {
                     Column(
                         modifier = Modifier
@@ -193,11 +192,6 @@ internal fun ManageAccountView(
                             }
                         }
                     }
-                    PullRefreshIndicator(
-                        refreshing,
-                        pullRefreshState,
-                        Modifier.align(Alignment.TopCenter)
-                    )
                 }
             }
         }

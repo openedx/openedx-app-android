@@ -1,6 +1,6 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Theme.OpenEdX" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.OpenEdX" parent="Theme.Material3.DayNight">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/primary</item>
 <!--        <item name="colorPrimaryVariant">@color/primaryVariant</item>-->

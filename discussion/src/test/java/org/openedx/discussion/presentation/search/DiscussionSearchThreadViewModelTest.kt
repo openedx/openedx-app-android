@@ -22,7 +22,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.R
 import org.openedx.core.domain.model.Pagination
 import org.openedx.discussion.DiscussionMocks
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
@@ -32,6 +31,7 @@ import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DiscussionSearchThreadViewModelTest {
@@ -51,13 +51,21 @@ class DiscussionSearchThreadViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+    }
+
+    private fun DiscussionSearchThreadViewModel.lastUiMessage(): UIMessage? {
+        return uiMessage.replayCache.lastOrNull()
     }
 
     @Test
@@ -71,7 +79,7 @@ class DiscussionSearchThreadViewModelTest {
 
         assert(uiState.data.isEmpty())
         assert(uiState.count == 0)
-        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.lastUiMessage() == null)
     }
 
     @Test
@@ -84,7 +92,7 @@ class DiscussionSearchThreadViewModelTest {
 
         coVerify(exactly = 1) { interactor.searchThread(any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as UIMessage.SnackBarMessage
         assert(viewModel.uiState.value is DiscussionSearchThreadUIState.Loading)
         assert(message.message == noInternet)
     }
@@ -99,7 +107,7 @@ class DiscussionSearchThreadViewModelTest {
 
         coVerify(exactly = 1) { interactor.searchThread(any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as UIMessage.SnackBarMessage
         assert(viewModel.uiState.value is DiscussionSearchThreadUIState.Loading)
         assert(message.message == somethingWrong)
     }
@@ -125,7 +133,7 @@ class DiscussionSearchThreadViewModelTest {
         coVerify(exactly = 1) { interactor.searchThread(any(), any(), any()) }
 
         assert(viewModel.uiState.value is DiscussionSearchThreadUIState.Threads)
-        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.lastUiMessage() == null)
         assert(viewModel.isUpdating.value == false)
     }
 
@@ -159,7 +167,7 @@ class DiscussionSearchThreadViewModelTest {
 
         assert(viewModel.uiState.value is DiscussionSearchThreadUIState.Threads)
         assert((viewModel.uiState.value as DiscussionSearchThreadUIState.Threads).data.size == 3)
-        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.lastUiMessage() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == false)
     }
@@ -195,7 +203,7 @@ class DiscussionSearchThreadViewModelTest {
 
         assert(viewModel.uiState.value is DiscussionSearchThreadUIState.Threads)
         assert((viewModel.uiState.value as DiscussionSearchThreadUIState.Threads).data.size == 2)
-        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.lastUiMessage() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == true)
     }
@@ -221,7 +229,7 @@ class DiscussionSearchThreadViewModelTest {
 
         assert(viewModel.uiState.value is DiscussionSearchThreadUIState.Threads)
         assert((viewModel.uiState.value as DiscussionSearchThreadUIState.Threads).data.isEmpty())
-        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.lastUiMessage() == null)
         assert(viewModel.isUpdating.value == null)
     }
 

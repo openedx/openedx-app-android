@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,21 +28,21 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -115,7 +116,7 @@ class DashboardListFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
                 val uiState by viewModel.uiState.observeAsState()
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(null)
                 val refreshing by viewModel.updating.observeAsState(false)
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
 
@@ -136,6 +137,8 @@ class DashboardListFragment : Fragment() {
                             fm = requireActivity().supportFragmentManager,
                             courseId = it.course.id,
                             courseTitle = it.course.name,
+                            resumeBlockId = "",
+                            openTab = ""
                         )
                     },
                     onSwipeRefresh = {
@@ -154,7 +157,7 @@ class DashboardListFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 internal fun DashboardListView(
     windowSize: WindowSize,
@@ -169,9 +172,8 @@ internal fun DashboardListView(
     paginationCallback: () -> Unit,
     onItemClick: (EnrolledCourse) -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
+    val snackbarHostState = remember { SnackbarHostState() }
+    val pullToRefreshState = rememberPullToRefreshState()
 
     var isInternetConnectionShown by rememberSaveable {
         mutableStateOf(false)
@@ -182,13 +184,13 @@ internal fun DashboardListView(
     }
 
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize()
             .semantics {
                 testTagsAsResourceId = true
             },
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background,
+        contentWindowInsets = WindowInsets()
     ) { paddingValues ->
 
         val contentPaddings by remember(key1 = windowSize) {
@@ -224,7 +226,7 @@ internal fun DashboardListView(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         Column(
             modifier = Modifier
@@ -236,10 +238,11 @@ internal fun DashboardListView(
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.screenBackgroundShape
             ) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .pullRefresh(pullRefreshState),
+                PullToRefreshBox(
+                    isRefreshing = refreshing,
+                    onRefresh = { onSwipeRefresh() },
+                    state = pullToRefreshState,
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     when (state) {
                         is DashboardUIState.Loading -> {
@@ -273,7 +276,7 @@ internal fun DashboardListView(
                                                     onItemClick(it)
                                                 }
                                             )
-                                            Divider()
+                                            HorizontalDivider()
                                         }
                                         item {
                                             if (canLoadMore) {
@@ -315,11 +318,6 @@ internal fun DashboardListView(
                             }
                         }
                     }
-                    PullRefreshIndicator(
-                        refreshing,
-                        pullRefreshState,
-                        Modifier.align(Alignment.TopCenter)
-                    )
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()

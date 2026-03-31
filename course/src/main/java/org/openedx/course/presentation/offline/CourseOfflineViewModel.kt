@@ -28,6 +28,7 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureGot
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 
 class CourseOfflineViewModel(
@@ -39,6 +40,7 @@ class CourseOfflineViewModel(
     private val fileUtil: FileUtil,
     private val networkConnection: NetworkConnection,
     private val courseNotifier: CourseNotifier,
+    private val resourceManager: ResourceManager,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
@@ -49,6 +51,7 @@ class CourseOfflineViewModel(
     workerController,
     coreAnalytics,
     downloadHelper,
+    resourceManager,
 ) {
     private val _uiState = MutableStateFlow(
         CourseOfflineUIState(

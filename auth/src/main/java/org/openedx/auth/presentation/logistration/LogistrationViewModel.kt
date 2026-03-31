@@ -8,13 +8,15 @@ import org.openedx.auth.presentation.AuthRouter
 import org.openedx.core.config.Config
 import org.openedx.foundation.extension.takeIfNotEmpty
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 
 class LogistrationViewModel(
     private val courseId: String,
     private val router: AuthRouter,
     private val config: Config,
     private val analytics: AuthAnalytics,
-) : BaseViewModel() {
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     private val discoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
     val isRegistrationEnabled get() = config.isRegistrationEnabled()

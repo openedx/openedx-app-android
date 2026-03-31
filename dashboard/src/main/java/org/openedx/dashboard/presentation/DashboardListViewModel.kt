@@ -5,17 +5,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.SingleEventLiveData
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 
 class DashboardListViewModel(
@@ -25,7 +21,7 @@ class DashboardListViewModel(
     private val resourceManager: ResourceManager,
     private val discoveryNotifier: DiscoveryNotifier,
     private val analytics: DashboardAnalytics,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val coursesList = mutableListOf<EnrolledCourse>()
     private var page = 1
@@ -36,10 +32,6 @@ class DashboardListViewModel(
     private val _uiState = MutableLiveData<DashboardUIState>(DashboardUIState.Loading)
     val uiState: LiveData<DashboardUIState>
         get() = _uiState
-
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
 
     private val _updating = MutableLiveData<Boolean>()
     val updating: LiveData<Boolean>
@@ -98,13 +90,9 @@ class DashboardListViewModel(
                     _uiState.value = DashboardUIState.Courses(ArrayList(coursesList))
                 }
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
             _updating.value = false
             isLoading = false
@@ -141,13 +129,9 @@ class DashboardListViewModel(
                     _uiState.value = DashboardUIState.Courses(ArrayList(coursesList))
                 }
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
             _updating.value = false
             isLoading = false

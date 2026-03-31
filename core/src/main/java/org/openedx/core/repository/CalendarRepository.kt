@@ -30,6 +30,10 @@ class CalendarRepository(
         return calendarDao.readCourseCalendarEventsById(courseId).map { it.mapToDomain() }
     }
 
+    suspend fun getAllCourseCalendarEventsFromCache(): List<CourseCalendarEvent> {
+        return calendarDao.readAllCourseCalendarEvents().map { it.mapToDomain() }
+    }
+
     suspend fun deleteCourseCalendarEntitiesByIdFromCache(courseId: String) {
         calendarDao.deleteCourseCalendarEntitiesById(courseId)
     }

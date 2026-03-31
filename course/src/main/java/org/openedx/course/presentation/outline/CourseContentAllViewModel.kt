@@ -12,13 +12,11 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
 import org.openedx.core.domain.model.CourseDateBlock
-import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.extension.getChapterBlocks
 import org.openedx.core.extension.getSequentialBlocks
@@ -32,9 +30,7 @@ import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogManager
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
-import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
@@ -42,7 +38,6 @@ import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.unit.container.CourseViewMode
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
@@ -70,7 +65,8 @@ class CourseContentAllViewModel(
     preferencesManager,
     workerController,
     coreAnalytics,
-    downloadHelper
+    downloadHelper,
+    resourceManager,
 ) {
     val isCourseDropdownNavigationEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
@@ -78,10 +74,6 @@ class CourseContentAllViewModel(
         MutableStateFlow<CourseContentAllUIState>(CourseContentAllUIState.Loading)
     val uiState: StateFlow<CourseContentAllUIState>
         get() = _uiState.asStateFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
 
     private val _resumeBlockId = MutableSharedFlow<String>()
     val resumeBlockId: SharedFlow<String>
@@ -107,10 +99,6 @@ class CourseContentAllViewModel(
                             getCourseData()
                         }
                     }
-
-                    is CourseOpenBlock -> {
-                        _resumeBlockId.emit(event.blockId)
-                    }
                 }
             }
         }
@@ -127,7 +115,6 @@ class CourseContentAllViewModel(
                         courseSubSections = courseSubSections,
                         courseSectionsState = state.courseSectionsState,
                         subSectionsDownloadsCount = subSectionsDownloadsCount,
-                        datesBannerInfo = state.datesBannerInfo,
                         useRelativeDates = preferencesManager.isRelativeDatesEnabled
                     )
                 }
@@ -143,7 +130,7 @@ class CourseContentAllViewModel(
                 super.saveDownloadModels(folder, courseId, id)
             } else {
                 viewModelScope.launch {
-                    _uiMessage.emit(
+                    sendMessage(
                         UIMessage.ToastMessage(
                             resourceManager.getString(courseR.string.course_can_download_only_with_wifi)
                         )
@@ -173,7 +160,6 @@ class CourseContentAllViewModel(
                 courseSubSections = courseSubSections,
                 courseSectionsState = courseSectionsState,
                 subSectionsDownloadsCount = subSectionsDownloadsCount,
-                datesBannerInfo = state.datesBannerInfo,
                 useRelativeDates = preferencesManager.isRelativeDatesEnabled
             )
 
@@ -185,8 +171,17 @@ class CourseContentAllViewModel(
 
     private fun getCourseDataInternal() {
         viewModelScope.launch {
+            if (_uiState.value !is CourseContentAllUIState.CourseData) {
+                _uiState.value = CourseContentAllUIState.Loading
+            }
+            var hasReceivedData = false
             val courseStructureFlow = interactor.getCourseStructureFlow(courseId, false)
-                .catch { emit(null) }
+                .catch { e ->
+                    if (!hasReceivedData) {
+                        handleCourseDataError(e)
+                    }
+                    emit(null)
+                }
             val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
             val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
             combine(
@@ -199,13 +194,13 @@ class CourseContentAllViewModel(
                 handleCourseDataError(e)
             }.collect { (courseStructure, courseStatus, courseDates) ->
                 if (courseStructure == null) return@collect
+                hasReceivedData = true
                 val blocks = courseStructure.blockData
-                val datesBannerInfo = courseDates.courseBanner
 
                 checkIfCalendarOutOfDate(courseDates.datesSection.values.flatten())
                 updateOutdatedOfflineXBlocks(courseStructure)
 
-                initializeCourseData(blocks, courseStructure, courseStatus, datesBannerInfo)
+                initializeCourseData(blocks, courseStructure, courseStatus)
             }
         }
     }
@@ -214,7 +209,6 @@ class CourseContentAllViewModel(
         blocks: List<Block>,
         courseStructure: CourseStructure,
         courseStatus: CourseComponentStatus,
-        datesBannerInfo: CourseDatesBannerInfo
     ) {
         setBlocks(blocks)
         courseSubSections.clear()
@@ -234,18 +228,15 @@ class CourseContentAllViewModel(
             courseSubSections = courseSubSections,
             courseSectionsState = courseSectionsState,
             subSectionsDownloadsCount = subSectionsDownloadsCount,
-            datesBannerInfo = datesBannerInfo,
             useRelativeDates = preferencesManager.isRelativeDatesEnabled
         )
     }
 
     private suspend fun handleCourseDataError(e: Throwable?) {
         _uiState.value = CourseContentAllUIState.Error
-        val errorMessage = when {
-            e?.isInternetError() == true -> R.string.core_error_no_connection
-            else -> R.string.core_error_unknown_error
-        }
-        _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(errorMessage)))
+        handleErrorUiMessage(
+            throwable = e,
+        )
     }
 
     private fun sortBlocks(blocks: List<Block>): List<Block> {
@@ -287,30 +278,6 @@ class CourseContentAllViewModel(
         resumeSectionBlock =
             blocks.getSequentialBlocks().find { it.descendants.contains(resumeVerticalBlock?.id) }
         return resumeBlock
-    }
-
-    fun resetCourseDatesBanner() {
-        viewModelScope.launch {
-            try {
-                interactor.resetCourseDates(courseId = courseId)
-                getCourseData()
-                courseNotifier.send(CourseDatesShifted)
-            } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg)
-                        )
-                    )
-                }
-            }
-        }
     }
 
     fun openBlock(fragmentManager: FragmentManager, blockId: String) {

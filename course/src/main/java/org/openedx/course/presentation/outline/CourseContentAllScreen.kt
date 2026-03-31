@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -47,8 +47,6 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.course.R
 import org.openedx.course.presentation.contenttab.CourseContentAllEmptyState
-import org.openedx.course.presentation.ui.CourseDatesBanner
-import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseMessage
 import org.openedx.course.presentation.ui.CourseProgress
 import org.openedx.course.presentation.ui.CourseSection
@@ -130,9 +128,6 @@ fun CourseContentAllScreen(
                 fragmentManager = fragmentManager,
             )
         },
-        onResetDatesClick = {
-            viewModel.resetCourseDatesBanner()
-        },
         onCertificateClick = {
             viewModel.viewCertificateTappedEvent()
             it.takeIfNotEmpty()
@@ -151,16 +146,14 @@ private fun CourseContentAllUI(
     onSubSectionClick: (Block) -> Unit,
     onResumeClick: (String) -> Unit,
     onDownloadClick: (blockIds: List<String>) -> Unit,
-    onResetDatesClick: () -> Unit,
     onCertificateClick: (String) -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        scaffoldState = scaffoldState,
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background
     ) {
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -189,7 +182,7 @@ private fun CourseContentAllUI(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         Box(
             modifier = Modifier
@@ -214,27 +207,6 @@ private fun CourseContentAllUI(
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = listBottomPadding
                                 ) {
-                                    if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
-                                        item {
-                                            Box(
-                                                modifier = Modifier
-                                                    .padding(all = 8.dp)
-                                            ) {
-                                                if (windowSize.isTablet) {
-                                                    CourseDatesBannerTablet(
-                                                        banner = uiState.datesBannerInfo,
-                                                        resetDates = onResetDatesClick,
-                                                    )
-                                                } else {
-                                                    CourseDatesBanner(
-                                                        banner = uiState.datesBannerInfo,
-                                                        resetDates = onResetDatesClick,
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-
                                     val certificate = uiState.courseStructure.certificate
                                     if (certificate?.isCertificateEarned() == true) {
                                         item {
@@ -363,7 +335,6 @@ private fun CourseOutlineScreenPreview() {
                 mapOf(),
                 mapOf(),
                 mapOf(),
-                CoreMocks.mockCourseDatesBannerInfo,
                 true
             ),
             uiMessage = null,
@@ -371,7 +342,6 @@ private fun CourseOutlineScreenPreview() {
             onSubSectionClick = {},
             onResumeClick = {},
             onDownloadClick = {},
-            onResetDatesClick = {},
             onCertificateClick = {},
             onNavigateToHome = {},
         )
@@ -393,7 +363,6 @@ private fun CourseContentAllScreenTabletPreview() {
                 mapOf(),
                 mapOf(),
                 mapOf(),
-                CoreMocks.mockCourseDatesBannerInfo,
                 true
             ),
             uiMessage = null,
@@ -401,7 +370,6 @@ private fun CourseContentAllScreenTabletPreview() {
             onSubSectionClick = {},
             onResumeClick = {},
             onDownloadClick = {},
-            onResetDatesClick = {},
             onCertificateClick = {},
             onNavigateToHome = {},
         )

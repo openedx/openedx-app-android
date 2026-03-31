@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,11 +14,10 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -104,23 +104,22 @@ private fun LogistrationScreen(
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
     }
-    val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = Modifier
             .semantics {
                 testTagsAsResourceId = true
             }
-            .fillMaxSize()
-            .navigationBarsPadding(),
-        backgroundColor = MaterialTheme.appColors.background
+            .fillMaxSize(),
+        containerColor = MaterialTheme.appColors.background,
+        contentWindowInsets = WindowInsets()
     ) {
         Surface(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
                 .verticalScroll(scrollState)
+                .navigationBarsPadding()
                 .displayCutoutForLandscape(),
             color = MaterialTheme.appColors.background
         ) {

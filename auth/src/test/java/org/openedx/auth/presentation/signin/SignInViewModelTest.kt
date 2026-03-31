@@ -36,14 +36,17 @@ import org.openedx.core.config.MicrosoftConfig
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
+import org.openedx.core.domain.model.CalendarType
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.captureUiMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 import org.openedx.core.R as CoreRes
+import org.openedx.foundation.R as foundationR
 
 @ExperimentalCoroutinesApi
 class SignInViewModelTest {
@@ -77,8 +80,12 @@ class SignInViewModelTest {
     fun before() {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(CoreRes.string.core_error_invalid_grant) } returns invalidCredential
-        every { resourceManager.getString(CoreRes.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(CoreRes.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
         every { resourceManager.getString(R.string.auth_invalid_email_username) } returns invalidEmailOrUsername
         every { resourceManager.getString(R.string.auth_invalid_password) } returns invalidPassword
         every { appNotifier.notifier } returns emptyFlow()
@@ -89,7 +96,8 @@ class SignInViewModelTest {
         every { config.getGoogleConfig() } returns GoogleConfig()
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
         every { calendarPreferences.calendarUser } returns ""
-        every { calendarPreferences.clearCalendarPreferences() } returns Unit
+        every { calendarPreferences.calendarType } returns CalendarType.LOCAL
+        coEvery { calendarPreferences.clearCalendarPreferences() } returns Unit
         coEvery { calendarInteractor.clearCalendarCachedData() } returns Unit
         every { analytics.logScreenEvent(any(), any()) } returns Unit
         every { config.isRegistrationEnabled() } returns true
@@ -135,9 +143,9 @@ class SignInViewModelTest {
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         val uiState = viewModel.uiState.value
-        assertEquals(invalidEmailOrUsername, message.message)
+        assertEquals(invalidEmailOrUsername, (message.await() as UIMessage.SnackBarMessage).message)
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
     }
@@ -171,9 +179,9 @@ class SignInViewModelTest {
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         val uiState = viewModel.uiState.value
-        assertEquals(invalidEmailOrUsername, message.message)
+        assertEquals(invalidEmailOrUsername, (message.await() as UIMessage.SnackBarMessage).message)
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
     }
@@ -209,9 +217,9 @@ class SignInViewModelTest {
 
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         val uiState = viewModel.uiState.value
-        assertEquals(invalidPassword, message.message)
+        assertEquals(invalidPassword, (message.await() as UIMessage.SnackBarMessage).message)
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
     }
@@ -249,9 +257,9 @@ class SignInViewModelTest {
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
+        assertEquals(invalidPassword, (message.await() as? UIMessage.SnackBarMessage)?.message)
         val uiState = viewModel.uiState.value
-        assertEquals(invalidPassword, message.message)
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
     }
@@ -295,7 +303,8 @@ class SignInViewModelTest {
         val uiState = viewModel.uiState.value
         assertFalse(uiState.showProgress)
         assert(uiState.loginSuccess)
-        assertEquals(null, viewModel.uiMessage.value)
+        val message = captureUiMessage(viewModel)
+        assertEquals(null, message.await())
     }
 
     @Test
@@ -334,11 +343,11 @@ class SignInViewModelTest {
         verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
         verify(exactly = 1) { appNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
         val uiState = viewModel.uiState.value
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
-        assertEquals(noInternet, message?.message)
     }
 
     @Test
@@ -377,11 +386,11 @@ class SignInViewModelTest {
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
+        assertEquals(invalidCredential, (message.await() as? UIMessage.SnackBarMessage)?.message)
         val uiState = viewModel.uiState.value
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
-        assertEquals(invalidCredential, message.message)
     }
 
     @Test
@@ -420,10 +429,10 @@ class SignInViewModelTest {
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
         val uiState = viewModel.uiState.value
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
-        assertEquals(somethingWrong, message.message)
     }
 }

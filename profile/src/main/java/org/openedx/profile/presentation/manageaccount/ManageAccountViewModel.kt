@@ -3,17 +3,11 @@ package org.openedx.profile.presentation.manageaccount
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.openedx.core.R
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.presentation.ProfileAnalytics
@@ -29,14 +23,10 @@ class ManageAccountViewModel(
     private val notifier: ProfileNotifier,
     private val analytics: ProfileAnalytics,
     val profileRouter: ProfileRouter
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val _uiState: MutableStateFlow<ManageAccountUIState> = MutableStateFlow(ManageAccountUIState.Loading)
     internal val uiState: StateFlow<ManageAccountUIState> = _uiState.asStateFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
 
     private val _isUpdating = MutableStateFlow(false)
     val isUpdating: StateFlow<Boolean>
@@ -74,19 +64,9 @@ class ManageAccountViewModel(
                     account = account
                 )
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_unknown_error)
-                        )
-                    )
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             } finally {
                 _isUpdating.value = false
             }

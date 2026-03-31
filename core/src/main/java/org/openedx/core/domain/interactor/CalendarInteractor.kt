@@ -22,6 +22,10 @@ class CalendarInteractor(
         return repository.getCourseCalendarEventsByIdFromCache(courseId)
     }
 
+    suspend fun getAllCourseCalendarEventsFromCache(): List<CourseCalendarEvent> {
+        return repository.getAllCourseCalendarEventsFromCache()
+    }
+
     suspend fun deleteCourseCalendarEntitiesByIdFromCache(courseId: String) {
         repository.deleteCourseCalendarEntitiesByIdFromCache(courseId)
     }

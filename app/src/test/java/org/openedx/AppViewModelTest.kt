@@ -5,6 +5,8 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -32,6 +34,7 @@ import org.openedx.core.config.FirebaseConfig
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 
 @ExperimentalCoroutinesApi
@@ -51,6 +54,7 @@ class AppViewModelTest {
     private val deepLinkRouter = mockk<DeepLinkRouter>()
     private val context = mockk<Context>()
     private val downloadNotifier = mockk<DownloadNotifier>()
+    private val resourceManager = mockk<ResourceManager>()
 
     @Before
     fun before() {
@@ -82,6 +86,7 @@ class AppViewModelTest {
             fileUtil,
             downloadNotifier,
             context,
+            resourceManager,
         )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
@@ -98,7 +103,7 @@ class AppViewModelTest {
         every { notifier.notifier } returns flow {
             emit(LogoutEvent(true))
         }
-        every { preferencesManager.clearCorePreferences() } returns Unit
+        coEvery { preferencesManager.clearCorePreferences() } returns Unit
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { preferencesManager.user } returns CoreMocks.mockUser
         every { room.clearAllTables() } returns Unit
@@ -118,6 +123,7 @@ class AppViewModelTest {
             fileUtil,
             downloadNotifier,
             context,
+            resourceManager,
         )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
@@ -136,7 +142,7 @@ class AppViewModelTest {
             emit(LogoutEvent(true))
             emit(LogoutEvent(true))
         }
-        every { preferencesManager.clearCorePreferences() } returns Unit
+        coEvery { preferencesManager.clearCorePreferences() } returns Unit
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { preferencesManager.user } returns CoreMocks.mockUser
         every { room.clearAllTables() } returns Unit
@@ -156,6 +162,7 @@ class AppViewModelTest {
             fileUtil,
             downloadNotifier,
             context,
+            resourceManager,
         )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
@@ -165,7 +172,7 @@ class AppViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) { analytics.logoutEvent(true) }
-        verify(exactly = 1) { preferencesManager.clearCorePreferences() }
+        coVerify(exactly = 1) { preferencesManager.clearCorePreferences() }
         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { preferencesManager.user }
         verify(exactly = 1) { room.clearAllTables() }

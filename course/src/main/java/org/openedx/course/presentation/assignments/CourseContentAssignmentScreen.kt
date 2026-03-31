@@ -23,16 +23,17 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -159,7 +161,7 @@ private fun CourseContentAssignmentScreen(
                                 description = description
                             )
                             Spacer(modifier = Modifier.padding(vertical = 6.dp))
-                            Divider(
+                            HorizontalDivider(
                                 color = MaterialTheme.appColors.divider
                             )
                             Spacer(modifier = Modifier.padding(vertical = 4.dp))
@@ -236,7 +238,7 @@ private fun AssignmentGroupSection(
                 modifier = Modifier.padding(start = 8.dp),
                 color = gradeColor.copy(alpha = 0.1f),
                 border = BorderStroke(1.dp, gradeColor),
-                shape = MaterialTheme.appShapes.material.small
+                shape = MaterialTheme.appShapes.material3.small
             ) {
                 Text(
                     modifier = Modifier.padding(4.dp),
@@ -301,7 +303,7 @@ private fun AssignmentGroupSection(
                 )
             }
         }
-        Divider(
+        HorizontalDivider(
             modifier = Modifier.padding(vertical = 12.dp),
             color = MaterialTheme.appColors.divider
         )
@@ -352,13 +354,13 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
                     .clickable {
                         onClick()
                     },
-                backgroundColor = cardBackground,
-                shape = MaterialTheme.appShapes.material.small,
+                colors = CardDefaults.cardColors(containerColor = cardBackground),
+                shape = MaterialTheme.appShapes.material3.small,
                 border = BorderStroke(
                     width = borderWidth,
                     color = cardBorderColor
                 ),
-                elevation = 0.dp,
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             ) {
                 Box(
                     modifier = Modifier
@@ -455,22 +457,25 @@ private fun AssignmentDetails(
             .clickable {
                 onAssignmentClick(assignment)
             },
-        backgroundColor = MaterialTheme.appColors.cardViewBackground,
-        shape = MaterialTheme.appShapes.material.small,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground),
+        shape = MaterialTheme.appShapes.material3.small,
         border = BorderStroke(
             width = 1.dp,
             color = color
         ),
-        elevation = 0.dp,
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column {
             LinearProgressIndicator(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(PROGRESS_HEIGHT_DP.dp),
-                progress = progress,
+                progress = { progress },
                 color = MaterialTheme.appColors.progressBarColor,
-                backgroundColor = color
+                trackColor = color,
+                strokeCap = StrokeCap.Square,
+                gapSize = 0.dp,
+                drawStopIndicator = { }
             )
             Row(
                 modifier = Modifier

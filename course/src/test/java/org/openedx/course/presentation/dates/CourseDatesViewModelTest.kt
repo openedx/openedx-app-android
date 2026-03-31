@@ -44,6 +44,7 @@ import org.openedx.course.presentation.CourseRouter
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseDatesViewModelTest {
@@ -72,8 +73,8 @@ class CourseDatesViewModelTest {
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(id = R.string.platform_name) } returns openEdx
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every { resourceManager.getString(foundationR.string.foundation_error_no_connection) } returns noInternet
+        every { resourceManager.getString(foundationR.string.foundation_error_unknown_error) } returns somethingWrong
         coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
         every { corePreferences.user } returns CoreMocks.mockUser
         every { corePreferences.appConfig } returns CoreMocks.mockAppConfig
@@ -102,7 +103,6 @@ class CourseDatesViewModelTest {
             "",
             notifier,
             interactor,
-            resourceManager,
             analytics,
             config,
             calendarInteractor,
@@ -110,8 +110,9 @@ class CourseDatesViewModelTest {
             preferencesManager,
             courseRouter,
             calendarRouter,
+            resourceManager,
         )
-        coEvery { interactor.getCourseDates(any()) } throws UnknownHostException()
+        coEvery { interactor.getCourseDates(any(), any()) } throws UnknownHostException()
         val message = async {
             withTimeoutOrNull(5000) {
                 viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
@@ -119,7 +120,7 @@ class CourseDatesViewModelTest {
         }
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseDates(any()) }
+        coVerify(exactly = 1) { interactor.getCourseDates(any(), any()) }
 
         Assert.assertEquals(noInternet, message.await()?.message)
         assert(viewModel.uiState.value is CourseDatesUIState.Error)
@@ -132,7 +133,6 @@ class CourseDatesViewModelTest {
             "",
             notifier,
             interactor,
-            resourceManager,
             analytics,
             config,
             calendarInteractor,
@@ -140,8 +140,9 @@ class CourseDatesViewModelTest {
             preferencesManager,
             courseRouter,
             calendarRouter,
+            resourceManager,
         )
-        coEvery { interactor.getCourseDates(any()) } throws Exception()
+        coEvery { interactor.getCourseDates(any(), any()) } throws Exception()
         val message = async {
             withTimeoutOrNull(5000) {
                 viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
@@ -149,7 +150,7 @@ class CourseDatesViewModelTest {
         }
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseDates(any()) }
+        coVerify(exactly = 1) { interactor.getCourseDates(any(), any()) }
 
         assert(message.await()?.message.isNullOrEmpty())
         assert(viewModel.uiState.value is CourseDatesUIState.Error)
@@ -162,7 +163,6 @@ class CourseDatesViewModelTest {
             "",
             notifier,
             interactor,
-            resourceManager,
             analytics,
             config,
             calendarInteractor,
@@ -170,8 +170,14 @@ class CourseDatesViewModelTest {
             preferencesManager,
             courseRouter,
             calendarRouter,
+            resourceManager,
         )
-        coEvery { interactor.getCourseDates(any()) } returns CourseMocks.courseDatesResultWithData
+        coEvery {
+            interactor.getCourseDates(
+                any(),
+                any()
+            )
+        } returns CourseMocks.courseDatesResultWithData
         val message = async {
             withTimeoutOrNull(5000) {
                 viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
@@ -179,7 +185,7 @@ class CourseDatesViewModelTest {
         }
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseDates(any()) }
+        coVerify(exactly = 1) { interactor.getCourseDates(any(), any()) }
 
         assert(message.await()?.message.isNullOrEmpty())
         assert(viewModel.uiState.value is CourseDatesUIState.CourseDates)
@@ -192,7 +198,6 @@ class CourseDatesViewModelTest {
             "",
             notifier,
             interactor,
-            resourceManager,
             analytics,
             config,
             calendarInteractor,
@@ -200,8 +205,9 @@ class CourseDatesViewModelTest {
             preferencesManager,
             courseRouter,
             calendarRouter,
+            resourceManager,
         )
-        coEvery { interactor.getCourseDates(any()) } returns CourseDatesResult(
+        coEvery { interactor.getCourseDates(any(), any()) } returns CourseDatesResult(
             datesSection = linkedMapOf(),
             courseBanner = CoreMocks.mockCourseDatesBannerInfo,
         )
@@ -212,7 +218,7 @@ class CourseDatesViewModelTest {
         }
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseDates(any()) }
+        coVerify(exactly = 1) { interactor.getCourseDates(any(), any()) }
 
         assert(message.await()?.message.isNullOrEmpty())
         assert(viewModel.uiState.value is CourseDatesUIState.Error)

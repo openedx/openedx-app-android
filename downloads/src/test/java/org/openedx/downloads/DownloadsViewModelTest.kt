@@ -24,7 +24,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.CoreMocks
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.DownloadCoursePreview
@@ -45,6 +44,7 @@ import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 class DownloadsViewModelTest {
 
@@ -87,8 +87,12 @@ class DownloadsViewModelTest {
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         every { config.getApiHostURL() } returns "http://localhost:8000"
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns unknownError
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns unknownError
         every { networkConnection.isOnline() } returns true
 
         coEvery { interactor.getDownloadCoursesPreview(any()) } returns flow {

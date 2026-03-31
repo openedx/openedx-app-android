@@ -3,27 +3,40 @@ package org.openedx.core.ui.theme
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
+
+internal val LocalAppColors = staticCompositionLocalOf<AppColors> {
+    error("No AppColors provided")
+}
 
 private val DarkColorPalette = AppColors(
-    material = darkColors(
+    material3 = darkColorScheme(
         primary = dark_primary,
-        primaryVariant = dark_primary_variant,
-        secondary = dark_secondary,
-        secondaryVariant = dark_secondary_variant,
-        background = dark_background,
-        surface = dark_surface,
-        error = dark_error,
         onPrimary = dark_onPrimary,
+        primaryContainer = dark_primary_variant,
+        onPrimaryContainer = dark_onPrimary,
+        secondary = dark_secondary,
         onSecondary = dark_onSecondary,
+        secondaryContainer = dark_secondary_variant,
+        onSecondaryContainer = dark_onSecondary,
+        tertiary = dark_secondary,
+        onTertiary = dark_onSecondary,
+        background = dark_background,
         onBackground = dark_onBackground,
+        surface = dark_surface,
         onSurface = dark_onSurface,
-        onError = dark_onError
+        surfaceVariant = dark_surface,
+        onSurfaceVariant = dark_onSurface,
+        error = dark_error,
+        onError = dark_onError,
+        outline = dark_text_field_border,
+        outlineVariant = dark_divider,
     ),
     textPrimary = dark_text_primary,
     textPrimaryVariant = dark_text_primary_variant,
@@ -103,19 +116,27 @@ private val DarkColorPalette = AppColors(
 )
 
 private val LightColorPalette = AppColors(
-    material = lightColors(
+    material3 = lightColorScheme(
         primary = light_primary,
-        primaryVariant = light_primary_variant,
-        secondary = light_secondary,
-        secondaryVariant = light_secondary_variant,
-        background = light_background,
-        surface = light_surface,
-        error = light_error,
         onPrimary = light_onPrimary,
+        primaryContainer = light_primary_variant,
+        onPrimaryContainer = light_onPrimary,
+        secondary = light_secondary,
         onSecondary = light_onSecondary,
+        secondaryContainer = light_secondary_variant,
+        onSecondaryContainer = light_onSecondary,
+        tertiary = light_secondary,
+        onTertiary = light_onSecondary,
+        background = light_background,
         onBackground = light_onBackground,
+        surface = light_surface,
         onSurface = light_onSurface,
-        onError = light_onError
+        surfaceVariant = light_surface,
+        onSurfaceVariant = light_onSurface,
+        error = light_error,
+        onError = light_onError,
+        outline = light_text_field_border,
+        outlineVariant = light_divider,
     ),
     textPrimary = light_text_primary,
     textPrimaryVariant = light_text_primary_variant,
@@ -197,7 +218,7 @@ private val LightColorPalette = AppColors(
 val MaterialTheme.appColors: AppColors
     @Composable
     @ReadOnlyComposable
-    get() = if (colors.isLight) LightColorPalette else DarkColorPalette
+    get() = LocalAppColors.current
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -209,11 +230,11 @@ fun OpenEdXTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
     }
 
     MaterialTheme(
-        colors = colors.material,
-        // typography = LocalTypography.current.material,
-        shapes = LocalShapes.current.material,
+        colorScheme = colors.material3,
+        shapes = LocalShapes.current.material3,
     ) {
         CompositionLocalProvider(
+            LocalAppColors provides colors,
             LocalOverscrollFactory provides null,
             content = content
         )

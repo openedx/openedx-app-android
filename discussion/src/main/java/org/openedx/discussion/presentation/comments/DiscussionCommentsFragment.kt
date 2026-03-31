@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,21 +28,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -117,7 +119,7 @@ class DiscussionCommentsFragment : Fragment() {
                 val windowSize = rememberWindowSize()
 
                 val uiState by viewModel.uiState.observeAsState(DiscussionCommentsUIState.Loading)
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
 
@@ -194,7 +196,7 @@ class DiscussionCommentsFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DiscussionCommentsScreen(
     windowSize: WindowSize,
@@ -211,13 +213,12 @@ private fun DiscussionCommentsScreen(
     onBackClick: () -> Unit,
     onUserPhotoClick: (String) -> Unit
 ) {
-    val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
     val firstVisibleIndex = remember {
         mutableStateOf(scrollState.firstVisibleItemIndex)
     }
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
+    val pullToRefreshState = rememberPullToRefreshState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var responseValue by rememberSaveable {
         mutableStateOf("")
@@ -236,11 +237,12 @@ private fun DiscussionCommentsScreen(
     }
 
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding(),
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets()
     ) {
         val keyboardController = LocalSoftwareKeyboardController.current
         val focusManager = LocalFocusManager.current
@@ -263,7 +265,7 @@ private fun DiscussionCommentsScreen(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         Column(
             Modifier
@@ -305,7 +307,11 @@ private fun DiscussionCommentsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.appColors.background
             ) {
-                Box(Modifier.pullRefresh(pullRefreshState)) {
+                PullToRefreshBox(
+                    isRefreshing = refreshing,
+                    onRefresh = { onSwipeRefresh() },
+                    state = pullToRefreshState
+                ) {
                     when (uiState) {
                         is DiscussionCommentsUIState.Success -> {
                             Column(
@@ -395,7 +401,7 @@ private fun DiscussionCommentsScreen(
                                     paginationCallBack()
                                 }
                                 if (!isSystemInDarkTheme()) {
-                                    Divider(color = MaterialTheme.appColors.cardViewBorder)
+                                    HorizontalDivider(color = MaterialTheme.appColors.cardViewBorder)
                                 }
                                 Box(
                                     Modifier
@@ -431,10 +437,14 @@ private fun DiscussionCommentsScreen(
                                                     style = MaterialTheme.appTypography.labelLarge,
                                                 )
                                             },
-                                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                                backgroundColor = MaterialTheme.appColors.textFieldBackgroundVariant,
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                unfocusedContainerColor =
+                                                    MaterialTheme.appColors.textFieldBackgroundVariant,
+                                                focusedContainerColor =
+                                                    MaterialTheme.appColors.textFieldBackgroundVariant,
                                                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                                                textColor = MaterialTheme.appColors.textFieldText
+                                                unfocusedTextColor = MaterialTheme.appColors.textFieldText,
+                                                focusedTextColor = MaterialTheme.appColors.textFieldText
                                             ),
                                             enabled = !uiState.thread.closed
                                         )
@@ -477,11 +487,6 @@ private fun DiscussionCommentsScreen(
                             }
                         }
                     }
-                    PullRefreshIndicator(
-                        refreshing,
-                        pullRefreshState,
-                        Modifier.align(Alignment.TopCenter)
-                    )
                 }
             }
         }

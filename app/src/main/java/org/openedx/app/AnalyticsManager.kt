@@ -6,6 +6,7 @@ import org.openedx.core.presentation.DownloadsAnalytics
 import org.openedx.core.presentation.dialog.appreview.AppReviewAnalytics
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.dashboard.presentation.DashboardAnalytics
+import org.openedx.dates.presentation.DatesAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discussion.presentation.DiscussionAnalytics
 import org.openedx.foundation.interfaces.Analytics
@@ -23,7 +24,8 @@ class AnalyticsManager :
     DiscussionAnalytics,
     ProfileAnalytics,
     WhatsNewAnalytics,
-    DownloadsAnalytics {
+    DownloadsAnalytics,
+    DatesAnalytics {
 
     private val analytics: MutableList<Analytics> = mutableListOf()
 

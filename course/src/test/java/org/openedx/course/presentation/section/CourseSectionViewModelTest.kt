@@ -24,7 +24,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.CoreMocks
-import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
@@ -36,8 +35,10 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.captureUiMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseSectionViewModelTest {
@@ -64,8 +65,8 @@ class CourseSectionViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every { resourceManager.getString(foundationR.string.foundation_error_no_connection) } returns noInternet
+        every { resourceManager.getString(foundationR.string.foundation_error_unknown_error) } returns somethingWrong
         every {
             resourceManager.getString(org.openedx.course.R.string.course_can_download_only_with_wifi)
         } returns cantDownload
@@ -96,8 +97,8 @@ class CourseSectionViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 0) { interactor.getCourseStructureForVideos(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(noInternet, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is CourseSectionUIState.Loading)
     }
 
@@ -121,8 +122,8 @@ class CourseSectionViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 0) { interactor.getCourseStructureForVideos(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(somethingWrong, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is CourseSectionUIState.Loading)
     }
 
@@ -151,7 +152,8 @@ class CourseSectionViewModelTest {
         coVerify(exactly = 0) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 1) { interactor.getCourseStructureForVideos(any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value is CourseSectionUIState.Blocks)
     }
 
@@ -174,7 +176,8 @@ class CourseSectionViewModelTest {
 
         advanceUntilIdle()
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
     }
 
     @Test
@@ -196,7 +199,8 @@ class CourseSectionViewModelTest {
 
         advanceUntilIdle()
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
     }
 
     @Test

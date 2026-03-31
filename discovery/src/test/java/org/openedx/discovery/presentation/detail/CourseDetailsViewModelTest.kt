@@ -21,7 +21,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.connection.NetworkConnection
@@ -35,6 +34,7 @@ import org.openedx.discovery.presentation.DiscoveryAnalyticsEvent
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseDetailsViewModelTest {
@@ -59,8 +59,12 @@ class CourseDetailsViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
         every { config.getApiHostURL() } returns "http://localhost:8000"
         every { calendarSyncScheduler.requestImmediateSync(any()) } returns Unit
     }
@@ -68,6 +72,10 @@ class CourseDetailsViewModelTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+    }
+
+    private fun CourseDetailsViewModel.lastUiMessage(): UIMessage? {
+        return uiMessage.replayCache.lastOrNull()
     }
 
     @Test
@@ -89,7 +97,7 @@ class CourseDetailsViewModelTest {
 
         coVerify(exactly = 1) { interactor.getCourseDetails(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as? UIMessage.SnackBarMessage
 
         assertEquals(noInternet, message?.message)
         assert(viewModel.uiState.value is CourseDetailsUIState.Loading)
@@ -114,7 +122,7 @@ class CourseDetailsViewModelTest {
 
         coVerify(exactly = 1) { interactor.getCourseDetails(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as? UIMessage.SnackBarMessage
 
         assertEquals(somethingWrong, message?.message)
         assert(viewModel.uiState.value is CourseDetailsUIState.Loading)
@@ -142,7 +150,7 @@ class CourseDetailsViewModelTest {
 
         coVerify(exactly = 1) { interactor.getCourseDetails(any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.lastUiMessage() == null)
         assert(viewModel.uiState.value is CourseDetailsUIState.CourseData)
     }
 
@@ -169,7 +177,7 @@ class CourseDetailsViewModelTest {
         coVerify(exactly = 0) { interactor.getCourseDetails(any()) }
         coVerify(exactly = 1) { interactor.getCourseDetailsFromCache(any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.lastUiMessage() == null)
         assert(viewModel.uiState.value is CourseDetailsUIState.CourseData)
     }
 
@@ -200,7 +208,7 @@ class CourseDetailsViewModelTest {
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
         verify { analytics.logEvent(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as? UIMessage.SnackBarMessage
         assertEquals(noInternet, message?.message)
         assert(viewModel.uiState.value is CourseDetailsUIState.CourseData)
     }
@@ -242,7 +250,7 @@ class CourseDetailsViewModelTest {
             )
         }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.lastUiMessage() as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
         assert(viewModel.uiState.value is CourseDetailsUIState.CourseData)
     }
@@ -297,7 +305,7 @@ class CourseDetailsViewModelTest {
             )
         }
 
-        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.lastUiMessage() == null)
         assert(viewModel.uiState.value is CourseDetailsUIState.CourseData)
     }
 

@@ -32,7 +32,6 @@ import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseProgressLoaded
@@ -46,6 +45,7 @@ import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 import java.net.UnknownHostException
 import org.openedx.course.R as courseR
+import org.openedx.foundation.R as foundationR
 
 @Suppress("LargeClass")
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -79,9 +79,8 @@ class CourseHomeViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every { resourceManager.getString(foundationR.string.foundation_error_no_connection) } returns noInternet
+        every { resourceManager.getString(foundationR.string.foundation_error_unknown_error) } returns somethingWrong
         every {
             resourceManager.getString(courseR.string.course_can_download_only_with_wifi)
         } returns cantDownload
@@ -103,7 +102,6 @@ class CourseHomeViewModelTest {
         every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
 
         every { courseNotifier.notifier } returns flow { }
-        coEvery { courseNotifier.send(any<CourseDatesShifted>()) } returns Unit
 
         every { analytics.logEvent(any(), any()) } returns Unit
         every { coreAnalytics.logEvent(any(), any()) } returns Unit
@@ -139,12 +137,17 @@ class CourseHomeViewModelTest {
                 )
             )
         }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
+        coEvery { interactor.getCourseStatusFlow(courseId, any()) } returns flow {
             emit(
                 CoreMocks.mockCourseComponentStatus
             )
         }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
+        coEvery {
+            interactor.getCourseDatesFlow(
+                courseId,
+                any()
+            )
+        } returns flow { emit(CoreMocks.mockCourseDatesResult) }
         coEvery {
             interactor.getCourseProgress(
                 courseId,
@@ -177,8 +180,8 @@ class CourseHomeViewModelTest {
         advanceUntilIdle()
 
         coVerify { interactor.getCourseStructureFlow(courseId, false) }
-        coVerify { interactor.getCourseStatusFlow(courseId) }
-        coVerify { interactor.getCourseDatesFlow(courseId) }
+        coVerify { interactor.getCourseStatusFlow(courseId, any()) }
+        coVerify { interactor.getCourseDatesFlow(courseId, any()) }
         coVerify { interactor.getCourseProgress(courseId, false, true) }
 
         assertTrue(viewModel.uiState.value is CourseHomeUIState.CourseData)
@@ -196,12 +199,17 @@ class CourseHomeViewModelTest {
                 false
             )
         } returns flow { throw UnknownHostException() }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
+        coEvery { interactor.getCourseStatusFlow(courseId, any()) } returns flow {
             emit(
                 CoreMocks.mockCourseComponentStatus
             )
         }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
+        coEvery {
+            interactor.getCourseDatesFlow(
+                courseId,
+                any()
+            )
+        } returns flow { emit(CoreMocks.mockCourseDatesResult) }
         coEvery {
             interactor.getCourseProgress(
                 courseId,
@@ -244,12 +252,17 @@ class CourseHomeViewModelTest {
                 false
             )
         } returns flow { throw Exception() }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
+        coEvery { interactor.getCourseStatusFlow(courseId, any()) } returns flow {
             emit(
                 CoreMocks.mockCourseComponentStatus
             )
         }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
+        coEvery {
+            interactor.getCourseDatesFlow(
+                courseId,
+                any()
+            )
+        } returns flow { emit(CoreMocks.mockCourseDatesResult) }
         coEvery {
             interactor.getCourseProgress(
                 courseId,
@@ -293,12 +306,17 @@ class CourseHomeViewModelTest {
                 CoreMocks.mockCourseStructure
             )
         }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
+        coEvery { interactor.getCourseStatusFlow(courseId, any()) } returns flow {
             emit(
                 CoreMocks.mockCourseComponentStatus
             )
         }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
+        coEvery {
+            interactor.getCourseDatesFlow(
+                courseId,
+                any()
+            )
+        } returns flow { emit(CoreMocks.mockCourseDatesResult) }
         coEvery {
             interactor.getCourseProgress(
                 courseId,
@@ -335,162 +353,9 @@ class CourseHomeViewModelTest {
     }
 
     @Test
-    fun `resetCourseDatesBanner success`() = runTest {
-        coEvery { interactor.resetCourseDates(courseId) } returns CoreMocks.mockResetCourseDates
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                CoreMocks.mockCourseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                CoreMocks.mockCourseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(CoreMocks.mockCourseProgress) }
-
-        val viewModel = CourseHomeViewModel(
-            courseId = courseId,
-            courseTitle = courseTitle,
-            config = config,
-            interactor = interactor,
-            resourceManager = resourceManager,
-            courseNotifier = courseNotifier,
-            networkConnection = networkConnection,
-            preferencesManager = preferencesManager,
-            analytics = analytics,
-            downloadDialogManager = downloadDialogManager,
-            fileUtil = fileUtil,
-            courseRouter = courseRouter,
-            videoPreviewHelper = videoPreviewHelper,
-            coreAnalytics = coreAnalytics,
-            downloadDao = downloadDao,
-            workerController = workerController,
-            downloadHelper = downloadHelper
-        )
-
-        advanceUntilIdle()
-
-        var resetResult: Boolean? = null
-
-        viewModel.resetCourseDatesBanner { success ->
-            resetResult = success
-        }
-
-        advanceUntilIdle()
-
-        coVerify { interactor.resetCourseDates(courseId) }
-        coVerify { courseNotifier.send(CourseDatesShifted) }
-        assertEquals(true, resetResult)
-    }
-
-    @Test
-    fun `resetCourseDatesBanner with internet error`() = runTest {
-        coEvery { interactor.resetCourseDates(courseId) } throws UnknownHostException()
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                CoreMocks.mockCourseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                CoreMocks.mockCourseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(CoreMocks.mockCourseProgress) }
-
-        val viewModel = CourseHomeViewModel(
-            courseId = courseId,
-            courseTitle = courseTitle,
-            config = config,
-            interactor = interactor,
-            resourceManager = resourceManager,
-            courseNotifier = courseNotifier,
-            networkConnection = networkConnection,
-            preferencesManager = preferencesManager,
-            analytics = analytics,
-            downloadDialogManager = downloadDialogManager,
-            fileUtil = fileUtil,
-            courseRouter = courseRouter,
-            videoPreviewHelper = videoPreviewHelper,
-            coreAnalytics = coreAnalytics,
-            downloadDao = downloadDao,
-            workerController = workerController,
-            downloadHelper = downloadHelper
-        )
-
-        advanceUntilIdle()
-
-        var resetResult: Boolean? = null
-
-        viewModel.resetCourseDatesBanner { success ->
-            resetResult = success
-        }
-
-        advanceUntilIdle()
-
-        coVerify { interactor.resetCourseDates(courseId) }
-        coVerify(exactly = 0) { courseNotifier.send(CourseDatesShifted) }
-        assertEquals(false, resetResult)
-    }
-
-    @Test
     fun `logVideoClick analytics event`() = runTest {
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                CoreMocks.mockCourseStructure.copy(
-                    id = courseId,
-                    name = courseTitle
-                )
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                CoreMocks.mockCourseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(CoreMocks.mockCourseProgress) }
-
-        val viewModel = CourseHomeViewModel(
-            courseId = courseId,
-            courseTitle = courseTitle,
-            config = config,
-            interactor = interactor,
-            resourceManager = resourceManager,
-            courseNotifier = courseNotifier,
-            networkConnection = networkConnection,
-            preferencesManager = preferencesManager,
-            analytics = analytics,
-            downloadDialogManager = downloadDialogManager,
-            fileUtil = fileUtil,
-            courseRouter = courseRouter,
-            videoPreviewHelper = videoPreviewHelper,
-            coreAnalytics = coreAnalytics,
-            downloadDao = downloadDao,
-            workerController = workerController,
-            downloadHelper = downloadHelper
-        )
+        stubCourseDataFlows()
+        val viewModel = createViewModel()
 
         advanceUntilIdle()
 
@@ -511,47 +376,8 @@ class CourseHomeViewModelTest {
 
     @Test
     fun `logAssignmentClick analytics event`() = runTest {
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                CoreMocks.mockCourseStructure.copy(
-                    id = courseId,
-                    name = courseTitle
-                )
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                CoreMocks.mockCourseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(CoreMocks.mockCourseProgress) }
-
-        val viewModel = CourseHomeViewModel(
-            courseId = courseId,
-            courseTitle = courseTitle,
-            config = config,
-            interactor = interactor,
-            resourceManager = resourceManager,
-            courseNotifier = courseNotifier,
-            networkConnection = networkConnection,
-            preferencesManager = preferencesManager,
-            analytics = analytics,
-            downloadDialogManager = downloadDialogManager,
-            fileUtil = fileUtil,
-            courseRouter = courseRouter,
-            videoPreviewHelper = videoPreviewHelper,
-            coreAnalytics = coreAnalytics,
-            downloadDao = downloadDao,
-            workerController = workerController,
-            downloadHelper = downloadHelper
-        )
+        stubCourseDataFlows()
+        val viewModel = createViewModel()
 
         advanceUntilIdle()
 
@@ -577,12 +403,17 @@ class CourseHomeViewModelTest {
                 CoreMocks.mockCourseStructure
             )
         }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
+        coEvery { interactor.getCourseStatusFlow(courseId, any()) } returns flow {
             emit(
                 CoreMocks.mockCourseComponentStatus
             )
         }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
+        coEvery {
+            interactor.getCourseDatesFlow(
+                courseId,
+                any()
+            )
+        } returns flow { emit(CoreMocks.mockCourseDatesResult) }
         coEvery {
             interactor.getCourseProgress(
                 courseId,
@@ -633,12 +464,17 @@ class CourseHomeViewModelTest {
                 CoreMocks.mockCourseStructure
             )
         }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
+        coEvery { interactor.getCourseStatusFlow(courseId, any()) } returns flow {
             emit(
                 CoreMocks.mockCourseComponentStatus
             )
         }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
+        coEvery {
+            interactor.getCourseDatesFlow(
+                courseId,
+                any()
+            )
+        } returns flow { emit(CoreMocks.mockCourseDatesResult) }
         coEvery {
             interactor.getCourseProgress(
                 courseId,
@@ -681,12 +517,17 @@ class CourseHomeViewModelTest {
                 CoreMocks.mockCourseStructure
             )
         }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
+        coEvery { interactor.getCourseStatusFlow(courseId, any()) } returns flow {
             emit(
                 CoreMocks.mockCourseComponentStatus
             )
         }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
+        coEvery {
+            interactor.getCourseDatesFlow(
+                courseId,
+                any()
+            )
+        } returns flow { emit(CoreMocks.mockCourseDatesResult) }
         coEvery {
             interactor.getCourseProgress(
                 courseId,
@@ -729,12 +570,17 @@ class CourseHomeViewModelTest {
                 CoreMocks.mockCourseStructure
             )
         }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
+        coEvery { interactor.getCourseStatusFlow(courseId, any()) } returns flow {
             emit(
                 CoreMocks.mockCourseComponentStatus
             )
         }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
+        coEvery {
+            interactor.getCourseDatesFlow(
+                courseId,
+                any()
+            )
+        } returns flow { emit(CoreMocks.mockCourseDatesResult) }
         coEvery {
             interactor.getCourseProgress(
                 courseId,
@@ -775,12 +621,17 @@ class CourseHomeViewModelTest {
                 CoreMocks.mockCourseStructure
             )
         }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
+        coEvery { interactor.getCourseStatusFlow(courseId, any()) } returns flow {
             emit(
                 CoreMocks.mockCourseComponentStatus
             )
         }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
+        coEvery {
+            interactor.getCourseDatesFlow(
+                courseId,
+                any()
+            )
+        } returns flow { emit(CoreMocks.mockCourseDatesResult) }
         coEvery {
             interactor.getCourseProgress(
                 courseId,
@@ -825,12 +676,17 @@ class CourseHomeViewModelTest {
                 CoreMocks.mockCourseStructure
             )
         }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
+        coEvery { interactor.getCourseStatusFlow(courseId, any()) } returns flow {
             emit(
                 CoreMocks.mockCourseComponentStatus
             )
         }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(CoreMocks.mockCourseDatesResult) }
+        coEvery {
+            interactor.getCourseDatesFlow(
+                courseId,
+                any()
+            )
+        } returns flow { emit(CoreMocks.mockCourseDatesResult) }
         coEvery {
             interactor.getCourseProgress(
                 courseId,
@@ -860,5 +716,56 @@ class CourseHomeViewModelTest {
         )
 
         assertTrue(viewModel.isCourseDropdownNavigationEnabled)
+    }
+
+    private fun stubCourseDataFlows() {
+        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
+            emit(
+                CoreMocks.mockCourseStructure.copy(
+                    id = courseId,
+                    name = courseTitle
+                )
+            )
+        }
+        coEvery { interactor.getCourseStatusFlow(courseId, any()) } returns flow {
+            emit(
+                CoreMocks.mockCourseComponentStatus
+            )
+        }
+        coEvery {
+            interactor.getCourseDatesFlow(
+                courseId,
+                any()
+            )
+        } returns flow { emit(CoreMocks.mockCourseDatesResult) }
+        coEvery {
+            interactor.getCourseProgress(
+                courseId,
+                false,
+                true
+            )
+        } returns flow { emit(CoreMocks.mockCourseProgress) }
+    }
+
+    private fun createViewModel(): CourseHomeViewModel {
+        return CourseHomeViewModel(
+            courseId = courseId,
+            courseTitle = courseTitle,
+            config = config,
+            interactor = interactor,
+            resourceManager = resourceManager,
+            courseNotifier = courseNotifier,
+            networkConnection = networkConnection,
+            preferencesManager = preferencesManager,
+            analytics = analytics,
+            downloadDialogManager = downloadDialogManager,
+            fileUtil = fileUtil,
+            courseRouter = courseRouter,
+            videoPreviewHelper = videoPreviewHelper,
+            coreAnalytics = coreAnalytics,
+            downloadDao = downloadDao,
+            workerController = workerController,
+            downloadHelper = downloadHelper
+        )
     }
 }

@@ -19,9 +19,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.captureUiMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.profile.ProfileMocks
 import org.openedx.profile.domain.interactor.ProfileInteractor
@@ -30,6 +30,7 @@ import org.openedx.profile.system.notifier.account.AccountUpdated
 import org.openedx.profile.system.notifier.profile.ProfileNotifier
 import java.io.File
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditProfileViewModelTest {
@@ -53,8 +54,12 @@ class EditProfileViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
         every { analytics.logScreenEvent(any(), any()) } returns Unit
     }
 
@@ -80,8 +85,8 @@ class EditProfileViewModelTest {
 
         coVerify(exactly = 1) { interactor.updateAccount(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(noInternet, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value?.isUpdating == false)
     }
 
@@ -103,8 +108,8 @@ class EditProfileViewModelTest {
 
         coVerify(exactly = 1) { interactor.updateAccount(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(somethingWrong, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value?.isUpdating == false)
     }
 
@@ -128,7 +133,8 @@ class EditProfileViewModelTest {
         verify { analytics.logEvent(any(), any()) }
         coVerify(exactly = 1) { interactor.updateAccount(any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value?.isUpdating == false)
     }
 
@@ -153,8 +159,8 @@ class EditProfileViewModelTest {
         coVerify(exactly = 0) { interactor.updateAccount(any()) }
         coVerify(exactly = 1) { interactor.setProfileImage(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(noInternet, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.selectedImageUri.value == null)
         assert(viewModel.uiState.value?.isUpdating == false)
     }
@@ -180,8 +186,8 @@ class EditProfileViewModelTest {
         coVerify(exactly = 0) { interactor.updateAccount(any()) }
         coVerify(exactly = 1) { interactor.setProfileImage(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(somethingWrong, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.selectedImageUri.value == null)
         assert(viewModel.uiState.value?.isUpdating == false)
     }
@@ -210,7 +216,8 @@ class EditProfileViewModelTest {
         coVerify(exactly = 1) { interactor.updateAccount(any()) }
         coVerify(exactly = 1) { interactor.setProfileImage(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assertEquals(null, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.selectedImageUri.value == null)
         assert(viewModel.uiState.value?.isUpdating == false)
     }

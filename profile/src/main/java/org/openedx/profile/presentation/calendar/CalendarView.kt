@@ -5,18 +5,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
-import androidx.compose.material.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
@@ -24,7 +24,7 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.profile.R
 import java.util.Date
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OptionsSection(
     isRelativeDatesEnabled: Boolean,
@@ -51,15 +51,12 @@ fun OptionsSection(
                 style = MaterialTheme.appTypography.titleMedium,
                 color = MaterialTheme.appColors.textDark
             )
-            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
                 Switch(
                     modifier = Modifier
                         .padding(0.dp),
                     checked = isRelativeDatesEnabled,
                     onCheckedChange = onRelativeDateSwitchClick,
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.appColors.textAccent
-                    )
                 )
             }
         }

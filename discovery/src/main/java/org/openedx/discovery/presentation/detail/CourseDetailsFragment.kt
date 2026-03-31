@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,18 +34,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Report
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
@@ -126,7 +129,7 @@ class CourseDetailsFragment : Fragment() {
                 val windowSize = rememberWindowSize()
 
                 val uiState by viewModel.uiState.observeAsState()
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
 
                 val colorBackgroundValue = MaterialTheme.appColors.background.value
                 val colorTextValue = MaterialTheme.appColors.textPrimary.value
@@ -220,8 +223,8 @@ internal fun CourseDetailsScreen(
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val isInternetConnectionShown = rememberSaveable {
         mutableStateOf(false)
@@ -234,8 +237,9 @@ internal fun CourseDetailsScreen(
             .semantics {
                 testTagsAsResourceId = true
             },
-        scaffoldState = scaffoldState,
-        backgroundColor = MaterialTheme.appColors.background,
+        containerColor = MaterialTheme.appColors.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets(),
         bottomBar = {
             if (!isUserLoggedIn) {
                 Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)) {
@@ -270,7 +274,7 @@ internal fun CourseDetailsScreen(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         Box(
             modifier = Modifier

@@ -3,11 +3,7 @@ package org.openedx.discussion.presentation.topics
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.RefreshDiscussions
@@ -16,7 +12,6 @@ import org.openedx.discussion.presentation.DiscussionAnalytics
 import org.openedx.discussion.presentation.DiscussionRouter
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 
 class DiscussionTopicsViewModel(
@@ -27,15 +22,11 @@ class DiscussionTopicsViewModel(
     private val analytics: DiscussionAnalytics,
     private val courseNotifier: CourseNotifier,
     val discussionRouter: DiscussionRouter,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val _uiState = MutableLiveData<DiscussionTopicsUIState>()
     val uiState: LiveData<DiscussionTopicsUIState>
         get() = _uiState
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
 
     init {
         collectCourseNotifier()
@@ -55,10 +46,8 @@ class DiscussionTopicsViewModel(
             } catch (e: Exception) {
                 _uiState.value = DiscussionTopicsUIState.Error
                 if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
+                    handleErrorUiMessage(
+                        throwable = e,
                     )
                 }
             } finally {

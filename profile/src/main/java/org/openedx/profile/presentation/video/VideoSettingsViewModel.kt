@@ -13,6 +13,7 @@ import org.openedx.core.presentation.settings.video.VideoQualityType
 import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.core.system.notifier.VideoQualityChanged
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileAnalyticsEvent
 import org.openedx.profile.presentation.ProfileAnalyticsKey
@@ -23,7 +24,8 @@ class VideoSettingsViewModel(
     private val notifier: VideoNotifier,
     private val analytics: ProfileAnalytics,
     private val router: ProfileRouter,
-) : BaseViewModel() {
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     private val _videoSettings = MutableLiveData<VideoSettings>()
     val videoSettings: LiveData<VideoSettings>

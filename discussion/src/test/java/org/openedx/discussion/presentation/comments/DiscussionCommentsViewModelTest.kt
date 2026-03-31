@@ -19,12 +19,11 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Pagination
 import org.openedx.discussion.DiscussionMocks
@@ -36,8 +35,10 @@ import org.openedx.discussion.system.notifier.DiscussionCommentDataChanged
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
 import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.captureUiMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @Suppress("LargeClass")
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -71,8 +72,12 @@ class DiscussionCommentsViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
         every {
             resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added)
         } returns commentAddedSuccessfully
@@ -100,9 +105,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 0) { interactor.getThreadQuestionComments(any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-
-        assert(noInternet == message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Loading)
         assert(viewModel.isUpdating.value == false)
     }
@@ -125,9 +129,8 @@ class DiscussionCommentsViewModelTest {
         coVerify(exactly = 0) { interactor.getThreadComments(any(), any()) }
         coVerify(exactly = 1) { interactor.getThreadQuestionComments(any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-
-        assert(somethingWrong == message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Loading)
         assert(viewModel.isUpdating.value == false)
     }
@@ -155,7 +158,8 @@ class DiscussionCommentsViewModelTest {
         coVerify(exactly = 1) { interactor.getThreadQuestionComments(any(), any(), any()) }
         coVerify(exactly = 1) { interactor.setThreadRead(any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assertEquals(null, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == true)
@@ -188,7 +192,8 @@ class DiscussionCommentsViewModelTest {
         coVerify(exactly = 0) { interactor.getThreadQuestionComments(any(), any(), any()) }
         coVerify(exactly = 1) { interactor.setThreadRead(any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assertEquals(null, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == false)
@@ -222,7 +227,8 @@ class DiscussionCommentsViewModelTest {
         coVerify(exactly = 0) { interactor.getThreadQuestionComments(any(), any(), any()) }
         coVerify(exactly = 1) { interactor.setThreadRead(any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assertEquals(null, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == false)
@@ -256,7 +262,8 @@ class DiscussionCommentsViewModelTest {
         coVerify(exactly = 0) { interactor.getThreadQuestionComments(any(), any(), any()) }
         coVerify(exactly = 1) { interactor.setThreadRead(any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assertEquals(null, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == false)
@@ -289,7 +296,8 @@ class DiscussionCommentsViewModelTest {
         coVerify(exactly = 2) { interactor.getThreadComments(any(), any()) }
         coVerify(exactly = 0) { interactor.getThreadQuestionComments(any(), any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assertEquals(null, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == false)
@@ -318,8 +326,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setThreadVoted(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(noInternet == message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -347,8 +355,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setThreadVoted(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(somethingWrong == message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -376,7 +384,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setThreadVoted(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -404,8 +413,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setCommentFlagged(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(noInternet == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(noInternet == (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -433,8 +442,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setCommentFlagged(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(somethingWrong == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(somethingWrong == (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -463,7 +472,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setCommentFlagged(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -490,8 +500,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setCommentVoted(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(noInternet == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(noInternet == (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -518,8 +528,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setCommentVoted(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(somethingWrong == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(somethingWrong == (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -551,7 +561,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setCommentVoted(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -578,8 +589,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setThreadFlagged(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(noInternet == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(noInternet == (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -606,8 +617,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setThreadFlagged(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(somethingWrong == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(somethingWrong == (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -634,7 +645,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setThreadFlagged(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assertEquals(null, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -661,8 +673,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setThreadFollowed(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(noInternet == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(noInternet == (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -689,8 +701,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setThreadFollowed(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(somethingWrong == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(somethingWrong == (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -717,7 +729,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.setThreadFollowed(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -750,7 +763,8 @@ class DiscussionCommentsViewModelTest {
 
         advanceUntilIdle()
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assertEquals(null, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -783,8 +797,11 @@ class DiscussionCommentsViewModelTest {
 
         advanceUntilIdle()
 
-        val message = viewModel.uiMessage.value as? UIMessage.ToastMessage
-        assert(commentAddedSuccessfully == message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(
+            commentAddedSuccessfully,
+            (message.await() as? UIMessage.ToastMessage)?.message
+        )
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -817,7 +834,8 @@ class DiscussionCommentsViewModelTest {
 
         advanceUntilIdle()
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assertEquals(null, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
@@ -843,8 +861,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.createComment(any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        Assert.assertEquals(noInternet, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -869,8 +887,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.createComment(any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        Assert.assertEquals(somethingWrong, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -896,7 +914,8 @@ class DiscussionCommentsViewModelTest {
 
         coVerify(exactly = 1) { interactor.createComment(any(), any(), any()) }
 
-        assert(viewModel.uiMessage.value != null)
+        val message = captureUiMessage(viewModel)
+        assertEquals(null, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
