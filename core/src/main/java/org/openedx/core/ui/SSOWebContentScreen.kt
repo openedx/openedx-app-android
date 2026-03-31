@@ -10,9 +10,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -20,7 +21,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
@@ -34,7 +34,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SSOWebContentScreen(
     windowSize: WindowSize,
@@ -45,34 +44,48 @@ fun SSOWebContentScreen(
     onWebPageLoaded: () -> Unit,
     onWebPageUpdated: (String) -> Unit = {},
 ) {
-    val webView = SSOWebView(
-        url = url,
-        ssoFinishedUrl = ssoFinishedUrl,
-        onWebPageLoaded = onWebPageLoaded,
-        onWebPageUpdated = onWebPageUpdated,
-        onWebPageError = {
-            WebViewUIState.Error(
-                ErrorType.UNKNOWN_ERROR
-            )
+    val context = LocalContext.current
+    val webView = remember {
+        WebView(context).apply {
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, pageUrl: String?) {
+                    super.onPageFinished(view, pageUrl)
+                    if (pageUrl == null) return
+                    if (pageUrl.contains(ssoFinishedUrl)) {
+                        val header = getCookie(pageUrl, "edx-jwt-cookie-header-payload")
+                        val signature = getCookie(pageUrl, "edx-jwt-cookie-signature")
+                        if (!header.isNullOrEmpty() && !signature.isNullOrEmpty()) {
+                            onWebPageUpdated("$header.$signature")
+                        } else {
+                            // Handle error logic here if needed
+                        }
+                    }
+                }
+                override fun onPageCommitVisible(view: WebView?, url: String?) {
+                    super.onPageCommitVisible(view, url)
+                    onWebPageLoaded()
+                }
+            }
+            with(settings) {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+            }
+            loadUrl(url)
         }
-    )
-    val screenWidth by remember(key1 = windowSize) {
-        mutableStateOf(
-           windowSize.windowSizeValue(
-               expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
-               compact = Modifier.fillMaxWidth(),
-               )
-        )
     }
+
+    val screenWidthModifier = windowSize.windowSizeValue(
+        expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
+        compact = Modifier.fillMaxWidth()
+    )
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .statusBarsInset()
-            .displayCutoutForLandscape(),
+            .statusBarsPadding(), // Fix 2: Changed from statusBarsInset()
         contentAlignment = Alignment.TopCenter
     ) {
-        Column(screenWidth) {
+        Column(screenWidthModifier) {
             Box(
                 Modifier
                     .fillMaxWidth()
@@ -97,77 +110,10 @@ fun SSOWebContentScreen(
                     AndroidView(
                         modifier = Modifier
                             .background(MaterialTheme.appColors.background),
-                        factory = {
-                            webView
-                        }
+                        factory = { webView }
                     )
                 }
             }
-        }
-    }
-}
-
-@SuppressLint("SetJavaScriptEnabled", "ComposableNaming")
-@Composable
-fun SSOWebView(
-    url: String,
-    ssoFinishedUrl: String,
-    onWebPageLoaded: () -> Unit,
-    onWebPageUpdated: (String) -> Unit = {},
-    onWebPageError: () -> Unit,
-): WebView {
-    val context = LocalContext.current
-
-    return remember {
-        WebView(context).apply {
-            webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView?, pageUrl: String?) {
-                    super.onPageFinished(view, pageUrl)
-                    if (pageUrl == null) return
-                    if (pageUrl.contains(ssoFinishedUrl)) {
-                        val header = getCookie(pageUrl, "edx-jwt-cookie-header-payload")
-                        val signature = getCookie(pageUrl, "edx-jwt-cookie-signature")
-                        if (!header.isNullOrEmpty() && !signature.isNullOrEmpty()) {
-                            onWebPageUpdated("$header.$signature")
-                        } else {
-                            onWebPageError()
-                        }
-                    }
-                }
-
-                override fun onReceivedLoginRequest(
-                    view: WebView?,
-                    realm: String?,
-                    account: String?,
-                    args: String?
-                ) {
-                    super.onReceivedLoginRequest(view, realm, account, args)
-                }
-
-                override fun onFormResubmission(
-                    view: WebView?,
-                    dontResend: Message?,
-                    resend: Message?
-                ) {
-                    super.onFormResubmission(view, dontResend, resend)
-                }
-                override fun onPageCommitVisible(view: WebView?, url: String?) {
-                    super.onPageCommitVisible(view, url)
-                    onWebPageLoaded()
-                }
-            }
-            with(settings) {
-                javaScriptEnabled = true
-                useWideViewPort = true
-                loadWithOverviewMode = true
-                builtInZoomControls = false
-                setSupportZoom(true)
-                loadsImagesAutomatically = true
-                domStorageEnabled = true
-            }
-            isVerticalScrollBarEnabled = true
-            isHorizontalScrollBarEnabled = true
-            loadUrl(url)
         }
     }
 }

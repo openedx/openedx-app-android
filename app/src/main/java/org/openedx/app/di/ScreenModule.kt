@@ -82,6 +82,7 @@ import org.openedx.profile.presentation.profile.ProfileViewModel
 import org.openedx.profile.presentation.settings.SettingsViewModel
 import org.openedx.profile.presentation.video.VideoSettingsViewModel
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
+import android.content.res.Resources
 
 val screenModule = module {
 
@@ -113,7 +114,6 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get(),
         )
     }
 
@@ -136,7 +136,8 @@ val screenModule = module {
             get(),
             courseId,
             infoType,
-            lang
+            lang,
+            get()
         )
     }
 

@@ -36,6 +36,8 @@ import org.openedx.core.utils.Logger
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.core.R as CoreRes
+import org.openedx.foundation.extension.isInternetError
+import org.openedx.foundation.presentation.UIMessage
 
 class SignInViewModel(
     private val interactor: AuthInteractor,
@@ -162,14 +164,12 @@ class SignInViewModel(
                 setUserId()
             } catch (e: Exception) {
                 if (e is EdxError.InvalidGrantException) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_invalid_grant))
-                } else if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_no_connection))
+                    handleErrorUiMessage(
+                        throwable = null,
+                        defaultErrorRes = CoreRes.string.core_error_invalid_grant
+                    )
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_unknown_error))
+                    handleErrorUiMessage(e)
                 }
             }
             _uiState.update { it.copy(showProgress = false) }
