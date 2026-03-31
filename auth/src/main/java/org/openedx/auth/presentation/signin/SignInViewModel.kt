@@ -36,8 +36,6 @@ import org.openedx.core.utils.Logger
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.core.R as CoreRes
-import org.openedx.foundation.extension.isInternetError
-import org.openedx.foundation.presentation.UIMessage
 
 class SignInViewModel(
     private val interactor: AuthInteractor,
