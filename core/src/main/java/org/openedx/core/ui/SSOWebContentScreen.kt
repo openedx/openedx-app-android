@@ -1,6 +1,5 @@
 package org.openedx.core.ui
 
-
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
