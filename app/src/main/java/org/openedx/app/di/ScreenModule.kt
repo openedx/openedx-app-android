@@ -1,5 +1,6 @@
 package org.openedx.app.di
 
+import android.content.res.Resources
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -82,7 +83,6 @@ import org.openedx.profile.presentation.profile.ProfileViewModel
 import org.openedx.profile.presentation.settings.SettingsViewModel
 import org.openedx.profile.presentation.video.VideoSettingsViewModel
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
-import android.content.res.Resources
 
 val screenModule = module {
 
