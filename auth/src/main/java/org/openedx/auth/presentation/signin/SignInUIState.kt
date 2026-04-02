@@ -13,16 +13,17 @@ import org.openedx.core.domain.model.RegistrationField
  * @param loginSuccess is login succeed
  */
 internal data class SignInUIState(
+    val isLoginRegistrationFormEnabled: Boolean = true,
+    val isSSOLoginEnabled: Boolean = false,
+    val ssoButtonTitle: String = "",
+    val isSSODefaultLoginButton: Boolean = false,
     val isFacebookAuthEnabled: Boolean = false,
     val isGoogleAuthEnabled: Boolean = false,
     val isMicrosoftAuthEnabled: Boolean = false,
     val isSocialAuthEnabled: Boolean = false,
-    val isBrowserLoginEnabled: Boolean = false,
-    val isBrowserRegistrationEnabled: Boolean = false,
     val isLogistrationEnabled: Boolean = false,
     val isRegistrationEnabled: Boolean = true,
     val showProgress: Boolean = false,
     val loginSuccess: Boolean = false,
     val agreement: RegistrationField? = null,
-    val loginFailure: Boolean = false,
 )

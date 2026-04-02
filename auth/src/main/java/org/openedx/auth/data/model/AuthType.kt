@@ -13,5 +13,4 @@ enum class AuthType(val postfix: String, val methodName: String) {
     GOOGLE(ApiConstants.AUTH_TYPE_GOOGLE, "Google"),
     FACEBOOK(ApiConstants.AUTH_TYPE_FB, "Facebook"),
     MICROSOFT(ApiConstants.AUTH_TYPE_MICROSOFT, "Microsoft"),
-    BROWSER(ApiConstants.AUTH_TYPE_BROWSER, "Browser")
 }

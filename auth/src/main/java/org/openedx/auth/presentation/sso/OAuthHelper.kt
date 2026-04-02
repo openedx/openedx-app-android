@@ -21,7 +21,6 @@ class OAuthHelper(
             AuthType.GOOGLE -> googleAuthHelper.socialAuth(fragment.requireActivity())
             AuthType.FACEBOOK -> facebookAuthHelper.socialAuth(fragment)
             AuthType.MICROSOFT -> microsoftAuthHelper.socialAuth(fragment.requireActivity())
-            AuthType.BROWSER -> null
         }
     }
 

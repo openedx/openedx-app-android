@@ -1,5 +1,6 @@
 package org.openedx.app.di
 
+import android.content.res.Resources
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -113,11 +114,11 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get(),
         )
     }
 
-    viewModel { (courseId: String?, infoType: String?, authCode: String) ->
+    val lang = Resources.getSystem().configuration.locales[0].language
+    viewModel { (courseId: String?, infoType: String?) ->
         SignInViewModel(
             get(),
             get(),
@@ -135,7 +136,8 @@ val screenModule = module {
             get(),
             courseId,
             infoType,
-            authCode,
+            lang,
+            get()
         )
     }
 

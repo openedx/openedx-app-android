@@ -87,6 +87,8 @@ ext {
     java_version = JavaVersion.VERSION_17
     jvm_target_version = JvmTarget.JVM_17
 
+    webkit_version = "1.11.0"
+
     configHelper = new ConfigHelper(projectDir, getCurrentFlavor())
 }
 
