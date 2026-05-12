@@ -70,6 +70,7 @@ dependencies {
     implementation "androidx.media3:media3-ui:$media3_version"
     implementation "androidx.media3:media3-cast:$media3_version"
     implementation "me.saket.extendedspans:extendedspans:$extented_spans_version"
+    implementation "androidx.activity:activity-compose:$activity_compose_version"
 
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation "androidx.test.ext:junit:$test_ext_version"

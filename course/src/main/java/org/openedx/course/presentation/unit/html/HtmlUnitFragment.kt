@@ -1,7 +1,9 @@
 package org.openedx.course.presentation.unit.html
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.Uri
@@ -10,12 +12,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.PermissionRequest
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -46,6 +52,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
@@ -272,6 +279,28 @@ private fun HTMLContentView(
 
     val isDarkTheme = isSystemInDarkTheme()
 
+    // Holds the in-flight PermissionRequest from the WebView until the Android permission
+    // dialog resolves. Storing it in a MutableState lets the launcher callback reach it
+    // without needing a mutable var captured inside the factory lambda.
+    val pendingWebPermissionRequest = remember { mutableStateOf<PermissionRequest?>(null) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { grants ->
+        val req = pendingWebPermissionRequest.value ?: return@rememberLauncherForActivityResult
+        pendingWebPermissionRequest.value = null
+        val grantedResources = req.resources.filter { resource ->
+            when (resource) {
+                PermissionRequest.RESOURCE_AUDIO_CAPTURE ->
+                    grants[Manifest.permission.RECORD_AUDIO] == true
+                // Non-dangerous resources (e.g. RESOURCE_PROTECTED_MEDIA_ID) are granted
+                // without a corresponding Android permission.
+                else -> true
+            }
+        }.toTypedArray()
+        if (grantedResources.isNotEmpty()) req.grant(grantedResources) else req.deny()
+    }
+
     AndroidView(
         modifier = Modifier
             .then(screenWidth)
@@ -362,6 +391,32 @@ private fun HTMLContentView(
                         super.onReceivedError(view, request, error)
                     }
                 }
+                // Grant camera/microphone access requested by web content (e.g. WebRTC, LTI
+                // tools, or real-time features). The corresponding Android permissions
+                // (RECORD_AUDIO, CAMERA) must also be declared in the manifest.
+                webChromeClient = object : WebChromeClient() {
+                    override fun onPermissionRequest(request: PermissionRequest) {
+                        if (pendingWebPermissionRequest.value != null) {
+                            // Another request is already being resolved; deny immediately.
+                            request.deny()
+                            return
+                        }
+                        val androidPerms = buildList {
+                            if (PermissionRequest.RESOURCE_AUDIO_CAPTURE in request.resources) {
+                                add(Manifest.permission.RECORD_AUDIO)
+                            }
+                        }
+                        if (androidPerms.isEmpty() || androidPerms.all {
+                            ContextCompat.checkSelfPermission(context, it) ==
+                                PackageManager.PERMISSION_GRANTED
+                        }) {
+                            request.grant(request.resources)
+                        } else {
+                            pendingWebPermissionRequest.value = request
+                            permissionLauncher.launch(androidPerms.toTypedArray())
+                        }
+                    }
+                }
                 with(settings) {
                     javaScriptEnabled = true
                     loadWithOverviewMode = true
@@ -373,6 +428,9 @@ private fun HTMLContentView(
                     allowContentAccess = true
                     useWideViewPort = true
                     cacheMode = WebSettings.LOAD_NO_CACHE
+                    // Allow audio and video elements to play without a prior user gesture.
+                    // Required for LTI tools and real-time features that produce sound on load.
+                    mediaPlaybackRequiresUserGesture = false
                 }
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
