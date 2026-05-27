@@ -275,7 +275,7 @@ fun SearchBar(
                     .testTag("txt_search_placeholder")
                     .fillMaxWidth(),
                 text = label,
-                color = MaterialTheme.appColors.textSecondary,
+                color = MaterialTheme.appColors.textFieldHint,
                 style = MaterialTheme.appTypography.bodyMedium
             )
         },
@@ -367,7 +367,7 @@ fun SearchBarStateless(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = label,
-                color = MaterialTheme.appColors.textSecondary,
+                color = MaterialTheme.appColors.textFieldHint,
                 style = MaterialTheme.appTypography.bodyMedium
             )
         },
