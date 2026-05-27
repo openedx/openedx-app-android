@@ -811,7 +811,7 @@ private fun PrimaryCourseTitle(
             modifier = Modifier.fillMaxWidth(),
             text = primaryCourse.course.org,
             style = MaterialTheme.appTypography.labelMedium,
-            color = MaterialTheme.appColors.textFieldHint
+            color = MaterialTheme.appColors.textSecondary
         )
         Text(
             modifier = Modifier
@@ -828,7 +828,7 @@ private fun PrimaryCourseTitle(
                 .fillMaxWidth()
                 .padding(top = 4.dp),
             style = MaterialTheme.appTypography.labelMedium,
-            color = MaterialTheme.appColors.textFieldHint,
+            color = MaterialTheme.appColors.textSecondary,
             text = TimeUtils.getCourseFormattedDate(
                 LocalContext.current,
                 Date(),
@@ -876,7 +876,7 @@ private fun NoCoursesInfo(
         ) {
             Icon(
                 painter = painterResource(id = CoreR.drawable.core_ic_book),
-                tint = MaterialTheme.appColors.textFieldBorder,
+                tint = MaterialTheme.appColors.emptyStateIconColor,
                 contentDescription = null
             )
             Spacer(Modifier.height(4.dp))

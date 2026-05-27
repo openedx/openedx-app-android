@@ -441,13 +441,13 @@ private fun NoDownloadableBlocksProgress(
         Text(
             text = stringResource(R.string.core_0mb),
             style = MaterialTheme.appTypography.titleLarge,
-            color = MaterialTheme.appColors.textFieldHint
+            color = MaterialTheme.appColors.textSecondary
         )
         Spacer(modifier = Modifier.height(4.dp))
         IconText(
             text = stringResource(R.string.core_available_to_download),
             icon = Icons.Outlined.CloudDownload,
-            color = MaterialTheme.appColors.textFieldHint,
+            color = MaterialTheme.appColors.secondaryContentColor,
             textStyle = MaterialTheme.appTypography.labelLarge
         )
         Spacer(modifier = Modifier.height(20.dp))
