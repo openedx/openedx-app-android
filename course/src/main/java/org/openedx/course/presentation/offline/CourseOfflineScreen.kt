@@ -441,7 +441,7 @@ private fun NoDownloadableBlocksProgress(
         Text(
             text = stringResource(R.string.core_0mb),
             style = MaterialTheme.appTypography.titleLarge,
-            color = MaterialTheme.appColors.textFieldHint
+            color = MaterialTheme.appColors.textSecondary
         )
         Spacer(modifier = Modifier.height(4.dp))
         IconText(

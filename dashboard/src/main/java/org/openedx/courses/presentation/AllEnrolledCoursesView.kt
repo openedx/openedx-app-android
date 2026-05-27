@@ -442,7 +442,7 @@ fun CourseItem(
                         .padding(horizontal = 8.dp)
                         .padding(top = 4.dp),
                     style = MaterialTheme.appTypography.labelMedium,
-                    color = MaterialTheme.appColors.textFieldHint,
+                    color = MaterialTheme.appColors.textSecondary,
                     overflow = TextOverflow.Ellipsis,
                     minLines = 1,
                     maxLines = 2,

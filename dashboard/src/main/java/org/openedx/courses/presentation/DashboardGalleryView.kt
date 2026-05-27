@@ -811,7 +811,7 @@ private fun PrimaryCourseTitle(
             modifier = Modifier.fillMaxWidth(),
             text = primaryCourse.course.org,
             style = MaterialTheme.appTypography.labelMedium,
-            color = MaterialTheme.appColors.textFieldHint
+            color = MaterialTheme.appColors.textSecondary
         )
         Text(
             modifier = Modifier
@@ -828,7 +828,7 @@ private fun PrimaryCourseTitle(
                 .fillMaxWidth()
                 .padding(top = 4.dp),
             style = MaterialTheme.appTypography.labelMedium,
-            color = MaterialTheme.appColors.textFieldHint,
+            color = MaterialTheme.appColors.textSecondary,
             text = TimeUtils.getCourseFormattedDate(
                 LocalContext.current,
                 Date(),
