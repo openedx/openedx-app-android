@@ -519,7 +519,7 @@ fun EmptyState(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.core_ic_book),
-                tint = MaterialTheme.appColors.textFieldBorder,
+                tint = MaterialTheme.appColors.emptyStateIconColor,
                 contentDescription = null
             )
             Spacer(Modifier.height(4.dp))

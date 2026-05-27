@@ -1126,7 +1126,7 @@ fun NoContentScreen(message: String, icon: Painter) {
                 ),
             painter = icon,
             contentDescription = null,
-            tint = MaterialTheme.appColors.progressBarBackgroundColor,
+            tint = MaterialTheme.appColors.emptyStateIconColor,
         )
         Spacer(Modifier.height(24.dp))
         Text(

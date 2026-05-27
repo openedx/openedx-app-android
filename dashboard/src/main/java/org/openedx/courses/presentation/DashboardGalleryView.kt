@@ -876,7 +876,7 @@ private fun NoCoursesInfo(
         ) {
             Icon(
                 painter = painterResource(id = CoreR.drawable.core_ic_book),
-                tint = MaterialTheme.appColors.textFieldBorder,
+                tint = MaterialTheme.appColors.emptyStateIconColor,
                 contentDescription = null
             )
             Spacer(Modifier.height(4.dp))

@@ -475,7 +475,7 @@ private fun EmptyState() {
             Icon(
                 painter = painterResource(id = R.drawable.dashboard_ic_empty),
                 contentDescription = null,
-                tint = MaterialTheme.appColors.textFieldBorder
+                tint = MaterialTheme.appColors.emptyStateIconColor
             )
             Spacer(Modifier.height(16.dp))
             Text(
