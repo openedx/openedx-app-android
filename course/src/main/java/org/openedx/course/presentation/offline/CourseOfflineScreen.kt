@@ -447,7 +447,7 @@ private fun NoDownloadableBlocksProgress(
         IconText(
             text = stringResource(R.string.core_available_to_download),
             icon = Icons.Outlined.CloudDownload,
-            color = MaterialTheme.appColors.textFieldHint,
+            color = MaterialTheme.appColors.secondaryContentColor,
             textStyle = MaterialTheme.appTypography.labelLarge
         )
         Spacer(modifier = Modifier.height(20.dp))
