@@ -22,18 +22,18 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: ⏬ Checkout with LFS
-        uses: nschloe/action-cached-lfs-checkout@v1.2.1
+        uses: nschloe/action-cached-lfs-checkout@d6efedcb8fc03d006e1e77743718e26234ed2c97 # v1.2.1
         with:
           # Ensure we are building the branch and not the branch after being merged on develop
           # https://github.com/actions/checkout/issues/881
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref }}
       - name: ☕️ Use JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@17f84c3641ba7b8f6deff6309fc4c864478f5d62 # v3.14.1
         with:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '17'
       - name: Configure gradle
-        uses: gradle/gradle-build-action@v2.6.1
+        uses: gradle/gradle-build-action@915a66c096a03101667f9df2e56c9efef558b165 # v2.6.1
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/develop' }}
       - name: Generate mock files
@@ -42,7 +42,7 @@ jobs:
         run: ./gradlew testProdDebugUnitTest $CI_GRADLE_ARG_PROPERTIES
 
       - name: Upload reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: failure()
         with:
           name: failures
