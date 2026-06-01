@@ -182,3 +182,7 @@
 -dontwarn net.jcip.annotations.GuardedBy
 -dontwarn net.jcip.annotations.Immutable
 -dontwarn net.jcip.annotations.ThreadSafe
+
+# XChaCha20Poly1305 is an optional dependency of nimbus-jose-jwt (via MSAL).
+# It's only needed for XChaCha20-Poly1305 encryption which this app doesn't use.
+-dontwarn com.google.crypto.tink.subtle.XChaCha20Poly1305
