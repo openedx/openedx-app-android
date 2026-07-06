@@ -74,6 +74,9 @@ dependencies {
     implementation("io.opentelemetry:opentelemetry-api:$opentelemetry_version")
     implementation("io.opentelemetry:opentelemetry-context:$opentelemetry_version")
 
+    // LMS Directory: QR sign-in scanner
+    implementation "com.journeyapps:zxing-android-embedded:$zxing_embedded_version"
+
     testImplementation "junit:junit:$junit_version"
     testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation "androidx.arch.core:core-testing:$android_arch_version"

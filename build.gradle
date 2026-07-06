@@ -51,6 +51,9 @@ buildscript {
         // OpenTelemetry versions
         opentelemetry_version = '1.53.0'
 
+        // LMS Directory QR scanner
+        zxing_embedded_version = '4.3.0'
+
         // Testing versions
         compose_ui_tooling = '1.7.8'
         mockk_version = '1.14.5'

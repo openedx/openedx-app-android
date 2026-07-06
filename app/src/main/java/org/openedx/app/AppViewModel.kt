@@ -57,6 +57,13 @@ class AppViewModel(
 
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
+    /**
+     * LMS Directory: on first launch (before sign-in) the learner must pick a platform.
+     * True only when the feature is on and nothing is selected yet.
+     */
+    val isLmsSelectionRequired: Boolean
+        get() = config.getLMSDirectoryConfig().enabled && preferencesManager.selectedBaseUrl.isNullOrBlank()
+
     private var logoutHandledAt: Long = 0
 
     val isBranchEnabled get() = config.getBranchConfig().enabled

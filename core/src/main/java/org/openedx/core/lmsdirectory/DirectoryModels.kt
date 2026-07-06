@@ -1,0 +1,54 @@
+package org.openedx.core.lmsdirectory
+
+/**
+ * Domain models for the LMS registry catalog.
+ * The registry is the same backend the iOS app talks to (`/api/v1/directory`).
+ */
+
+data class LmsSummary(
+    val id: String,
+    val title: String,
+    val shortDescription: String,
+    val baseUrl: String,
+    val logoUrl: String?,
+    val accentColor: String?,
+)
+
+data class DirectoryConfig(
+    val directoryMode: String,
+    val providerName: String,
+    val providerTagline: String,
+) {
+    val isCurated: Boolean get() = directoryMode.equals("curated", ignoreCase = true)
+
+    companion object {
+        val SEARCH_DEFAULT = DirectoryConfig(
+            directoryMode = "search",
+            providerName = "",
+            providerTagline = "",
+        )
+    }
+}
+
+/**
+ * Why a learner flags an LMS. Moderation reasons (trust & safety), not tech
+ * support. Raw values match the registry's categories.
+ */
+enum class ReportCategory(val apiValue: String) {
+    INAPPROPRIATE("inappropriate"),
+    SCAM("scam"),
+    IMPERSONATION("impersonation"),
+    SPAM("spam"),
+    BROKEN("broken"),
+    OTHER("other"),
+}
+
+data class ReportDraft(
+    val lmsId: String?,
+    val baseUrl: String,
+    val category: ReportCategory,
+    val message: String,
+    val reporterEmail: String?,
+    /** A compressed screenshot as base64 (no data: prefix), or null. */
+    val screenshotBase64: String? = null,
+)

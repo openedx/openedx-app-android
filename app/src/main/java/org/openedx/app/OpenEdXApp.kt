@@ -14,11 +14,15 @@ import org.openedx.app.di.appModule
 import org.openedx.app.di.networkingModule
 import org.openedx.app.di.screenModule
 import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.lmsdirectory.LmsThemeController
+import org.openedx.core.lmsdirectory.lmsDirectoryModule
 import org.openedx.firebase.OEXFirebaseAnalytics
 
 class OpenEdXApp : Application() {
 
     private val config by inject<Config>()
+    private val corePreferences by inject<CorePreferences>()
     private val pluginManager by inject<PluginManager>()
 
     override fun onCreate() {
@@ -28,8 +32,14 @@ class OpenEdXApp : Application() {
             modules(
                 appModule,
                 networkingModule,
-                screenModule
+                screenModule,
+                lmsDirectoryModule
             )
+        }
+        // LMS Directory: re-apply the selected platform's brand color on cold start so
+        // the whole app is themed before the first screen composes. No-op when off.
+        if (config.getLMSDirectoryConfig().enabled) {
+            LmsThemeController.apply(corePreferences.selectedLmsAccentColor)
         }
         if (config.getFirebaseConfig().enabled) {
             FirebaseApp.initializeApp(this)

@@ -85,6 +85,8 @@ class PreferencesManager(
         val LAST_WHATS_NEW_VERSION = stringPreferencesKey("last_whats_new_version")
         val LAST_REVIEW_VERSION = stringPreferencesKey("last_review_version")
         val WAS_POSITIVE_RATED = booleanPreferencesKey("app_was_positive_rated")
+        val SELECTED_BASE_URL = stringPreferencesKey("selected_base_url")
+        val SELECTED_LMS_ACCENT_COLOR = stringPreferencesKey("selected_lms_accent_color")
 
         fun calendarSyncDialogShown(courseName: String) =
             booleanPreferencesKey("calendar_sync_dialog_${courseName.replaceSpace("_")}")
@@ -200,6 +202,14 @@ class PreferencesManager(
     override var isRelativeDatesEnabled: Boolean
         get() = getValue(Keys.IS_RELATIVE_DATES_ENABLED, true)
         set(value) = setValue(Keys.IS_RELATIVE_DATES_ENABLED, value)
+
+    override var selectedBaseUrl: String?
+        get() = getValue(Keys.SELECTED_BASE_URL, "").ifEmpty { null }
+        set(value) = setValue(Keys.SELECTED_BASE_URL, value.orEmpty())
+
+    override var selectedLmsAccentColor: String?
+        get() = getValue(Keys.SELECTED_LMS_ACCENT_COLOR, "").ifEmpty { null }
+        set(value) = setValue(Keys.SELECTED_LMS_ACCENT_COLOR, value.orEmpty())
 
     override var profile: Account?
         get() {

@@ -61,6 +61,7 @@ internal fun ProfileView(
     uiState: ProfileUIState,
     uiMessage: UIMessage?,
     refreshing: Boolean,
+    showReportLms: Boolean = false,
     onAction: (ProfileViewAction) -> Unit,
     onSettingsClick: () -> Unit
 ) {
@@ -153,6 +154,17 @@ internal fun ProfileView(
                                         borderColor = MaterialTheme.appColors.primaryButtonBackground,
                                         textColor = MaterialTheme.appColors.textAccent
                                     )
+                                    if (showReportLms) {
+                                        OpenEdXOutlinedButton(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            text = stringResource(
+                                                id = org.openedx.profile.R.string.profile_report_lms_button
+                                            ),
+                                            onClick = { onAction(ProfileViewAction.ReportLmsClick) },
+                                            borderColor = MaterialTheme.appColors.error,
+                                            textColor = MaterialTheme.appColors.error
+                                        )
+                                    }
                                     Spacer(modifier = Modifier.height(12.dp))
                                 }
                             }
@@ -204,5 +216,6 @@ private fun ProfileScreenTabletPreview() {
 
 internal interface ProfileViewAction {
     object EditAccountClick : ProfileViewAction
+    object ReportLmsClick : ProfileViewAction
     object SwipeRefresh : ProfileViewAction
 }

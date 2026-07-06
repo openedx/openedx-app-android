@@ -5,6 +5,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import org.openedx.app.deeplink.HomeTab
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.auth.presentation.lmsselection.SiteSelectionFragment
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
@@ -100,6 +101,10 @@ class AppRouter :
 
     override fun navigateToLogistration(fm: FragmentManager, courseId: String?) {
         replaceFragmentWithBackStack(fm, LogistrationFragment.newInstance(courseId))
+    }
+
+    override fun navigateToLmsSelection(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, SiteSelectionFragment())
     }
 
     override fun navigateToDownloadQueue(fm: FragmentManager, descendants: List<String>) {
