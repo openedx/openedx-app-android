@@ -2,6 +2,7 @@ package org.openedx.auth.presentation.signin.compose
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -30,6 +32,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +44,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
@@ -58,6 +62,8 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import org.openedx.auth.R
 import org.openedx.auth.presentation.signin.AuthEvent
 import org.openedx.auth.presentation.signin.SignInUIState
@@ -156,7 +162,29 @@ internal fun LoginScreen(
             Modifier.padding(it),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            SignInLogoView()
+            // LMS Directory: brand the header with the selected platform's logo.
+            if (!state.selectedLmsLogoUrl.isNullOrBlank()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(fraction = 0.2f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(state.selectedLmsLogoUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .padding(top = 20.dp, start = 24.dp, end = 24.dp)
+                            .heightIn(max = 80.dp)
+                    )
+                }
+            } else {
+                SignInLogoView()
+            }
             Surface(
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.screenBackgroundShape,
@@ -171,6 +199,12 @@ internal fun LoginScreen(
                             .displayCutoutForLandscape()
                             .then(contentPaddings),
                     ) {
+                        if (!state.selectedLmsTitle.isNullOrBlank()) {
+                            SelectedLmsBanner(
+                                title = state.selectedLmsTitle,
+                                onChange = { onEvent(AuthEvent.ChangeLmsClick) },
+                            )
+                        }
                         Text(
                             modifier = Modifier.testTag("txt_sign_in_title"),
                             text = stringResource(id = coreR.string.core_sign_in),
@@ -467,5 +501,49 @@ private fun SignInScreenTabletPreview() {
             uiMessage = null,
             onEvent = {},
         )
+    }
+}
+
+@Composable
+private fun SelectedLmsBanner(
+    title: String,
+    onChange: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+        shape = MaterialTheme.appShapes.textFieldShape,
+        color = MaterialTheme.appColors.textFieldBackground,
+        border = BorderStroke(1.dp, MaterialTheme.appColors.textFieldBorder.copy(alpha = 0.5f)),
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(id = R.string.auth_lms_selected_label),
+                    style = MaterialTheme.appTypography.labelMedium,
+                    color = MaterialTheme.appColors.textSecondary,
+                )
+                Text(
+                    text = title,
+                    maxLines = 1,
+                    style = MaterialTheme.appTypography.bodyLarge,
+                    color = MaterialTheme.appColors.textPrimary,
+                )
+            }
+            TextButton(
+                onClick = onChange,
+                modifier = Modifier.testTag("change_lms_button"),
+            ) {
+                Text(
+                    text = stringResource(id = R.string.auth_lms_change),
+                    style = MaterialTheme.appTypography.labelLarge,
+                    color = MaterialTheme.appColors.primary,
+                )
+            }
+        }
     }
 }

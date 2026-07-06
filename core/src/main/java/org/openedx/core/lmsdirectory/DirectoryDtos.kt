@@ -26,6 +26,31 @@ data class LmsSummaryDto(
     )
 }
 
+data class LmsDetailDto(
+    @SerializedName("id") val id: String,
+    @SerializedName("title") val title: String,
+    @SerializedName("base_url") val baseUrl: String,
+    @SerializedName("logo_url") val logoUrl: String? = null,
+    @SerializedName("accent_color") val accentColor: String? = null,
+    @SerializedName("api") val api: ApiDto? = null,
+) {
+    data class ApiDto(
+        @SerializedName("host_url") val hostUrl: String? = null,
+        @SerializedName("oauth_client_id") val oauthClientId: String? = null,
+        @SerializedName("feedback_email") val feedbackEmail: String? = null,
+    )
+
+    fun toDomain() = LmsDetail(
+        id = id,
+        title = title,
+        baseUrl = api?.hostUrl?.ifBlank { null } ?: baseUrl,
+        logoUrl = logoUrl,
+        accentColor = accentColor,
+        oauthClientId = api?.oauthClientId?.ifBlank { null },
+        feedbackEmail = api?.feedbackEmail?.ifBlank { null },
+    )
+}
+
 data class DirectoryConfigDto(
     @SerializedName("directory_mode") val directoryMode: String = "search",
     @SerializedName("provider_name") val providerName: String = "",

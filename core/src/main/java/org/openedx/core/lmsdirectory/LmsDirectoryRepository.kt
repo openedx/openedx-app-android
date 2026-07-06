@@ -31,6 +31,11 @@ class LmsDirectoryRepository(
         api.search(featured = true).items.map { it.toDomain() }
     }.onFailure { Log.w(TAG, "Featured fetch failed: ${it.message}") }
 
+    /** Full record for one platform (includes the OAuth client id needed to sign in). */
+    suspend fun fetchDetail(id: String): Result<LmsDetail> = runCatching {
+        api.detail(id).toDomain()
+    }.onFailure { Log.w(TAG, "Detail fetch failed: ${it.message}") }
+
     suspend fun submitReport(draft: ReportDraft): Result<Unit> = runCatching {
         api.submitReport(
             ReportRequestBody(

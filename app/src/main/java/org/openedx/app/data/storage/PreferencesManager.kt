@@ -87,6 +87,10 @@ class PreferencesManager(
         val WAS_POSITIVE_RATED = booleanPreferencesKey("app_was_positive_rated")
         val SELECTED_BASE_URL = stringPreferencesKey("selected_base_url")
         val SELECTED_LMS_ACCENT_COLOR = stringPreferencesKey("selected_lms_accent_color")
+        val SELECTED_OAUTH_CLIENT_ID = stringPreferencesKey("selected_oauth_client_id")
+        val SELECTED_FEEDBACK_EMAIL = stringPreferencesKey("selected_feedback_email")
+        val SELECTED_LMS_LOGO_URL = stringPreferencesKey("selected_lms_logo_url")
+        val SELECTED_LMS_TITLE = stringPreferencesKey("selected_lms_title")
 
         fun calendarSyncDialogShown(courseName: String) =
             booleanPreferencesKey("calendar_sync_dialog_${courseName.replaceSpace("_")}")
@@ -210,6 +214,22 @@ class PreferencesManager(
     override var selectedLmsAccentColor: String?
         get() = getValue(Keys.SELECTED_LMS_ACCENT_COLOR, "").ifEmpty { null }
         set(value) = setValue(Keys.SELECTED_LMS_ACCENT_COLOR, value.orEmpty())
+
+    override var selectedOAuthClientId: String?
+        get() = getValue(Keys.SELECTED_OAUTH_CLIENT_ID, "").ifEmpty { null }
+        set(value) = setValue(Keys.SELECTED_OAUTH_CLIENT_ID, value.orEmpty())
+
+    override var selectedFeedbackEmail: String?
+        get() = getValue(Keys.SELECTED_FEEDBACK_EMAIL, "").ifEmpty { null }
+        set(value) = setValue(Keys.SELECTED_FEEDBACK_EMAIL, value.orEmpty())
+
+    override var selectedLmsLogoUrl: String?
+        get() = getValue(Keys.SELECTED_LMS_LOGO_URL, "").ifEmpty { null }
+        set(value) = setValue(Keys.SELECTED_LMS_LOGO_URL, value.orEmpty())
+
+    override var selectedLmsTitle: String?
+        get() = getValue(Keys.SELECTED_LMS_TITLE, "").ifEmpty { null }
+        set(value) = setValue(Keys.SELECTED_LMS_TITLE, value.orEmpty())
 
     override var profile: Account?
         get() {

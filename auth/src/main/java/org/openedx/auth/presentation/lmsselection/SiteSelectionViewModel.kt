@@ -116,9 +116,31 @@ class SiteSelectionViewModel(
     }
 
     fun onCatalogItemSelected(item: LmsSummary) {
-        val normalized = normalizeUrl(item.baseUrl) ?: return
-        selectLms(normalized.newBuilder().encodedPath("/").build().toString(), item.accentColor)
-        viewModelScope.launch { _actions.emit(SiteSelectionAction.Success) }
+        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        viewModelScope.launch {
+            // Fetch the full record: the catalog summary has no OAuth client id, and
+            // sign-in needs the platform's own registered mobile client to work.
+            val detail = directoryRepository.fetchDetail(item.id).getOrNull()
+            val normalized = normalizeUrl(detail?.baseUrl ?: item.baseUrl)
+            if (normalized == null) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = resourceManager.getString(R.string.auth_lms_error_invalid_url),
+                    )
+                }
+                return@launch
+            }
+            selectLms(
+                baseUrl = normalized.newBuilder().encodedPath("/").build().toString(),
+                accentColor = detail?.accentColor ?: item.accentColor,
+                oauthClientId = detail?.oauthClientId,
+                feedbackEmail = detail?.feedbackEmail,
+                logoUrl = detail?.logoUrl ?: item.logoUrl,
+                title = detail?.title ?: item.title,
+            )
+            _actions.emit(SiteSelectionAction.Success)
+        }
     }
 
     /** Select an LMS by URL scanned from a QR code. Validates before committing. */
@@ -179,10 +201,25 @@ class SiteSelectionViewModel(
         }
     }
 
-    /** Commit the chosen platform: persist host + accent, then re-theme immediately. */
-    private fun selectLms(baseUrl: String, accentColor: String?) {
+    /**
+     * Commit the chosen platform: persist host, OAuth client, feedback, branding, then
+     * re-theme immediately. Manual/QR entry passes only the URL, clearing the per-LMS
+     * OAuth override so sign-in falls back to the config client for unknown hosts.
+     */
+    private fun selectLms(
+        baseUrl: String,
+        accentColor: String?,
+        oauthClientId: String? = null,
+        feedbackEmail: String? = null,
+        logoUrl: String? = null,
+        title: String? = null,
+    ) {
         corePreferences.selectedBaseUrl = baseUrl
         corePreferences.selectedLmsAccentColor = accentColor
+        corePreferences.selectedOAuthClientId = oauthClientId
+        corePreferences.selectedFeedbackEmail = feedbackEmail
+        corePreferences.selectedLmsLogoUrl = logoUrl
+        corePreferences.selectedLmsTitle = title
         LmsThemeController.apply(accentColor)
     }
 

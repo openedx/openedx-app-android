@@ -75,6 +75,12 @@ class SignInFragment : Fragment() {
                                     requireActivity().supportFragmentManager.popBackStackImmediate()
                                 }
 
+                                AuthEvent.ChangeLmsClick -> {
+                                    viewModel.navigateToLmsSelection(
+                                        requireActivity().supportFragmentManager
+                                    )
+                                }
+
                                 is AuthEvent.OpenLink -> viewModel.openLink(
                                     parentFragmentManager,
                                     event.links,
@@ -121,4 +127,5 @@ internal sealed interface AuthEvent {
     object RegisterClick : AuthEvent
     object ForgotPasswordClick : AuthEvent
     object BackClick : AuthEvent
+    object ChangeLmsClick : AuthEvent
 }

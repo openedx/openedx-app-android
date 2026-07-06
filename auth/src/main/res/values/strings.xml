@@ -61,4 +61,6 @@
     <string name="auth_lms_error_catalog_failed">Couldn\'t load the catalog. Check your connection and try again.</string>
     <string name="auth_lms_error_invalid_url">Enter a valid platform address.</string>
     <string name="auth_lms_error_unable_confirm_url">We couldn\'t reach that platform. Check the address and try again.</string>
+    <string name="auth_lms_selected_label">Selected LMS</string>
+    <string name="auth_lms_change">Change</string>
 </resources>

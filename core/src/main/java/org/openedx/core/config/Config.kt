@@ -52,6 +52,14 @@ class Config(
     }
 
     fun getOAuthClientId(): String {
+        // LMS Directory: sign in with the selected platform's own registered mobile
+        // OAuth client. Off (default) or no selection → the config value.
+        if (getLMSDirectoryConfig().enabled) {
+            val selected = corePreferences?.selectedOAuthClientId
+            if (!selected.isNullOrBlank()) {
+                return selected
+            }
+        }
         return getString(OAUTH_CLIENT_ID)
     }
 
@@ -64,6 +72,12 @@ class Config(
     }
 
     fun getFeedbackEmailAddress(): String {
+        if (getLMSDirectoryConfig().enabled) {
+            val selected = corePreferences?.selectedFeedbackEmail
+            if (!selected.isNullOrBlank()) {
+                return selected
+            }
+        }
         return getString(FEEDBACK_EMAIL_ADDRESS)
     }
 

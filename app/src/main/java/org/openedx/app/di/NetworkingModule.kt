@@ -5,6 +5,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
 import org.openedx.app.data.api.NotificationsApi
 import org.openedx.app.data.networking.AppUpgradeInterceptor
+import org.openedx.app.data.networking.BaseUrlOverrideInterceptor
 import org.openedx.app.data.networking.HandleErrorInterceptor
 import org.openedx.app.data.networking.HeadersInterceptor
 import org.openedx.app.data.networking.OauthRefreshTokenAuthenticator
@@ -29,6 +30,8 @@ val networkingModule = module {
             writeTimeout(60, TimeUnit.SECONDS)
             readTimeout(60, TimeUnit.SECONDS)
             addInterceptor(HeadersInterceptor(get(), get(), get()))
+            // LMS Directory: redirect requests to the selected platform (no-op when off).
+            addInterceptor(BaseUrlOverrideInterceptor(get()))
             if (BuildConfig.DEBUG) {
                 addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             }

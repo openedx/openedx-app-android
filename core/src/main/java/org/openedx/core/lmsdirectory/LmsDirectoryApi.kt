@@ -19,7 +19,7 @@ interface LmsDirectoryApi {
     ): DirectoryListResponse
 
     @GET("api/v1/directory/{id}")
-    suspend fun detail(@Path("id") id: String): LmsSummaryDto
+    suspend fun detail(@Path("id") id: String): LmsDetailDto
 
     @POST("api/v1/reports")
     suspend fun submitReport(@Body body: ReportRequestBody): ReportResponse

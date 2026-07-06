@@ -14,6 +14,21 @@ data class LmsSummary(
     val accentColor: String?,
 )
 
+/**
+ * Full record for one platform, fetched when the learner picks it. Carries the
+ * per-LMS OAuth client id and feedback email needed to actually sign in against it,
+ * plus branding (logo, accent) — the catalog summary alone can't log you in.
+ */
+data class LmsDetail(
+    val id: String,
+    val title: String,
+    val baseUrl: String,
+    val logoUrl: String?,
+    val accentColor: String?,
+    val oauthClientId: String?,
+    val feedbackEmail: String?,
+)
+
 data class DirectoryConfig(
     val directoryMode: String,
     val providerName: String,
