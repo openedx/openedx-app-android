@@ -47,6 +47,13 @@ class Config(
         return getObjectOrNewInstance(LMS_DIRECTORY, LMSDirectoryConfig::class.java)
     }
 
+    fun getSSOURL(): String {
+        return getString(SSO_URL, "")
+    }
+
+    fun getSSOFinishedURL(): String {
+        return getString(SSO_FINISHED_URL, "")
+    }
     fun getUriScheme(): String {
         return getString(URI_SCHEME)
     }
@@ -145,20 +152,31 @@ class Config(
         return getBoolean(PRE_LOGIN_EXPERIENCE_ENABLED, true)
     }
 
+    fun isLoginRegistrationEnabled(): Boolean {
+        return getBoolean(LOGIN_REGISTRATION_ENABLED, true)
+    }
+
+    fun isSSOLoginEnabled(): Boolean {
+        return getBoolean(SAML_SSO_LOGIN_ENABLED, false)
+    }
+
+    fun isSSODefaultLoginButton(): Boolean {
+        return getBoolean(SAML_SSO_DEFAULT_LOGIN_BUTTON, false)
+    }
+
+    fun getSSOButtonTitle(key: String, defaultValue: String): String {
+        print("getSSOButtonTitle")
+        val element = getObject(SSO_BUTTON_TITLE)
+        print("element: $element, key: ${key.uppercase()}")
+        return element?.asJsonObject?.get(key.uppercase())?.asString ?: defaultValue
+    }
+
     fun getCourseUIConfig(): UIConfig {
         return getObjectOrNewInstance(UI_COMPONENTS, UIConfig::class.java)
     }
 
     fun isRegistrationEnabled(): Boolean {
         return getBoolean(REGISTRATION_ENABLED, true)
-    }
-
-    fun isBrowserLoginEnabled(): Boolean {
-        return getBoolean(BROWSER_LOGIN, false)
-    }
-
-    fun isBrowserRegistrationEnabled(): Boolean {
-        return getBoolean(BROWSER_REGISTRATION, false)
     }
 
     private fun getExperimentalFeaturesConfig(): ExperimentalFeaturesConfig {
@@ -204,6 +222,12 @@ class Config(
     companion object {
         private const val APPLICATION_ID = "APPLICATION_ID"
         private const val API_HOST_URL = "API_HOST_URL"
+        private const val SSO_URL = "SSO_URL"
+        private const val SSO_FINISHED_URL = "SSO_FINISHED_URL"
+        private const val SSO_BUTTON_TITLE = "SSO_BUTTON_TITLE"
+        private const val SAML_SSO_LOGIN_ENABLED = "SAML_SSO_LOGIN_ENABLED"
+        private const val SAML_SSO_DEFAULT_LOGIN_BUTTON = "SAML_SSO_DEFAULT_LOGIN_BUTTON"
+        private const val LOGIN_REGISTRATION_ENABLED = "LOGIN_REGISTRATION_ENABLED"
         private const val URI_SCHEME = "URI_SCHEME"
         private const val OAUTH_CLIENT_ID = "OAUTH_CLIENT_ID"
         private const val TOKEN_TYPE = "TOKEN_TYPE"
@@ -219,8 +243,6 @@ class Config(
         private const val MICROSOFT = "MICROSOFT"
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
         private const val REGISTRATION_ENABLED = "REGISTRATION_ENABLED"
-        private const val BROWSER_LOGIN = "BROWSER_LOGIN"
-        private const val BROWSER_REGISTRATION = "BROWSER_REGISTRATION"
         private const val DISCOVERY = "DISCOVERY"
         private const val PROGRAM = "PROGRAM"
         private const val DASHBOARD = "DASHBOARD"

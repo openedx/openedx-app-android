@@ -26,13 +26,13 @@ import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.auth.presentation.sso.BrowserAuthHelper
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.CoreMocks
 import org.openedx.core.Validator
 import org.openedx.core.config.Config
 import org.openedx.core.config.FacebookConfig
 import org.openedx.core.config.GoogleConfig
+import org.openedx.core.config.LMSDirectoryConfig
 import org.openedx.core.config.MicrosoftConfig
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
@@ -70,7 +70,6 @@ class SignInViewModelTest {
     private val whatsNewGlobalManager = mockk<WhatsNewGlobalManager>()
     private val calendarInteractor = mockk<CalendarInteractor>()
     private val calendarPreferences = mockk<CalendarPreferences>()
-    private val browserAuthHelper = mockk<BrowserAuthHelper>()
 
     private val invalidCredential = "Invalid credentials"
     private val noInternet = "Slow or no internet connection"
@@ -93,6 +92,7 @@ class SignInViewModelTest {
         every { appNotifier.notifier } returns emptyFlow()
         every { agreementProvider.getAgreement(true) } returns null
         every { config.isPreLoginExperienceEnabled() } returns false
+        every { config.getLMSDirectoryConfig() } returns LMSDirectoryConfig()
         every { config.isSocialAuthEnabled() } returns false
         every { config.getFacebookConfig() } returns FacebookConfig()
         every { config.getGoogleConfig() } returns GoogleConfig()
@@ -103,8 +103,10 @@ class SignInViewModelTest {
         coEvery { calendarInteractor.clearCalendarCachedData() } returns Unit
         every { analytics.logScreenEvent(any(), any()) } returns Unit
         every { config.isRegistrationEnabled() } returns true
-        every { config.isBrowserLoginEnabled() } returns false
-        every { config.isBrowserRegistrationEnabled() } returns false
+        every { config.isLoginRegistrationEnabled() } returns true
+        every { config.isSSOLoginEnabled() } returns false
+        every { config.isSSODefaultLoginButton() } returns false
+        every { config.getSSOButtonTitle(any(), any()) } returns "SSO Login"
     }
 
     @After
@@ -130,12 +132,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         viewModel.login("", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -168,12 +171,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         viewModel.login("acc@test.o", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -206,12 +210,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         viewModel.login("acc@test.org", "")
 
@@ -243,12 +248,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         viewModel.login("acc@test.org", "ed")
 
@@ -284,12 +290,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         coEvery { interactor.login("acc@test.org", "edx") } returns Unit
         viewModel.login("acc@test.org", "edx")
@@ -326,12 +333,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws UnknownHostException()
         viewModel.login("acc@test.org", "edx")
@@ -369,12 +377,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws EdxError.InvalidGrantException()
         viewModel.login("acc@test.org", "edx")
@@ -412,12 +421,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws IllegalStateException()
         viewModel.login("acc@test.org", "edx")

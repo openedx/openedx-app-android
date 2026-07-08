@@ -57,6 +57,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -73,8 +74,10 @@ import org.openedx.auth.presentation.ui.SocialAuthView
 import org.openedx.core.extension.TextConverter
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.HorizontalLine
 import org.openedx.core.ui.HyperlinkText
 import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -113,24 +116,26 @@ internal fun LoginScreen(
         val contentPaddings by remember {
             mutableStateOf(
                 windowSize.windowSizeValue(
-                    expanded = Modifier
-                        .widthIn(Dp.Unspecified, 420.dp)
-                        .padding(
-                            top = 32.dp,
-                            bottom = 40.dp
-                        ),
-                    compact = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 28.dp)
-                )
+                    expanded =
+                        Modifier
+                            .widthIn(Dp.Unspecified, 420.dp)
+                            .padding(
+                                top = 32.dp,
+                                bottom = 40.dp,
+                            ),
+                    compact =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 28.dp),
+                ),
             )
         }
         val buttonWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
                     expanded = Modifier.widthIn(232.dp, Dp.Unspecified),
-                    compact = Modifier.fillMaxWidth()
-                )
+                    compact = Modifier.fillMaxWidth(),
+                ),
             )
         }
 
@@ -161,14 +166,15 @@ internal fun LoginScreen(
         HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
         if (state.isLogistrationEnabled) {
             Box(
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.CenterStart
+                modifier =
+                    Modifier
+                        .statusBarsPadding()
+                        .fillMaxWidth(),
+                contentAlignment = Alignment.CenterStart,
             ) {
                 BackBtn(
                     modifier = Modifier.padding(end = 16.dp),
-                    tint = Color.White
+                    tint = Color.White,
                 ) {
                     onEvent(AuthEvent.BackClick)
                 }
@@ -176,7 +182,7 @@ internal fun LoginScreen(
         }
         Column(
             Modifier.padding(it),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // LMS Directory: brand the header with the selected platform's logo.
             if (!state.selectedLmsLogoUrl.isNullOrBlank()) {
@@ -204,31 +210,36 @@ internal fun LoginScreen(
             Surface(
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.screenBackgroundShape,
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
             ) {
                 Box(contentAlignment = Alignment.TopCenter) {
                     Column(
-                        modifier = Modifier
-                            .background(MaterialTheme.appColors.background)
-                            .verticalScroll(scrollState)
-                            .displayCutoutForLandscape()
-                            .then(contentPaddings),
+                        modifier =
+                            Modifier
+                                .background(MaterialTheme.appColors.background)
+                                .verticalScroll(scrollState)
+                                .displayCutoutForLandscape()
+                                .then(contentPaddings),
                     ) {
-                        Text(
-                            modifier = Modifier.testTag("txt_sign_in_title"),
-                            text = stringResource(id = coreR.string.core_sign_in),
-                            color = MaterialTheme.appColors.textPrimary,
-                            style = MaterialTheme.appTypography.displaySmall
-                        )
-                        Text(
-                            modifier = Modifier
-                                .testTag("txt_sign_in_description")
-                                .padding(top = 4.dp),
-                            text = stringResource(id = R.string.auth_welcome_back),
-                            color = MaterialTheme.appColors.textPrimary,
-                            style = MaterialTheme.appTypography.titleSmall
-                        )
+                        if (state.isLoginRegistrationFormEnabled) {
+                            Text(
+                                modifier = Modifier.testTag("txt_sign_in_title"),
+                                text = stringResource(id = coreR.string.core_sign_in),
+                                color = MaterialTheme.appColors.textPrimary,
+                                style = MaterialTheme.appTypography.displaySmall,
+                            )
+                            Text(
+                                modifier =
+                                    Modifier
+                                        .testTag("txt_sign_in_description")
+                                        .padding(top = 4.dp),
+                                text = stringResource(id = R.string.auth_welcome_back),
+                                color = MaterialTheme.appColors.textPrimary,
+                                style = MaterialTheme.appTypography.titleSmall,
+                            )
+                        }
                         if (!state.selectedLmsTitle.isNullOrBlank()) {
                             Spacer(modifier = Modifier.height(16.dp))
                             SelectedLmsBanner(
@@ -275,9 +286,8 @@ private fun AuthForm(
     val keyboardController = LocalSoftwareKeyboardController.current
     var isEmailError by rememberSaveable { mutableStateOf(false) }
     var isPasswordError by rememberSaveable { mutableStateOf(false) }
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        if (!state.isBrowserLoginEnabled) {
+    if (state.isLoginRegistrationFormEnabled) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             LoginTextField(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -310,16 +320,12 @@ private fun AuthForm(
                 },
                 isError = isPasswordError,
             )
-        } else {
-            Spacer(modifier = Modifier.height(40.dp))
-        }
 
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp, bottom = 36.dp)
-        ) {
-            if (!state.isBrowserLoginEnabled) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp, bottom = 36.dp)
+            ) {
                 if (state.isLogistrationEnabled.not() && state.isRegistrationEnabled) {
                     Text(
                         modifier = Modifier
@@ -344,20 +350,16 @@ private fun AuthForm(
                     style = MaterialTheme.appTypography.labelLarge
                 )
             }
-        }
 
-        if (state.showProgress) {
-            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-        } else {
-            OpenEdXButton(
-                modifier = buttonWidth.testTag("btn_sign_in"),
-                text = stringResource(id = coreR.string.core_sign_in),
-                textColor = MaterialTheme.appColors.primaryButtonText,
-                backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
-                onClick = {
-                    if (state.isBrowserLoginEnabled) {
-                        onEvent(AuthEvent.SignInBrowser)
-                    } else {
+            if (state.showProgress) {
+                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+            } else {
+                OpenEdXButton(
+                    modifier = buttonWidth.testTag("btn_sign_in"),
+                    text = stringResource(id = coreR.string.core_sign_in),
+                    textColor = MaterialTheme.appColors.primaryButtonText,
+                    backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                    onClick = {
                         keyboardController?.hide()
                         if (login.isNotEmpty() && password.isNotEmpty()) {
                             onEvent(AuthEvent.SignIn(login = login, password = password))
@@ -366,19 +368,88 @@ private fun AuthForm(
                             isPasswordError = password.isEmpty()
                         }
                     }
+                )
+            }
+            if (state.isSocialAuthEnabled) {
+                SocialAuthView(
+                    modifier = buttonWidth,
+                    isGoogleAuthEnabled = state.isGoogleAuthEnabled,
+                    isFacebookAuthEnabled = state.isFacebookAuthEnabled,
+                    isMicrosoftAuthEnabled = state.isMicrosoftAuthEnabled,
+                    isSignIn = true,
+                ) {
+                    keyboardController?.hide()
+                    onEvent(AuthEvent.SocialSignIn(it))
                 }
-            )
+            }
         }
-        if (state.isSocialAuthEnabled) {
-            SocialAuthView(
-                modifier = buttonWidth,
-                isGoogleAuthEnabled = state.isGoogleAuthEnabled,
-                isFacebookAuthEnabled = state.isFacebookAuthEnabled,
-                isMicrosoftAuthEnabled = state.isMicrosoftAuthEnabled,
-                isSignIn = true,
-            ) {
-                keyboardController?.hide()
-                onEvent(AuthEvent.SocialSignIn(it))
+    }
+    if (state.isSSOLoginEnabled) {
+        Spacer(modifier = Modifier.height(18.dp))
+        if (!state.isLoginRegistrationFormEnabled) {
+            Text(
+                modifier =
+                    Modifier
+                        .testTag("txt_sso_header")
+                        .padding(top = 4.dp)
+                        .fillMaxWidth(),
+                text = stringResource(id = coreR.string.core_sign_in_sso_heading),
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.headlineSmall,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+            HorizontalLine()
+            Spacer(modifier = Modifier.height(18.dp))
+            Text(
+                modifier =
+                    Modifier
+                        .testTag("txt_sso_login_title")
+                        .padding(top = 4.dp)
+                        .fillMaxWidth(),
+                text = stringResource(id = org.openedx.core.R.string.core_sign_in_sso_login_title),
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.titleLarge,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                modifier =
+                    Modifier
+                        .testTag("txt_sso_login_subtitle")
+                        .padding(top = 4.dp)
+                        .fillMaxWidth(),
+                text = stringResource(id = org.openedx.core.R.string.core_sign_in_sso_login_subtitle),
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.bodyLarge,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+        }
+        if (state.showProgress) {
+            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+        } else {
+            if (state.isSSODefaultLoginButton) {
+                OpenEdXButton(
+                    modifier =
+                        buttonWidth
+                            .testTag("btn_sso")
+                            .fillMaxWidth(),
+                    text = state.ssoButtonTitle,
+                    onClick = {
+                        onEvent(AuthEvent.SsoSignIn(jwtToken = ""))
+                    },
+                )
+            } else {
+                OpenEdXOutlinedButton(
+                    modifier =
+                        buttonWidth
+                            .testTag("btn_sso")
+                            .fillMaxWidth(),
+                    text = state.ssoButtonTitle,
+                    borderColor = MaterialTheme.appColors.primary,
+                    textColor = MaterialTheme.appColors.textPrimary,
+                    onClick = { onEvent(AuthEvent.SsoSignIn(jwtToken = "")) },
+                )
             }
         }
     }
@@ -398,12 +469,13 @@ private fun PasswordTextField(
     val focusManager = LocalFocusManager.current
 
     Text(
-        modifier = Modifier
-            .testTag("txt_password_label")
-            .fillMaxWidth(),
+        modifier =
+            Modifier
+                .testTag("txt_password_label")
+                .fillMaxWidth(),
         text = stringResource(id = coreR.string.core_password),
         color = MaterialTheme.appColors.textPrimary,
-        style = MaterialTheme.appTypography.labelLarge
+        style = MaterialTheme.appTypography.labelLarge,
     )
 
     Spacer(modifier = Modifier.height(8.dp))
@@ -429,38 +501,42 @@ private fun PasswordTextField(
                 modifier = Modifier.testTag("txt_password_placeholder"),
                 text = stringResource(id = R.string.auth_enter_password),
                 color = MaterialTheme.appColors.textFieldHint,
-                style = MaterialTheme.appTypography.bodyMedium
+                style = MaterialTheme.appTypography.bodyMedium,
             )
         },
         trailingIcon = {
             PasswordVisibilityIcon(
                 isPasswordVisible = isPasswordVisible,
-                onClick = { isPasswordVisible = !isPasswordVisible }
+                onClick = { isPasswordVisible = !isPasswordVisible },
             )
         },
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Password,
-            imeAction = ImeAction.Done
-        ),
-        visualTransformation = if (isPasswordVisible) {
-            VisualTransformation.None
-        } else {
-            PasswordVisualTransformation()
-        },
-        keyboardActions = KeyboardActions {
-            focusManager.clearFocus()
-            onPressDone()
-        },
+        keyboardOptions =
+            KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done,
+            ),
+        visualTransformation =
+            if (isPasswordVisible) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
+        keyboardActions =
+            KeyboardActions {
+                focusManager.clearFocus()
+                onPressDone()
+            },
         isError = isError,
         textStyle = MaterialTheme.appTypography.bodyMedium,
         singleLine = true,
     )
     if (isError) {
         Text(
-            modifier = Modifier
-                .testTag("txt_password_error")
-                .fillMaxWidth()
-                .padding(top = 4.dp),
+            modifier =
+                Modifier
+                    .testTag("txt_password_error")
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
             text = stringResource(id = R.string.auth_error_empty_password),
             style = MaterialTheme.appTypography.bodySmall,
             color = MaterialTheme.appColors.error,
@@ -484,24 +560,6 @@ private fun SignInScreenPreview() {
     }
 }
 
-@Preview(uiMode = UI_MODE_NIGHT_NO)
-@Preview(uiMode = UI_MODE_NIGHT_YES)
-@Preview(name = "NEXUS_5_Light", device = Devices.NEXUS_5, uiMode = UI_MODE_NIGHT_NO)
-@Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-private fun SignInUsingBrowserScreenPreview() {
-    OpenEdXTheme {
-        LoginScreen(
-            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            state = SignInUIState().copy(
-                isBrowserLoginEnabled = true,
-            ),
-            uiMessage = null,
-            onEvent = {},
-        )
-    }
-}
-
 @Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_NO)
 @Preview(name = "NEXUS_9_Night", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_YES)
 @Composable
@@ -509,12 +567,16 @@ private fun SignInScreenTabletPreview() {
     OpenEdXTheme {
         LoginScreen(
             windowSize = WindowSize(WindowType.Expanded, WindowType.Expanded),
-            state = SignInUIState().copy(
-                isSocialAuthEnabled = true,
-                isFacebookAuthEnabled = true,
-                isGoogleAuthEnabled = true,
-                isMicrosoftAuthEnabled = true,
-            ),
+            state =
+                SignInUIState().copy(
+                    isLoginRegistrationFormEnabled = false,
+                    isSSOLoginEnabled = true,
+                    isSSODefaultLoginButton = true,
+                    isSocialAuthEnabled = true,
+                    isFacebookAuthEnabled = true,
+                    isGoogleAuthEnabled = true,
+                    isMicrosoftAuthEnabled = true,
+                ),
             uiMessage = null,
             onEvent = {},
         )

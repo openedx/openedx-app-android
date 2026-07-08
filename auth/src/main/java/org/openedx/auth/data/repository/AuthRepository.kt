@@ -31,6 +31,16 @@ class AuthRepository(
             .processAuthResponse()
     }
 
+    suspend fun ssoLogin(
+        jwtToken: String
+    ) {
+        if (preferencesManager.accessToken.isBlank()) {
+            preferencesManager.accessToken = jwtToken
+        }
+        val user = api.getProfile()
+        preferencesManager.user = user
+    }
+
     suspend fun socialLogin(token: String?, authType: AuthType) {
         require(!token.isNullOrBlank()) { "Token is null" }
         api.exchangeAccessToken(
@@ -41,16 +51,6 @@ class AuthRepository(
         )
             .mapToDomain()
             .processAuthResponse()
-    }
-
-    suspend fun browserAuthCodeLogin(code: String) {
-        api.getAccessTokenFromCode(
-            grantType = ApiConstants.GRANT_TYPE_CODE,
-            clientId = config.getOAuthClientId(),
-            code = code,
-            redirectUri = "${config.getAppId()}://${ApiConstants.BrowserLogin.REDIRECT_HOST}",
-            tokenType = config.getAccessTokenType(),
-        ).mapToDomain().processAuthResponse()
     }
 
     suspend fun getRegistrationFields(): List<RegistrationField> {

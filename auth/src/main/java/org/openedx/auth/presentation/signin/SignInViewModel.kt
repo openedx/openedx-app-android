@@ -1,6 +1,5 @@
 package org.openedx.auth.presentation.signin
 
-import android.app.Activity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
@@ -21,7 +20,6 @@ import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthAnalyticsEvent
 import org.openedx.auth.presentation.AuthAnalyticsKey
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.auth.presentation.sso.BrowserAuthHelper
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.Validator
 import org.openedx.core.config.Config
@@ -47,27 +45,30 @@ class SignInViewModel(
     private val appNotifier: AppNotifier,
     private val analytics: AuthAnalytics,
     private val oAuthHelper: OAuthHelper,
+    private val configuration: Config,
     private val router: AuthRouter,
     private val whatsNewGlobalManager: WhatsNewGlobalManager,
     private val calendarPreferences: CalendarPreferences,
     private val calendarInteractor: CalendarInteractor,
     agreementProvider: AgreementProvider,
-    private val browserAuthHelper: BrowserAuthHelper,
-    val config: Config,
+    config: Config,
     val courseId: String?,
     val infoType: String?,
     val authCode: String,
+    currentLang: String,
 ) : BaseViewModel(resourceManager) {
 
     private val logger = Logger("SignInViewModel")
 
     private val _uiState = MutableStateFlow(
         SignInUIState(
+            isLoginRegistrationFormEnabled = config.isLoginRegistrationEnabled(),
+            isSSOLoginEnabled = config.isSSOLoginEnabled(),
+            ssoButtonTitle = config.getSSOButtonTitle(currentLang, "Login"),
+            isSSODefaultLoginButton = config.isSSODefaultLoginButton(),
             isFacebookAuthEnabled = config.getFacebookConfig().isEnabled(),
             isGoogleAuthEnabled = config.getGoogleConfig().isEnabled(),
             isMicrosoftAuthEnabled = config.getMicrosoftConfig().isEnabled(),
-            isBrowserLoginEnabled = config.isBrowserLoginEnabled(),
-            isBrowserRegistrationEnabled = config.isBrowserRegistrationEnabled(),
             isSocialAuthEnabled = config.isSocialAuthEnabled(),
             isLogistrationEnabled = config.isPreLoginExperienceEnabled(),
             isRegistrationEnabled = config.isRegistrationEnabled(),
@@ -157,6 +158,37 @@ class SignInViewModel(
         }
     }
 
+    fun ssoClicked(fragmentManager: FragmentManager) {
+        router.navigateToSSOWebContent(
+            fm = fragmentManager,
+            title = resourceManager.getString(CoreRes.string.core_sso_sign_in),
+            url = configuration.getSSOURL(),
+        )
+    }
+
+    fun ssoLogin(token: String) {
+        logEvent(AuthAnalyticsEvent.USER_SIGN_IN_CLICKED)
+
+        _uiState.update { it.copy(showProgress = true) }
+        viewModelScope.launch {
+            try {
+                interactor.ssoLogin(token)
+                _uiState.update { it.copy(loginSuccess = true) }
+                setUserId()
+            } catch (e: Exception) {
+                if (e is EdxError.InvalidGrantException) {
+                    handleErrorUiMessage(
+                        throwable = null,
+                        defaultErrorRes = CoreRes.string.core_error_invalid_grant
+                    )
+                } else {
+                    handleErrorUiMessage(e)
+                }
+            }
+            _uiState.update { it.copy(showProgress = false) }
+        }
+    }
+
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
             appNotifier.notifier.collect { event ->
@@ -180,39 +212,9 @@ class SignInViewModel(
         }
     }
 
-    fun signInBrowser(activityContext: Activity) {
-        _uiState.update { it.copy(showProgress = true) }
-        viewModelScope.launch {
-            runCatching {
-                browserAuthHelper.signIn(activityContext)
-            }.onFailure {
-                logger.e { "Browser auth error: $it" }
-            }
-        }
-    }
-
     fun navigateToSignUp(parentFragmentManager: FragmentManager) {
         router.navigateToSignUp(parentFragmentManager, null, null)
         logEvent(AuthAnalyticsEvent.REGISTER_CLICKED)
-    }
-
-    fun signInAuthCode(authCode: String) {
-        _uiState.update { it.copy(showProgress = true) }
-        viewModelScope.launch {
-            runCatching {
-                interactor.loginAuthCode(authCode)
-            }
-                .onFailure {
-                    logger.e { "OAuth2 code error: $it" }
-                    onUnknownError()
-                    _uiState.update { it.copy(loginFailure = true) }
-                }.onSuccess {
-                    _uiState.update { it.copy(loginSuccess = true) }
-                    setUserId()
-                    appNotifier.send(SignInEvent())
-                    _uiState.update { it.copy(showProgress = false) }
-                }
-        }
     }
 
     fun navigateToLmsSelection(parentFragmentManager: FragmentManager) {

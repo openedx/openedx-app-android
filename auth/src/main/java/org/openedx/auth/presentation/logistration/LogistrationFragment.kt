@@ -42,7 +42,6 @@ import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.auth.R
-import org.openedx.core.ApiConstants
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -51,7 +50,6 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.theme.compose.LogistrationLogoView
-import org.openedx.foundation.utils.UrlUtils
 
 class LogistrationFragment : Fragment() {
 
@@ -69,22 +67,10 @@ class LogistrationFragment : Fragment() {
             OpenEdXTheme {
                 LogistrationScreen(
                     onSignInClick = {
-                        if (viewModel.isBrowserLoginEnabled) {
-                            viewModel.signInBrowser(requireActivity())
-                        } else {
-                            viewModel.navigateToSignIn(parentFragmentManager)
-                        }
+                        viewModel.navigateToSignIn(parentFragmentManager)
                     },
                     onRegisterClick = {
-                        if (viewModel.isBrowserRegistrationEnabled) {
-                            UrlUtils.openInBrowser(
-                                activity = context,
-                                apiHostUrl = viewModel.apiHostUrl,
-                                url = ApiConstants.URL_REGISTER_BROWSER,
-                            )
-                        } else {
-                            viewModel.navigateToSignUp(parentFragmentManager)
-                        }
+                        viewModel.navigateToSignUp(parentFragmentManager)
                     },
                     onSearchClick = { querySearch ->
                         viewModel.navigateToDiscovery(parentFragmentManager, querySearch)
