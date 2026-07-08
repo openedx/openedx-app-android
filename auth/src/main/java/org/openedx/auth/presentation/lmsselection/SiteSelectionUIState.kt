@@ -1,5 +1,6 @@
 package org.openedx.auth.presentation.lmsselection
 
+import org.openedx.core.lmsdirectory.LmsHistoryEntry
 import org.openedx.core.lmsdirectory.LmsSummary
 
 data class SiteSelectionUIState(
@@ -13,6 +14,9 @@ data class SiteSelectionUIState(
     val query: String = "",
     val catalog: CatalogState = CatalogState.Idle,
     val results: List<LmsSummary> = emptyList(),
+
+    // Recently selected platforms, shown when the search field is empty.
+    val history: List<LmsHistoryEntry> = emptyList(),
 )
 
 sealed interface CatalogState {

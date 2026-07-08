@@ -5,6 +5,7 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,7 +33,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -134,14 +134,30 @@ internal fun LoginScreen(
             )
         }
 
-        Image(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(fraction = 0.3f),
-            painter = painterResource(id = coreR.drawable.core_top_header),
-            contentScale = ContentScale.FillBounds,
-            contentDescription = null
-        )
+        // LMS Directory: brand the header background with the selected platform's own
+        // login background image, falling back to the default gradient header.
+        if (!state.selectedLmsLoginBackgroundUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(state.selectedLmsLoginBackgroundUrl)
+                    .crossfade(true)
+                    .build(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(fraction = 0.3f),
+                contentScale = ContentScale.FillBounds,
+                contentDescription = null
+            )
+        } else {
+            Image(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(fraction = 0.3f),
+                painter = painterResource(id = coreR.drawable.core_top_header),
+                contentScale = ContentScale.FillBounds,
+                contentDescription = null
+            )
+        }
         HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
         if (state.isLogistrationEnabled) {
             Box(
@@ -199,12 +215,6 @@ internal fun LoginScreen(
                             .displayCutoutForLandscape()
                             .then(contentPaddings),
                     ) {
-                        if (!state.selectedLmsTitle.isNullOrBlank()) {
-                            SelectedLmsBanner(
-                                title = state.selectedLmsTitle,
-                                onChange = { onEvent(AuthEvent.ChangeLmsClick) },
-                            )
-                        }
                         Text(
                             modifier = Modifier.testTag("txt_sign_in_title"),
                             text = stringResource(id = coreR.string.core_sign_in),
@@ -219,6 +229,13 @@ internal fun LoginScreen(
                             color = MaterialTheme.appColors.textPrimary,
                             style = MaterialTheme.appTypography.titleSmall
                         )
+                        if (!state.selectedLmsTitle.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            SelectedLmsBanner(
+                                title = state.selectedLmsTitle,
+                                onChange = { onEvent(AuthEvent.ChangeLmsClick) },
+                            )
+                        }
                         Spacer(modifier = Modifier.height(24.dp))
                         AuthForm(
                             buttonWidth,
@@ -512,16 +529,21 @@ private fun SelectedLmsBanner(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp),
+            .testTag("selected_lms_container"),
         shape = MaterialTheme.appShapes.textFieldShape,
-        color = MaterialTheme.appColors.textFieldBackground,
+        color = MaterialTheme.appColors.background,
         border = BorderStroke(1.dp, MaterialTheme.appColors.textFieldBorder.copy(alpha = 0.5f)),
     ) {
         Row(
-            modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 Text(
                     text = stringResource(id = R.string.auth_lms_selected_label),
                     style = MaterialTheme.appTypography.labelMedium,
@@ -534,16 +556,15 @@ private fun SelectedLmsBanner(
                     color = MaterialTheme.appColors.textPrimary,
                 )
             }
-            TextButton(
-                onClick = onChange,
-                modifier = Modifier.testTag("change_lms_button"),
-            ) {
-                Text(
-                    text = stringResource(id = R.string.auth_lms_change),
-                    style = MaterialTheme.appTypography.labelLarge,
-                    color = MaterialTheme.appColors.primary,
-                )
-            }
+            Text(
+                modifier = Modifier
+                    .noRippleClickable { onChange() }
+                    .padding(start = 12.dp)
+                    .testTag("change_lms_button"),
+                text = stringResource(id = R.string.auth_lms_change),
+                style = MaterialTheme.appTypography.labelLarge,
+                color = MaterialTheme.appColors.primary,
+            )
         }
     }
 }

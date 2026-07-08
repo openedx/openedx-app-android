@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -39,17 +41,40 @@ class LmsLandingFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
+                val state by viewModel.uiState.collectAsState()
                 LaunchedEffect(Unit) {
                     viewModel.actions.collect { action ->
                         when (action) {
-                            is SiteSelectionViewModel.SiteSelectionAction.Success -> continueAfterSelection()
+                            is SiteSelectionViewModel.SiteSelectionAction.Success ->
+                                continueAfterSelection(action.preLoginDiscovery)
                         }
                     }
                 }
-                LmsLandingScreen(
-                    onFindClick = { router.navigateToLmsSelection(requireActivity().supportFragmentManager) },
-                    onQrClick = { launchQrScanner() },
-                )
+                if (state.isCurated) {
+                    // Curated / company mode: the registry serves a fixed list of platforms,
+                    // so skip the "Choose your learning platform" intro and show the list
+                    // straight away (matches iOS). No back button — this is the entry point.
+                    SiteSelectionScreen(
+                        state = state,
+                        showBack = false,
+                        callbacks = SiteSelectionCallbacks(
+                            onBack = {},
+                            onQrClick = { launchQrScanner() },
+                            onSubmitManual = viewModel::onSubmitManual,
+                            onQueryChanged = viewModel::onQueryChanged,
+                            onCatalogItemSelected = viewModel::onCatalogItemSelected,
+                            onCleanHistory = viewModel::onCleanHistory,
+                            onHistoryItemSelected = viewModel::onHistoryItemSelected,
+                        ),
+                    )
+                } else {
+                    // Open (search) mode: tapping "Find my LMS" opens search; "Sign in with
+                    // QR code" opens the camera scanner directly (no instructions screen).
+                    LmsLandingScreen(
+                        onFindClick = { router.navigateToLmsSelection(requireActivity().supportFragmentManager) },
+                        onQrClick = { launchQrScanner() },
+                    )
+                }
             }
         }
     }
@@ -60,15 +85,23 @@ class LmsLandingFragment : Fragment() {
             .setPrompt(getString(R.string.auth_lms_qr_prompt))
             .setBeepEnabled(false)
             .setOrientationLocked(false)
+            .setCaptureActivity(LmsQrScannerActivity::class.java)
         scanLauncher.launch(options)
     }
 
-    private fun continueAfterSelection() {
+    private fun continueAfterSelection(preLoginDiscovery: Boolean) {
         val fm = requireActivity().supportFragmentManager
-        if (config.isPreLoginExperienceEnabled()) {
-            router.navigateToLogistration(fm, courseId = null)
-        } else {
-            router.navigateToSignIn(fm, courseId = null, infoType = null)
+        when {
+            // The selected LMS is configured to start on the course Discovery screen —
+            // open it (native or webview per config) instead of sign-in, matching iOS.
+            preLoginDiscovery -> if (config.getDiscoveryConfig().isViewTypeWebView()) {
+                router.navigateToWebDiscoverCourses(fm, querySearch = "")
+            } else {
+                router.navigateToNativeDiscoverCourses(fm, querySearch = "")
+            }
+
+            config.isPreLoginExperienceEnabled() -> router.navigateToLogistration(fm, courseId = null)
+            else -> router.navigateToSignIn(fm, courseId = null, infoType = null)
         }
     }
 }

@@ -20,6 +20,7 @@ import org.openedx.auth.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.lmsdirectory.LmsDirectoryRepository
+import org.openedx.core.lmsdirectory.LmsHistoryEntry
 import org.openedx.core.lmsdirectory.LmsSummary
 import org.openedx.core.lmsdirectory.LmsThemeController
 import org.openedx.foundation.presentation.BaseViewModel
@@ -46,7 +47,10 @@ class SiteSelectionViewModel(
         .build()
 
     private val _uiState = MutableStateFlow(
-        SiteSelectionUIState(inputUrl = corePreferences.selectedBaseUrl?.trimEnd('/') ?: "")
+        SiteSelectionUIState(
+            inputUrl = corePreferences.selectedBaseUrl?.trimEnd('/') ?: "",
+            history = corePreferences.lmsHistory,
+        )
     )
     val uiState: StateFlow<SiteSelectionUIState> = _uiState
 
@@ -66,6 +70,8 @@ class SiteSelectionViewModel(
             val remote = directoryRepository.fetchConfig()
             val configuredMode = config.getLMSDirectoryConfig().directoryMode
             val curated = remote.isCurated || configuredMode.equals("curated", ignoreCase = true)
+            // Share the mode so the Profile tab can hide "Report this LMS" in curated mode.
+            corePreferences.lmsDirectoryCurated = curated
             _uiState.update {
                 it.copy(isCurated = curated, providerName = remote.providerName)
             }
@@ -90,7 +96,9 @@ class SiteSelectionViewModel(
     }
 
     fun onQueryChanged(value: String) {
-        _uiState.update { it.copy(query = value) }
+        // The single search field doubles as URL entry (iOS parity): keep inputUrl in
+        // sync so submitting the field (IME "search") can connect to a typed-in URL.
+        _uiState.update { it.copy(query = value, inputUrl = value, errorMessage = null) }
         searchJob?.cancel()
         val trimmed = value.trim()
         if (trimmed.isEmpty()) {
@@ -138,12 +146,21 @@ class SiteSelectionViewModel(
                 feedbackEmail = detail?.feedbackEmail,
                 logoUrl = detail?.logoUrl ?: item.logoUrl,
                 title = detail?.title ?: item.title,
+                shortDescription = detail?.shortDescription ?: item.shortDescription,
+                loginBackgroundUrl = detail?.loginBackgroundUrl,
+                preLoginDiscovery = detail?.preLoginDiscovery ?: false,
             )
-            _actions.emit(SiteSelectionAction.Success)
+            _actions.emit(SiteSelectionAction.Success(detail?.preLoginDiscovery ?: false))
         }
     }
 
-    /** Select an LMS by URL scanned from a QR code. Validates before committing. */
+    /**
+     * Select an LMS from a scanned QR (the code holds the platform's base URL). Resolve
+     * the host against the registry so a scanned platform gets its full branding + OAuth
+     * client and routes to sign-in or pre-login Discovery per its settings — exactly like
+     * tapping it in the catalog. If the host isn't registered, fall back to validating the
+     * URL directly and continue to sign-in.
+     */
     fun onUrlScanned(rawUrl: String) {
         val normalized = normalizeUrl(rawUrl) ?: run {
             _uiState.update {
@@ -153,10 +170,30 @@ class SiteSelectionViewModel(
         }
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
         viewModelScope.launch {
+            val match = directoryRepository.search(normalized.host).getOrNull()
+                ?.firstOrNull { it.baseUrl.toHttpUrlOrNull()?.host.equals(normalized.host, ignoreCase = true) }
+            if (match != null) {
+                val detail = directoryRepository.fetchDetail(match.id).getOrNull()
+                val resolved = normalizeUrl(detail?.baseUrl ?: match.baseUrl) ?: normalized
+                selectLms(
+                    baseUrl = resolved.newBuilder().encodedPath("/").build().toString(),
+                    accentColor = detail?.accentColor ?: match.accentColor,
+                    oauthClientId = detail?.oauthClientId,
+                    feedbackEmail = detail?.feedbackEmail,
+                    logoUrl = detail?.logoUrl ?: match.logoUrl,
+                    title = detail?.title ?: match.title,
+                    shortDescription = detail?.shortDescription ?: match.shortDescription,
+                    loginBackgroundUrl = detail?.loginBackgroundUrl,
+                    preLoginDiscovery = detail?.preLoginDiscovery ?: false,
+                )
+                _actions.emit(SiteSelectionAction.Success(detail?.preLoginDiscovery ?: false))
+                return@launch
+            }
+            // Not in the registry — validate the URL directly, then continue to sign-in.
             val confirmed = withContext(Dispatchers.IO) { confirmBaseUrl(normalized) }
             if (confirmed) {
                 selectLms(normalized.newBuilder().encodedPath("/").build().toString(), accentColor = null)
-                _actions.emit(SiteSelectionAction.Success)
+                _actions.emit(SiteSelectionAction.Success(preLoginDiscovery = false))
             } else {
                 _uiState.update {
                     it.copy(
@@ -165,6 +202,33 @@ class SiteSelectionViewModel(
                     )
                 }
             }
+        }
+    }
+
+    /** Clear the persisted directory history and drop it from the UI. */
+    fun onCleanHistory() {
+        corePreferences.lmsHistory = emptyList()
+        _uiState.update { it.copy(history = emptyList()) }
+    }
+
+    /**
+     * Re-select a platform straight from history. Its details were already validated
+     * when first added, so there's no network round-trip — commit and continue.
+     */
+    fun onHistoryItemSelected(entry: LmsHistoryEntry) {
+        viewModelScope.launch {
+            selectLms(
+                baseUrl = entry.baseUrl,
+                accentColor = entry.accentColor,
+                oauthClientId = entry.oauthClientId,
+                feedbackEmail = entry.feedbackEmail,
+                logoUrl = entry.logoUrl,
+                title = entry.title,
+                shortDescription = entry.shortDescription,
+                loginBackgroundUrl = entry.loginBackgroundUrl,
+                preLoginDiscovery = entry.preLoginDiscovery,
+            )
+            _actions.emit(SiteSelectionAction.Success(entry.preLoginDiscovery))
         }
     }
 
@@ -189,7 +253,7 @@ class SiteSelectionViewModel(
             val confirmed = withContext(Dispatchers.IO) { confirmBaseUrl(normalized) }
             if (confirmed) {
                 selectLms(normalized.newBuilder().encodedPath("/").build().toString(), accentColor = null)
-                _actions.emit(SiteSelectionAction.Success)
+                _actions.emit(SiteSelectionAction.Success(preLoginDiscovery = false))
             } else {
                 _uiState.update {
                     it.copy(
@@ -213,6 +277,9 @@ class SiteSelectionViewModel(
         feedbackEmail: String? = null,
         logoUrl: String? = null,
         title: String? = null,
+        shortDescription: String = "",
+        loginBackgroundUrl: String? = null,
+        preLoginDiscovery: Boolean = false,
     ) {
         corePreferences.selectedBaseUrl = baseUrl
         corePreferences.selectedLmsAccentColor = accentColor
@@ -220,8 +287,37 @@ class SiteSelectionViewModel(
         corePreferences.selectedFeedbackEmail = feedbackEmail
         corePreferences.selectedLmsLogoUrl = logoUrl
         corePreferences.selectedLmsTitle = title
+        corePreferences.selectedLmsLoginBackgroundUrl = loginBackgroundUrl
         LmsThemeController.apply(accentColor)
+        LmsThemeController.applyBackground(loginBackgroundUrl)
+        rememberInHistory(
+            LmsHistoryEntry(
+                baseUrl = baseUrl,
+                title = title.orEmpty(),
+                shortDescription = shortDescription,
+                logoUrl = logoUrl,
+                accentColor = accentColor,
+                oauthClientId = oauthClientId,
+                feedbackEmail = feedbackEmail,
+                loginBackgroundUrl = loginBackgroundUrl,
+                preLoginDiscovery = preLoginDiscovery,
+            )
+        )
     }
+
+    /**
+     * Prepend [entry] to the persisted history as the most recent, deduping by base URL
+     * (case- and trailing-slash-insensitive) and capping the list. Mirrors iOS.
+     */
+    private fun rememberInHistory(entry: LmsHistoryEntry) {
+        val key = historyKey(entry.baseUrl)
+        val deduped = corePreferences.lmsHistory.filterNot { historyKey(it.baseUrl) == key }
+        val updated = (listOf(entry) + deduped).take(HISTORY_LIMIT)
+        corePreferences.lmsHistory = updated
+        _uiState.update { it.copy(history = updated) }
+    }
+
+    private fun historyKey(url: String) = url.trimEnd('/').lowercase()
 
     private fun normalizeUrl(text: String): HttpUrl? {
         val trimmed = text.trim()
@@ -272,7 +368,8 @@ class SiteSelectionViewModel(
     // endregion
 
     sealed interface SiteSelectionAction {
-        data object Success : SiteSelectionAction
+        /** [preLoginDiscovery] true -> open the pre-login Discovery catalog instead of sign-in. */
+        data class Success(val preLoginDiscovery: Boolean) : SiteSelectionAction
     }
 
     private companion object {
@@ -280,5 +377,6 @@ class SiteSelectionViewModel(
         const val OAUTH_PATH = "oauth2/login/"
         const val SEARCH_DEBOUNCE_MS = 400L
         const val VALIDATION_TIMEOUT_SECONDS = 20L
+        const val HISTORY_LIMIT = 10
     }
 }

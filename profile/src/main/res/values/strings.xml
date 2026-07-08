@@ -83,18 +83,18 @@
     <!-- LMS Directory: report the current platform -->
     <string name="profile_report_lms_button">Report this LMS</string>
     <string name="profile_report_lms_title">Report a problem</string>
-    <string name="profile_report_lms_whats_wrong">What\'s wrong?</string>
-    <string name="profile_report_lms_tell_us_more">Tell us more</string>
+    <string name="profile_report_lms_section_whats_wrong">What\'s wrong?</string>
+    <string name="profile_report_lms_section_tell_us_more">Tell us more</string>
+    <string name="profile_report_lms_section_screenshot">Screenshot (optional)</string>
+    <string name="profile_report_lms_section_email">Email (optional)</string>
     <string name="profile_report_lms_describe">Describe what happened</string>
-    <string name="profile_report_lms_screenshot">Screenshot (optional)</string>
     <string name="profile_report_lms_attach_screenshot">Attach a screenshot</string>
     <string name="profile_report_lms_remove_screenshot">Remove screenshot</string>
-    <string name="profile_report_lms_email">Email (optional)</string>
     <string name="profile_report_lms_email_hint">So we can follow up</string>
     <string name="profile_report_lms_send">Send report</string>
     <string name="profile_report_lms_thanks">Thanks for the heads-up</string>
     <string name="profile_report_lms_thanks_body">A moderator will look into %1$s shortly.</string>
-    <string name="profile_report_lms_error">We couldn\'t send your report. Check your connection and try again.</string>
+    <string name="profile_report_lms_error">Couldn\'t send your report. Check your connection and try again.</string>
     <string name="profile_report_lms_category_inappropriate">Inappropriate or adult content</string>
     <string name="profile_report_lms_category_scam">Scam or phishing</string>
     <string name="profile_report_lms_category_impersonation">Pretends to be someone else</string>

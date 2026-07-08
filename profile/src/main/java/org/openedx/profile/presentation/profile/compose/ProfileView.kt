@@ -161,8 +161,8 @@ internal fun ProfileView(
                                                 id = org.openedx.profile.R.string.profile_report_lms_button
                                             ),
                                             onClick = { onAction(ProfileViewAction.ReportLmsClick) },
-                                            borderColor = MaterialTheme.appColors.error,
-                                            textColor = MaterialTheme.appColors.error
+                                            borderColor = MaterialTheme.appColors.primaryButtonBackground,
+                                            textColor = MaterialTheme.appColors.textAccent
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(12.dp))

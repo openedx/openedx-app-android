@@ -72,13 +72,18 @@ class SignInViewModel(
             isLogistrationEnabled = config.isPreLoginExperienceEnabled(),
             isRegistrationEnabled = config.isRegistrationEnabled(),
             agreement = agreementProvider.getAgreement(isSignIn = true)?.createHonorCodeField(),
-            selectedLmsTitle = if (config.getLMSDirectoryConfig().enabled) {
+            selectedLmsTitle = if (config.getLMSDirectoryConfig().isReachable) {
                 preferencesManager.selectedLmsTitle
             } else {
                 null
             },
-            selectedLmsLogoUrl = if (config.getLMSDirectoryConfig().enabled) {
+            selectedLmsLogoUrl = if (config.getLMSDirectoryConfig().isReachable) {
                 preferencesManager.selectedLmsLogoUrl
+            } else {
+                null
+            },
+            selectedLmsLoginBackgroundUrl = if (config.getLMSDirectoryConfig().isReachable) {
+                preferencesManager.selectedLmsLoginBackgroundUrl
             } else {
                 null
             },

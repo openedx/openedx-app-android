@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Custom full-screen QR scanner (framing viewfinder + Close button) used by the
+             LMS Directory "Sign in with QR code" flow. Camera permission is contributed by
+             the zxing-android-embedded library manifest. -->
+        <activity
+            android:name=".presentation.lmsselection.LmsQrScannerActivity"
+            android:exported="false"
+            android:screenOrientation="fullSensor"
+            android:stateNotNeeded="true"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
+    </application>
+</manifest>

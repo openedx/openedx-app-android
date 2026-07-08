@@ -1,5 +1,6 @@
 package org.openedx.app
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
@@ -8,6 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
@@ -22,6 +25,7 @@ import org.openedx.app.deeplink.HomeTab
 import org.openedx.core.AppUpdateState
 import org.openedx.core.AppUpdateState.wasUpgradeDialogClosed
 import org.openedx.core.adapter.NavigationFragmentAdapter
+import org.openedx.core.lmsdirectory.LmsThemeController
 import org.openedx.core.presentation.dialog.appupgrade.AppUpgradeDialogFragment
 import org.openedx.core.presentation.global.appupgrade.AppUpgradeRecommendedBox
 import org.openedx.core.presentation.global.appupgrade.UpgradeRequiredFragment
@@ -84,8 +88,29 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         val tabList = createTabList(openTabArg)
         addMenuItems(menu, tabList)
         setupBottomNavListener(tabList)
+        applyLmsAccentTint()
 
         requireArguments().remove(ARG_OPEN_TAB)
+    }
+
+    /**
+     * LMS Directory: the bottom bar is a View-based [BottomNavigationView], so the Compose
+     * accent theme doesn't reach it — its selected color stays the baked-in stock blue.
+     * When a platform is selected, tint the checked item with the LMS accent so the tab bar
+     * matches the rest of the re-themed app (and iOS). Unchecked keeps the stock grey.
+     */
+    private fun applyLmsAccentTint() {
+        val accent = LmsThemeController.accentColor ?: return
+        val unchecked = ContextCompat.getColor(requireContext(), org.openedx.core.R.color.unchecked_tab_item)
+        val tint = ColorStateList(
+            arrayOf(
+                intArrayOf(android.R.attr.state_checked),
+                intArrayOf(-android.R.attr.state_checked),
+            ),
+            intArrayOf(accent.toArgb(), unchecked),
+        )
+        binding.bottomNavView.itemIconTintList = tint
+        binding.bottomNavView.itemTextColor = tint
     }
 
     private fun createTabList(openTabArg: String): List<Pair<Int, () -> Fragment>> {

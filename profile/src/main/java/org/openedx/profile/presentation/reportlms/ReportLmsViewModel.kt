@@ -28,12 +28,16 @@ class ReportLmsViewModel(
     private val _uiState = MutableStateFlow(ReportLmsUiState())
     val uiState: StateFlow<ReportLmsUiState> = _uiState
 
-    /** Host of the LMS being reported (the current platform), for the sheet header. */
-    val lmsTitle: String
-        get() = config.getApiHostURL()
-            .removePrefix("https://")
-            .removePrefix("http://")
-            .trimEnd('/')
+    /**
+     * Host of the LMS being reported (the current platform), for the sheet header and
+     * success message — e.g. "sandbox.openedx.org" rather than the full "https://…/",
+     * matching iOS's `lmsTitle`.
+     */
+    val displayHost: String
+        get() {
+            val url = config.getApiHostURL()
+            return android.net.Uri.parse(url).host ?: url
+        }
 
     fun onCategoryChanged(category: ReportCategory) {
         _uiState.update { it.copy(category = category) }

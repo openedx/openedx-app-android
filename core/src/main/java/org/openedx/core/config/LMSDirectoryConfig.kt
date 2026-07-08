@@ -19,6 +19,16 @@ data class LMSDirectoryConfig(
     @SerializedName("DIRECTORY_MODE")
     val directoryMode: String = "",
 ) {
-    /** The feature only works with a registry to talk to. */
+    /**
+     * The single gate for activating any LMS Directory behaviour: the feature only
+     * works with a registry to talk to, so an ENABLED:true build with a blank
+     * [directoryUrl] stays fully single-tenant instead of building clients against an
+     * invalid stub.
+     *
+     * This deliberately diverges from the white-label source, which gates purely on the
+     * directory URL being non-blank. It is equivalent in effect (a directory URL is only
+     * ever present when the feature is on) and safer, because it also refuses to activate
+     * on the ENABLED:true + empty-URL misconfiguration.
+     */
     val isReachable: Boolean get() = enabled && directoryUrl.isNotBlank()
 }

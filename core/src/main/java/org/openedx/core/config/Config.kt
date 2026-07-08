@@ -34,7 +34,7 @@ class Config(
      * is used. Off (default) → always the config value, i.e. stock behaviour.
      */
     fun getApiHostURL(): String {
-        if (getLMSDirectoryConfig().enabled) {
+        if (getLMSDirectoryConfig().isReachable) {
             val selected = corePreferences?.selectedBaseUrl
             if (!selected.isNullOrBlank()) {
                 return selected
@@ -54,7 +54,7 @@ class Config(
     fun getOAuthClientId(): String {
         // LMS Directory: sign in with the selected platform's own registered mobile
         // OAuth client. Off (default) or no selection → the config value.
-        if (getLMSDirectoryConfig().enabled) {
+        if (getLMSDirectoryConfig().isReachable) {
             val selected = corePreferences?.selectedOAuthClientId
             if (!selected.isNullOrBlank()) {
                 return selected
@@ -72,7 +72,7 @@ class Config(
     }
 
     fun getFeedbackEmailAddress(): String {
-        if (getLMSDirectoryConfig().enabled) {
+        if (getLMSDirectoryConfig().isReachable) {
             val selected = corePreferences?.selectedFeedbackEmail
             if (!selected.isNullOrBlank()) {
                 return selected

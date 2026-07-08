@@ -249,8 +249,13 @@ fun OpenEdXTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
 /**
  * Returns a copy of this palette with the accent-driven surfaces re-tinted to
  * [accent] — the primary/secondary buttons, the Material3 primary/tertiary roles,
- * and the accent text. Everything else (backgrounds, text, borders) is preserved so
- * the app keeps its light/dark identity while adopting the platform's brand color.
+ * the accent text, and every link/interactive accent role (mirroring iOS's
+ * LMSThemeApplier: accentColor/infoColor, the outlined secondary-button text &
+ * border, and the toggle switch). This drives the SignIn "Change" / "Register"
+ * (primary) and "Forgot password" (infoVariant) text links, plus page indicators
+ * and toggles, so the whole app adopts the platform's brand color. Everything else
+ * (backgrounds, body text, on-button text, borders) is preserved so the app keeps
+ * its light/dark identity and text-on-surface readability.
  */
 private fun AppColors.withAccent(accent: Color): AppColors {
     return copy(
@@ -262,6 +267,11 @@ private fun AppColors.withAccent(accent: Color): AppColors {
         textAccent = accent,
         primaryButtonBackground = accent,
         secondaryButtonBackground = accent,
+        secondaryButtonBorder = accent,
+        secondaryButtonBorderedText = accent,
+        bottomSheetToggle = accent,
+        info = accent,
+        infoVariant = accent,
         progressBarColor = accent,
     )
 }

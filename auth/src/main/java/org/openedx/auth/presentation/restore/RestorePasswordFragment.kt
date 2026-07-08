@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,7 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -64,6 +62,7 @@ import org.openedx.core.R
 import org.openedx.core.presentation.global.appupgrade.AppUpgradeRequiredScreen
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.LmsHeaderImage
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.statusBarsInset
@@ -186,13 +185,10 @@ private fun RestorePasswordScreen(
             )
         }
 
-        Image(
+        LmsHeaderImage(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp),
-            painter = painterResource(id = R.drawable.core_top_header),
-            contentScale = ContentScale.FillBounds,
-            contentDescription = null
+                .height(200.dp)
         )
 
         HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)

@@ -5,6 +5,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import org.openedx.app.deeplink.HomeTab
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.auth.presentation.lmsselection.LmsLandingFragment
 import org.openedx.auth.presentation.lmsselection.SiteSelectionFragment
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
@@ -12,6 +13,9 @@ import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
 import org.openedx.core.CalendarRouter
 import org.openedx.core.FragmentViewType
+import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.lmsdirectory.LmsThemeController
 import org.openedx.core.presentation.global.appupgrade.AppUpgradeRouter
 import org.openedx.core.presentation.global.appupgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.webview.WebContentFragment
@@ -61,7 +65,10 @@ import org.openedx.profile.presentation.video.VideoSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
-class AppRouter :
+class AppRouter(
+    private val config: Config,
+    private val corePreferences: CorePreferences,
+) :
     AuthRouter,
     DiscoveryRouter,
     DashboardRouter,
@@ -410,10 +417,20 @@ class AppRouter :
     override fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean) {
         fm.apply {
             clearBackStack(this)
-            if (isLogistrationEnabled) {
-                replaceFragment(fm, LogistrationFragment())
-            } else {
-                replaceFragment(fm, SignInFragment.newInstance(null, null))
+            when {
+                // LMS Directory: after logout the selection is cleared (see
+                // clearCorePreferences), so when the feature is reachable return to the
+                // platform picker instead of the stock sign-in — matches the app-launch
+                // path in AppActivity.setupInitialFragment and the iOS behavior. Reset the
+                // in-memory accent so the neutral landing isn't tinted by the old LMS.
+                config.getLMSDirectoryConfig().isReachable &&
+                    corePreferences.selectedBaseUrl.isNullOrBlank() -> {
+                    LmsThemeController.clear()
+                    replaceFragment(fm, LmsLandingFragment())
+                }
+
+                isLogistrationEnabled -> replaceFragment(fm, LogistrationFragment())
+                else -> replaceFragment(fm, SignInFragment.newInstance(null, null))
             }
         }
     }

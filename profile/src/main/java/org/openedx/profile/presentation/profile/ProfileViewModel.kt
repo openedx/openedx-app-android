@@ -30,7 +30,7 @@ class ProfileViewModel(
 ) : BaseViewModel(resourceManager) {
 
     /** LMS Directory: show the "Report this LMS" entry only when the feature is on. */
-    val isLmsDirectoryEnabled: Boolean get() = config.getLMSDirectoryConfig().enabled
+    val isLmsDirectoryEnabled: Boolean get() = config.getLMSDirectoryConfig().isReachable
 
     private val _uiState: MutableStateFlow<ProfileUIState> = MutableStateFlow(ProfileUIState.Loading)
     internal val uiState: StateFlow<ProfileUIState> = _uiState.asStateFlow()

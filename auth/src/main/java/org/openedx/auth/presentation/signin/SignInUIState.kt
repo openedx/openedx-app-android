@@ -29,4 +29,5 @@ internal data class SignInUIState(
     // feature is off or nothing selected — sign-in then shows the app's own logo).
     val selectedLmsTitle: String? = null,
     val selectedLmsLogoUrl: String? = null,
+    val selectedLmsLoginBackgroundUrl: String? = null,
 )

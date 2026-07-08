@@ -62,7 +62,7 @@ class AppViewModel(
      * True only when the feature is on and nothing is selected yet.
      */
     val isLmsSelectionRequired: Boolean
-        get() = config.getLMSDirectoryConfig().enabled && preferencesManager.selectedBaseUrl.isNullOrBlank()
+        get() = config.getLMSDirectoryConfig().isReachable && preferencesManager.selectedBaseUrl.isNullOrBlank()
 
     private var logoutHandledAt: Long = 0
 

@@ -38,8 +38,9 @@ class OpenEdXApp : Application() {
         }
         // LMS Directory: re-apply the selected platform's brand color on cold start so
         // the whole app is themed before the first screen composes. No-op when off.
-        if (config.getLMSDirectoryConfig().enabled) {
+        if (config.getLMSDirectoryConfig().isReachable) {
             LmsThemeController.apply(corePreferences.selectedLmsAccentColor)
+            LmsThemeController.applyBackground(corePreferences.selectedLmsLoginBackgroundUrl)
         }
         if (config.getFirebaseConfig().enabled) {
             FirebaseApp.initializeApp(this)

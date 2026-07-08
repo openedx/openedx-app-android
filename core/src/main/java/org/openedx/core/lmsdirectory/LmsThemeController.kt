@@ -18,13 +18,27 @@ object LmsThemeController {
     var accentColor by mutableStateOf<Color?>(null)
         private set
 
+    /**
+     * The selected platform's login background image URL. Drives the branded header on
+     * the auth (sign-in/register/reset) and settings screens, mirroring iOS's
+     * `LmsHeaderBackground`. Null (default build / no custom image) keeps the stock header.
+     */
+    var loginBackgroundUrl by mutableStateOf<String?>(null)
+        private set
+
     /** Apply a hex color like "#f15d49". Invalid or blank input clears the override. */
     fun apply(hex: String?) {
         accentColor = parseHexColor(hex)
     }
 
+    /** Apply the selected LMS's login background image URL (blank/null clears it). */
+    fun applyBackground(url: String?) {
+        loginBackgroundUrl = url?.takeIf { it.isNotBlank() }
+    }
+
     fun clear() {
         accentColor = null
+        loginBackgroundUrl = null
     }
 
     @Suppress("MagicNumber", "ReturnCount")

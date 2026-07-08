@@ -22,11 +22,32 @@ data class LmsSummary(
 data class LmsDetail(
     val id: String,
     val title: String,
+    val shortDescription: String = "",
     val baseUrl: String,
     val logoUrl: String?,
     val accentColor: String?,
     val oauthClientId: String?,
     val feedbackEmail: String?,
+    val loginBackgroundUrl: String?,
+    /** When true, the app opens the pre-login course Discovery screen instead of sign-in. */
+    val preLoginDiscovery: Boolean = false,
+)
+
+/**
+ * A platform the learner previously opened. Persisted (Gson JSON) so the directory
+ * screen can show a "History" section when the search field is empty — mirrors iOS.
+ * Carries the full detail needed to re-select without re-validating over the network.
+ */
+data class LmsHistoryEntry(
+    val baseUrl: String,
+    val title: String,
+    val shortDescription: String = "",
+    val logoUrl: String? = null,
+    val accentColor: String? = null,
+    val oauthClientId: String? = null,
+    val feedbackEmail: String? = null,
+    val loginBackgroundUrl: String? = null,
+    val preLoginDiscovery: Boolean = false,
 )
 
 data class DirectoryConfig(
