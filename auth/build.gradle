@@ -70,6 +70,10 @@ dependencies {
         exclude group: 'io.opentelemetry', module: 'opentelemetry-bom'
     }
 
+    // Required by microsoft identity common4j; declared as runtime-scoped in its POM
+    // but not resolved transitively by Gradle in Android projects.
+    implementation "com.github.stephenc.jcip:jcip-annotations:1.0-1"
+
     // OpenTelemetry
     implementation("io.opentelemetry:opentelemetry-api:$opentelemetry_version")
     implementation("io.opentelemetry:opentelemetry-context:$opentelemetry_version")
