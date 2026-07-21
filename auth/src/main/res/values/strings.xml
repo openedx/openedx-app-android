@@ -10,6 +10,7 @@
     <string name="auth_email_username" tools:ignore="MissingTranslation">Email or Username</string>
     <string name="auth_invalid_email_username" tools:ignore="MissingTranslation">Invalid email or username</string>
     <string name="auth_invalid_password">Password is too short</string>
+    <string name="auth_social_account_not_registered">This %1$s account is not linked with any %2$s account. Please register.</string>
     <string name="auth_welcome_back">Welcome back! Sign in to access your courses.</string>
     <string name="auth_show_optional_fields">Show optional fields</string>
     <string name="auth_hide_optional_fields">Hide optional fields</string>
