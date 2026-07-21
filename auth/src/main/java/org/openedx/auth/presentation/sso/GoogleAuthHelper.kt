@@ -105,6 +105,20 @@ class GoogleAuthHelper(private val config: Config) {
 
     private companion object {
         const val TAG = "GoogleAuthHelper"
-        const val SCOPE = "oauth2: https://www.googleapis.com/auth/userinfo.email"
+
+        /**
+         * Scopes requested for the Google access token that is exchanged on the backend via
+         * `/oauth2/exchange_access_token/google-oauth2/`.
+         *
+         * Must match the scopes expected by the server-side social-auth `google-oauth2` backend
+         * (`DEFAULT_SCOPE = ["openid", "email", "profile"]`) and the iOS/web clients. Requesting
+         * only `userinfo.email` yields a token whose `userinfo` response lacks the profile/name
+         * claims, so first-time SSO account creation fails and the exchange returns
+         * `invalid_grant` ("access_token is not valid"). The `oauth2:` prefix is immediately
+         * followed by a space-separated scope list (no leading space).
+         */
+        const val SCOPE = "oauth2:openid " +
+            "https://www.googleapis.com/auth/userinfo.email " +
+            "https://www.googleapis.com/auth/userinfo.profile"
     }
 }

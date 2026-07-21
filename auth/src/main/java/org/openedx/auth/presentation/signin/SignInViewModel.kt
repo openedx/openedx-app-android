@@ -34,6 +34,7 @@ import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.core.utils.Logger
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.core.R as CoreRes
 
@@ -217,7 +218,23 @@ class SignInViewModel(
             interactor.loginSocial(token, authType)
         }.onFailure { error ->
             logger.e { "Social login error: $error" }
-            onUnknownError()
+            if (error is EdxError.InvalidGrantException) {
+                // The social identity resolved on Google's side but is not linked to any
+                // account on this platform. The mobile token-exchange endpoint only signs in
+                // existing/linked users, so guide the user to register (mirrors iOS/web).
+                sendMessage(
+                    UIMessage.SnackBarMessage(
+                        resourceManager.getString(
+                            R.string.auth_social_account_not_registered,
+                            authType.methodName,
+                            configuration.getPlatformName(),
+                        )
+                    )
+                )
+                _uiState.update { it.copy(showProgress = false) }
+            } else {
+                onUnknownError()
+            }
         }.onSuccess {
             logger.d { "Social login (${authType.methodName}) success" }
             _uiState.update { it.copy(loginSuccess = true) }
