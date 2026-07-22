@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.openedx.core.config.Config
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
@@ -24,8 +25,12 @@ class ProfileViewModel(
     private val resourceManager: ResourceManager,
     private val notifier: ProfileNotifier,
     private val analytics: ProfileAnalytics,
+    private val config: Config,
     val profileRouter: ProfileRouter
 ) : BaseViewModel(resourceManager) {
+
+    /** LMS Directory: show the "Report this LMS" entry only when the feature is on. */
+    val isLmsDirectoryEnabled: Boolean get() = config.getLMSDirectoryConfig().isReachable
 
     private val _uiState: MutableStateFlow<ProfileUIState> = MutableStateFlow(ProfileUIState.Loading)
     internal val uiState: StateFlow<ProfileUIState> = _uiState.asStateFlow()

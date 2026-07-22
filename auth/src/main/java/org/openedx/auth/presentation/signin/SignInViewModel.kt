@@ -74,6 +74,21 @@ class SignInViewModel(
             isLogistrationEnabled = config.isPreLoginExperienceEnabled(),
             isRegistrationEnabled = config.isRegistrationEnabled(),
             agreement = agreementProvider.getAgreement(isSignIn = true)?.createHonorCodeField(),
+            selectedLmsTitle = if (config.getLMSDirectoryConfig().isReachable) {
+                preferencesManager.selectedLmsTitle
+            } else {
+                null
+            },
+            selectedLmsLogoUrl = if (config.getLMSDirectoryConfig().isReachable) {
+                preferencesManager.selectedLmsLogoUrl
+            } else {
+                null
+            },
+            selectedLmsLoginBackgroundUrl = if (config.getLMSDirectoryConfig().isReachable) {
+                preferencesManager.selectedLmsLoginBackgroundUrl
+            } else {
+                null
+            },
         )
     )
     internal val uiState: StateFlow<SignInUIState> = _uiState
@@ -201,6 +216,10 @@ class SignInViewModel(
     fun navigateToSignUp(parentFragmentManager: FragmentManager) {
         router.navigateToSignUp(parentFragmentManager, null, null)
         logEvent(AuthAnalyticsEvent.REGISTER_CLICKED)
+    }
+
+    fun navigateToLmsSelection(parentFragmentManager: FragmentManager) {
+        router.navigateToLmsSelection(parentFragmentManager)
     }
 
     fun navigateToForgotPassword(parentFragmentManager: FragmentManager) {

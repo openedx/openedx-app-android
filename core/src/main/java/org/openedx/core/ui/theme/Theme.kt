@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
+import org.openedx.core.lmsdirectory.LmsThemeController
 
 internal val LocalAppColors = staticCompositionLocalOf<AppColors> {
     error("No AppColors provided")
@@ -223,11 +225,14 @@ val MaterialTheme.appColors: AppColors
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OpenEdXTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = if (darkTheme) {
+    val basePalette = if (darkTheme) {
         DarkColorPalette
     } else {
         LightColorPalette
     }
+    // LMS Directory: re-tint accent surfaces to the selected platform's brand color.
+    // Null (default / stock build) leaves the baked-in palette untouched.
+    val colors = LmsThemeController.accentColor?.let { basePalette.withAccent(it) } ?: basePalette
 
     MaterialTheme(
         colorScheme = colors.material3,
@@ -239,4 +244,34 @@ fun OpenEdXTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
             content = content
         )
     }
+}
+
+/**
+ * Returns a copy of this palette with the accent-driven surfaces re-tinted to
+ * [accent] — the primary/secondary buttons, the Material3 primary/tertiary roles,
+ * the accent text, and every link/interactive accent role (mirroring iOS's
+ * LMSThemeApplier: accentColor/infoColor, the outlined secondary-button text &
+ * border, and the toggle switch). This drives the SignIn "Change" / "Register"
+ * (primary) and "Forgot password" (infoVariant) text links, plus page indicators
+ * and toggles, so the whole app adopts the platform's brand color. Everything else
+ * (backgrounds, body text, on-button text, borders) is preserved so the app keeps
+ * its light/dark identity and text-on-surface readability.
+ */
+private fun AppColors.withAccent(accent: Color): AppColors {
+    return copy(
+        material3 = material3.copy(
+            primary = accent,
+            tertiary = accent,
+            surfaceTint = accent,
+        ),
+        textAccent = accent,
+        primaryButtonBackground = accent,
+        secondaryButtonBackground = accent,
+        secondaryButtonBorder = accent,
+        secondaryButtonBorderedText = accent,
+        bottomSheetToggle = accent,
+        info = accent,
+        infoVariant = accent,
+        progressBarColor = accent,
+    )
 }

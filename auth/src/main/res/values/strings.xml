@@ -44,4 +44,27 @@
     <string name="auth_cdata_template" translatable="false"><![CDATA[<a href="%1$s">%2$s</a>]]></string>
     <string name="auth_accessibility_show_password">Show password</string>
     <string name="auth_accessibility_hide_password">Hide password</string>
+
+    <!-- LMS Directory (multi-tenant) -->
+    <string name="auth_lms_welcome_title">Choose your learning platform</string>
+    <string name="auth_lms_welcome_subtitle">Connect to any LMS in our library to explore courses or continue learning.</string>
+    <string name="auth_lms_find_button">Find my LMS</string>
+    <string name="auth_lms_qr_button">Sign in with QR code</string>
+    <string name="auth_lms_qr_prompt">Point your camera at the QR code shown on your platform.</string>
+    <string name="auth_lms_qr_close">Close</string>
+    <string name="auth_lms_choose_title">Find your LMS</string>
+    <string name="auth_lms_curated_title">Choose your platform</string>
+    <string name="auth_lms_curated_empty">No platforms are available yet.</string>
+    <string name="auth_lms_search_hint">Enter LMS URL or name</string>
+    <string name="auth_lms_start_typing">Start typing to find your platform.</string>
+    <string name="auth_lms_results">Results</string>
+    <string name="auth_lms_history">History</string>
+    <string name="auth_lms_clean_history">Clean history</string>
+    <string name="auth_lms_searching">Searching…</string>
+    <string name="auth_lms_no_results">No matching platforms found.</string>
+    <string name="auth_lms_error_catalog_failed">Couldn\'t load the catalog. Check your connection and try again.</string>
+    <string name="auth_lms_error_invalid_url">Enter a valid platform address.</string>
+    <string name="auth_lms_error_unable_confirm_url">We couldn\'t reach that platform. Check the address and try again.</string>
+    <string name="auth_lms_selected_label">Selected LMS</string>
+    <string name="auth_lms_change">Change</string>
 </resources>

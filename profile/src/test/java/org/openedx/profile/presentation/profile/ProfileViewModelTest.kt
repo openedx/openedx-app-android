@@ -82,6 +82,7 @@ class ProfileViewModelTest {
             resourceManager,
             notifier,
             analytics,
+            config,
             router
         )
         coEvery { interactor.getCachedAccount() } returns null
@@ -102,6 +103,7 @@ class ProfileViewModelTest {
             resourceManager,
             notifier,
             analytics,
+            config,
             router
         )
         coEvery { interactor.getCachedAccount() } returns ProfileMocks.account.copy(
@@ -124,6 +126,7 @@ class ProfileViewModelTest {
             resourceManager,
             notifier,
             analytics,
+            config,
             router
         )
         coEvery { interactor.getCachedAccount() } returns null
@@ -144,6 +147,7 @@ class ProfileViewModelTest {
             resourceManager,
             notifier,
             analytics,
+            config,
             router
         )
         coEvery { interactor.getCachedAccount() } returns null
@@ -166,6 +170,7 @@ class ProfileViewModelTest {
             resourceManager,
             notifier,
             analytics,
+            config,
             router
         )
         coEvery { interactor.getCachedAccount() } returns null

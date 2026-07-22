@@ -8,6 +8,7 @@ import org.openedx.app.AppViewModel
 import org.openedx.app.MainViewModel
 import org.openedx.auth.data.repository.AuthRepository
 import org.openedx.auth.domain.interactor.AuthInteractor
+import org.openedx.auth.presentation.lmsselection.SiteSelectionViewModel
 import org.openedx.auth.presentation.logistration.LogistrationViewModel
 import org.openedx.auth.presentation.restore.RestorePasswordViewModel
 import org.openedx.auth.presentation.signin.SignInViewModel
@@ -80,6 +81,7 @@ import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
 import org.openedx.profile.presentation.manageaccount.ManageAccountViewModel
 import org.openedx.profile.presentation.profile.ProfileViewModel
+import org.openedx.profile.presentation.reportlms.ReportLmsViewModel
 import org.openedx.profile.presentation.settings.SettingsViewModel
 import org.openedx.profile.presentation.video.VideoSettingsViewModel
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
@@ -106,6 +108,8 @@ val screenModule = module {
     factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
     factory { Validator() }
+
+    viewModel { SiteSelectionViewModel(get(), get(), get(), get()) }
 
     viewModel { (courseId: String) ->
         LogistrationViewModel(
@@ -213,6 +217,7 @@ val screenModule = module {
             resourceManager = get(),
             notifier = get(),
             analytics = get(),
+            config = get(),
             profileRouter = get(),
         )
     }
@@ -226,6 +231,7 @@ val screenModule = module {
             account
         )
     }
+    viewModel { ReportLmsViewModel(get(), get(), get()) }
     viewModel { VideoSettingsViewModel(get(), get(), get(), get(), get()) }
     viewModel { (qualityType: String) ->
         VideoQualityViewModel(

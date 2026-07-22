@@ -15,6 +15,9 @@ interface AuthRouter {
 
     fun navigateToLogistration(fm: FragmentManager, courseId: String?)
 
+    /** LMS Directory: open the "Find my LMS" browse/search screen. */
+    fun navigateToLmsSelection(fm: FragmentManager)
+
     fun navigateToSignUp(fm: FragmentManager, courseId: String?, infoType: String?)
 
     fun navigateToRestorePassword(fm: FragmentManager)

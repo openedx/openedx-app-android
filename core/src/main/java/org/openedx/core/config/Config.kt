@@ -5,11 +5,15 @@ import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.AgreementUrls
 import java.io.InputStreamReader
 
 @Suppress("TooManyFunctions")
-class Config(context: Context) {
+class Config(
+    context: Context,
+    private val corePreferences: CorePreferences? = null,
+) {
 
     private var configProperties: JsonObject = try {
         val inputStream = context.assets.open("config/config.json")
@@ -24,8 +28,23 @@ class Config(context: Context) {
         return getString(APPLICATION_ID, "")
     }
 
+    /**
+     * The LMS the app talks to. With the LMS Directory feature on and a platform
+     * picked, that selection wins over the baked-in host; otherwise the config value
+     * is used. Off (default) → always the config value, i.e. stock behaviour.
+     */
     fun getApiHostURL(): String {
+        if (getLMSDirectoryConfig().isReachable) {
+            val selected = corePreferences?.selectedBaseUrl
+            if (!selected.isNullOrBlank()) {
+                return selected
+            }
+        }
         return getString(API_HOST_URL)
+    }
+
+    fun getLMSDirectoryConfig(): LMSDirectoryConfig {
+        return getObjectOrNewInstance(LMS_DIRECTORY, LMSDirectoryConfig::class.java)
     }
 
     fun getSSOURL(): String {
@@ -40,6 +59,14 @@ class Config(context: Context) {
     }
 
     fun getOAuthClientId(): String {
+        // LMS Directory: sign in with the selected platform's own registered mobile
+        // OAuth client. Off (default) or no selection → the config value.
+        if (getLMSDirectoryConfig().isReachable) {
+            val selected = corePreferences?.selectedOAuthClientId
+            if (!selected.isNullOrBlank()) {
+                return selected
+            }
+        }
         return getString(OAUTH_CLIENT_ID)
     }
 
@@ -52,6 +79,12 @@ class Config(context: Context) {
     }
 
     fun getFeedbackEmailAddress(): String {
+        if (getLMSDirectoryConfig().isReachable) {
+            val selected = corePreferences?.selectedFeedbackEmail
+            if (!selected.isNullOrBlank()) {
+                return selected
+            }
+        }
         return getString(FEEDBACK_EMAIL_ADDRESS)
     }
 
@@ -217,6 +250,7 @@ class Config(context: Context) {
         private const val BRANCH = "BRANCH"
         private const val UI_COMPONENTS = "UI_COMPONENTS"
         private const val PLATFORM_NAME = "PLATFORM_NAME"
+        private const val LMS_DIRECTORY = "LMS_DIRECTORY"
     }
 
     enum class ViewType {

@@ -26,4 +26,9 @@ internal data class SignInUIState(
     val showProgress: Boolean = false,
     val loginSuccess: Boolean = false,
     val agreement: RegistrationField? = null,
+    // LMS Directory: branding of the platform the learner picked (null when the
+    // feature is off or nothing selected — sign-in then shows the app's own logo).
+    val selectedLmsTitle: String? = null,
+    val selectedLmsLogoUrl: String? = null,
+    val selectedLmsLoginBackgroundUrl: String? = null,
 )

@@ -37,7 +37,10 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import org.openedx.core.R
+import org.openedx.core.lmsdirectory.LmsThemeController
 import org.openedx.core.presentation.global.InsetHolder
 
 const val KEYBOARD_VISIBILITY_THRESHOLD = 0.15f
@@ -172,9 +175,24 @@ fun PagerState.calculateCurrentOffsetForPage(page: Int): Float {
 }
 
 fun Modifier.settingsHeaderBackground(): Modifier = composed {
+    // LMS Directory: brand the header with the selected platform's login background image,
+    // falling back to the stock gradient header (matches iOS's LmsHeaderBackground).
+    val backgroundUrl = LmsThemeController.loginBackgroundUrl
+    val painter = if (!backgroundUrl.isNullOrBlank()) {
+        rememberAsyncImagePainter(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(backgroundUrl)
+                .placeholder(R.drawable.core_top_header)
+                .error(R.drawable.core_top_header)
+                .crossfade(true)
+                .build()
+        )
+    } else {
+        painterResource(id = R.drawable.core_top_header)
+    }
     return@composed this
         .paint(
-            painter = painterResource(id = R.drawable.core_top_header),
+            painter = painter,
             contentScale = ContentScale.FillWidth,
             alignment = Alignment.TopCenter
         )

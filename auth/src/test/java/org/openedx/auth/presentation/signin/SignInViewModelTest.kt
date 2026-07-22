@@ -32,6 +32,7 @@ import org.openedx.core.Validator
 import org.openedx.core.config.Config
 import org.openedx.core.config.FacebookConfig
 import org.openedx.core.config.GoogleConfig
+import org.openedx.core.config.LMSDirectoryConfig
 import org.openedx.core.config.MicrosoftConfig
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
@@ -91,6 +92,7 @@ class SignInViewModelTest {
         every { appNotifier.notifier } returns emptyFlow()
         every { agreementProvider.getAgreement(true) } returns null
         every { config.isPreLoginExperienceEnabled() } returns false
+        every { config.getLMSDirectoryConfig() } returns LMSDirectoryConfig()
         every { config.isSocialAuthEnabled() } returns false
         every { config.getFacebookConfig() } returns FacebookConfig()
         every { config.getGoogleConfig() } returns GoogleConfig()
