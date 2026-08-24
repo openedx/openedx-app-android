@@ -7,11 +7,13 @@ import org.openedx.core.domain.interactor.CourseInteractor
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.domain.model.CourseStructure
+import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.course.data.repository.CourseRepository
 
 @Suppress("TooManyFunctions")
 class CourseInteractor(
-    private val repository: CourseRepository
+    private val repository: CourseRepository,
+    private val networkConnection: NetworkConnection,
 ) : CourseInteractor {
 
     fun startCourseSession(courseId: String) {
@@ -33,7 +35,15 @@ class CourseInteractor(
         courseId: String,
         isNeedRefresh: Boolean
     ): CourseStructure {
-        return repository.getCourseStructureFlow(courseId, isNeedRefresh).first()
+        return when {
+            isNeedRefresh && networkConnection.isOnline() -> {
+                repository.getCourseStructureFresh(courseId)
+            }
+
+            else -> {
+                repository.getCourseStructureFlow(courseId, isNeedRefresh).first()
+            }
+        }
     }
 
     override suspend fun getCourseStructureFromCache(courseId: String): CourseStructure {

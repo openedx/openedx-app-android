@@ -13,24 +13,73 @@ import java.util.concurrent.ConcurrentHashMap
  * @param V the type of cached values
  * @param fetch the suspend function to fetch data for a given key
  * @param persist optional callback invoked after successful fetch (e.g., to save to database)
+ * @param autoCache whether a successful fetch is published automatically
+ * @param activeGeneration optional provider that invalidates entries from an earlier generation
  */
 class CoalescingCache<K, V>(
     private val fetch: suspend (K) -> V,
-    private val persist: (suspend (K, V) -> Unit)? = null
+    private val persist: (suspend (K, V) -> Unit)? = null,
+    private val autoCache: Boolean = true,
+    private val activeGeneration: (() -> Long)? = null,
 ) {
-    private val cache = ConcurrentHashMap<K, V>()
+    private data class CacheEntry<V>(
+        val value: V,
+        val generation: Long,
+    )
+
+    private val cache = ConcurrentHashMap<K, CacheEntry<V>>()
     private val pending = ConcurrentHashMap<K, CompletableDeferred<V>>()
 
     /**
      * Returns cached value for the key, or null if not cached.
      */
-    fun getCached(key: K): V? = cache[key]
+    fun getCached(key: K): V? {
+        val entry = cache[key] ?: return null
+        val generationProvider = activeGeneration
+
+        return when {
+            generationProvider == null -> {
+                entry.value
+            }
+
+            entry.generation == generationProvider() -> {
+                entry.value
+            }
+
+            else -> {
+                cache.remove(key, entry)
+                null
+            }
+        }
+    }
 
     /**
      * Manually sets a cached value.
      */
-    fun setCached(key: K, value: V) {
-        cache[key] = value
+    fun setCached(
+        key: K,
+        value: V,
+        writeGeneration: Long = UNSPECIFIED_GENERATION,
+    ) {
+        val generationProvider = activeGeneration
+        if (generationProvider == null) {
+            cache[key] = CacheEntry(value, DEFAULT_GENERATION)
+            return
+        }
+
+        if (writeGeneration == UNSPECIFIED_GENERATION) {
+            val currentGeneration = generationProvider()
+            cache[key] = CacheEntry(value, currentGeneration)
+            return
+        }
+
+        cache.compute(key) { _, currentEntry ->
+            if (generationProvider() == writeGeneration) {
+                CacheEntry(value, writeGeneration)
+            } else {
+                currentEntry
+            }
+        }
     }
 
     /**
@@ -38,6 +87,18 @@ class CoalescingCache<K, V>(
      */
     fun clear() {
         cache.clear()
+    }
+
+    /**
+     * Cancels pending requests without allowing an earlier fetch to remove a later request.
+     */
+    fun cancelPending() {
+        val pendingSnapshot = HashMap(pending)
+        for ((key, deferred) in pendingSnapshot) {
+            if (pending.remove(key, deferred)) {
+                deferred.cancel()
+            }
+        }
     }
 
     /**
@@ -49,22 +110,24 @@ class CoalescingCache<K, V>(
      */
     suspend fun getOrFetch(key: K, forceRefresh: Boolean = false): V {
         if (!forceRefresh) {
-            cache[key]?.let { return it }
+            getCached(key)?.let { return it }
         }
 
-        val (deferred, isOwner) = getOrCreateDeferred(key)
-        return if (isOwner) {
+        val (deferred, startsFetch) = getOrCreateDeferred(key)
+        return if (startsFetch) {
             try {
-                val result = fetch(key)
-                cache[key] = result
-                persist?.invoke(key, result)
-                deferred.complete(result)
-                result
+                val value = fetch(key)
+                if (autoCache) {
+                    setCached(key, value)
+                }
+                persist?.invoke(key, value)
+                deferred.complete(value)
+                value
             } catch (e: Exception) {
                 deferred.completeExceptionally(e)
                 throw e
             } finally {
-                pending.remove(key)
+                pending.remove(key, deferred)
             }
         } else {
             deferred.await()
@@ -76,5 +139,10 @@ class CoalescingCache<K, V>(
         val deferred = CompletableDeferred<V>()
         val existing = pending.putIfAbsent(key, deferred)
         return if (existing != null) existing to false else deferred to true
+    }
+
+    private companion object {
+        const val DEFAULT_GENERATION = 0L
+        const val UNSPECIFIED_GENERATION = Long.MIN_VALUE
     }
 }
