@@ -100,6 +100,10 @@ class Config(context: Context) {
         return getObjectOrNewInstance(BRANCH, BranchConfig::class.java)
     }
 
+    fun getAppsFlyerConfig(): AppsFlyerConfig {
+        return getObjectOrNewInstance(APPSFLYER, AppsFlyerConfig::class.java)
+    }
+
     fun isWhatsNewEnabled(): Boolean {
         return getBoolean(WHATS_NEW_ENABLED, false)
     }
@@ -189,6 +193,7 @@ class Config(context: Context) {
         private const val DASHBOARD = "DASHBOARD"
         private const val EXPERIMENTAL_FEATURES = "EXPERIMENTAL_FEATURES"
         private const val BRANCH = "BRANCH"
+        private const val APPSFLYER = "APPSFLYER"
         private const val UI_COMPONENTS = "UI_COMPONENTS"
         private const val PLATFORM_NAME = "PLATFORM_NAME"
     }

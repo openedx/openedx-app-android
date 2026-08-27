@@ -114,6 +114,9 @@ dependencies {
     api "com.google.android.gms:play-services-ads-identifier:$play_services_ads_identifier_version"
     api "com.android.installreferrer:installreferrer:$install_referrer_version"
 
+    // AppsFlyer SDK Integration
+    api "com.appsflyer:af-android-sdk:$appsflyer_sdk_version"
+
     // Zip
     api "net.lingala.zip4j:zip4j:$zip_version"
 
