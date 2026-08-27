@@ -16,6 +16,7 @@ import org.openedx.app.AppRouter
 import org.openedx.app.BuildConfig
 import org.openedx.app.PluginManager
 import org.openedx.app.data.storage.PreferencesManager
+import org.openedx.app.deeplink.AppsFlyerDeepLinkHandler
 import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DATABASE_NAME
@@ -129,6 +130,7 @@ val appModule = module {
     single<WhatsNewRouter> { get<AppRouter>() }
     single<AppUpgradeRouter> { get<AppRouter>() }
     single { DeepLinkRouter(get(), get(), get(), get(), get(), get()) }
+    single { AppsFlyerDeepLinkHandler() }
     single<CalendarRouter> { get<AppRouter>() }
     single<DownloadsRouter> { get<AppRouter>() }
 

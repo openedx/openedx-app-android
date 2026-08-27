@@ -8,6 +8,7 @@ import org.openedx.app.AppRouter
 import org.openedx.app.MainFragment
 import org.openedx.app.R
 import org.openedx.auth.presentation.signin.SignInFragment
+import org.openedx.auth.presentation.signup.SignUpFragment
 import org.openedx.core.FragmentViewType
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
@@ -41,6 +42,7 @@ class DeepLinkRouter(
             DeepLinkType.DISCOVERY -> navigateToDiscoveryScreen(fm)
             DeepLinkType.DISCOVERY_COURSE_DETAIL -> navigateToCourseDetail(fm, deepLink)
             DeepLinkType.DISCOVERY_PROGRAM_DETAIL -> navigateToProgramDetail(fm, deepLink)
+            DeepLinkType.REGISTER -> navigateToRegistration(fm)
             else -> handleLoggedOutOrUserNavigation(fm, deepLink)
         }
     }
@@ -189,6 +191,20 @@ class DeepLinkRouter(
                 courseId = null,
                 infoType = null
             )
+        }
+    }
+
+    private fun navigateToRegistration(fm: FragmentManager) {
+        when {
+            isUserLoggedIn -> navigateToDashboard(fm)
+            !config.isRegistrationEnabled() -> navigateToSignIn(fm)
+            appRouter.getVisibleFragment(fm = fm) !is SignUpFragment -> {
+                appRouter.navigateToSignUp(
+                    fm = fm,
+                    courseId = null,
+                    infoType = null
+                )
+            }
         }
     }
 

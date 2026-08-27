@@ -29,6 +29,7 @@ buildscript {
 
         // Third-party library versions
         branch_sdk_version = '5.20.0'
+        appsflyer_sdk_version = '6.17.4'
         play_services_ads_identifier_version = '18.2.0'
         install_referrer_version = '2.2'
         snakeyaml_version = '2.4'

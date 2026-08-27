@@ -49,6 +49,7 @@ enum class DeepLinkType(val type: String) {
     REMOVE_BETA_TESTER("remove_beta_tester"),
     FORUM_RESPONSE("forum_response"),
     FORUM_COMMENT("forum_comment"),
+    REGISTER("register"),
     NONE("");
 
     companion object {

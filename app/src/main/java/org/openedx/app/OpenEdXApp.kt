@@ -9,6 +9,7 @@ import io.branch.referral.Branch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
+import org.openedx.app.deeplink.AppsFlyerDeepLinkHandler
 import org.openedx.app.deeplink.BranchBrazeDeeplinkHandler
 import org.openedx.app.di.appModule
 import org.openedx.app.di.networkingModule
@@ -20,6 +21,7 @@ class OpenEdXApp : Application() {
 
     private val config by inject<Config>()
     private val pluginManager by inject<PluginManager>()
+    private val appsFlyerDeepLinkHandler by inject<AppsFlyerDeepLinkHandler>()
 
     override fun onCreate() {
         super.onCreate()
@@ -42,6 +44,10 @@ class OpenEdXApp : Application() {
             }
             Branch.expectDelayedSessionInitialization(true)
             Branch.getAutoInstance(this)
+        }
+
+        if (config.getAppsFlyerConfig().enabled) {
+            appsFlyerDeepLinkHandler.init(this, config.getAppsFlyerConfig().devKey)
         }
 
         if (config.getBrazeConfig().isEnabled && config.getFirebaseConfig().enabled) {

@@ -35,6 +35,7 @@
         android:screenOrientation="sensor"
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting"
+        tools:replace="android:allowBackup,android:dataExtractionRules,android:fullBackupContent"
         tools:targetApi="tiramisu">
         <activity
             android:name=".AppActivity"
@@ -75,6 +76,28 @@
                 <data android:scheme="https" />
                 <data android:host="@string/branch_host" />
                 <data android:host="@string/branch_alternate_host" />
+            </intent-filter>
+
+            <!-- AppsFlyer URI Scheme -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="academyapp" />
+            </intent-filter>
+
+            <!-- AppsFlyer OneLink App Links -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https" />
+                <data android:host="go.proanalytics.academy" />
+                <data android:host="proanalytics.onelink.me" />
             </intent-filter>
         </activity>
 

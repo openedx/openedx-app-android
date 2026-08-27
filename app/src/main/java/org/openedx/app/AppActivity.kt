@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
+import org.openedx.app.deeplink.AppsFlyerDeepLinkHandler
 import org.openedx.app.deeplink.DeepLink
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
@@ -59,6 +60,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val profileRouter by inject<ProfileRouter>()
     private val downloadDialogManager by inject<DownloadDialogManager>()
     private val calendarSyncScheduler by inject<CalendarSyncScheduler>()
+    private val appsFlyerDeepLinkHandler by inject<AppsFlyerDeepLinkHandler>()
 
     private val branchLogger = Logger(BRANCH_TAG)
 
@@ -114,6 +116,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         setupInitialFragment(savedInstanceState)
         observeLogoutEvent()
         observeDownloadFailedDialog()
+        observeAppsFlyerDeepLink()
 
         calendarSyncScheduler.scheduleDailySync()
     }
@@ -204,6 +207,14 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                     downloadModel = it.downloadModel,
                     fragmentManager = supportFragmentManager,
                 )
+            }
+        }
+    }
+
+    private fun observeAppsFlyerDeepLink() {
+        lifecycleScope.launch {
+            appsFlyerDeepLinkHandler.deepLink.collect { deepLink ->
+                viewModel.makeExternalRoute(supportFragmentManager, deepLink)
             }
         }
     }
