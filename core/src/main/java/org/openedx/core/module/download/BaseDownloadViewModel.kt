@@ -17,6 +17,7 @@ import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.CoreAnalyticsEvent
 import org.openedx.core.presentation.CoreAnalyticsKey
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 
 abstract class BaseDownloadViewModel(
     private val downloadDao: DownloadDao,
@@ -24,7 +25,8 @@ abstract class BaseDownloadViewModel(
     private val workerController: DownloadWorkerController,
     private val analytics: CoreAnalytics,
     private val downloadHelper: DownloadHelper,
-) : BaseViewModel() {
+    resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     val allBlocks = hashMapOf<String, Block>()
 

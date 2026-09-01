@@ -23,18 +23,19 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.AgreementUrls
-import org.openedx.core.domain.model.ProfileImage
 import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.captureUiMessage
 import org.openedx.foundation.system.ResourceManager
+import org.openedx.profile.ProfileMocks
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.account.AccountUpdated
 import org.openedx.profile.system.notifier.profile.ProfileNotifier
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModelTest {
@@ -51,33 +52,18 @@ class ProfileViewModelTest {
     private val analytics = mockk<ProfileAnalytics>()
     private val router = mockk<ProfileRouter>()
 
-    private val account = org.openedx.profile.domain.model.Account(
-        username = "",
-        bio = "",
-        requiresParentalConsent = false,
-        name = "",
-        country = "",
-        isActive = true,
-        profileImage = ProfileImage("", "", "", "", false),
-        yearOfBirth = 2000,
-        levelOfEducation = "",
-        goals = "",
-        languageProficiencies = emptyList(),
-        gender = "",
-        mailingAddress = "",
-        email = "",
-        dateJoined = null,
-        accountPrivacy = org.openedx.profile.domain.model.Account.Privacy.PRIVATE
-    )
-
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
         every { config.isPreLoginExperienceEnabled() } returns false
         every { config.getFeedbackEmailAddress() } returns ""
         every { config.getAgreement(Locale.current.language) } returns AgreementUrls()
@@ -104,9 +90,9 @@ class ProfileViewModelTest {
 
         coVerify(exactly = 1) { interactor.getAccount() }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         assert(viewModel.uiState.value is ProfileUIState.Loading)
-        assertEquals(noInternet, message?.message)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -118,15 +104,17 @@ class ProfileViewModelTest {
             analytics,
             router
         )
-        coEvery { interactor.getCachedAccount() } returns account
+        coEvery { interactor.getCachedAccount() } returns ProfileMocks.account.copy(
+            accountPrivacy = org.openedx.profile.domain.model.Account.Privacy.PRIVATE
+        )
         coEvery { interactor.getAccount() } throws UnknownHostException()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getAccount() }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         assert(viewModel.uiState.value is ProfileUIState.Data)
-        assertEquals(noInternet, message?.message)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -144,9 +132,9 @@ class ProfileViewModelTest {
 
         coVerify(exactly = 1) { interactor.getAccount() }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         assert(viewModel.uiState.value is ProfileUIState.Loading)
-        assertEquals(somethingWrong, message?.message)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -159,13 +147,16 @@ class ProfileViewModelTest {
             router
         )
         coEvery { interactor.getCachedAccount() } returns null
-        coEvery { interactor.getAccount() } returns account
+        coEvery { interactor.getAccount() } returns ProfileMocks.account.copy(
+            accountPrivacy = org.openedx.profile.domain.model.Account.Privacy.PRIVATE
+        )
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getAccount() }
 
         assert(viewModel.uiState.value is ProfileUIState.Data)
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
     }
 
     @Test

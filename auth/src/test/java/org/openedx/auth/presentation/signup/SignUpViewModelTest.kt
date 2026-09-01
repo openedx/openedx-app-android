@@ -32,12 +32,12 @@ import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
+import org.openedx.core.CoreMocks
 import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.config.FacebookConfig
 import org.openedx.core.config.GoogleConfig
 import org.openedx.core.config.MicrosoftConfig
-import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.core.domain.model.RegistrationField
@@ -46,6 +46,7 @@ import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @ExperimentalCoroutinesApi
 class SignUpViewModelTest {
@@ -98,8 +99,6 @@ class SignUpViewModelTest {
         )
     )
 
-    private val user = User(0, "", "", "")
-
     //endregion
 
     private val noInternet = "Slow or no internet connection"
@@ -109,8 +108,12 @@ class SignUpViewModelTest {
     fun before() {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(R.string.core_error_invalid_grant) } returns "Invalid credentials"
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
         every { appNotifier.notifier } returns emptyFlow()
         every { agreementProvider.getAgreement(false) } returns null
         every { config.isSocialAuthEnabled() } returns false
@@ -149,7 +152,7 @@ class SignUpViewModelTest {
         every { analytics.logEvent(any(), any()) } returns Unit
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery { interactor.login("", "") } returns Unit
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.getRegistrationFields()
         advanceUntilIdle()
@@ -198,7 +201,7 @@ class SignUpViewModelTest {
             )
         } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.getRegistrationFields()
         advanceUntilIdle()
@@ -242,7 +245,7 @@ class SignUpViewModelTest {
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery { interactor.login("", "") } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.register()
         advanceUntilIdle()
@@ -288,7 +291,7 @@ class SignUpViewModelTest {
                 parametersMap.getValue(ApiConstants.PASSWORD)
             )
         } returns Unit
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.getRegistrationFields()
         advanceUntilIdle()

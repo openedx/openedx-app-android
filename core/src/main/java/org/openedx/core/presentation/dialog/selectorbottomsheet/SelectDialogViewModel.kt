@@ -6,10 +6,12 @@ import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSubtitleLanguageChanged
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 
 class SelectDialogViewModel(
-    private val notifier: CourseNotifier
-) : BaseViewModel() {
+    private val notifier: CourseNotifier,
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     var values = mutableListOf<RegistrationField.Option>()
 

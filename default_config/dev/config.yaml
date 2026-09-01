@@ -83,6 +83,8 @@ WHATS_NEW_ENABLED: false
 SOCIAL_AUTH_ENABLED: false
 #feature flag to enable registration from app
 REGISTRATION_ENABLED: true
+#Enables the pre login courses discovery experience (LogistrationFragment).
+PRE_LOGIN_EXPERIENCE_ENABLED: false
 #feature flag to do the authentication flow in the browser to log in
 BROWSER_LOGIN: false
 #feature flag to do the registration for in the browser

@@ -15,22 +15,23 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.domain.model.Media
 import org.openedx.core.domain.model.Pagination
+import org.openedx.discovery.DiscoveryMocks
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
-import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.domain.model.CourseList
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.captureUiMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseSearchViewModelTest {
@@ -49,39 +50,11 @@ class CourseSearchViewModelTest {
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
 
-    //region course
-
-    private val mockCourse = Course(
-        id = "id",
-        blocksUrl = "blocksUrl",
-        courseId = "courseId",
-        effort = "effort",
-        enrollmentStart = null,
-        enrollmentEnd = null,
-        hidden = false,
-        invitationOnly = false,
-        media = Media(),
-        mobileAvailable = true,
-        name = "Test course",
-        number = "number",
-        org = "EdX",
-        pacing = "pacing",
-        shortDescription = "shortDescription",
-        start = "start",
-        end = "end",
-        startDisplay = "startDisplay",
-        startType = "startType",
-        overview = "",
-        false
-    )
-
-    //endregion
-
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every { resourceManager.getString(foundationR.string.foundation_error_no_connection) } returns noInternet
+        every { resourceManager.getString(foundationR.string.foundation_error_unknown_error) } returns somethingWrong
         every { config.getApiHostURL() } returns "http://localhost:8000"
     }
 
@@ -102,7 +75,8 @@ class CourseSearchViewModelTest {
 
         assert(uiState.courses.isEmpty())
         assert(uiState.numCourses == 0)
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
     }
 
     @Test
@@ -116,9 +90,9 @@ class CourseSearchViewModelTest {
 
         coVerify(exactly = 1) { interactor.getCoursesListByQuery(any(), any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         assert(viewModel.uiState.value is CourseSearchUIState.Loading)
-        assert(message.message == noInternet)
+        assert((message.await() as UIMessage.SnackBarMessage).message == noInternet)
     }
 
     @Test
@@ -132,9 +106,9 @@ class CourseSearchViewModelTest {
 
         coVerify(exactly = 1) { interactor.getCoursesListByQuery(any(), any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         assert(viewModel.uiState.value is CourseSearchUIState.Loading)
-        assert(message.message == somethingWrong)
+        assert((message.await() as UIMessage.SnackBarMessage).message == somethingWrong)
     }
 
     @Test
@@ -160,7 +134,8 @@ class CourseSearchViewModelTest {
         verify(exactly = 1) { analytics.discoveryCourseSearchEvent(any(), any()) }
 
         assert(viewModel.uiState.value is CourseSearchUIState.Courses)
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.isUpdating.value == false)
     }
 
@@ -175,14 +150,14 @@ class CourseSearchViewModelTest {
                 5,
                 ""
             ),
-            listOf(mockCourse, mockCourse)
+            DiscoveryMocks.courses(2)
         )
         coEvery {
             interactor.getCoursesListByQuery(
                 any(),
                 not(1)
             )
-        } returns CourseList(Pagination(10, "", 5, ""), listOf(mockCourse))
+        } returns CourseList(Pagination(10, "", 5, ""), listOf(DiscoveryMocks.course))
         every { analytics.discoveryCourseSearchEvent(any(), any()) } returns Unit
 
         viewModel.search("course")
@@ -195,7 +170,8 @@ class CourseSearchViewModelTest {
 
         assert(viewModel.uiState.value is CourseSearchUIState.Courses)
         assert((viewModel.uiState.value as CourseSearchUIState.Courses).courses.size == 3)
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == false)
     }
@@ -211,14 +187,14 @@ class CourseSearchViewModelTest {
                 5,
                 ""
             ),
-            listOf(mockCourse, mockCourse)
+            DiscoveryMocks.courses(2)
         )
         coEvery {
             interactor.getCoursesListByQuery(
                 any(),
                 not(1)
             )
-        } returns CourseList(Pagination(10, "0", 5, ""), listOf(mockCourse))
+        } returns CourseList(Pagination(10, "0", 5, ""), listOf(DiscoveryMocks.course))
         every { analytics.discoveryCourseSearchEvent(any(), any()) } returns Unit
 
         viewModel.search("course")
@@ -232,7 +208,8 @@ class CourseSearchViewModelTest {
 
         assert(viewModel.uiState.value is CourseSearchUIState.Courses)
         assert((viewModel.uiState.value as CourseSearchUIState.Courses).courses.size == 2)
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == true)
     }
@@ -248,7 +225,7 @@ class CourseSearchViewModelTest {
                 5,
                 ""
             ),
-            listOf(mockCourse, mockCourse)
+            DiscoveryMocks.courses(2)
         )
 
         viewModel.updateSearchQuery()
@@ -258,7 +235,8 @@ class CourseSearchViewModelTest {
 
         assert(viewModel.uiState.value is CourseSearchUIState.Courses)
         assert((viewModel.uiState.value as CourseSearchUIState.Courses).courses.isEmpty())
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assertEquals(null, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.isUpdating.value == null)
     }
 }

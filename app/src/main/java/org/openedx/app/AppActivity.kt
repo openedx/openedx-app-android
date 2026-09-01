@@ -2,9 +2,6 @@ package org.openedx.app
 
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.Color
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
@@ -26,7 +23,6 @@ import org.openedx.app.databinding.ActivityAppBinding
 import org.openedx.app.deeplink.DeepLink
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
-import org.openedx.core.ApiConstants
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogManager
 import org.openedx.core.presentation.global.InsetHolder
@@ -70,13 +66,6 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val authCode: String?
         get() {
             val data = intent?.data
-            if (
-                data is Uri &&
-                data.scheme == BuildConfig.APPLICATION_ID &&
-                data.host == ApiConstants.BrowserLogin.REDIRECT_HOST
-            ) {
-                return data.getQueryParameter(ApiConstants.BrowserLogin.CODE_QUERY_PARAM)
-            }
             return null
         }
 
@@ -160,12 +149,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             WindowCompat.setDecorFitsSystemWindows(this, false)
             val insetsController = WindowInsetsControllerCompat(this, binding.root)
             insetsController.isAppearanceLightStatusBars = !isUsingNightModeResources()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                insetsController.systemBarsBehavior =
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            } else {
-                window.statusBarColor = Color.TRANSPARENT
-            }
+            insetsController.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
     }
 
@@ -176,7 +161,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                     val fragment = if (viewModel.isLogistrationEnabled && authCode == null) {
                         LogistrationFragment()
                     } else {
-                        SignInFragment.newInstance(null, null, authCode = authCode)
+                        SignInFragment.newInstance(null, null)
                     }
                     addFragment(fragment)
                 }
@@ -224,7 +209,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         this.intent = intent
 
         if (authCode != null) {
-            addFragment(SignInFragment.newInstance(null, null, authCode = authCode))
+            addFragment(SignInFragment.newInstance(null, null))
         }
 
         val extras = intent.extras

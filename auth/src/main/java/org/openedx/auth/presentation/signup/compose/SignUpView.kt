@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,15 +21,16 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -74,8 +76,6 @@ import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.isImeVisibleState
-import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.rememberSaveableMap
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -88,7 +88,7 @@ import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as coreR
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 internal fun SignUpView(
     windowSize: WindowSize,
@@ -99,12 +99,9 @@ internal fun SignUpView(
     onRegisterClick: (authType: AuthType) -> Unit,
     onHyperLinkClick: (Map<String, String>, String) -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
     val focusManager = LocalFocusManager.current
-    val bottomSheetScaffoldState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true
-    )
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val coroutine = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     var expandedList by rememberSaveable {
@@ -123,6 +120,7 @@ internal fun SignUpView(
         mutableStateMapOf<String, Boolean?>()
     }
     val scrollState = rememberScrollState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val haptic = LocalHapticFeedback.current
 
@@ -135,8 +133,6 @@ internal fun SignUpView(
     var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue())
     }
-
-    val isImeVisible by isImeVisibleState()
 
     LaunchedEffect(uiState.validationError) {
         if (uiState.validationError) {
@@ -156,22 +152,23 @@ internal fun SignUpView(
         }
     }
 
-    LaunchedEffect(bottomSheetScaffoldState.isVisible) {
-        if (!bottomSheetScaffoldState.isVisible) {
+    LaunchedEffect(showBottomSheet) {
+        if (!showBottomSheet) {
             focusManager.clearFocus()
             searchValue = TextFieldValue("")
         }
     }
 
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = Modifier
             .semantics {
                 testTagsAsResourceId = true
             }
             .fillMaxSize()
             .navigationBarsPadding(),
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets()
     ) {
         val topBarPadding by remember {
             mutableStateOf(
@@ -209,21 +206,14 @@ internal fun SignUpView(
             )
         }
 
-        ModalBottomSheetLayout(
-            modifier = Modifier
-                .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
-                .noRippleClickable {
-                    if (bottomSheetScaffoldState.isVisible) {
-                        coroutine.launch {
-                            bottomSheetScaffoldState.hide()
-                        }
-                    }
-                },
-            sheetState = bottomSheetScaffoldState,
-            sheetShape = MaterialTheme.appShapes.screenBackgroundShape,
-            scrimColor = Color.Black.copy(alpha = 0.4f),
-            sheetBackgroundColor = MaterialTheme.appColors.background,
-            sheetContent = {
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false },
+                sheetState = bottomSheetState,
+                shape = MaterialTheme.appShapes.screenBackgroundShape,
+                scrimColor = Color.Black.copy(alpha = 0.4f),
+                containerColor = MaterialTheme.appColors.background,
+            ) {
                 SheetContent(
                     title = bottomDialogTitle,
                     searchValue = searchValue,
@@ -233,7 +223,8 @@ internal fun SignUpView(
                         onFieldUpdated(serverFieldName.value, item.value)
                         selectableNamesMap[serverFieldName.value] = item.name
                         coroutine.launch {
-                            bottomSheetScaffoldState.hide()
+                            bottomSheetState.hide()
+                            showBottomSheet = false
                         }
                     },
                     searchValueChanged = {
@@ -241,20 +232,18 @@ internal fun SignUpView(
                     }
                 )
             }
-        ) {
-            Image(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(fraction = 0.3f),
-                painter = painterResource(id = coreR.drawable.core_top_header),
-                contentScale = ContentScale.FillBounds,
-                contentDescription = null
-            )
-            HandleUIMessage(
-                uiMessage = uiMessage,
-                scaffoldState = scaffoldState
-            )
-            Column(
+        }
+
+        Image(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(fraction = 0.3f),
+            painter = painterResource(id = coreR.drawable.core_top_header),
+            contentScale = ContentScale.FillBounds,
+            contentDescription = null
+        )
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
+        Column(
                 Modifier
                     .fillMaxWidth()
                     .padding(it)
@@ -355,12 +344,13 @@ internal fun SignUpView(
                                         serverFieldName.value = serverName
                                         expandedList = list
                                         coroutine.launch {
-                                            if (bottomSheetScaffoldState.isVisible) {
-                                                bottomSheetScaffoldState.hide()
+                                            if (showBottomSheet) {
+                                                bottomSheetState.hide()
+                                                showBottomSheet = false
                                             } else {
                                                 bottomDialogTitle = field.label
                                                 showErrorMap[field.name] = false
-                                                bottomSheetScaffoldState.show()
+                                                showBottomSheet = true
                                             }
                                         }
                                     },
@@ -385,12 +375,13 @@ internal fun SignUpView(
                                                     serverName
                                                 expandedList = list
                                                 coroutine.launch {
-                                                    if (bottomSheetScaffoldState.isVisible) {
-                                                        bottomSheetScaffoldState.hide()
+                                                    if (showBottomSheet) {
+                                                        bottomSheetState.hide()
+                                                        showBottomSheet = false
                                                     } else {
                                                         bottomDialogTitle = field.label
                                                         showErrorMap[field.name] = false
-                                                        bottomSheetScaffoldState.show()
+                                                        showBottomSheet = true
                                                     }
                                                 }
                                             },
@@ -408,12 +399,13 @@ internal fun SignUpView(
                                             serverFieldName.value = serverName
                                             expandedList = list
                                             coroutine.launch {
-                                                if (bottomSheetScaffoldState.isVisible) {
-                                                    bottomSheetScaffoldState.hide()
+                                                if (showBottomSheet) {
+                                                    bottomSheetState.hide()
+                                                    showBottomSheet = false
                                                 } else {
                                                     bottomDialogTitle = field.label
                                                     showErrorMap[field.name] = false
-                                                    bottomSheetScaffoldState.show()
+                                                    showBottomSheet = true
                                                 }
                                             }
                                         },
@@ -463,7 +455,6 @@ internal fun SignUpView(
                         }
                     }
                 }
-            }
         }
     }
 }

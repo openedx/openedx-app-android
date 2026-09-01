@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,16 +22,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -54,10 +56,8 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.BlockType
-import org.openedx.core.domain.model.AssignmentProgress
+import org.openedx.core.CoreMocks
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -76,7 +76,6 @@ import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
-import java.util.Date
 import org.openedx.core.R as CoreR
 
 class CourseSectionFragment : Fragment() {
@@ -105,7 +104,7 @@ class CourseSectionFragment : Fragment() {
                 val windowSize = rememberWindowSize()
 
                 val uiState by viewModel.uiState.observeAsState(CourseSectionUIState.Loading)
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 CourseSectionScreen(
                     windowSize = windowSize,
                     uiState = uiState,
@@ -177,7 +176,7 @@ private fun CourseSectionScreen(
     onBackClick: () -> Unit,
     onItemClick: (Block) -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
     val title = when (uiState) {
         is CourseSectionUIState.Blocks -> uiState.sectionName
         else -> ""
@@ -187,8 +186,8 @@ private fun CourseSectionScreen(
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding(),
-        scaffoldState = scaffoldState,
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background,
+        contentWindowInsets = WindowInsets()
     ) { paddingValues ->
 
         val contentWidth by remember(key1 = windowSize) {
@@ -209,7 +208,7 @@ private fun CourseSectionScreen(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         Box(
             modifier = Modifier
@@ -268,7 +267,7 @@ private fun CourseSectionScreen(
                                                 onItemClick(it)
                                             },
                                         )
-                                        Divider()
+                                        HorizontalDivider()
                                     }
                                 }
                             }
@@ -350,10 +349,10 @@ private fun CourseSectionScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseSectionUIState.Blocks(
                 listOf(
-                    mockBlock,
-                    mockBlock,
-                    mockBlock,
-                    mockBlock
+                    CoreMocks.mockChapterBlock,
+                    CoreMocks.mockChapterBlock,
+                    CoreMocks.mockChapterBlock,
+                    CoreMocks.mockChapterBlock,
                 ),
                 "",
                 "Course default"
@@ -374,10 +373,10 @@ private fun CourseSectionScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseSectionUIState.Blocks(
                 listOf(
-                    mockBlock,
-                    mockBlock,
-                    mockBlock,
-                    mockBlock
+                    CoreMocks.mockChapterBlock,
+                    CoreMocks.mockChapterBlock,
+                    CoreMocks.mockChapterBlock,
+                    CoreMocks.mockChapterBlock,
                 ),
                 "",
                 "Course default",
@@ -388,24 +387,3 @@ private fun CourseSectionScreenTabletPreview() {
         )
     }
 }
-
-private val mockBlock = Block(
-    id = "id",
-    blockId = "blockId",
-    lmsWebUrl = "lmsWebUrl",
-    legacyWebUrl = "legacyWebUrl",
-    studentViewUrl = "studentViewUrl",
-    type = BlockType.HTML,
-    displayName = "Block",
-    graded = false,
-    studentViewData = null,
-    studentViewMultiDevice = false,
-    blockCounts = BlockCounts(0),
-    descendants = emptyList(),
-    descendantsType = BlockType.HTML,
-    completion = 0.0,
-    containsGatedContent = false,
-    assignmentProgress = AssignmentProgress("", 1f, 2f, "HM1"),
-    due = Date(),
-    offlineDownload = null
-)

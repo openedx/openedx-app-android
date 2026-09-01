@@ -16,17 +16,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -261,9 +261,11 @@ fun LoginTextField(
             loginTextFieldValue = it
             onValueChanged(it.text.trim())
         },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            textColor = MaterialTheme.appColors.textFieldText,
-            backgroundColor = MaterialTheme.appColors.textFieldBackground,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = MaterialTheme.appColors.textFieldText,
+            unfocusedTextColor = MaterialTheme.appColors.textFieldText,
+            focusedContainerColor = MaterialTheme.appColors.textFieldBackground,
+            unfocusedContainerColor = MaterialTheme.appColors.textFieldBackground,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
             cursorColor = MaterialTheme.appColors.textFieldText,
         ),
@@ -373,9 +375,11 @@ fun InputRegistrationField(
                     onValueChanged(registrationField.name, it.trim(), true)
                 }
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                textColor = MaterialTheme.appColors.textFieldText,
-                backgroundColor = MaterialTheme.appColors.textFieldBackground,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = MaterialTheme.appColors.textFieldText,
+                unfocusedTextColor = MaterialTheme.appColors.textFieldText,
+                focusedContainerColor = MaterialTheme.appColors.textFieldBackground,
+                unfocusedContainerColor = MaterialTheme.appColors.textFieldBackground,
                 focusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                 cursorColor = MaterialTheme.appColors.textFieldText,
@@ -459,11 +463,13 @@ fun SelectableRegisterField(
             enabled = false,
             singleLine = true,
             value = initialValue,
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                 disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
                 disabledTextColor = MaterialTheme.appColors.textPrimary,
-                backgroundColor = MaterialTheme.appColors.textFieldBackground,
+                focusedContainerColor = MaterialTheme.appColors.textFieldBackground,
+                unfocusedContainerColor = MaterialTheme.appColors.textFieldBackground,
+                disabledContainerColor = MaterialTheme.appColors.textFieldBackground,
                 disabledPlaceholderColor = MaterialTheme.appColors.textFieldHint
             ),
             shape = MaterialTheme.appShapes.textFieldShape,

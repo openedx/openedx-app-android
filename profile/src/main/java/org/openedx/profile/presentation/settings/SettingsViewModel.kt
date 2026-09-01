@@ -23,9 +23,7 @@ import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.core.utils.EmailUtil
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Configuration
@@ -48,7 +46,7 @@ class SettingsViewModel(
     private val calendarRouter: CalendarRouter,
     private val appNotifier: AppNotifier,
     private val profileNotifier: ProfileNotifier,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val _uiState: MutableStateFlow<SettingsUIState> = MutableStateFlow(SettingsUIState.Data(configuration))
     internal val uiState: StateFlow<SettingsUIState> = _uiState.asStateFlow()
@@ -56,10 +54,6 @@ class SettingsViewModel(
     private val _successLogout = MutableSharedFlow<Boolean>()
     val successLogout: SharedFlow<Boolean>
         get() = _successLogout.asSharedFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
 
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
@@ -90,19 +84,9 @@ class SettingsViewModel(
                     }
                 )
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_unknown_error)
-                        )
-                    )
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             } finally {
                 cookieManager.clearWebViewCookie()
                 appNotifier.send(LogoutEvent(false))

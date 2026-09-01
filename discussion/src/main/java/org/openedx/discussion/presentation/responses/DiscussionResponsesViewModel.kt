@@ -4,14 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.system.notifier.DiscussionCommentDataChanged
 import org.openedx.discussion.system.notifier.DiscussionNotifier
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.SingleEventLiveData
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 
@@ -20,15 +17,11 @@ class DiscussionResponsesViewModel(
     private val resourceManager: ResourceManager,
     private val notifier: DiscussionNotifier,
     private var comment: DiscussionComment,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val _uiState = MutableLiveData<DiscussionResponsesUIState>()
     val uiState: LiveData<DiscussionResponsesUIState>
         get() = _uiState
-
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
 
     private val _canLoadMore = MutableLiveData<Boolean>()
     val canLoadMore: LiveData<Boolean>
@@ -85,17 +78,9 @@ class DiscussionResponsesViewModel(
                 comments.addAll(response.results)
                 _uiState.value = DiscussionResponsesUIState.Success(comment, comments.toList())
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_unknown_error)
-                        )
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             } finally {
                 isLoading = false
                 _isUpdating.value = false
@@ -119,17 +104,9 @@ class DiscussionResponsesViewModel(
                 }
                 _uiState.value = DiscussionResponsesUIState.Success(comment, comments.toList())
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_unknown_error)
-                        )
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }
@@ -149,17 +126,9 @@ class DiscussionResponsesViewModel(
                 }
                 _uiState.value = DiscussionResponsesUIState.Success(comment, comments.toList())
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_unknown_error)
-                        )
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }
@@ -173,25 +142,18 @@ class DiscussionResponsesViewModel(
                 if (page == -1) {
                     comments.add(response)
                 } else {
-                    _uiMessage.value =
+                    sendMessage(
                         UIMessage.ToastMessage(
                             resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added)
                         )
+                    )
                 }
                 _uiState.value =
                     DiscussionResponsesUIState.Success(comment, comments.toList())
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_unknown_error)
-                        )
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }

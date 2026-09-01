@@ -3,5 +3,6 @@
     <item type="id" name="fragmentLearn" />
     <item type="id" name="fragmentDiscover" />
     <item type="id" name="fragmentDownloads" />
+    <item type="id" name="fragmentDates" />
     <item type="id" name="fragmentProfile" />
 </resources>

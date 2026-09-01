@@ -1,13 +1,13 @@
 package org.openedx.core.ui.theme
 
 import androidx.compose.foundation.shape.CornerBasedShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Shapes
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 
 data class AppShapes(
-    val material: Shapes,
+    val material3: Shapes,
     val buttonShape: CornerBasedShape,
     val navigationButtonShape: CornerBasedShape,
     val textFieldShape: CornerBasedShape,

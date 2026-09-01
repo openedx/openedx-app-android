@@ -12,13 +12,15 @@ import org.openedx.core.presentation.CoreAnalyticsKey
 import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.core.system.notifier.VideoQualityChanged
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 
 class VideoQualityViewModel(
     private val qualityType: String,
     private val preferencesManager: CorePreferences,
     private val notifier: VideoNotifier,
     private val analytics: CoreAnalytics,
-) : BaseViewModel() {
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     private val _videoQuality = MutableLiveData<VideoQuality>()
     val videoQuality: LiveData<VideoQuality>

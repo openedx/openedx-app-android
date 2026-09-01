@@ -18,7 +18,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Pagination
@@ -26,8 +25,10 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.domain.model.CourseList
 import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.captureUiMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NativeDiscoveryViewModelTest {
@@ -50,8 +51,12 @@ class NativeDiscoveryViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
         every { corePreferences.user } returns null
         every { config.getApiHostURL() } returns "http://localhost:8000"
         every { config.isPreLoginExperienceEnabled() } returns false
@@ -79,8 +84,8 @@ class NativeDiscoveryViewModelTest {
         coVerify(exactly = 1) { interactor.getCoursesList(any(), any(), any()) }
         coVerify(exactly = 0) { interactor.getCoursesListFromCache() }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(noInternet, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscoveryUIState.Loading)
         assert(viewModel.canLoadMore.value == null)
     }
@@ -102,8 +107,8 @@ class NativeDiscoveryViewModelTest {
         coVerify(exactly = 1) { interactor.getCoursesList(any(), any(), any()) }
         coVerify(exactly = 0) { interactor.getCoursesListFromCache() }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(somethingWrong, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is DiscoveryUIState.Loading)
         assert(viewModel.canLoadMore.value == null)
     }
@@ -125,7 +130,8 @@ class NativeDiscoveryViewModelTest {
         coVerify(exactly = 0) { interactor.getCoursesList(any(), any(), any()) }
         coVerify(exactly = 1) { interactor.getCoursesListFromCache() }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value is DiscoveryUIState.Courses)
         assert(viewModel.canLoadMore.value == false)
     }
@@ -155,7 +161,8 @@ class NativeDiscoveryViewModelTest {
         coVerify(exactly = 1) { interactor.getCoursesList(any(), any(), any()) }
         coVerify(exactly = 0) { interactor.getCoursesListFromCache() }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value is DiscoveryUIState.Courses)
         assert(viewModel.canLoadMore.value == true)
     }
@@ -185,7 +192,8 @@ class NativeDiscoveryViewModelTest {
         coVerify(exactly = 1) { interactor.getCoursesList(any(), any(), any()) }
         coVerify(exactly = 0) { interactor.getCoursesListFromCache() }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value is DiscoveryUIState.Courses)
         assert(viewModel.canLoadMore.value == false)
     }
@@ -207,8 +215,8 @@ class NativeDiscoveryViewModelTest {
 
         coVerify(exactly = 2) { interactor.getCoursesList(any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(noInternet, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == null)
         assert(viewModel.uiState.value is DiscoveryUIState.Loading)
@@ -231,8 +239,8 @@ class NativeDiscoveryViewModelTest {
 
         coVerify(exactly = 2) { interactor.getCoursesList(any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(somethingWrong, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == null)
         assert(viewModel.uiState.value is DiscoveryUIState.Loading)
@@ -263,7 +271,8 @@ class NativeDiscoveryViewModelTest {
 
         coVerify(exactly = 2) { interactor.getCoursesList(any(), any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == true)
         assert(viewModel.uiState.value is DiscoveryUIState.Courses)
@@ -294,7 +303,8 @@ class NativeDiscoveryViewModelTest {
 
         coVerify(exactly = 2) { interactor.getCoursesList(any(), any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == false)
         assert(viewModel.uiState.value is DiscoveryUIState.Courses)

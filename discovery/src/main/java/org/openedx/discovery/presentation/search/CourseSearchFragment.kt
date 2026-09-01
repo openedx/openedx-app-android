@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,19 +20,20 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -63,7 +65,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.domain.model.Media
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
@@ -73,7 +74,7 @@ import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.discovery.domain.model.Course
+import org.openedx.discovery.DiscoveryMocks
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.search.CourseSearchFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.discovery.presentation.ui.DiscoveryCourseItem
@@ -106,7 +107,7 @@ class CourseSearchFragment : Fragment() {
                         0
                     )
                 )
-                val uiMessage by viewModel.uiMessage.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
                 val querySearch = arguments?.getString(ARG_SEARCH_QUERY, "") ?: ""
@@ -163,7 +164,7 @@ class CourseSearchFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun CourseSearchScreen(
     windowSize: WindowSize,
@@ -183,13 +184,12 @@ private fun CourseSearchScreen(
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
     val firstVisibleIndex = remember {
         mutableStateOf(scrollState.firstVisibleItemIndex)
     }
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
+    val pullToRefreshState = rememberPullToRefreshState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(
@@ -208,12 +208,13 @@ private fun CourseSearchScreen(
     }
 
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding()
             .semantics { testTagsAsResourceId = true },
-        backgroundColor = MaterialTheme.appColors.background,
+        containerColor = MaterialTheme.appColors.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets(),
         bottomBar = {
             if (!isUserLoggedIn) {
                 Box(
@@ -262,7 +263,7 @@ private fun CourseSearchScreen(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         Box(
             modifier = Modifier
@@ -325,21 +326,22 @@ private fun CourseSearchScreen(
                 Surface(
                     color = MaterialTheme.appColors.background
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .pullRefresh(pullRefreshState)
+                    val typingText =
+                        if (textFieldValue.text.isEmpty()) {
+                            stringResource(id = discoveryR.string.discovery_start_typing_to_find)
+                        } else {
+                            pluralStringResource(
+                                id = discoveryR.plurals.discovery_found_courses,
+                                (state as? CourseSearchUIState.Courses)?.numCourses ?: 0,
+                                (state as? CourseSearchUIState.Courses)?.numCourses ?: 0
+                            )
+                        }
+                    PullToRefreshBox(
+                        modifier = Modifier.fillMaxWidth(),
+                        state = pullToRefreshState,
+                        isRefreshing = refreshing,
+                        onRefresh = { onSwipeRefresh() }
                     ) {
-                        val typingText =
-                            if (textFieldValue.text.isEmpty()) {
-                                stringResource(id = discoveryR.string.discovery_start_typing_to_find)
-                            } else {
-                                pluralStringResource(
-                                    id = discoveryR.plurals.discovery_found_courses,
-                                    (state as? CourseSearchUIState.Courses)?.numCourses ?: 0,
-                                    (state as? CourseSearchUIState.Courses)?.numCourses ?: 0
-                                )
-                            }
                         LazyColumn(
                             Modifier.fillMaxSize(),
                             contentPadding = contentPaddings,
@@ -388,7 +390,7 @@ private fun CourseSearchScreen(
                                                 onItemClick(courseId)
                                             }
                                         )
-                                        Divider()
+                                        HorizontalDivider()
                                     }
                                     item {
                                         if (canLoadMore) {
@@ -408,11 +410,6 @@ private fun CourseSearchScreen(
                                 }
                             }
                         }
-                        PullRefreshIndicator(
-                            refreshing,
-                            pullRefreshState,
-                            Modifier.align(Alignment.TopCenter)
-                        )
                     }
                 }
             }
@@ -430,7 +427,7 @@ fun CourseSearchScreenPreview() {
     OpenEdXTheme {
         CourseSearchScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            state = CourseSearchUIState.Courses(listOf(mockCourse, mockCourse), 2),
+            state = CourseSearchUIState.Courses(DiscoveryMocks.courses(2), 2),
             uiMessage = null,
             apiHostUrl = "",
             canLoadMore = false,
@@ -456,7 +453,7 @@ fun CourseSearchScreenTabletPreview() {
     OpenEdXTheme {
         CourseSearchScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            state = CourseSearchUIState.Courses(listOf(mockCourse, mockCourse), 2),
+            state = CourseSearchUIState.Courses(DiscoveryMocks.courses(2), 2),
             uiMessage = null,
             apiHostUrl = "",
             canLoadMore = false,
@@ -474,27 +471,3 @@ fun CourseSearchScreenTabletPreview() {
         )
     }
 }
-
-private val mockCourse = Course(
-    id = "id",
-    blocksUrl = "blocksUrl",
-    courseId = "courseId",
-    effort = "effort",
-    enrollmentStart = null,
-    enrollmentEnd = null,
-    hidden = false,
-    invitationOnly = false,
-    media = Media(),
-    mobileAvailable = true,
-    name = "Test course",
-    number = "number",
-    org = "EdX",
-    pacing = "pacing",
-    shortDescription = "shortDescription",
-    start = "start",
-    end = "end",
-    startDisplay = "startDisplay",
-    startType = "startType",
-    overview = "",
-    isEnrolled = false
-)

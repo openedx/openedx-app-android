@@ -23,7 +23,6 @@ import org.openedx.app.room.DatabaseManager
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.auth.presentation.sso.BrowserAuthHelper
 import org.openedx.auth.presentation.sso.FacebookAuthHelper
 import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
@@ -65,6 +64,8 @@ import org.openedx.course.utils.ImageProcessor
 import org.openedx.course.worker.OfflineProgressSyncScheduler
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.dates.presentation.DatesAnalytics
+import org.openedx.dates.presentation.DatesRouter
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discussion.presentation.DiscussionAnalytics
@@ -86,7 +87,7 @@ import org.openedx.core.DatabaseManager as IDatabaseManager
 val appModule = module {
 
     single { Config(get()) }
-    single { PreferencesManager(get()) }
+    single { PreferencesManager(get(), get()) }
     single<CorePreferences> { get<PreferencesManager>() }
     single<ProfilePreferences> { get<PreferencesManager>() }
     single<WhatsNewPreferences> { get<PreferencesManager>() }
@@ -131,6 +132,7 @@ val appModule = module {
     single { DeepLinkRouter(get(), get(), get(), get(), get(), get()) }
     single<CalendarRouter> { get<AppRouter>() }
     single<DownloadsRouter> { get<AppRouter>() }
+    single<DatesRouter> { get<AppRouter>() }
 
     single { NetworkConnection(get()) }
 
@@ -178,6 +180,11 @@ val appModule = module {
     }
 
     single {
+        val room = get<AppDatabase>()
+        room.datesDao()
+    }
+
+    single {
         FileDownloader()
     }
 
@@ -209,13 +216,13 @@ val appModule = module {
     single<DiscussionAnalytics> { get<AnalyticsManager>() }
     single<ProfileAnalytics> { get<AnalyticsManager>() }
     single<WhatsNewAnalytics> { get<AnalyticsManager>() }
+    single<DatesAnalytics> { get<AnalyticsManager>() }
     single<DownloadsAnalytics> { get<AnalyticsManager>() }
 
     factory { AgreementProvider(get(), get()) }
     factory { FacebookAuthHelper() }
     factory { GoogleAuthHelper(get()) }
     factory { MicrosoftAuthHelper() }
-    factory { BrowserAuthHelper(get()) }
     factory { OAuthHelper(get(), get(), get()) }
     factory { VideoPreviewHelper(get(), get()) }
 

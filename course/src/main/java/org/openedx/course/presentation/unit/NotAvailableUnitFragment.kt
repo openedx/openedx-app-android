@@ -15,13 +15,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -133,11 +132,9 @@ private fun NotAvailableUnitScreen(
     description: String,
     buttonAction: (() -> Unit)? = null,
 ) {
-    val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        scaffoldState = scaffoldState
+        modifier = Modifier.fillMaxSize()
     ) {
         val contentWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -192,7 +189,7 @@ private fun NotAvailableUnitScreen(
                             .height(42.dp),
                         shape = MaterialTheme.appShapes.buttonShape,
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = MaterialTheme.appColors.primaryButtonBackground
+                            containerColor = MaterialTheme.appColors.primaryButtonBackground
                         ),
                         onClick = buttonAction
                     ) {

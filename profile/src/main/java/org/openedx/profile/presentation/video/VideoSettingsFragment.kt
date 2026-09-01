@@ -12,21 +12,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -118,8 +117,6 @@ private fun VideoSettingsScreen(
     videoDownloadQualityClick: () -> Unit,
     onBackClick: () -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
-
     var wifiDownloadOnly by rememberSaveable {
         mutableStateOf(videoSettings.wifiDownloadOnly)
     }
@@ -130,7 +127,7 @@ private fun VideoSettingsScreen(
             .semantics {
                 testTagsAsResourceId = true
             },
-        scaffoldState = scaffoldState
+        contentWindowInsets = WindowInsets()
     ) { paddingValues ->
 
         val contentWidth by remember(key1 = windowSize) {
@@ -222,13 +219,9 @@ private fun VideoSettingsScreen(
                                     wifiDownloadOnly = !wifiDownloadOnly
                                     wifiDownloadChanged(wifiDownloadOnly)
                                 },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = MaterialTheme.appColors.primary,
-                                    checkedTrackColor = MaterialTheme.appColors.primary
-                                )
                             )
                         }
-                        Divider()
+                        HorizontalDivider()
                         Row(
                             Modifier
                                 .fillMaxWidth()
@@ -258,7 +251,7 @@ private fun VideoSettingsScreen(
                                 contentDescription = stringResource(CoreR.string.core_accessibility_expandable_arrow)
                             )
                         }
-                        Divider()
+                        HorizontalDivider()
                         Row(
                             Modifier
                                 .testTag("btn_video_quality")
@@ -289,7 +282,7 @@ private fun VideoSettingsScreen(
                                 contentDescription = stringResource(CoreR.string.core_accessibility_expandable_arrow)
                             )
                         }
-                        Divider()
+                        HorizontalDivider()
                     }
                 }
             }

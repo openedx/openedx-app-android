@@ -5,18 +5,14 @@ import androidx.compose.material.icons.filled.School
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseStructure
@@ -40,8 +36,6 @@ import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.downloads.domain.interactor.DownloadInteractor
 import org.openedx.downloads.presentation.DownloadsRouter
-import org.openedx.foundation.extension.isInternetError
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 
@@ -68,14 +62,12 @@ class DownloadsViewModel(
     workerController,
     coreAnalytics,
     downloadHelper,
+    resourceManager,
 ) {
     val apiHostUrl get() = config.getApiHostURL()
 
     private val _uiState = MutableStateFlow(DownloadsUIState())
     val uiState: StateFlow<DownloadsUIState> = _uiState.asStateFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage> = _uiMessage.asSharedFlow()
 
     private val courseBlockIds = mutableMapOf<String, List<String>>()
 
@@ -207,13 +199,8 @@ class DownloadsViewModel(
 
     private fun emitErrorMessage(e: Throwable) {
         viewModelScope.launch {
-            val text = if (e.isInternetError()) {
-                R.string.core_error_no_connection
-            } else {
-                R.string.core_error_unknown_error
-            }
-            _uiMessage.emit(
-                UIMessage.SnackBarMessage(resourceManager.getString(text))
+            handleErrorUiMessage(
+                throwable = e,
             )
         }
     }

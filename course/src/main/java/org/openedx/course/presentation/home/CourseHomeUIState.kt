@@ -1,7 +1,6 @@
 package org.openedx.course.presentation.home
 
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.module.db.DownloadedState
@@ -17,7 +16,6 @@ sealed class CourseHomeUIState {
         val resumeUnitTitle: String,
         val courseSubSections: Map<String, List<Block>>,
         val subSectionsDownloadsCount: Map<String, Int>,
-        val datesBannerInfo: CourseDatesBannerInfo,
         val useRelativeDates: Boolean,
         val courseVideos: Map<String, List<Block>>,
         val courseAssignments: List<Block>,

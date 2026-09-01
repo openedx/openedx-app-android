@@ -8,27 +8,31 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Pagination
+import org.openedx.discussion.DiscussionMocks
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.domain.model.CommentsData
-import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DiscussionResponsesViewModelTest {
@@ -47,45 +51,20 @@ class DiscussionResponsesViewModelTest {
     private val somethingWrong = "Something went wrong"
     private val commentAddedSuccessfully = "Comment Successfully added"
 
-    //region mockComment
-
-    private val mockComment = DiscussionComment(
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        false,
-        true,
-        20,
-        emptyList(),
-        false,
-        "",
-        "",
-        false,
-        "",
-        "",
-        "",
-        21,
-        emptyList(),
-        null,
-        emptyMap()
-    )
-
-    //endregion
-
     private val comments = listOf(
-        mockComment.copy(id = "0"),
-        mockComment.copy(id = "1")
+        DiscussionMocks.comment.copy(id = "0"),
+        DiscussionMocks.comment.copy(id = "1")
     )
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
         every {
             resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added)
         } returns commentAddedSuccessfully
@@ -97,6 +76,10 @@ class DiscussionResponsesViewModelTest {
         clearAllMocks()
     }
 
+    private fun TestScope.captureUiMessage(viewModel: DiscussionResponsesViewModel) = async {
+        withTimeoutOrNull(5_000) { viewModel.uiMessage.first() }
+    }
+
     @Test
     fun `loadCommentResponses no internet connection exception`() = runTest {
         coEvery { interactor.getCommentsResponses(any(), any()) } throws UnknownHostException()
@@ -105,14 +88,14 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCommentsResponses(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(noInternet == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(noInternet == (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Loading)
     }
@@ -125,15 +108,15 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
 
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCommentsResponses(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(somethingWrong == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(somethingWrong == (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Loading)
     }
@@ -148,14 +131,15 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
 
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCommentsResponses(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == true)
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Success)
@@ -171,13 +155,14 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCommentsResponses(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == false)
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Success)
@@ -193,14 +178,15 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         viewModel.fetchMore()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCommentsResponses(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == false)
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Success)
@@ -216,7 +202,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.getCommentsResponses(any(), eq(2)) } returns CommentsData(
             comments,
@@ -227,7 +213,8 @@ class DiscussionResponsesViewModelTest {
 
         coVerify(exactly = 2) { interactor.getCommentsResponses(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.isUpdating.value == false)
         assert(viewModel.canLoadMore.value == false)
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Success)
@@ -243,7 +230,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.setCommentVoted(any(), any()) } throws UnknownHostException()
         viewModel.setCommentUpvoted("", false)
@@ -251,8 +238,8 @@ class DiscussionResponsesViewModelTest {
 
         coVerify(exactly = 1) { interactor.setCommentVoted(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(noInternet == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(noInternet == (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -265,7 +252,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.setCommentVoted(any(), any()) } throws Exception()
         viewModel.setCommentUpvoted("", false)
@@ -273,8 +260,8 @@ class DiscussionResponsesViewModelTest {
 
         coVerify(exactly = 1) { interactor.setCommentVoted(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(somethingWrong == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(somethingWrong == (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -287,16 +274,22 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.setCommentVoted(any(), any()) } returns mockComment.copy(id = "0")
+        coEvery {
+            interactor.setCommentVoted(
+                any(),
+                any()
+            )
+        } returns DiscussionMocks.comment.copy(id = "0")
         viewModel.updateCommentResponses()
         viewModel.setCommentUpvoted("", false)
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.setCommentVoted(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Success)
     }
 
@@ -310,16 +303,22 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.setCommentVoted(any(), any()) } returns mockComment.copy(id = "2")
+        coEvery {
+            interactor.setCommentVoted(
+                any(),
+                any()
+            )
+        } returns DiscussionMocks.comment.copy(id = "2")
         viewModel.updateCommentResponses()
         viewModel.setCommentUpvoted("", false)
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.setCommentVoted(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Success)
     }
 
@@ -333,7 +332,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.setCommentFlagged(any(), any()) } throws UnknownHostException()
         viewModel.setCommentReported("", false)
@@ -341,8 +340,8 @@ class DiscussionResponsesViewModelTest {
 
         coVerify(exactly = 1) { interactor.setCommentFlagged(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(noInternet == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(noInternet == (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -355,7 +354,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.setCommentFlagged(any(), any()) } throws Exception()
         viewModel.setCommentReported("", false)
@@ -363,8 +362,8 @@ class DiscussionResponsesViewModelTest {
 
         coVerify(exactly = 1) { interactor.setCommentFlagged(any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(somethingWrong == message?.message)
+        val message = captureUiMessage(viewModel)
+        assert(somethingWrong == (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -377,15 +376,18 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.setCommentFlagged(any(), any()) } returns mockComment.copy(id = "0")
+        coEvery { interactor.setCommentFlagged(any(), any()) } returns DiscussionMocks.comment.copy(
+            id = "0"
+        )
         viewModel.setCommentReported("", false)
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.setCommentFlagged(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Success)
     }
 
@@ -399,9 +401,11 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.setCommentFlagged(any(), any()) } returns mockComment.copy(id = "0")
+        coEvery { interactor.setCommentFlagged(any(), any()) } returns DiscussionMocks.comment.copy(
+            id = "0"
+        )
 
         viewModel.updateCommentResponses()
         viewModel.setCommentReported("", false)
@@ -409,7 +413,8 @@ class DiscussionResponsesViewModelTest {
 
         coVerify(exactly = 1) { interactor.setCommentFlagged(any(), any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Success)
     }
 
@@ -423,7 +428,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.createComment(any(), any(), any()) } throws UnknownHostException()
 
@@ -432,8 +437,8 @@ class DiscussionResponsesViewModelTest {
 
         coVerify(exactly = 1) { interactor.createComment(any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        Assert.assertEquals(noInternet, message?.message)
+        val message = captureUiMessage(viewModel)
+        Assert.assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
@@ -446,7 +451,7 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
         coEvery { interactor.createComment(any(), any(), any()) } throws Exception()
 
@@ -455,8 +460,11 @@ class DiscussionResponsesViewModelTest {
 
         coVerify(exactly = 1) { interactor.createComment(any(), any(), any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        Assert.assertEquals(somethingWrong, message?.message)
+        val message = captureUiMessage(viewModel)
+        Assert.assertEquals(
+            somethingWrong,
+            (message.await() as? UIMessage.SnackBarMessage)?.message
+        )
     }
 
     @Test
@@ -469,16 +477,17 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
+        coEvery { interactor.createComment(any(), any(), any()) } returns DiscussionMocks.comment
 
         viewModel.createComment("")
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.createComment(any(), any(), any()) }
 
-        assert(viewModel.uiMessage.value != null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() != null)
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Success)
     }
 
@@ -492,9 +501,9 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
+        coEvery { interactor.createComment(any(), any(), any()) } returns DiscussionMocks.comment
         every { preferencesManager.user?.username } returns ""
 
         viewModel.createComment("")
@@ -513,9 +522,9 @@ class DiscussionResponsesViewModelTest {
             interactor,
             resourceManager,
             notifier,
-            mockComment.copy(id = "0")
+            DiscussionMocks.comment.copy(id = "0")
         )
-        coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
+        coEvery { interactor.createComment(any(), any(), any()) } returns DiscussionMocks.comment
         every { preferencesManager.user?.username } returns ""
 
         viewModel.createComment("")

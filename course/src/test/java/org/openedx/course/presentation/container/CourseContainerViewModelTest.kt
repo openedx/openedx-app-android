@@ -5,6 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
@@ -24,21 +25,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.CoreMocks
 import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.api.CourseApi
-import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.domain.model.AppConfig
-import org.openedx.core.domain.model.CourseAccessDetails
 import org.openedx.core.domain.model.CourseAccessError
-import org.openedx.core.domain.model.CourseDatesCalendarSync
-import org.openedx.core.domain.model.CourseEnrollmentDetails
-import org.openedx.core.domain.model.CourseInfoOverview
-import org.openedx.core.domain.model.CourseSharingUtmParameters
-import org.openedx.core.domain.model.CourseStructure
-import org.openedx.core.domain.model.CoursewareAccess
-import org.openedx.core.domain.model.EnrollmentDetails
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
@@ -49,7 +41,7 @@ import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.utils.ImageProcessor
 import org.openedx.foundation.system.ResourceManager
-import java.util.Date
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseContainerViewModelTest {
@@ -76,138 +68,22 @@ class CourseContainerViewModelTest {
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
 
-    private val user = User(
-        id = 0,
-        username = "",
-        email = "",
-        name = "",
-    )
-    private val appConfig = AppConfig(
-        CourseDatesCalendarSync(
-            isEnabled = true,
-            isSelfPacedEnabled = true,
-            isInstructorPacedEnabled = true,
-            isDeepLinkEnabled = false,
-        )
-    )
-    private val courseDetails = CourseEnrollmentDetails(
-        id = "id",
-        courseUpdates = "",
-        courseHandouts = "",
-        discussionUrl = "",
-        courseAccessDetails = CourseAccessDetails(
-            false,
-            false,
-            false,
-            null,
-            coursewareAccess = CoursewareAccess(
-                false,
-                "",
-                "",
-                "",
-                "",
-                ""
-            )
-        ),
-        certificate = null,
-        enrollmentDetails = EnrollmentDetails(
-            null,
-            "audit",
-            false,
-            Date()
-        ),
-        courseInfoOverview = CourseInfoOverview(
-            "Open edX Demo Course",
-            "",
-            "OpenedX",
-            Date(),
-            "",
-            "",
-            null,
-            false,
-            null,
-            CourseSharingUtmParameters("", ""),
-            "",
-        )
-    )
-
-    private val courseStructure = CourseStructure(
-        root = "",
-        blockData = listOf(),
-        id = "id",
-        name = "Course name",
-        number = "",
-        org = "Org",
-        start = Date(0),
-        startDisplay = "",
-        startType = "",
-        end = null,
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
-        media = null,
-        certificate = null,
-        isSelfPaced = false,
-        progress = null
-    )
-
-    private val enrollmentDetails = CourseEnrollmentDetails(
-        id = "",
-        courseUpdates = "",
-        courseHandouts = "",
-        discussionUrl = "",
-        courseAccessDetails = CourseAccessDetails(
-            false,
-            false,
-            false,
-            null,
-            CoursewareAccess(
-                false,
-                "",
-                "",
-                "",
-                "",
-                ""
-            )
-        ),
-        certificate = null,
-        enrollmentDetails = EnrollmentDetails(
-            null,
-            "",
-            false,
-            null
-        ),
-        courseInfoOverview = CourseInfoOverview(
-            "Open edX Demo Course",
-            "",
-            "OpenedX",
-            null,
-            "",
-            "",
-            null,
-            false,
-            null,
-            CourseSharingUtmParameters("", ""),
-            "",
-        )
-    )
-
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(id = R.string.platform_name) } returns openEdx
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
-        every { corePreferences.user } returns user
-        every { corePreferences.appConfig } returns appConfig
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
+        every { corePreferences.user } returns CoreMocks.mockUser
+        every { corePreferences.appConfig } returns CoreMocks.mockAppConfig
         every { courseNotifier.notifier } returns emptyFlow()
         every { config.getApiHostURL() } returns "baseUrl"
-        coEvery { interactor.getEnrollmentDetails(any()) } returns courseDetails
+        justRun { interactor.startCourseSession(any()) }
+        coEvery { interactor.getEnrollmentDetails(any()) } returns CoreMocks.mockCourseEnrollmentDetails
         every { imageProcessor.loadImage(any(), any(), any()) } returns Unit
         every { imageProcessor.applyBlur(any(), any()) } returns mockBitmap
     }
@@ -240,7 +116,7 @@ class CourseContainerViewModelTest {
             interactor.getCourseStructureFlow(any(), any())
         } returns flowOf(null)
         coEvery {
-            interactor.getEnrollmentDetailsFlow(any())
+            interactor.getEnrollmentDetailsFlow(any(), any())
         } returns flow { throw Exception() }
         every {
             analytics.logScreenEvent(
@@ -257,7 +133,7 @@ class CourseContainerViewModelTest {
         viewModel.fetchCourseDetails()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getEnrollmentDetailsFlow(any()) }
+        coVerify(exactly = 1) { interactor.getEnrollmentDetailsFlow(any(), any()) }
         verify(exactly = 1) {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
@@ -292,8 +168,12 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseStructureFlow(any(), any()) } returns flowOf(courseStructure)
-        coEvery { interactor.getEnrollmentDetailsFlow(any()) } returns flowOf(enrollmentDetails)
+        coEvery { interactor.getCourseStructureFlow(any(), any()) } returns flowOf(
+            CoreMocks.mockCourseStructure
+        )
+        coEvery { interactor.getEnrollmentDetailsFlow(any(), any()) } returns flowOf(
+            CoreMocks.mockCourseEnrollmentDetails
+        )
         every {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
@@ -309,7 +189,7 @@ class CourseContainerViewModelTest {
         viewModel.fetchCourseDetails()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getEnrollmentDetailsFlow(any()) }
+        coVerify(exactly = 1) { interactor.getEnrollmentDetailsFlow(any(), any()) }
         verify(exactly = 1) {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
@@ -345,8 +225,12 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         every { networkConnection.isOnline() } returns false
-        coEvery { interactor.getCourseStructureFlow(any(), any()) } returns flowOf(courseStructure)
-        coEvery { interactor.getEnrollmentDetailsFlow(any()) } returns flowOf(enrollmentDetails)
+        coEvery { interactor.getCourseStructureFlow(any(), any()) } returns flowOf(
+            CoreMocks.mockCourseStructure
+        )
+        coEvery { interactor.getEnrollmentDetailsFlow(any(), any()) } returns flowOf(
+            CoreMocks.mockCourseEnrollmentDetails
+        )
         every {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
@@ -426,8 +310,8 @@ class CourseContainerViewModelTest {
             calendarSyncScheduler,
             courseRouter
         )
-        coEvery { interactor.getEnrollmentDetails(any()) } returns courseDetails
-        coEvery { interactor.getCourseStructure(any(), true) } returns courseStructure
+        coEvery { interactor.getEnrollmentDetails(any()) } returns CoreMocks.mockCourseEnrollmentDetails
+        coEvery { interactor.getCourseStructure(any(), true) } returns CoreMocks.mockCourseStructure
         coEvery { courseNotifier.send(CourseStructureUpdated("")) } returns Unit
         viewModel.updateData()
         advanceUntilIdle()

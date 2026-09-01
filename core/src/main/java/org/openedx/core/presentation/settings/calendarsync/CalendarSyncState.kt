@@ -1,12 +1,12 @@
 package org.openedx.core.presentation.settings.calendarsync
 
 import androidx.annotation.StringRes
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.SyncDisabled
 import androidx.compose.material.icons.rounded.EventRepeat
 import androidx.compose.material.icons.rounded.FreeCancellation
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color

@@ -66,7 +66,6 @@ class SignUpFragment : Fragment() {
                                     this@SignUpFragment,
                                     authType
                                 )
-                                AuthType.BROWSER -> null
                             }
                         },
                         onFieldUpdated = { key, value ->

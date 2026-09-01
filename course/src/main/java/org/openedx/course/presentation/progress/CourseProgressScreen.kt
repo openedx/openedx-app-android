@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.progress
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,16 +23,16 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,20 +52,25 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.openedx.core.CoreMocks
 import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
 
 @Composable
@@ -92,14 +98,13 @@ private fun CourseProgressContent(
     uiMessage: UIMessage?,
     windowSize: WindowSize
 ) {
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
     val gradingPolicy = uiState.progress.gradingPolicy
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        scaffoldState = scaffoldState,
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background
     ) {
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -154,7 +159,7 @@ private fun CourseProgressContent(
                                     MaterialTheme.appColors.primary
                                 }
                             )
-                            Divider(
+                            HorizontalDivider(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 8.dp)
@@ -180,7 +185,7 @@ private fun CourseProgressContent(
                 }
             }
 
-            HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+            HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
         }
     }
 }
@@ -443,9 +448,9 @@ fun CourseCompletionCircularProgress(
                     shape = CircleShape
                 )
                 .padding(3.dp),
-            progress = progress,
+            progress = { progress },
             color = MaterialTheme.appColors.primary,
-            backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor,
+            trackColor = MaterialTheme.appColors.progressBarBackgroundColor,
             strokeWidth = 10.dp,
             strokeCap = StrokeCap.Round
         )
@@ -586,4 +591,36 @@ fun CurrentOverallGradeText(
         },
         style = MaterialTheme.appTypography.labelMedium,
     )
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun CourseProgressScreenPreview() {
+    OpenEdXTheme {
+        CourseProgressContent(
+            uiState = CourseProgressUIState.Data(
+                progress = CoreMocks.mockCourseProgress,
+                courseStructure = CoreMocks.mockCourseStructure
+            ),
+            uiMessage = null,
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact)
+        )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.NEXUS_9)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, device = Devices.NEXUS_9)
+@Composable
+private fun CourseProgressScreenTabletPreview() {
+    OpenEdXTheme {
+        CourseProgressContent(
+            uiState = CourseProgressUIState.Data(
+                progress = CoreMocks.mockCourseProgress,
+                courseStructure = CoreMocks.mockCourseStructure
+            ),
+            uiMessage = null,
+            windowSize = WindowSize(WindowType.Medium, WindowType.Medium)
+        )
+    }
 }

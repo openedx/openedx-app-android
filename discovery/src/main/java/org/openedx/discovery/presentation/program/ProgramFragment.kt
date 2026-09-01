@@ -7,16 +7,18 @@ import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -251,24 +253,25 @@ private fun ProgramInfoScreen(
     onBackClick: () -> Unit,
     onUriClick: (String, linkAuthority) -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
     val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     when (uiState) {
         is ProgramUIState.UiMessage -> {
-            HandleUIMessage(uiMessage = uiState.uiMessage, scaffoldState = scaffoldState)
+            HandleUIMessage(uiMessage = uiState.uiMessage, snackbarHostState = snackbarHostState)
         }
 
         else -> {}
     }
 
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize()
             .semantics { testTagsAsResourceId = true },
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets()
     ) { paddingValues ->
         val modifierScreenWidth by remember(key1 = windowSize) {
             mutableStateOf(

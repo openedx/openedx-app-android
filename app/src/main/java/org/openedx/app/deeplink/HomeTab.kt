@@ -4,6 +4,7 @@ enum class HomeTab {
     LEARN,
     PROGRAMS,
     DISCOVER,
+    DATES,
     DOWNLOADS,
     PROFILE
 }

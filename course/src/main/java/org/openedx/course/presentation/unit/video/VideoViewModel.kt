@@ -9,6 +9,7 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseVideoPositionChanged
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.foundation.system.ResourceManager
 
 class VideoViewModel(
     private val courseId: String,
@@ -16,7 +17,8 @@ class VideoViewModel(
     private val notifier: CourseNotifier,
     private val preferencesManager: CorePreferences,
     courseAnalytics: CourseAnalytics,
-) : BaseVideoViewModel(courseId, courseAnalytics) {
+    resourceManager: ResourceManager,
+) : BaseVideoViewModel(courseId, courseAnalytics, resourceManager) {
 
     var videoUrl = ""
     var currentVideoTime = 0L

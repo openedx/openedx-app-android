@@ -13,6 +13,7 @@ import org.openedx.core.CalendarRouter
 import org.openedx.core.FragmentViewType
 import org.openedx.core.presentation.global.appupgrade.AppUpgradeRouter
 import org.openedx.core.presentation.global.appupgrade.UpgradeRequiredFragment
+import org.openedx.core.presentation.global.webview.SSOWebContentFragment
 import org.openedx.core.presentation.global.webview.WebContentFragment
 import org.openedx.core.presentation.settings.video.VideoQualityFragment
 import org.openedx.core.presentation.settings.video.VideoQualityType
@@ -29,6 +30,7 @@ import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
 import org.openedx.course.settings.download.DownloadQueueFragment
 import org.openedx.courses.presentation.AllEnrolledCoursesFragment
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.dates.presentation.DatesRouter
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.NativeDiscoveryFragment
 import org.openedx.discovery.presentation.WebViewDiscoveryFragment
@@ -69,7 +71,8 @@ class AppRouter :
     AppUpgradeRouter,
     WhatsNewRouter,
     CalendarRouter,
-    DownloadsRouter {
+    DownloadsRouter,
+    DatesRouter {
 
     // region AuthRouter
     override fun navigateToMain(
@@ -406,7 +409,7 @@ class AppRouter :
             if (isLogistrationEnabled) {
                 replaceFragment(fm, LogistrationFragment())
             } else {
-                replaceFragment(fm, SignInFragment())
+                replaceFragment(fm, SignInFragment.newInstance(null, null))
             }
         }
     }
@@ -429,6 +432,13 @@ class AppRouter :
         replaceFragmentWithBackStack(
             fm,
             WebContentFragment.newInstance(title = title, url = url)
+        )
+    }
+
+    override fun navigateToSSOWebContent(fm: FragmentManager, title: String, url: String) {
+        replaceFragmentWithBackStack(
+            fm,
+            SSOWebContentFragment.newInstance(title = title, url = url)
         )
     }
 

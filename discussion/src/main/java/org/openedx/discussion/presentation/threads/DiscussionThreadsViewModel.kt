@@ -5,16 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadAdded
 import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.SingleEventLiveData
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 
 class DiscussionThreadsViewModel(
@@ -24,15 +20,11 @@ class DiscussionThreadsViewModel(
     val courseId: String,
     val topicId: String,
     private val threadType: String
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val _uiState = MutableLiveData<DiscussionThreadsUIState>()
     val uiState: LiveData<DiscussionThreadsUIState>
         get() = _uiState
-
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
 
     private val _isUpdating = MutableLiveData<Boolean>()
     val isUpdating: LiveData<Boolean>
@@ -161,13 +153,9 @@ class DiscussionThreadsViewModel(
                 threadsList.addAll(response.results)
                 _uiState.value = DiscussionThreadsUIState.Threads(threadsList.toList())
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
             _isUpdating.value = false
             isLoading = false
@@ -188,13 +176,9 @@ class DiscussionThreadsViewModel(
                 threadsList.addAll(response.results)
                 _uiState.value = DiscussionThreadsUIState.Threads(threadsList.toList())
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
             _isUpdating.value = false
             isLoading = false
@@ -216,13 +200,9 @@ class DiscussionThreadsViewModel(
                 threadsList.addAll(response.results)
                 _uiState.value = DiscussionThreadsUIState.Threads(threadsList.toList())
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
             _isUpdating.value = false
             isLoading = false

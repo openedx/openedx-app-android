@@ -5,11 +5,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.core.config.Config
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Account
@@ -27,15 +24,11 @@ class EditProfileViewModel(
     private val analytics: ProfileAnalytics,
     val config: Config,
     account: Account,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val _uiState = MutableLiveData<EditProfileUIState>()
     val uiState: LiveData<EditProfileUIState>
         get() = _uiState
-
-    private val _uiMessage = MutableLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
 
     var account = account
         private set
@@ -93,13 +86,9 @@ class EditProfileViewModel(
                 _selectedImageUri.value = null
             } catch (e: Exception) {
                 _uiState.value = EditProfileUIState(account.copy(), isLimited = isLimitedProfile)
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }
@@ -118,13 +107,9 @@ class EditProfileViewModel(
                 sendAccountUpdated()
             } catch (e: Exception) {
                 _uiState.value = EditProfileUIState(account.copy(), isLimited = isLimitedProfile)
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }

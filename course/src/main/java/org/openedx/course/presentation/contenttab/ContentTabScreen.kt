@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -116,7 +116,7 @@ fun ContentTabScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         if (!isEdgeItem) {
-                            Divider(
+                            VerticalDivider(
                                 modifier = Modifier
                                     .fillMaxHeight()
                                     .width(1.dp)
@@ -131,10 +131,10 @@ fun ContentTabScreen(
                             } else {
                                 MaterialTheme.appColors.primary
                             },
-                            style = MaterialTheme.typography.button
+                            style = MaterialTheme.typography.labelLarge
                         )
                         if (!isEdgeItem) {
-                            Divider(
+                            VerticalDivider(
                                 modifier = Modifier
                                     .fillMaxHeight()
                                     .width(1.dp)

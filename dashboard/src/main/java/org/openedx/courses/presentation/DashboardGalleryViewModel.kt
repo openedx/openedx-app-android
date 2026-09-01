@@ -2,14 +2,10 @@ package org.openedx.courses.presentation
 
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.CourseEnrollments
 import org.openedx.core.data.storage.CorePreferences
@@ -20,9 +16,7 @@ import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.NavigationToDiscovery
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardRouter
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
@@ -37,7 +31,7 @@ class DashboardGalleryViewModel(
     private val dashboardRouter: DashboardRouter,
     private val corePreferences: CorePreferences,
     private val windowSize: WindowSize,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     val apiHostUrl get() = config.getApiHostURL()
 
@@ -45,10 +39,6 @@ class DashboardGalleryViewModel(
         MutableStateFlow<DashboardGalleryUIState>(DashboardGalleryUIState.Loading)
     val uiState: StateFlow<DashboardGalleryUIState>
         get() = _uiState.asStateFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage?>
-        get() = _uiMessage.asSharedFlow()
 
     private val _updating = MutableStateFlow<Boolean>(false)
     val updating: StateFlow<Boolean>
@@ -99,19 +89,9 @@ class DashboardGalleryViewModel(
                     }
                 }
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_unknown_error)
-                        )
-                    )
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             } finally {
                 _updating.value = false
                 isLoading = false

@@ -3,11 +3,8 @@ package org.openedx.course.presentation.videos
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
@@ -59,14 +56,11 @@ class CourseVideoViewModel(
     workerController,
     coreAnalytics,
     downloadHelper,
+    resourceManager,
 ) {
     private val _uiState = MutableStateFlow<CourseVideoUIState>(CourseVideoUIState.Loading)
     val uiState: StateFlow<CourseVideoUIState>
         get() = _uiState.asStateFlow()
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
 
     private val courseVideos = mutableMapOf<String, MutableList<Block>>()
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
@@ -107,7 +101,7 @@ class CourseVideoViewModel(
                 super.saveDownloadModels(folder, courseId, id)
             } else {
                 viewModelScope.launch {
-                    _uiMessage.emit(
+                    sendMessage(
                         UIMessage.ToastMessage(
                             resourceManager.getString(R.string.course_can_download_only_with_wifi)
                         )
@@ -122,7 +116,7 @@ class CourseVideoViewModel(
     override fun saveAllDownloadModels(folder: String, courseId: String) {
         if (preferencesManager.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected()) {
             viewModelScope.launch {
-                _uiMessage.emit(
+                sendMessage(
                     UIMessage.ToastMessage(resourceManager.getString(R.string.course_can_download_only_with_wifi))
                 )
             }

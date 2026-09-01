@@ -20,16 +20,17 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,10 +50,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
-import org.openedx.core.Mock
+import org.openedx.core.CoreMocks
 import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.NoContentScreen
@@ -63,8 +63,6 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.openedx.course.presentation.container.CourseContentTab
-import org.openedx.course.presentation.ui.CourseDatesBanner
-import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseMessage
 import org.openedx.course.presentation.ui.ResumeCourseButton
 import org.openedx.course.presentation.unit.container.CourseViewMode
@@ -81,7 +79,6 @@ fun CourseHomeScreen(
     viewModel: CourseHomeViewModel,
     fragmentManager: FragmentManager,
     homePagerState: PagerState,
-    onResetDatesClick: () -> Unit,
     onNavigateToContent: (CourseContentTab) -> Unit = {},
     onNavigateToProgress: () -> Unit = {},
 ) {
@@ -137,13 +134,6 @@ fun CourseHomeScreen(
                 fragmentManager = fragmentManager,
             )
         },
-        onResetDatesClick = {
-            viewModel.resetCourseDatesBanner(
-                onResetDates = {
-                    onResetDatesClick()
-                }
-            )
-        },
         onCertificateClick = {
             viewModel.viewCertificateTappedEvent()
             it.takeIfNotEmpty()
@@ -186,7 +176,6 @@ private fun CourseHomeUI(
     onSubSectionClick: (Block) -> Unit,
     onResumeClick: (String) -> Unit,
     onDownloadClick: (blockIds: List<String>) -> Unit,
-    onResetDatesClick: () -> Unit,
     onCertificateClick: (String) -> Unit,
     onVideoClick: (Block) -> Unit,
     onAssignmentClick: (Block) -> Unit,
@@ -198,13 +187,12 @@ private fun CourseHomeUI(
     onViewAllAssignmentsClick: () -> Unit,
     onViewProgressClick: () -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        scaffoldState = scaffoldState,
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background
     ) {
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -215,7 +203,7 @@ private fun CourseHomeUI(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         Box(
             modifier = Modifier
@@ -235,25 +223,6 @@ private fun CourseHomeUI(
                                 .fillMaxSize()
                                 .verticalScroll(rememberScrollState()),
                         ) {
-                            if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
-                                Box(
-                                    modifier = Modifier
-                                        .padding(all = 8.dp)
-                                ) {
-                                    if (windowSize.isTablet) {
-                                        CourseDatesBannerTablet(
-                                            banner = uiState.datesBannerInfo,
-                                            resetDates = onResetDatesClick,
-                                        )
-                                    } else {
-                                        CourseDatesBanner(
-                                            banner = uiState.datesBannerInfo,
-                                            resetDates = onResetDatesClick,
-                                        )
-                                    }
-                                }
-                            }
-
                             val certificate = uiState.courseStructure.certificate
                             if (certificate?.isCertificateEarned() == true) {
                                 CourseMessage(
@@ -294,13 +263,15 @@ private fun CourseHomeUI(
                             ) { tab ->
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
-                                    backgroundColor = MaterialTheme.appColors.cardViewBackground,
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.appColors.cardViewBackground
+                                    ),
                                     border = BorderStroke(
                                         1.dp,
                                         MaterialTheme.appColors.cardViewBorder
                                     ),
                                     shape = MaterialTheme.appShapes.cardShape,
-                                    elevation = 0.dp,
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                                 ) {
                                     when (tab) {
                                         CourseHomePagerTab.COURSE_COMPLETION -> {
@@ -452,21 +423,14 @@ private fun CourseHomeScreenPreview() {
         CourseHomeUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseHomeUIState.CourseData(
-                courseStructure = Mock.mockCourseStructure,
+                courseStructure = CoreMocks.mockCourseStructure,
                 courseProgress = null, // No course progress for preview
                 next = null, // No next section for preview
                 downloadedState = mapOf(),
-                resumeComponent = Mock.mockChapterBlock,
+                resumeComponent = CoreMocks.mockChapterBlock,
                 resumeUnitTitle = "Resumed Unit",
                 courseSubSections = mapOf(),
                 subSectionsDownloadsCount = mapOf(),
-                datesBannerInfo = CourseDatesBannerInfo(
-                    missedDeadlines = false,
-                    missedGatedContent = false,
-                    verifiedUpgradeLink = "",
-                    contentTypeGatingEnabled = false,
-                    hasEnded = false
-                ),
                 useRelativeDates = true,
                 courseVideos = mapOf(),
                 courseAssignments = emptyList(),
@@ -478,7 +442,6 @@ private fun CourseHomeScreenPreview() {
             onSubSectionClick = {},
             onResumeClick = {},
             onDownloadClick = {},
-            onResetDatesClick = {},
             onCertificateClick = {},
             onVideoClick = {},
             onAssignmentClick = {},
@@ -505,21 +468,14 @@ private fun CourseHomeScreenTabletPreview() {
         CourseHomeUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseHomeUIState.CourseData(
-                courseStructure = Mock.mockCourseStructure,
+                courseStructure = CoreMocks.mockCourseStructure,
                 courseProgress = null, // No course progress for preview
                 next = null, // No next section for preview
                 downloadedState = mapOf(),
-                resumeComponent = Mock.mockChapterBlock,
+                resumeComponent = CoreMocks.mockChapterBlock,
                 resumeUnitTitle = "Resumed Unit",
                 courseSubSections = mapOf(),
                 subSectionsDownloadsCount = mapOf(),
-                datesBannerInfo = CourseDatesBannerInfo(
-                    missedDeadlines = false,
-                    missedGatedContent = false,
-                    verifiedUpgradeLink = "",
-                    contentTypeGatingEnabled = false,
-                    hasEnded = false
-                ),
                 useRelativeDates = true,
                 courseVideos = mapOf(),
                 courseAssignments = emptyList(),
@@ -531,7 +487,6 @@ private fun CourseHomeScreenTabletPreview() {
             onSubSectionClick = {},
             onResumeClick = {},
             onDownloadClick = {},
-            onResetDatesClick = {},
             onCertificateClick = {},
             onVideoClick = {},
             onAssignmentClick = {},

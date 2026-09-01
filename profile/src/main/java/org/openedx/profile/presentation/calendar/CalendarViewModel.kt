@@ -23,6 +23,7 @@ import org.openedx.core.system.notifier.calendar.CalendarSynced
 import org.openedx.core.system.notifier.calendar.CalendarSyncing
 import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.profile.presentation.ProfileRouter
 
 class CalendarViewModel(
@@ -34,7 +35,8 @@ class CalendarViewModel(
     private val corePreferences: CorePreferences,
     private val profileRouter: ProfileRouter,
     private val networkConnection: NetworkConnection,
-) : BaseViewModel() {
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     private val calendarInitState: CalendarUIState
         get() = CalendarUIState(
@@ -124,10 +126,16 @@ class CalendarViewModel(
     }
 
     private fun getCalendarData() {
-        if (calendarManager.hasPermissions()) {
-            val calendarData = calendarManager.getCalendarData(calendarId = calendarPreferences.calendarId)
-            _uiState.update { it.copy(calendarData = calendarData) }
+        if (!calendarManager.hasPermissions()) return
+
+        val calendarId = calendarPreferences.calendarId
+        if (calendarId == CalendarManager.CALENDAR_DOES_NOT_EXIST) {
+            _uiState.update { it.copy(calendarData = null) }
+            return
         }
+
+        val calendarData = calendarManager.getCalendarData(calendarId = calendarId)
+        _uiState.update { it.copy(calendarData = calendarData) }
     }
 
     private fun updateSyncedCoursesCount() {

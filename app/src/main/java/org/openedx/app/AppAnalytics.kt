@@ -20,6 +20,10 @@ enum class AppAnalyticsEvent(val eventName: String, val biValue: String) {
         "MainDashboard:Discover",
         "edx.bi.app.main_dashboard.discover"
     ),
+    DATES(
+        "MainDashboard:DATES",
+        "edx.bi.app.main_dashboard.dates"
+    ),
     DOWNLOADS(
         "MainDashboard:Downloads",
         "edx.bi.app.main_dashboard.downloads"

@@ -6,6 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import org.openedx.core.data.model.room.CourseCalendarEventEntity
 import org.openedx.core.data.model.room.CourseCalendarStateEntity
+import org.openedx.core.data.model.room.CourseDateEntity
 import org.openedx.core.data.model.room.CourseEnrollmentDetailsEntity
 import org.openedx.core.data.model.room.CourseProgressEntity
 import org.openedx.core.data.model.room.CourseStructureEntity
@@ -19,11 +20,12 @@ import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.course.data.storage.CourseConverter
 import org.openedx.dashboard.data.DashboardDao
+import org.openedx.dates.data.storage.DatesDao
 import org.openedx.discovery.data.converter.DiscoveryConverter
 import org.openedx.discovery.data.model.room.CourseEntity
 import org.openedx.discovery.data.storage.DiscoveryDao
 
-const val DATABASE_VERSION = 5
+const val DATABASE_VERSION = 6
 const val DATABASE_NAME = "OpenEdX_db"
 
 @Suppress("MagicNumber")
@@ -38,6 +40,7 @@ const val DATABASE_NAME = "OpenEdX_db"
         CourseCalendarStateEntity::class,
         DownloadCoursePreview::class,
         CourseEnrollmentDetailsEntity::class,
+        CourseDateEntity::class,
         VideoProgressEntity::class,
         CourseProgressEntity::class,
     ],
@@ -45,7 +48,8 @@ const val DATABASE_NAME = "OpenEdX_db"
         AutoMigration(1, 2),
         AutoMigration(2, 3),
         AutoMigration(3, 4),
-        AutoMigration(4, DATABASE_VERSION),
+        AutoMigration(4, 5),
+        AutoMigration(5, DATABASE_VERSION),
     ],
     version = DATABASE_VERSION
 )
@@ -55,5 +59,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun courseDao(): CourseDao
     abstract fun dashboardDao(): DashboardDao
     abstract fun downloadDao(): DownloadDao
+    abstract fun datesDao(): DatesDao
     abstract fun calendarDao(): CalendarDao
 }

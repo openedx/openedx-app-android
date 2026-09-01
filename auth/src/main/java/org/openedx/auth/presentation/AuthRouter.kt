@@ -27,5 +27,7 @@ interface AuthRouter {
 
     fun navigateToWebContent(fm: FragmentManager, title: String, url: String)
 
+    fun navigateToSSOWebContent(fm: FragmentManager, title: String, url: String)
+
     fun clearBackStack(fm: FragmentManager)
 }

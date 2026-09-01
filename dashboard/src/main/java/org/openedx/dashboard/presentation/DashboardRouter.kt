@@ -9,8 +9,8 @@ interface DashboardRouter {
         fm: FragmentManager,
         courseId: String,
         courseTitle: String,
-        openTab: String = "",
-        resumeBlockId: String = ""
+        openTab: String,
+        resumeBlockId: String
     )
 
     fun navigateToSettings(fm: FragmentManager)

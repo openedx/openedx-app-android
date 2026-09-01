@@ -24,24 +24,24 @@ import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,6 +52,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
@@ -75,20 +76,8 @@ import coil.request.ImageRequest
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.Lock
-import org.openedx.core.domain.model.AppConfig
-import org.openedx.core.domain.model.Certificate
-import org.openedx.core.domain.model.CourseAssignments
-import org.openedx.core.domain.model.CourseDateBlock
-import org.openedx.core.domain.model.CourseDatesCalendarSync
 import org.openedx.core.domain.model.CourseEnrollments
-import org.openedx.core.domain.model.CourseSharingUtmParameters
-import org.openedx.core.domain.model.CourseStatus
-import org.openedx.core.domain.model.CoursewareAccess
-import org.openedx.core.domain.model.DashboardCourseList
 import org.openedx.core.domain.model.EnrolledCourse
-import org.openedx.core.domain.model.EnrolledCourseData
-import org.openedx.core.domain.model.Pagination
-import org.openedx.core.domain.model.Progress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
@@ -101,6 +90,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
 import org.openedx.courses.presentation.DashboardGalleryFragment.Companion.MOBILE_COURSE_LIST_ITEM_COUNT
 import org.openedx.courses.presentation.DashboardGalleryFragment.Companion.TABLET_COURSE_LIST_ITEM_COUNT
+import org.openedx.dashboard.DashboardMocks
 import org.openedx.dashboard.R
 import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.UIMessage
@@ -177,7 +167,7 @@ fun DashboardGalleryView(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DashboardGalleryView(
     uiMessage: UIMessage?,
@@ -188,11 +178,8 @@ private fun DashboardGalleryView(
     hasInternetConnection: Boolean
 ) {
     val windowSize = rememberWindowSize()
-    val scaffoldState = rememberScaffoldState()
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = updating,
-        onRefresh = { onAction(DashboardGalleryScreenAction.SwipeRefresh) }
-    )
+    val snackbarHostState = remember { SnackbarHostState() }
+    val pullToRefreshState = rememberPullToRefreshState()
     var isInternetConnectionShown by rememberSaveable {
         mutableStateOf(false)
     }
@@ -216,12 +203,11 @@ private fun DashboardGalleryView(
     }
 
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = Modifier.fillMaxSize(),
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background
     ) { paddingValues ->
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         Surface(
             modifier = Modifier
@@ -230,80 +216,85 @@ private fun DashboardGalleryView(
                 .padding(paddingValues),
             color = MaterialTheme.appColors.background
         ) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .pullRefresh(pullRefreshState)
-                    .verticalScroll(rememberScrollState()),
+            PullToRefreshBox(
+                isRefreshing = updating,
+                onRefresh = { onAction(DashboardGalleryScreenAction.SwipeRefresh) },
+                state = pullToRefreshState,
+                modifier = Modifier.fillMaxSize(),
             ) {
-                when (uiState) {
-                    is DashboardGalleryUIState.Loading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            color = MaterialTheme.appColors.primary
-                        )
-                    }
-
-                    is DashboardGalleryUIState.Courses -> {
-                        UserCourses(
-                            modifier = contentWidth
-                                .fillMaxHeight()
-                                .padding(vertical = 12.dp)
-                                .displayCutoutForLandscape()
-                                .align(Alignment.TopCenter),
-                            contentPadding = contentPadding,
-                            userCourses = uiState.userCourses,
-                            useRelativeDates = uiState.useRelativeDates,
-                            apiHostUrl = apiHostUrl,
-                            openCourse = {
-                                onAction(DashboardGalleryScreenAction.OpenCourse(it))
-                            },
-                            onViewAllClick = {
-                                onAction(DashboardGalleryScreenAction.ViewAll)
-                            },
-                            navigateToDates = {
-                                onAction(DashboardGalleryScreenAction.NavigateToDates(it))
-                            },
-                            resumeBlockId = { course, blockId ->
-                                onAction(DashboardGalleryScreenAction.OpenBlock(course, blockId))
-                            }
-                        )
-                    }
-
-                    is DashboardGalleryUIState.Empty -> {
-                        NoCoursesInfo(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                        )
-                        FindACourseButton(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter),
-                            findACourseClick = {
-                                onAction(DashboardGalleryScreenAction.NavigateToDiscovery)
-                            }
-                        )
-                    }
-                }
-
-                PullRefreshIndicator(
-                    updating,
-                    pullRefreshState,
-                    Modifier.align(Alignment.TopCenter)
-                )
-
-                if (!isInternetConnectionShown && !hasInternetConnection) {
-                    OfflineModeDialog(
-                        Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.BottomCenter),
-                        onDismissCLick = {
-                            isInternetConnectionShown = true
-                        },
-                        onReloadClick = {
-                            isInternetConnectionShown = true
-                            onAction(DashboardGalleryScreenAction.SwipeRefresh)
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    when (uiState) {
+                        is DashboardGalleryUIState.Loading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.align(Alignment.Center),
+                                color = MaterialTheme.appColors.primary
+                            )
                         }
-                    )
+
+                        is DashboardGalleryUIState.Courses -> {
+                            UserCourses(
+                                modifier = contentWidth
+                                    .fillMaxHeight()
+                                    .padding(vertical = 12.dp)
+                                    .displayCutoutForLandscape()
+                                    .align(Alignment.TopCenter),
+                                contentPadding = contentPadding,
+                                userCourses = uiState.userCourses,
+                                useRelativeDates = uiState.useRelativeDates,
+                                apiHostUrl = apiHostUrl,
+                                openCourse = {
+                                    onAction(DashboardGalleryScreenAction.OpenCourse(it))
+                                },
+                                onViewAllClick = {
+                                    onAction(DashboardGalleryScreenAction.ViewAll)
+                                },
+                                navigateToDates = {
+                                    onAction(DashboardGalleryScreenAction.NavigateToDates(it))
+                                },
+                                resumeBlockId = { course, blockId ->
+                                    onAction(
+                                        DashboardGalleryScreenAction.OpenBlock(
+                                            course,
+                                            blockId
+                                        )
+                                    )
+                                }
+                            )
+                        }
+
+                        is DashboardGalleryUIState.Empty -> {
+                            NoCoursesInfo(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                            FindACourseButton(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter),
+                                findACourseClick = {
+                                    onAction(DashboardGalleryScreenAction.NavigateToDiscovery)
+                                }
+                            )
+                        }
+                    }
+
+                    if (!isInternetConnectionShown && !hasInternetConnection) {
+                        OfflineModeDialog(
+                            Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.BottomCenter),
+                            onDismissCLick = {
+                                isInternetConnectionShown = true
+                            },
+                            onReloadClick = {
+                                isInternetConnectionShown = true
+                                onAction(DashboardGalleryScreenAction.SwipeRefresh)
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -424,9 +415,9 @@ private fun ViewAllItem(
                     onViewAllClick()
                 }
             ),
-        backgroundColor = MaterialTheme.appColors.cardViewBackground,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground),
         shape = MaterialTheme.appShapes.courseImageShape,
-        elevation = 4.dp,
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -463,9 +454,9 @@ private fun CourseListItem(
             .clickable {
                 onCourseClick(course)
             },
-        backgroundColor = MaterialTheme.appColors.background,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.background),
         shape = MaterialTheme.appShapes.courseImageShape,
-        elevation = 4.dp
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box {
             Column {
@@ -566,9 +557,9 @@ private fun PrimaryCourseCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(2.dp),
-        backgroundColor = MaterialTheme.appColors.background,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.background),
         shape = MaterialTheme.appShapes.courseImageShape,
-        elevation = 4.dp
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         when (orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> {
@@ -644,7 +635,7 @@ private fun PrimaryCourseButtons(
             modifier = titleModifier,
             primaryCourse = primaryCourse,
         )
-        Divider()
+        HorizontalDivider()
         if (!pastAssignments.isNullOrEmpty()) {
             val nearestAssignment = pastAssignments.maxBy { it.date }
             val title = if (pastAssignments.size == 1) nearestAssignment.title else null
@@ -669,7 +660,7 @@ private fun PrimaryCourseButtons(
         if (!futureAssignments.isNullOrEmpty()) {
             val nearestAssignment = futureAssignments.minBy { it.date }
             val title = if (futureAssignments.size == 1) nearestAssignment.title else null
-            Divider()
+            HorizontalDivider()
             AssignmentItem(
                 modifier = Modifier.clickable {
                     if (futureAssignments.size == 1) {
@@ -738,9 +729,12 @@ private fun PrimaryCourseCaption(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp),
-            progress = primaryCourse.progress.value,
+            progress = { primaryCourse.progress.value },
             color = MaterialTheme.appColors.primary,
-            backgroundColor = MaterialTheme.appColors.divider
+            trackColor = MaterialTheme.appColors.divider,
+            strokeCap = StrokeCap.Square,
+            gapSize = 0.dp,
+            drawStopIndicator = { }
         )
     }
 }
@@ -909,65 +903,6 @@ private fun NoCoursesInfo(
     }
 }
 
-private val mockCourseDateBlock = CourseDateBlock(
-    title = "Homework 1: ABCD",
-    description = "After this date, course content will be archived",
-    date = TimeUtils.iso8601ToDate("2024-05-31T15:08:07Z")!!,
-    assignmentType = "Homework"
-)
-private val mockCourseAssignments =
-    CourseAssignments(listOf(mockCourseDateBlock), listOf(mockCourseDateBlock, mockCourseDateBlock))
-private val mockCourse = EnrolledCourse(
-    auditAccessExpires = Date(),
-    created = "created",
-    certificate = Certificate(""),
-    mode = "mode",
-    isActive = true,
-    progress = Progress.DEFAULT_PROGRESS,
-    courseStatus = CourseStatus("", emptyList(), "", "Unit name"),
-    courseAssignments = mockCourseAssignments,
-    course = EnrolledCourseData(
-        id = "id",
-        name = "Looooooooooooooooooooong Course name",
-        number = "",
-        org = "Org",
-        start = Date(),
-        startDisplay = "",
-        startType = "",
-        end = Date(),
-        dynamicUpgradeDeadline = "",
-        subscriptionId = "",
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            "",
-        ),
-        media = null,
-        courseImage = "",
-        courseAbout = "",
-        courseSharingUtmParameters = CourseSharingUtmParameters("", ""),
-        courseUpdates = "",
-        courseHandouts = "",
-        discussionUrl = "",
-        videoOutline = "",
-        isSelfPaced = false
-    )
-)
-private val mockPagination = Pagination(10, "", 4, "1")
-private val mockDashboardCourseList = DashboardCourseList(
-    pagination = mockPagination,
-    courses = listOf(mockCourse, mockCourse, mockCourse, mockCourse, mockCourse, mockCourse)
-)
-
-private val mockUserCourses = CourseEnrollments(
-    enrollments = mockDashboardCourseList,
-    configs = AppConfig(CourseDatesCalendarSync(true, true, true, true)),
-    primary = mockCourse
-)
-
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -987,7 +922,7 @@ private fun ViewAllItemPreview() {
 private fun DashboardGalleryViewPreview() {
     OpenEdXTheme {
         DashboardGalleryView(
-            uiState = DashboardGalleryUIState.Courses(mockUserCourses, true),
+            uiState = DashboardGalleryUIState.Courses(DashboardMocks.courseEnrollments, true),
             apiHostUrl = "",
             uiMessage = null,
             updating = false,

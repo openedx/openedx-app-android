@@ -27,6 +27,7 @@ import org.openedx.core.system.notifier.calendar.CalendarCreated
 import org.openedx.core.system.notifier.calendar.CalendarNotifier
 import org.openedx.core.system.notifier.calendar.CalendarSynced
 import org.openedx.core.worker.CalendarSyncScheduler
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.calendar.CalendarViewModel
 
@@ -43,6 +44,7 @@ class CalendarViewModelTest {
     private val calendarInteractor = mockk<CalendarInteractor>(relaxed = true)
     private val corePreferences = mockk<CorePreferences>(relaxed = true)
     private val profileRouter = mockk<ProfileRouter>()
+    private val resourceManager = mockk<ResourceManager>()
     private val networkConnection = mockk<NetworkConnection>()
     private val permissionLauncher = mockk<ActivityResultLauncher<Array<String>>>()
     private val fragmentManager = mockk<FragmentManager>()
@@ -59,7 +61,8 @@ class CalendarViewModelTest {
             calendarInteractor = calendarInteractor,
             corePreferences = corePreferences,
             profileRouter = profileRouter,
-            networkConnection = networkConnection
+            networkConnection = networkConnection,
+            resourceManager = resourceManager,
         )
     }
 
@@ -111,7 +114,8 @@ class CalendarViewModelTest {
             calendarInteractor,
             corePreferences,
             profileRouter,
-            networkConnection
+            networkConnection,
+            resourceManager,
         )
 
         assertEquals(CalendarSyncState.OFFLINE, viewModel.uiState.value.calendarSyncState)
@@ -129,7 +133,8 @@ class CalendarViewModelTest {
             calendarInteractor,
             corePreferences,
             profileRouter,
-            networkConnection
+            networkConnection,
+            resourceManager,
         )
 
         assertEquals(CalendarSyncState.SYNCED, viewModel.uiState.value.calendarSyncState)
@@ -150,7 +155,8 @@ class CalendarViewModelTest {
             calendarInteractor,
             corePreferences,
             profileRouter,
-            networkConnection
+            networkConnection,
+            resourceManager,
         )
 
         assertTrue(viewModel.uiState.value.isCalendarExist)

@@ -24,15 +24,11 @@ class DeleteProfileViewModel(
     private val notifier: ProfileNotifier,
     private val validator: Validator,
     private val analytics: ProfileAnalytics,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val _uiState = MutableLiveData<DeleteProfileFragmentUIState>()
     val uiState: LiveData<DeleteProfileFragmentUIState>
         get() = _uiState
-
-    private val _uiMessage = MutableLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
 
     fun deleteProfile(password: String) {
         logDeleteProfileClickedEvent()
@@ -52,12 +48,16 @@ class DeleteProfileViewModel(
                 notifier.send(AccountDeactivated())
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                    handleErrorUiMessage(
+                        throwable = e,
+                    )
                     _uiState.value = DeleteProfileFragmentUIState.Initial
                 } else if (e is EdxError.UserNotActiveException) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_user_not_active))
+                    sendMessage(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_user_not_active)
+                        )
+                    )
                     _uiState.value = DeleteProfileFragmentUIState.Initial
                 } else {
                     _uiState.value =

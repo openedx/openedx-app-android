@@ -19,15 +19,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,8 +53,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import org.openedx.core.AppUpdateState
 import org.openedx.core.R
-import org.openedx.core.domain.model.AgreementUrls
-import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.Toolbar
@@ -67,7 +66,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
-import org.openedx.profile.domain.model.Configuration
+import org.openedx.profile.ProfileMocks
 import org.openedx.profile.presentation.ui.SettingsDivider
 import org.openedx.profile.presentation.ui.SettingsItem
 import org.openedx.profile.R as profileR
@@ -224,8 +223,8 @@ private fun SettingsSection(
         Card(
             modifier = Modifier,
             shape = MaterialTheme.appShapes.cardShape,
-            elevation = 0.dp,
-            backgroundColor = MaterialTheme.appColors.cardViewBackground
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground)
         ) {
             Column(Modifier.fillMaxWidth()) {
                 SettingsItem(
@@ -247,8 +246,8 @@ private fun ManageAccountSection(onManageAccountClick: () -> Unit) {
     Column {
         Card(
             shape = MaterialTheme.appShapes.cardShape,
-            elevation = 0.dp,
-            backgroundColor = MaterialTheme.appColors.cardViewBackground
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground)
         ) {
             Column(Modifier.fillMaxWidth()) {
                 SettingsItem(
@@ -276,8 +275,8 @@ private fun SupportInfoSection(
         Card(
             modifier = Modifier,
             shape = MaterialTheme.appShapes.cardShape,
-            elevation = 0.dp,
-            backgroundColor = MaterialTheme.appColors.cardViewBackground
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground)
         ) {
             Column(Modifier.fillMaxWidth()) {
                 if (uiState.configuration.supportEmail.isNotBlank()) {
@@ -339,11 +338,12 @@ private fun LogoutButton(onClick: () -> Unit) {
             .testTag("btn_logout")
             .fillMaxWidth(),
         shape = MaterialTheme.appShapes.cardShape,
-        elevation = 0.dp,
-        backgroundColor = MaterialTheme.appColors.cardViewBackground
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground)
     ) {
         Row(
             modifier = Modifier
+                .fillMaxWidth()
                 .clickable {
                     onClick()
                 }
@@ -622,29 +622,12 @@ fun AppVersionItemUpgradeRequired(
     }
 }
 
-private val mockAppData = AppData(
-    appName = "openedx",
-    versionName = "1.0.0",
-    applicationId = "org.example.com"
-)
-
-private val mockConfiguration = Configuration(
-    agreementUrls = AgreementUrls(),
-    faqUrl = "https://example.com/faq",
-    supportEmail = "test@example.com",
-    versionName = mockAppData.versionName,
-)
-
-private val mockUiState = SettingsUIState.Data(
-    configuration = mockConfiguration
-)
-
 @Preview
 @Composable
 private fun AppVersionItemAppToDatePreview() {
     OpenEdXTheme {
         AppVersionItem(
-            versionName = mockAppData.versionName,
+            versionName = ProfileMocks.appData.versionName,
             appUpgradeEvent = null,
             onClick = {}
         )
@@ -656,7 +639,7 @@ private fun AppVersionItemAppToDatePreview() {
 private fun AppVersionItemUpgradeRecommendedPreview() {
     OpenEdXTheme {
         AppVersionItem(
-            versionName = mockAppData.versionName,
+            versionName = ProfileMocks.appData.versionName,
             appUpgradeEvent = AppUpgradeEvent.UpgradeRecommendedEvent("1.0.1"),
             onClick = {}
         )
@@ -668,7 +651,7 @@ private fun AppVersionItemUpgradeRecommendedPreview() {
 private fun AppVersionItemUpgradeRequiredPreview() {
     OpenEdXTheme {
         AppVersionItem(
-            versionName = mockAppData.versionName,
+            versionName = ProfileMocks.appData.versionName,
             appUpgradeEvent = AppUpgradeEvent.UpgradeRequiredEvent,
             onClick = {}
         )
@@ -688,7 +671,9 @@ private fun SettingsScreenPreview() {
         SettingsScreen(
             onBackClick = {},
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = mockUiState,
+            uiState = SettingsUIState.Data(
+                configuration = ProfileMocks.configuration
+            ),
             onAction = {},
         )
     }

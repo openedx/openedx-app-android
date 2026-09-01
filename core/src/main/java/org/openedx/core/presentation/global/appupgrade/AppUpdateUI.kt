@@ -16,13 +16,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -267,7 +268,7 @@ fun TransparentTextButton(
             .testTag("btn_secondary")
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.Transparent
+            containerColor = Color.Transparent
         ),
         elevation = null,
         shape = MaterialTheme.appShapes.navigationButtonShape,
@@ -292,7 +293,7 @@ fun DefaultTextButton(
             .testTag("btn_primary")
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.appColors.primaryButtonBackground
+            containerColor = MaterialTheme.appColors.primaryButtonBackground
         ),
         elevation = null,
         shape = MaterialTheme.appShapes.navigationButtonShape,
@@ -326,7 +327,7 @@ fun AppUpgradeRecommendedBox(
                 onClick()
             },
         shape = MaterialTheme.appShapes.cardShape,
-        backgroundColor = MaterialTheme.appColors.primary
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.primary)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),

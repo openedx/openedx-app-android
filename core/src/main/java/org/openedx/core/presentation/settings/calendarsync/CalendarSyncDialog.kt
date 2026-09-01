@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -124,7 +124,7 @@ private fun CalendarAlertDialog(dialogProperties: DialogProperties, onDismiss: (
             shape = MaterialTheme.appShapes.cardShape
         ),
         shape = MaterialTheme.appShapes.cardShape,
-        backgroundColor = MaterialTheme.appColors.background,
+        containerColor = MaterialTheme.appColors.background,
 
         properties = AlertDialogProperties(
             dismissOnBackPress = false,
@@ -133,7 +133,7 @@ private fun CalendarAlertDialog(dialogProperties: DialogProperties, onDismiss: (
         onDismissRequest = onDismiss,
 
         title = dialogProperties.title.takeIfNotEmpty()?.let {
-            @Composable {
+            {
                 Text(
                     text = dialogProperties.title,
                     color = MaterialTheme.appColors.textPrimary,

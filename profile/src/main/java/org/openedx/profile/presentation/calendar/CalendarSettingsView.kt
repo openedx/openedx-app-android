@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,17 +17,16 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
-import androidx.compose.material.Text
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -61,7 +61,7 @@ import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.profile.R
 import org.openedx.profile.presentation.ui.SettingsItem
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarSettingsView(
     windowSize: WindowSize,
@@ -72,7 +72,6 @@ fun CalendarSettingsView(
     onCourseToSyncClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
-    val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()
 
     Scaffold(
@@ -81,7 +80,7 @@ fun CalendarSettingsView(
             .semantics {
                 testTagsAsResourceId = true
             },
-        scaffoldState = scaffoldState
+        contentWindowInsets = WindowInsets()
     ) { paddingValues ->
 
         val contentWidth by remember(key1 = windowSize) {
@@ -168,7 +167,7 @@ fun CalendarSettingsView(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarSyncSection(
     isCourseCalendarSyncEnabled: Boolean,
@@ -234,15 +233,12 @@ fun CalendarSyncSection(
                 style = MaterialTheme.appTypography.titleMedium,
                 color = MaterialTheme.appColors.textDark
             )
-            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
                 Switch(
                     modifier = Modifier
                         .padding(0.dp),
                     checked = isCourseCalendarSyncEnabled,
                     onCheckedChange = onCalendarSyncSwitchClick,
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.appColors.textAccent
-                    )
                 )
             }
         }
@@ -286,8 +282,8 @@ fun CoursesToSyncSection(
         Card(
             modifier = Modifier,
             shape = MaterialTheme.appShapes.cardShape,
-            elevation = 0.dp,
-            backgroundColor = MaterialTheme.appColors.cardViewBackground
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground)
         ) {
             SettingsItem(
                 text = stringResource(R.string.profile_syncing_courses, coursesSynced),

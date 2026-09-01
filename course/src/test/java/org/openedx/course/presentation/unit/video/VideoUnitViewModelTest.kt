@@ -29,6 +29,7 @@ import org.openedx.core.system.notifier.CourseVideoPositionChanged
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.foundation.system.ResourceManager
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class VideoUnitViewModelTest {
@@ -43,6 +44,7 @@ class VideoUnitViewModelTest {
     private val networkConnection = mockk<NetworkConnection>()
     private val transcriptManager = mockk<TranscriptManager>()
     private val courseAnalytics = mockk<CourseAnalytics>()
+    private val resourceManager = mockk<ResourceManager>()
 
     @Before
     fun setUp() {
@@ -64,7 +66,8 @@ class VideoUnitViewModelTest {
             notifier,
             networkConnection,
             transcriptManager,
-            courseAnalytics
+            courseAnalytics,
+            resourceManager
         )
         coEvery {
             courseRepository.markBlocksCompletion(
@@ -106,6 +109,7 @@ class VideoUnitViewModelTest {
             networkConnection,
             transcriptManager,
             courseAnalytics,
+            resourceManager
         )
         coEvery {
             courseRepository.markBlocksCompletion(
@@ -147,6 +151,7 @@ class VideoUnitViewModelTest {
             networkConnection,
             transcriptManager,
             courseAnalytics,
+            resourceManager
         )
         coEvery { notifier.notifier } returns flow {
             emit(

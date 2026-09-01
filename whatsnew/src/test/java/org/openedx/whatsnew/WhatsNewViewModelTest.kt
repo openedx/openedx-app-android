@@ -6,6 +6,7 @@ import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.openedx.core.presentation.global.AppData
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 import org.openedx.whatsnew.domain.model.WhatsNewItem
 import org.openedx.whatsnew.presentation.WhatsNewAnalytics
@@ -18,6 +19,7 @@ class WhatsNewViewModelTest {
     private val router = mockk<WhatsNewRouter>()
     private val preferencesManager = mockk<WhatsNewPreferences>()
     private val appData = mockk<AppData>()
+    private val resourceManager = mockk<ResourceManager>()
 
     private val whatsNewItem = WhatsNewItem(
         version = "1.0.0",
@@ -35,7 +37,8 @@ class WhatsNewViewModelTest {
             analytics,
             router,
             preferencesManager,
-            appData
+            appData,
+            resourceManager
         )
 
         verify(exactly = 1) { whatsNewManager.getNewestData() }

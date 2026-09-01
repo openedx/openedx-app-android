@@ -18,15 +18,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,7 +45,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.RenderHtmlContent
@@ -53,6 +53,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
+import org.openedx.discussion.DiscussionMocks
 import org.openedx.discussion.R
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.DiscussionType
@@ -112,7 +113,7 @@ fun ThreadMainItem(
                 ),
                 modifier = Modifier
                     .size(48.dp)
-                    .clip(MaterialTheme.appShapes.material.medium)
+                    .clip(MaterialTheme.appShapes.material3.medium)
                     .clickable {
                         if (thread.author.isNotEmpty()) {
                             onUserPhotoClick(thread.author)
@@ -192,7 +193,7 @@ fun ThreadMainItem(
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Divider(color = MaterialTheme.appColors.cardViewBorder)
+        HorizontalDivider(color = MaterialTheme.appColors.cardViewBorder)
     }
 }
 
@@ -246,8 +247,8 @@ fun CommentItem(
                 shape
             )
         ),
-        backgroundColor = MaterialTheme.appColors.surface,
-        elevation = 0.dp
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             Modifier
@@ -609,7 +610,7 @@ fun ThreadItemCategory(
                 .clickable { onClick() }
         ),
         shape = MaterialTheme.appShapes.cardShape,
-        backgroundColor = MaterialTheme.appColors.surface
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.surface)
     ) {
         Column(
             modifier = Modifier
@@ -665,7 +666,7 @@ fun TopicItem(
 private fun TopicItemPreview() {
     OpenEdXTheme {
         TopicItem(
-            topic = mockTopic,
+            topic = DiscussionMocks.topic,
             onClick = { _, _ -> }
         )
     }
@@ -677,7 +678,7 @@ private fun TopicItemPreview() {
 private fun ThreadItemPreview() {
     OpenEdXTheme {
         ThreadItem(
-            thread = mockThread,
+            thread = DiscussionMocks.thread,
             onClick = {}
         )
     }
@@ -689,7 +690,7 @@ private fun CommentItemPreview() {
     OpenEdXTheme {
         CommentItem(
             modifier = Modifier.fillMaxWidth(),
-            comment = mockComment,
+            comment = DiscussionMocks.comment,
             onClick = { _, _, _ -> },
             onUserPhotoClick = {}
         )
@@ -701,74 +702,8 @@ private fun CommentItemPreview() {
 private fun ThreadMainItemPreview() {
     ThreadMainItem(
         modifier = Modifier.fillMaxWidth(),
-        thread = mockThread,
+        thread = DiscussionMocks.thread,
         onClick = { _, _ -> },
         onUserPhotoClick = {}
     )
 }
-
-private val mockComment = DiscussionComment(
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    false,
-    true,
-    20,
-    emptyList(),
-    false,
-    "",
-    "",
-    false,
-    "",
-    "",
-    "",
-    21,
-    emptyList(),
-    ProfileImage("", "", "", "", false),
-    mapOf()
-)
-
-private val mockThread = org.openedx.discussion.domain.model.Thread(
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    false,
-    true,
-    20,
-    emptyList(),
-    false,
-    "",
-    "",
-    "",
-    "",
-    DiscussionType.DISCUSSION,
-    "",
-    "",
-    "Discussion title long Discussion title long good item",
-    true,
-    false,
-    true,
-    21,
-    4,
-    false,
-    false,
-    mapOf(),
-    10,
-    false,
-    false
-)
-
-private val mockTopic = Topic(
-    id = "",
-    name = "All Topics",
-    threadListUrl = "",
-    children = emptyList()
-)

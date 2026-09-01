@@ -23,20 +23,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.BlockType
-import org.openedx.core.R
+import org.openedx.core.CoreMocks
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.domain.model.AssignmentProgress
-import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.BlockCounts
-import org.openedx.core.domain.model.CourseStructure
-import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
-import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
-import org.openedx.core.module.db.DownloadedState
-import org.openedx.core.module.db.FileType
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
@@ -44,9 +35,10 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.captureUiMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
-import java.util.Date
+import org.openedx.foundation.R as foundationR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseSectionViewModelTest {
@@ -70,115 +62,11 @@ class CourseSectionViewModelTest {
     private val somethingWrong = "Something went wrong"
     private val cantDownload = "You can download content only from Wi-fi"
 
-    private val assignmentProgress = AssignmentProgress(
-        assignmentType = "Homework",
-        numPointsEarned = 1f,
-        numPointsPossible = 3f,
-        shortLabel = "HW1",
-    )
-
-    private val blocks = listOf(
-        Block(
-            id = "id",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.CHAPTER,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = listOf("1", "id1"),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        ),
-        Block(
-            id = "id1",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.SEQUENTIAL,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = listOf("id2"),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        ),
-        Block(
-            id = "id2",
-            blockId = "blockId",
-            lmsWebUrl = "lmsWebUrl",
-            legacyWebUrl = "legacyWebUrl",
-            studentViewUrl = "studentViewUrl",
-            type = BlockType.VERTICAL,
-            displayName = "Block",
-            graded = false,
-            studentViewData = null,
-            studentViewMultiDevice = false,
-            blockCounts = BlockCounts(0),
-            descendants = emptyList(),
-            descendantsType = BlockType.HTML,
-            completion = 0.0,
-            assignmentProgress = assignmentProgress,
-            due = Date(),
-            offlineDownload = null,
-        )
-    )
-
-    private val courseStructure = CourseStructure(
-        root = "",
-        blockData = blocks,
-        id = "id",
-        name = "Course name",
-        number = "",
-        org = "Org",
-        start = Date(),
-        startDisplay = "",
-        startType = "",
-        end = Date(),
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
-        media = null,
-        certificate = null,
-        isSelfPaced = false,
-        progress = null
-    )
-
-    private val downloadModel = DownloadModel(
-        "id",
-        "title",
-        "",
-        0,
-        "",
-        "url",
-        FileType.VIDEO,
-        DownloadedState.NOT_DOWNLOADED,
-        null
-    )
-
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every { resourceManager.getString(foundationR.string.foundation_error_no_connection) } returns noInternet
+        every { resourceManager.getString(foundationR.string.foundation_error_unknown_error) } returns somethingWrong
         every {
             resourceManager.getString(org.openedx.course.R.string.course_can_download_only_with_wifi)
         } returns cantDownload
@@ -209,8 +97,8 @@ class CourseSectionViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 0) { interactor.getCourseStructureForVideos(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(noInternet, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is CourseSectionUIState.Loading)
     }
 
@@ -234,15 +122,15 @@ class CourseSectionViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 0) { interactor.getCourseStructureForVideos(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(somethingWrong, message?.message)
+        val message = captureUiMessage(viewModel)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
         assert(viewModel.uiState.value is CourseSectionUIState.Loading)
     }
 
     @Test
     fun `getBlocks success`() = runTest {
         coEvery { downloadDao.getAllDataFlow() } returns flow {
-            emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
+            emit(listOf(DownloadModelEntity.createFrom(CoreMocks.mockDownloadModel)))
         }
         val viewModel = CourseSectionViewModel(
             "",
@@ -253,10 +141,10 @@ class CourseSectionViewModelTest {
         )
 
         coEvery { downloadDao.getAllDataFlow() } returns flow {
-            emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
+            emit(listOf(DownloadModelEntity.createFrom(CoreMocks.mockDownloadModel)))
         }
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
         viewModel.getBlocks("id", CourseViewMode.VIDEOS)
         advanceUntilIdle()
@@ -264,14 +152,15 @@ class CourseSectionViewModelTest {
         coVerify(exactly = 0) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 1) { interactor.getCourseStructureForVideos(any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
         assert(viewModel.uiState.value is CourseSectionUIState.Blocks)
     }
 
     @Test
     fun `saveDownloadModels test`() = runTest {
         coEvery { downloadDao.getAllDataFlow() } returns flow {
-            emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
+            emit(listOf(DownloadModelEntity.createFrom(CoreMocks.mockDownloadModel)))
         }
         val viewModel = CourseSectionViewModel(
             "",
@@ -287,13 +176,14 @@ class CourseSectionViewModelTest {
 
         advanceUntilIdle()
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
     }
 
     @Test
     fun `saveDownloadModels only wifi download, with connection`() = runTest {
         coEvery { downloadDao.getAllDataFlow() } returns flow {
-            emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
+            emit(listOf(DownloadModelEntity.createFrom(CoreMocks.mockDownloadModel)))
         }
         val viewModel = CourseSectionViewModel(
             "",
@@ -309,7 +199,8 @@ class CourseSectionViewModelTest {
 
         advanceUntilIdle()
 
-        assert(viewModel.uiMessage.value == null)
+        val message = captureUiMessage(viewModel)
+        assert(message.await() == null)
     }
 
     @Test
@@ -329,8 +220,8 @@ class CourseSectionViewModelTest {
         )
 
         coEvery { notifier.notifier } returns flow { }
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns CoreMocks.mockCourseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns CoreMocks.mockCourseStructure
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)

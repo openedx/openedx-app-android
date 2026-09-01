@@ -15,14 +15,10 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.SingleEventLiveData
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 
 class DiscussionSearchThreadViewModel(
@@ -30,7 +26,7 @@ class DiscussionSearchThreadViewModel(
     private val resourceManager: ResourceManager,
     private val notifier: DiscussionNotifier,
     val courseId: String
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val _uiState = MutableLiveData<DiscussionSearchThreadUIState>(
         DiscussionSearchThreadUIState.Threads(
@@ -40,10 +36,6 @@ class DiscussionSearchThreadViewModel(
     )
     val uiState: LiveData<DiscussionSearchThreadUIState>
         get() = _uiState
-
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
 
     private val _canLoadMore = MutableLiveData<Boolean>()
     val canLoadMore: LiveData<Boolean>
@@ -155,13 +147,9 @@ class DiscussionSearchThreadViewModel(
                 isLoading = false
                 _isUpdating.value = false
             }.catch { e ->
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
                 isLoading = false
                 _isUpdating.value = false
             }

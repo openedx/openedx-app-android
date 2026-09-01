@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.ErrorType
@@ -31,7 +30,7 @@ class ProgramViewModel(
     private val edxCookieManager: AppCookieManager,
     private val resourceManager: ResourceManager,
     private val interactor: DiscoveryInteractor,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
     val uriScheme: String get() = config.getUriScheme()
 
     val programConfig get() = config.getProgramConfig().webViewConfig
@@ -62,7 +61,11 @@ class ProgramViewModel(
                 if (e.isInternetError()) {
                     _uiState.emit(
                         ProgramUIState.UiMessage(
-                            UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                            UIMessage.SnackBarMessage(
+                                resolveErrorMessage(
+                                    throwable = e,
+                                )
+                            )
                         )
                     )
                 } else {

@@ -16,6 +16,7 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.worker.OfflineProgressSyncScheduler
 import org.openedx.foundation.extension.readAsText
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 
 class HtmlUnitViewModel(
     private val blockId: String,
@@ -25,8 +26,9 @@ class HtmlUnitViewModel(
     private val networkConnection: NetworkConnection,
     private val notifier: CourseNotifier,
     private val courseInteractor: CourseInteractor,
-    private val offlineProgressSyncScheduler: OfflineProgressSyncScheduler
-) : BaseViewModel() {
+    private val offlineProgressSyncScheduler: OfflineProgressSyncScheduler,
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     private val _uiState = MutableStateFlow<HtmlUnitUIState>(HtmlUnitUIState.Initialization)
     val uiState = _uiState.asStateFlow()

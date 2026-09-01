@@ -14,12 +14,14 @@ class AuthInteractor(private val repository: AuthRepository) {
         repository.login(username, password)
     }
 
-    suspend fun loginSocial(token: String?, authType: AuthType) {
-        repository.socialLogin(token, authType)
+    suspend fun ssoLogin(
+        jwtToken: String
+    ) {
+        repository.ssoLogin(jwtToken)
     }
 
-    suspend fun loginAuthCode(authCode: String) {
-        repository.browserAuthCodeLogin(authCode)
+    suspend fun loginSocial(token: String?, authType: AuthType) {
+        repository.socialLogin(token, authType)
     }
 
     suspend fun getRegistrationFields(): List<RegistrationField> {

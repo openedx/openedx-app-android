@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.DiscussionType
@@ -13,9 +12,7 @@ import org.openedx.discussion.system.notifier.DiscussionCommentAdded
 import org.openedx.discussion.system.notifier.DiscussionCommentDataChanged
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.SingleEventLiveData
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 
@@ -24,7 +21,7 @@ class DiscussionCommentsViewModel(
     private val resourceManager: ResourceManager,
     private val notifier: DiscussionNotifier,
     thread: org.openedx.discussion.domain.model.Thread,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     val title = resourceManager.getString(thread.type.resId)
 
@@ -35,10 +32,6 @@ class DiscussionCommentsViewModel(
     private val _uiState = MutableLiveData<DiscussionCommentsUIState>()
     val uiState: LiveData<DiscussionCommentsUIState>
         get() = _uiState
-
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
 
     private val _canLoadMore = MutableLiveData<Boolean>()
     val canLoadMore: LiveData<Boolean>
@@ -65,10 +58,11 @@ class DiscussionCommentsViewModel(
                             commentCount
                         )
                     } else {
-                        _uiMessage.value =
+                        sendMessage(
                             UIMessage.ToastMessage(
                                 resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added)
                             )
+                        )
                     }
                     thread = thread.copy(commentCount = thread.commentCount + 1)
                     sendThreadUpdated()
@@ -125,13 +119,9 @@ class DiscussionCommentsViewModel(
                     markRead()
                 }
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             } finally {
                 isLoading = false
                 _isUpdating.value = false
@@ -181,13 +171,9 @@ class DiscussionCommentsViewModel(
                     DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
                 sendThreadUpdated()
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }
@@ -201,13 +187,9 @@ class DiscussionCommentsViewModel(
                     DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
                 sendThreadUpdated()
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }
@@ -221,13 +203,9 @@ class DiscussionCommentsViewModel(
                     DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
                 sendThreadUpdated()
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }
@@ -236,21 +214,15 @@ class DiscussionCommentsViewModel(
         viewModelScope.launch {
             try {
                 val response = interactor.setCommentVoted(commentId, vote)
-                val index = comments.indexOfFirst {
-                    it.id == response.id
-                }
+                val index = comments.indexOfFirst { it.id == response.id }
                 comments[index] =
                     comments[index].copy(voted = response.voted, voteCount = response.voteCount)
                 _uiState.value =
                     DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }
@@ -259,20 +231,14 @@ class DiscussionCommentsViewModel(
         viewModelScope.launch {
             try {
                 val response = interactor.setCommentFlagged(commentId, vote)
-                val index = comments.indexOfFirst {
-                    it.id == response.id
-                }
+                val index = comments.indexOfFirst { it.id == response.id }
                 comments[index] = comments[index].copy(abuseFlagged = response.abuseFlagged)
                 _uiState.value =
                     DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }
@@ -286,21 +252,18 @@ class DiscussionCommentsViewModel(
                 if (page == -1) {
                     comments.add(response)
                 } else {
-                    _uiMessage.value =
+                    sendMessage(
                         UIMessage.ToastMessage(
                             resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added)
                         )
+                    )
                 }
                 _uiState.value =
                     DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
         }
     }

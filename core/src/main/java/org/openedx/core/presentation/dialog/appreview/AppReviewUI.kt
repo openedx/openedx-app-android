@@ -13,16 +13,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
@@ -170,10 +170,12 @@ fun FeedbackDialog(
                         style = MaterialTheme.appTypography.labelLarge,
                     )
                 },
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = MaterialTheme.appColors.cardViewBackground,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.appColors.cardViewBackground,
+                    unfocusedContainerColor = MaterialTheme.appColors.cardViewBackground,
                     unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                    textColor = MaterialTheme.appColors.textFieldText
+                    focusedTextColor = MaterialTheme.appColors.textFieldText,
+                    unfocusedTextColor = MaterialTheme.appColors.textFieldText
                 ),
             )
 
@@ -254,7 +256,7 @@ fun TransparentTextButton(
         modifier = Modifier
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.Transparent
+            containerColor = Color.Transparent
         ),
         elevation = null,
         shape = MaterialTheme.appShapes.navigationButtonShape,
@@ -288,7 +290,7 @@ fun DefaultTextButton(
         modifier = Modifier
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = backgroundColor,
+            containerColor = backgroundColor,
             contentColor = textColor
         ),
         elevation = null,

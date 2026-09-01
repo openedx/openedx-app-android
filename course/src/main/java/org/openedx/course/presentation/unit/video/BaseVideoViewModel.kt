@@ -4,11 +4,13 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 
 open class BaseVideoViewModel(
     private val courseId: String,
     private val courseAnalytics: CourseAnalytics,
-) : BaseViewModel() {
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     fun logVideoSpeedEvent(videoUrl: String, speed: Float, currentVideoTime: Long, medium: String) {
         logVideoEvent(

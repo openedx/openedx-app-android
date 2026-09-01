@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,15 +30,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,12 +62,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.NoContentScreenType
-import org.openedx.core.data.model.DateType
 import org.openedx.core.domain.model.CourseDateBlock
-import org.openedx.core.domain.model.CourseDatesBannerInfo
-import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.presentation.CoreAnalyticsScreen
+import org.openedx.core.presentation.dates.CourseDateBlockSection
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncState
 import org.openedx.core.ui.CircularProgress
@@ -76,9 +75,9 @@ import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.utils.TimeUtils
 import org.openedx.core.utils.TimeUtils.formatToString
 import org.openedx.core.utils.clearTime
+import org.openedx.course.CourseMocks
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.unit.container.CourseViewMode
@@ -87,7 +86,6 @@ import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
-import java.util.Date
 import org.openedx.core.R as CoreR
 
 @Composable
@@ -182,12 +180,12 @@ private fun CourseDatesUI(
     onSyncDates: () -> Unit,
     onCalendarSyncStateClick: () -> Unit,
 ) {
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        scaffoldState = scaffoldState,
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background,
+        contentWindowInsets = WindowInsets()
     ) {
         val modifierScreenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -207,7 +205,7 @@ private fun CourseDatesUI(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         val isPLSBannerAvailable = (uiState as? CourseDatesUIState.CourseDates)
             ?.courseDatesResult
@@ -473,7 +471,11 @@ private fun CourseDateBlockSection(
             if (sectionKey != DatesSection.COMPLETED) {
                 DateBullet(section = sectionKey)
             }
-            DateBlock(dateBlocks = sectionDates, onItemClick = onItemClick, useRelativeDates = useRelativeDates)
+            DateBlock(
+                dateBlocks = sectionDates,
+                onItemClick = onItemClick,
+                useRelativeDates = useRelativeDates
+            )
         }
     }
 }
@@ -645,7 +647,7 @@ private fun CourseDatesScreenPreview() {
         CourseDatesUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseDatesUIState.CourseDates(
-                CourseDatesResult(mockedResponse, mockedCourseBannerInfo),
+                CourseMocks.courseDatesResultWithData,
                 CalendarSyncState.SYNCED
             ),
             uiMessage = null,
@@ -667,7 +669,7 @@ private fun CourseDatesScreenTabletPreview() {
         CourseDatesUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseDatesUIState.CourseDates(
-                CourseDatesResult(mockedResponse, mockedCourseBannerInfo),
+                CourseMocks.courseDatesResultWithData,
                 CalendarSyncState.SYNCED
             ),
             uiMessage = null,
@@ -680,108 +682,3 @@ private fun CourseDatesScreenTabletPreview() {
         )
     }
 }
-
-val mockedCourseBannerInfo = CourseDatesBannerInfo(
-    missedDeadlines = true,
-    missedGatedContent = false,
-    verifiedUpgradeLink = "",
-    contentTypeGatingEnabled = false,
-    hasEnded = false,
-)
-
-private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
-    linkedMapOf(
-        Pair(
-            DatesSection.COMPLETED,
-            listOf(
-                CourseDateBlock(
-                    title = "Homework 1: ABCD",
-                    description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z")!!,
-                )
-            )
-        ),
-
-        Pair(
-            DatesSection.COMPLETED,
-            listOf(
-                CourseDateBlock(
-                    title = "Homework 1: ABCD",
-                    description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z")!!,
-                )
-            )
-        ),
-
-        Pair(
-            DatesSection.PAST_DUE,
-            listOf(
-                CourseDateBlock(
-                    title = "Homework 1: ABCD",
-                    description = "After this date, course content will be archived",
-                    date = Date(),
-                    dateType = DateType.ASSIGNMENT_DUE_DATE,
-                )
-            )
-        ),
-
-        Pair(
-            DatesSection.TODAY,
-            listOf(
-                CourseDateBlock(
-                    title = "Homework 2: ABCD",
-                    description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-21T15:08:07Z")!!,
-                )
-            )
-        ),
-
-        Pair(
-            DatesSection.THIS_WEEK,
-            listOf(
-                CourseDateBlock(
-                    title = "Assignment Due: ABCD",
-                    description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-22T15:08:07Z")!!,
-                    dateType = DateType.ASSIGNMENT_DUE_DATE,
-                ),
-
-                CourseDateBlock(
-                    title = "Assignment Due",
-                    description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-23T15:08:07Z")!!,
-                    dateType = DateType.ASSIGNMENT_DUE_DATE,
-                ),
-
-                CourseDateBlock(
-                    title = "Surprise Assignment",
-                    description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-24T15:08:07Z")!!,
-                )
-            )
-        ),
-
-        Pair(
-            DatesSection.NEXT_WEEK,
-            listOf(
-                CourseDateBlock(
-                    title = "Homework 5: ABCD",
-                    description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-25T15:08:07Z")!!,
-                )
-            )
-        ),
-
-        Pair(
-            DatesSection.UPCOMING,
-            listOf(
-                CourseDateBlock(
-                    title = "Last Assignment",
-                    description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-26T15:08:07Z")!!,
-                    assignmentType = "Module 1",
-                    dateType = DateType.VERIFICATION_DEADLINE_DATE,
-                )
-            )
-        )
-    )

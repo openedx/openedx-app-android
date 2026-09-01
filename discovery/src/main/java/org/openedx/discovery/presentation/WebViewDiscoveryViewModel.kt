@@ -11,6 +11,7 @@ import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.UrlUtils
 
 class WebViewDiscoveryViewModel(
@@ -21,7 +22,8 @@ class WebViewDiscoveryViewModel(
     private val corePreferences: CorePreferences,
     private val router: DiscoveryRouter,
     private val analytics: DiscoveryAnalytics,
-) : BaseViewModel() {
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
 
     private val _uiState = MutableStateFlow<WebViewUIState>(WebViewUIState.Loading)
     val uiState: StateFlow<WebViewUIState> = _uiState.asStateFlow()

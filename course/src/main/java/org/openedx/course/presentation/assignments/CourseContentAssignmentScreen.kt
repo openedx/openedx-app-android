@@ -23,16 +23,17 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -52,17 +54,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
-import org.openedx.core.BlockType
-import org.openedx.core.domain.model.AssignmentProgress
+import org.openedx.core.CoreMocks
 import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.BlockCounts
-import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
+import org.openedx.course.CourseMocks
 import org.openedx.course.R
 import org.openedx.course.presentation.contenttab.CourseContentAssignmentEmptyState
 import org.openedx.course.presentation.ui.CourseProgress
@@ -78,9 +78,6 @@ private const val POINTER_ICON_SIZE_DP = 10
 private const val POINTER_ICON_PADDING_TOP_DP = 4
 private const val PROGRESS_HEIGHT_DP = 6
 private const val ASSIGNMENT_BUTTON_CARD_BACKGROUND_ALPHA = 0.5f
-private const val COMPLETED_ASSIGNMENTS_COUNT = 1
-private const val COMPLETED_ASSIGNMENTS_COUNT_TABLET = 2
-private const val TOTAL_ASSIGNMENTS_COUNT = 3
 
 @Composable
 fun CourseContentAssignmentScreen(
@@ -164,7 +161,7 @@ private fun CourseContentAssignmentScreen(
                                 description = description
                             )
                             Spacer(modifier = Modifier.padding(vertical = 6.dp))
-                            Divider(
+                            HorizontalDivider(
                                 color = MaterialTheme.appColors.divider
                             )
                             Spacer(modifier = Modifier.padding(vertical = 4.dp))
@@ -212,7 +209,7 @@ private fun AssignmentGroupSection(
         completed = assignments.filter { it.isCompleted() }.size
     )
     val description = stringResource(
-        id = R.string.course_completed,
+        id = R.string.course_completed_of,
         progress.completed,
         progress.total
     )
@@ -241,7 +238,7 @@ private fun AssignmentGroupSection(
                 modifier = Modifier.padding(start = 8.dp),
                 color = gradeColor.copy(alpha = 0.1f),
                 border = BorderStroke(1.dp, gradeColor),
-                shape = MaterialTheme.appShapes.material.small
+                shape = MaterialTheme.appShapes.material3.small
             ) {
                 Text(
                     modifier = Modifier.padding(4.dp),
@@ -306,7 +303,7 @@ private fun AssignmentGroupSection(
                 )
             }
         }
-        Divider(
+        HorizontalDivider(
             modifier = Modifier.padding(vertical = 12.dp),
             color = MaterialTheme.appColors.divider
         )
@@ -357,13 +354,13 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
                     .clickable {
                         onClick()
                     },
-                backgroundColor = cardBackground,
-                shape = MaterialTheme.appShapes.material.small,
+                colors = CardDefaults.cardColors(containerColor = cardBackground),
+                shape = MaterialTheme.appShapes.material3.small,
                 border = BorderStroke(
                     width = borderWidth,
                     color = cardBorderColor
                 ),
-                elevation = 0.dp,
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             ) {
                 Box(
                     modifier = Modifier
@@ -460,22 +457,25 @@ private fun AssignmentDetails(
             .clickable {
                 onAssignmentClick(assignment)
             },
-        backgroundColor = MaterialTheme.appColors.cardViewBackground,
-        shape = MaterialTheme.appShapes.material.small,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground),
+        shape = MaterialTheme.appShapes.material3.small,
         border = BorderStroke(
             width = 1.dp,
             color = color
         ),
-        elevation = 0.dp,
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column {
             LinearProgressIndicator(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(PROGRESS_HEIGHT_DP.dp),
-                progress = progress,
+                progress = { progress },
                 color = MaterialTheme.appColors.progressBarColor,
-                backgroundColor = color
+                trackColor = color,
+                strokeCap = StrokeCap.Square,
+                gapSize = 0.dp,
+                drawStopIndicator = { }
             )
             Row(
                 modifier = Modifier
@@ -524,11 +524,11 @@ private fun CourseContentAssignmentScreenPreview() {
         CourseContentAssignmentScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseAssignmentUIState.CourseData(
-                progress = Progress(COMPLETED_ASSIGNMENTS_COUNT, TOTAL_ASSIGNMENTS_COUNT),
+                progress = CourseMocks.assignmentProgress,
                 groupedAssignments = mapOf(
-                    "Homework" to listOf(mockChapterBlock, mockSequentialBlock)
+                    "Homework" to listOf(CoreMocks.mockChapterBlock, CourseMocks.sequentialBlock)
                 ),
-                courseProgress = mockCourseProgress,
+                courseProgress = CoreMocks.mockCourseProgress,
                 sectionNames = mapOf()
             ),
             onAssignmentClick = {},
@@ -557,12 +557,12 @@ private fun CourseContentAssignmentScreenTabletPreview() {
         CourseContentAssignmentScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseAssignmentUIState.CourseData(
-                progress = Progress(COMPLETED_ASSIGNMENTS_COUNT_TABLET, TOTAL_ASSIGNMENTS_COUNT),
+                progress = CourseMocks.assignmentProgressTablet,
                 groupedAssignments = mapOf(
-                    "Homework" to listOf(mockChapterBlock),
-                    "Quiz" to listOf(mockSequentialBlock)
+                    "Homework" to listOf(CoreMocks.mockChapterBlock),
+                    "Quiz" to listOf(CourseMocks.sequentialBlock)
                 ),
-                courseProgress = mockCourseProgress,
+                courseProgress = CoreMocks.mockCourseProgress,
                 sectionNames = mapOf()
             ),
             onAssignmentClick = {},
@@ -570,138 +570,3 @@ private fun CourseContentAssignmentScreenTabletPreview() {
         )
     }
 }
-
-private val mockCourseProgress = CourseProgress(
-    verifiedMode = "verified",
-    accessExpiration = "2024-12-31",
-    certificateData = CourseProgress.CertificateData(
-        certStatus = "downloadable",
-        certWebViewUrl = "https://example.com/cert",
-        downloadUrl = "https://example.com/cert.pdf",
-        certificateAvailableDate = "2024-06-01"
-    ),
-    completionSummary = CourseProgress.CompletionSummary(
-        completeCount = 5,
-        incompleteCount = 3,
-        lockedCount = 1
-    ),
-    courseGrade = CourseProgress.CourseGrade(
-        letterGrade = "B+",
-        percent = 85.5,
-        isPassing = true
-    ),
-    creditCourseRequirements = "Complete all assignments",
-    end = "2024-12-31",
-    enrollmentMode = "verified",
-    gradingPolicy = CourseProgress.GradingPolicy(
-        assignmentPolicies = listOf(
-            CourseProgress.GradingPolicy.AssignmentPolicy(
-                numDroppable = 1,
-                numTotal = 5,
-                shortLabel = "HW",
-                type = "Homework",
-                weight = 0.4
-            ),
-            CourseProgress.GradingPolicy.AssignmentPolicy(
-                numDroppable = 0,
-                numTotal = 3,
-                shortLabel = "Quiz",
-                type = "Quiz",
-                weight = 0.6
-            )
-        ),
-        gradeRange = mapOf(
-            "A" to 0.9f,
-            "B" to 0.8f,
-            "C" to 0.7f,
-            "D" to 0.6f
-        ),
-        assignmentColors = listOf(Color(0xFF2196F3), Color(0xFF4CAF50))
-    ),
-    hasScheduledContent = false,
-    sectionScores = listOf(
-        CourseProgress.SectionScore(
-            displayName = "Week 1",
-            subsections = listOf(
-                CourseProgress.SectionScore.Subsection(
-                    assignmentType = "Homework",
-                    blockKey = "block1",
-                    displayName = "Homework 1",
-                    hasGradedAssignment = true,
-                    override = "",
-                    learnerHasAccess = true,
-                    numPointsEarned = 8f,
-                    numPointsPossible = 10f,
-                    percentGraded = 80.0,
-                    problemScores = listOf(
-                        CourseProgress.SectionScore.Subsection.ProblemScore(
-                            earned = 8.0,
-                            possible = 10.0
-                        )
-                    ),
-                    showCorrectness = "always",
-                    showGrades = true,
-                    url = "https://example.com/hw1"
-                )
-            )
-        )
-    ),
-    studioUrl = "https://studio.example.com",
-    username = "testuser",
-    userHasPassingGrade = true,
-    verificationData = CourseProgress.VerificationData(
-        link = "https://example.com/verify",
-        status = "approved",
-        statusDate = "2024-01-15"
-    ),
-    disableProgressGraph = false
-)
-
-private val mockAssignmentProgress = AssignmentProgress(
-    assignmentType = "Home",
-    numPointsEarned = 1f,
-    numPointsPossible = 3f,
-    shortLabel = "HM1"
-)
-
-private val mockChapterBlock = Block(
-    id = "id",
-    blockId = "blockId",
-    lmsWebUrl = "lmsWebUrl",
-    legacyWebUrl = "legacyWebUrl",
-    studentViewUrl = "studentViewUrl",
-    type = BlockType.CHAPTER,
-    displayName = "Chapter",
-    graded = false,
-    studentViewData = null,
-    studentViewMultiDevice = false,
-    blockCounts = BlockCounts(1),
-    descendants = emptyList(),
-    descendantsType = BlockType.CHAPTER,
-    completion = 0.0,
-    containsGatedContent = false,
-    assignmentProgress = mockAssignmentProgress,
-    due = Date(),
-    offlineDownload = null
-)
-
-private val mockSequentialBlock = Block(
-    id = "id",
-    blockId = "blockId",
-    lmsWebUrl = "lmsWebUrl",
-    legacyWebUrl = "legacyWebUrl",
-    studentViewUrl = "studentViewUrl",
-    type = BlockType.SEQUENTIAL,
-    displayName = "Sequential",
-    graded = false,
-    studentViewData = null,
-    studentViewMultiDevice = false,
-    blockCounts = BlockCounts(1),
-    descendants = emptyList(),
-    descendantsType = BlockType.SEQUENTIAL,
-    completion = 0.0,
-    containsGatedContent = false,
-    assignmentProgress = mockAssignmentProgress,
-    due = Date(),
-    offlineDownload = null
-)

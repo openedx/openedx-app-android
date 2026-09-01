@@ -4,14 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import org.openedx.core.R
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
+import org.openedx.discussion.domain.model.Thread
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadAdded
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.SingleEventLiveData
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 
 class DiscussionAddThreadViewModel(
@@ -19,15 +16,11 @@ class DiscussionAddThreadViewModel(
     private val resourceManager: ResourceManager,
     private val notifier: DiscussionNotifier,
     private val courseId: String
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
-    private val _newThread = MutableLiveData<org.openedx.discussion.domain.model.Thread>()
-    val newThread: LiveData<org.openedx.discussion.domain.model.Thread>
+    private val _newThread = MutableLiveData<Thread>()
+    val newThread: LiveData<Thread>
         get() = _newThread
-
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean>
@@ -45,13 +38,9 @@ class DiscussionAddThreadViewModel(
             try {
                 _newThread.value = interactor.createThread(topicId, courseId, type, title, rawBody, follow)
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             }
             _isLoading.value = false
         }

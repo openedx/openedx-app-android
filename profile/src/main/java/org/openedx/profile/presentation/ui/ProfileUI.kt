@@ -10,9 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,11 +26,11 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.openedx.core.R
-import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.profile.ProfileMocks
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.R as ProfileR
 
@@ -87,8 +88,8 @@ fun ProfileInfoSection(account: Account) {
             Card(
                 modifier = Modifier,
                 shape = MaterialTheme.appShapes.cardShape,
-                elevation = 0.dp,
-                backgroundColor = MaterialTheme.appColors.cardViewBackground
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground)
             ) {
                 Column(
                     Modifier
@@ -116,35 +117,15 @@ fun ProfileInfoSection(account: Account) {
     }
 }
 
-val mockAccount = Account(
-    username = "thom84",
-    bio = "He as compliment unreserved projecting. Between had observe pretend delight for believe. Do newspaper " +
-            "questions consulted sweetness do. Our sportsman his unwilling fulfilled departure law.",
-    requiresParentalConsent = true,
-    name = "Thomas",
-    country = "Ukraine",
-    isActive = true,
-    profileImage = ProfileImage("", "", "", "", false),
-    yearOfBirth = 2000,
-    levelOfEducation = "Bachelor",
-    goals = "130",
-    languageProficiencies = emptyList(),
-    gender = "male",
-    mailingAddress = "",
-    "example@email.com",
-    null,
-    accountPrivacy = Account.Privacy.ALL_USERS
-)
-
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ProfileTopicPreview() {
     OpenEdXTheme {
         ProfileTopic(
-            image = mockAccount.profileImage.imageUrlFull,
-            title = mockAccount.name,
-            subtitle = mockAccount.username,
+            image = ProfileMocks.account.profileImage.imageUrlFull,
+            title = ProfileMocks.account.name,
+            subtitle = ProfileMocks.account.username,
         )
     }
 }
@@ -155,7 +136,7 @@ private fun ProfileTopicPreview() {
 private fun ProfileInfoSectionPreview() {
     OpenEdXTheme {
         ProfileInfoSection(
-            account = mockAccount
+            account = ProfileMocks.account
         )
     }
 }

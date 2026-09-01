@@ -4,10 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -31,11 +28,8 @@ import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.core.utils.Logger
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
-import org.openedx.core.R as coreR
 
 class SignUpViewModel(
     private val interactor: AuthInteractor,
@@ -49,7 +43,7 @@ class SignUpViewModel(
     private val router: AuthRouter,
     val courseId: String?,
     val infoType: String?,
-) : BaseViewModel() {
+) : BaseViewModel(resourceManager) {
 
     private val logger = Logger("SignUpViewModel")
 
@@ -64,13 +58,6 @@ class SignUpViewModel(
     )
     val uiState = _uiState.asStateFlow()
 
-    private val _uiMessage = MutableSharedFlow<UIMessage>(
-        replay = 0,
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
-    val uiMessage = _uiMessage.asSharedFlow()
-
     init {
         collectAppUpgradeEvent()
         logRegisterScreenEvent()
@@ -82,19 +69,9 @@ class SignUpViewModel(
             try {
                 updateFields(interactor.getRegistrationFields())
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(coreR.string.core_error_no_connection)
-                        )
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(coreR.string.core_error_unknown_error)
-                        )
-                    )
-                }
+                handleErrorUiMessage(
+                    throwable = e,
+                )
             } finally {
                 _uiState.update { state ->
                     state.copy(isLoading = false)
@@ -212,12 +189,9 @@ class SignUpViewModel(
 
     private suspend fun handleRegistrationError(e: Exception) {
         _uiState.update { it.copy(isButtonLoading = false) }
-        val errorMessage = if (e.isInternetError()) {
-            coreR.string.core_error_no_connection
-        } else {
-            coreR.string.core_error_unknown_error
-        }
-        _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(errorMessage)))
+        handleErrorUiMessage(
+            throwable = e,
+        )
     }
 
     fun socialAuth(fragment: Fragment, authType: AuthType) {

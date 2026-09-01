@@ -14,6 +14,7 @@ import org.openedx.dashboard.presentation.DashboardAnalyticsEvent
 import org.openedx.dashboard.presentation.DashboardAnalyticsKey
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.learn.LearnType
 
 class LearnViewModel(
@@ -21,7 +22,8 @@ class LearnViewModel(
     private val config: Config,
     private val dashboardRouter: DashboardRouter,
     private val analytics: DashboardAnalytics,
-) : BaseViewModel() {
+    private val resourceManager: ResourceManager,
+) : BaseViewModel(resourceManager) {
     private val _uiState = MutableStateFlow(
         LearnUIState(
             if (openTab == LearnTab.PROGRAMS.name) {

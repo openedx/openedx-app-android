@@ -27,6 +27,7 @@ import org.openedx.core.presentation.global.appupgrade.AppUpgradeRecommendedBox
 import org.openedx.core.presentation.global.appupgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
+import org.openedx.dates.presentation.dates.DatesFragment
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.downloads.presentation.download.DownloadsFragment
 import org.openedx.learn.presentation.LearnFragment
@@ -104,6 +105,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             if (viewModel.isDownloadsFragmentEnabled) {
                 add(R.id.fragmentDownloads to { DownloadsFragment() })
             }
+            if (viewModel.isDatesFragmentEnabled) {
+                add(R.id.fragmentDates to { DatesFragment() })
+            }
             add(R.id.fragmentProfile to { ProfileFragment() })
         }
     }
@@ -113,12 +117,14 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             R.id.fragmentLearn to resources.getString(R.string.app_navigation_learn),
             R.id.fragmentDiscover to resources.getString(R.string.app_navigation_discovery),
             R.id.fragmentDownloads to resources.getString(R.string.app_navigation_downloads),
+            R.id.fragmentDates to resources.getString(R.string.app_navigation_dates),
             R.id.fragmentProfile to resources.getString(R.string.app_navigation_profile),
         )
         val tabIconSelectors = mapOf(
             R.id.fragmentLearn to R.drawable.app_ic_learn_selector,
             R.id.fragmentDiscover to R.drawable.app_ic_discover_selector,
             R.id.fragmentDownloads to R.drawable.app_ic_downloads_selector,
+            R.id.fragmentDates to R.drawable.app_ic_dates_selector,
             R.id.fragmentProfile to R.drawable.app_ic_profile_selector
         )
 
@@ -136,6 +142,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 R.id.fragmentLearn -> viewModel.logLearnTabClickedEvent()
                 R.id.fragmentDiscover -> viewModel.logDiscoveryTabClickedEvent()
                 R.id.fragmentDownloads -> viewModel.logDownloadsTabClickedEvent()
+                R.id.fragmentDates -> viewModel.logDatesTabClickedEvent()
                 R.id.fragmentProfile -> viewModel.logProfileTabClickedEvent()
             }
             menuIdToIndex[menuItem.itemId]?.let { index ->
@@ -174,6 +181,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 R.id.fragmentLearn
             }
 
+            HomeTab.DATES.name -> R.id.fragmentDates
             HomeTab.PROFILE.name -> R.id.fragmentProfile
             else -> R.id.fragmentLearn
         }

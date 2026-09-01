@@ -1,6 +1,5 @@
 package org.openedx.auth.presentation.signin
 
-import android.app.Activity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
@@ -21,7 +20,6 @@ import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthAnalyticsEvent
 import org.openedx.auth.presentation.AuthAnalyticsKey
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.auth.presentation.sso.BrowserAuthHelper
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.Validator
 import org.openedx.core.config.Config
@@ -35,9 +33,7 @@ import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.core.utils.Logger
-import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.foundation.presentation.SingleEventLiveData
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.core.R as CoreRes
@@ -50,27 +46,30 @@ class SignInViewModel(
     private val appNotifier: AppNotifier,
     private val analytics: AuthAnalytics,
     private val oAuthHelper: OAuthHelper,
+    private val configuration: Config,
     private val router: AuthRouter,
     private val whatsNewGlobalManager: WhatsNewGlobalManager,
     private val calendarPreferences: CalendarPreferences,
     private val calendarInteractor: CalendarInteractor,
     agreementProvider: AgreementProvider,
-    private val browserAuthHelper: BrowserAuthHelper,
-    val config: Config,
+    config: Config,
     val courseId: String?,
     val infoType: String?,
     val authCode: String,
-) : BaseViewModel() {
+    currentLang: String,
+) : BaseViewModel(resourceManager) {
 
     private val logger = Logger("SignInViewModel")
 
     private val _uiState = MutableStateFlow(
         SignInUIState(
+            isLoginRegistrationFormEnabled = config.isLoginRegistrationEnabled(),
+            isSSOLoginEnabled = config.isSSOLoginEnabled(),
+            ssoButtonTitle = config.getSSOButtonTitle(currentLang, "Login"),
+            isSSODefaultLoginButton = config.isSSODefaultLoginButton(),
             isFacebookAuthEnabled = config.getFacebookConfig().isEnabled(),
             isGoogleAuthEnabled = config.getGoogleConfig().isEnabled(),
             isMicrosoftAuthEnabled = config.getMicrosoftConfig().isEnabled(),
-            isBrowserLoginEnabled = config.isBrowserLoginEnabled(),
-            isBrowserRegistrationEnabled = config.isBrowserRegistrationEnabled(),
             isSocialAuthEnabled = config.isSocialAuthEnabled(),
             isLogistrationEnabled = config.isPreLoginExperienceEnabled(),
             isRegistrationEnabled = config.isRegistrationEnabled(),
@@ -78,10 +77,6 @@ class SignInViewModel(
         )
     )
     internal val uiState: StateFlow<SignInUIState> = _uiState
-
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
 
     private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent>()
     val appUpgradeEvent: LiveData<AppUpgradeEvent>
@@ -95,13 +90,21 @@ class SignInViewModel(
     fun login(username: String, password: String) {
         logEvent(AuthAnalyticsEvent.USER_SIGN_IN_CLICKED)
         if (!validator.isEmailOrUserNameValid(username)) {
-            _uiMessage.value =
-                UIMessage.SnackBarMessage(resourceManager.getString(R.string.auth_invalid_email_username))
+            viewModelScope.launch {
+                handleErrorUiMessage(
+                    throwable = null,
+                    defaultErrorRes = R.string.auth_invalid_email_username,
+                )
+            }
             return
         }
         if (!validator.isPasswordValid(password)) {
-            _uiMessage.value =
-                UIMessage.SnackBarMessage(resourceManager.getString(R.string.auth_invalid_password))
+            viewModelScope.launch {
+                handleErrorUiMessage(
+                    throwable = null,
+                    defaultErrorRes = R.string.auth_invalid_password,
+                )
+            }
             return
         }
 
@@ -126,15 +129,46 @@ class SignInViewModel(
                 )
                 appNotifier.send(SignInEvent())
             } catch (e: Exception) {
+                when (e) {
+                    is EdxError.InvalidGrantException -> handleErrorUiMessage(
+                        throwable = null,
+                        defaultErrorRes = CoreRes.string.core_error_invalid_grant,
+                    )
+
+                    else -> handleErrorUiMessage(
+                        throwable = e,
+                    )
+                }
+            }
+            _uiState.update { it.copy(showProgress = false) }
+        }
+    }
+
+    fun ssoClicked(fragmentManager: FragmentManager) {
+        router.navigateToSSOWebContent(
+            fm = fragmentManager,
+            title = resourceManager.getString(CoreRes.string.core_sso_sign_in),
+            url = configuration.getSSOURL(),
+        )
+    }
+
+    fun ssoLogin(token: String) {
+        logEvent(AuthAnalyticsEvent.USER_SIGN_IN_CLICKED)
+
+        _uiState.update { it.copy(showProgress = true) }
+        viewModelScope.launch {
+            try {
+                interactor.ssoLogin(token)
+                _uiState.update { it.copy(loginSuccess = true) }
+                setUserId()
+            } catch (e: Exception) {
                 if (e is EdxError.InvalidGrantException) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_invalid_grant))
-                } else if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_no_connection))
+                    handleErrorUiMessage(
+                        throwable = null,
+                        defaultErrorRes = CoreRes.string.core_error_invalid_grant
+                    )
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_unknown_error))
+                    handleErrorUiMessage(e)
                 }
             }
             _uiState.update { it.copy(showProgress = false) }
@@ -164,39 +198,9 @@ class SignInViewModel(
         }
     }
 
-    fun signInBrowser(activityContext: Activity) {
-        _uiState.update { it.copy(showProgress = true) }
-        viewModelScope.launch {
-            runCatching {
-                browserAuthHelper.signIn(activityContext)
-            }.onFailure {
-                logger.e { "Browser auth error: $it" }
-            }
-        }
-    }
-
     fun navigateToSignUp(parentFragmentManager: FragmentManager) {
         router.navigateToSignUp(parentFragmentManager, null, null)
         logEvent(AuthAnalyticsEvent.REGISTER_CLICKED)
-    }
-
-    fun signInAuthCode(authCode: String) {
-        _uiState.update { it.copy(showProgress = true) }
-        viewModelScope.launch {
-            runCatching {
-                interactor.loginAuthCode(authCode)
-            }
-                .onFailure {
-                    logger.e { "OAuth2 code error: $it" }
-                    onUnknownError()
-                    _uiState.update { it.copy(loginFailure = true) }
-                }.onSuccess {
-                    _uiState.update { it.copy(loginSuccess = true) }
-                    setUserId()
-                    appNotifier.send(SignInEvent())
-                    _uiState.update { it.copy(showProgress = false) }
-                }
-        }
     }
 
     fun navigateToForgotPassword(parentFragmentManager: FragmentManager) {
@@ -214,7 +218,23 @@ class SignInViewModel(
             interactor.loginSocial(token, authType)
         }.onFailure { error ->
             logger.e { "Social login error: $error" }
-            onUnknownError()
+            if (error is EdxError.InvalidGrantException) {
+                // The social identity resolved on Google's side but is not linked to any
+                // account on this platform. The mobile token-exchange endpoint only signs in
+                // existing/linked users, so guide the user to register (mirrors iOS/web).
+                sendMessage(
+                    UIMessage.SnackBarMessage(
+                        resourceManager.getString(
+                            R.string.auth_social_account_not_registered,
+                            authType.methodName,
+                            configuration.getPlatformName(),
+                        )
+                    )
+                )
+                _uiState.update { it.copy(showProgress = false) }
+            } else {
+                onUnknownError()
+            }
         }.onSuccess {
             logger.d { "Social login (${authType.methodName}) success" }
             _uiState.update { it.copy(loginSuccess = true) }
@@ -228,9 +248,11 @@ class SignInViewModel(
         message?.let {
             logger.e { it() }
         }
-        _uiMessage.value = UIMessage.SnackBarMessage(
-            resourceManager.getString(CoreRes.string.core_error_unknown_error)
-        )
+        viewModelScope.launch {
+            handleErrorUiMessage(
+                throwable = null,
+            )
+        }
         _uiState.update { it.copy(showProgress = false) }
     }
 

@@ -15,10 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -173,16 +173,16 @@ fun WarningLabel(
             .fillMaxWidth()
             .shadow(
                 0.dp,
-                MaterialTheme.appShapes.material.medium
+                MaterialTheme.appShapes.material3.medium
             )
             .background(
                 MaterialTheme.appColors.surface,
-                MaterialTheme.appShapes.material.medium
+                MaterialTheme.appShapes.material3.medium
             )
             .border(
                 1.dp,
                 borderColor,
-                MaterialTheme.appShapes.material.medium
+                MaterialTheme.appShapes.material3.medium
             )
     ) {
         Row(

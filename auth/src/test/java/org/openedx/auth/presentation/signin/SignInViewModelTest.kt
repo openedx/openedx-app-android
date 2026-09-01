@@ -26,25 +26,27 @@ import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.auth.presentation.sso.BrowserAuthHelper
 import org.openedx.auth.presentation.sso.OAuthHelper
+import org.openedx.core.CoreMocks
 import org.openedx.core.Validator
 import org.openedx.core.config.Config
 import org.openedx.core.config.FacebookConfig
 import org.openedx.core.config.GoogleConfig
 import org.openedx.core.config.MicrosoftConfig
-import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
+import org.openedx.core.domain.model.CalendarType
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.captureUiMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 import org.openedx.core.R as CoreRes
+import org.openedx.foundation.R as foundationR
 
 @ExperimentalCoroutinesApi
 class SignInViewModelTest {
@@ -67,7 +69,6 @@ class SignInViewModelTest {
     private val whatsNewGlobalManager = mockk<WhatsNewGlobalManager>()
     private val calendarInteractor = mockk<CalendarInteractor>()
     private val calendarPreferences = mockk<CalendarPreferences>()
-    private val browserAuthHelper = mockk<BrowserAuthHelper>()
 
     private val invalidCredential = "Invalid credentials"
     private val noInternet = "Slow or no internet connection"
@@ -75,14 +76,16 @@ class SignInViewModelTest {
     private val invalidEmailOrUsername = "Invalid email or username"
     private val invalidPassword = "Password too short"
 
-    private val user = User(0, "", "", "")
-
     @Before
     fun before() {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(CoreRes.string.core_error_invalid_grant) } returns invalidCredential
-        every { resourceManager.getString(CoreRes.string.core_error_no_connection) } returns noInternet
-        every { resourceManager.getString(CoreRes.string.core_error_unknown_error) } returns somethingWrong
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_no_connection)
+        } returns noInternet
+        every {
+            resourceManager.getString(foundationR.string.foundation_error_unknown_error)
+        } returns somethingWrong
         every { resourceManager.getString(R.string.auth_invalid_email_username) } returns invalidEmailOrUsername
         every { resourceManager.getString(R.string.auth_invalid_password) } returns invalidPassword
         every { appNotifier.notifier } returns emptyFlow()
@@ -93,12 +96,15 @@ class SignInViewModelTest {
         every { config.getGoogleConfig() } returns GoogleConfig()
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
         every { calendarPreferences.calendarUser } returns ""
-        every { calendarPreferences.clearCalendarPreferences() } returns Unit
+        every { calendarPreferences.calendarType } returns CalendarType.LOCAL
+        coEvery { calendarPreferences.clearCalendarPreferences() } returns Unit
         coEvery { calendarInteractor.clearCalendarCachedData() } returns Unit
         every { analytics.logScreenEvent(any(), any()) } returns Unit
         every { config.isRegistrationEnabled() } returns true
-        every { config.isBrowserLoginEnabled() } returns false
-        every { config.isBrowserRegistrationEnabled() } returns false
+        every { config.isLoginRegistrationEnabled() } returns true
+        every { config.isSSOLoginEnabled() } returns false
+        every { config.isSSODefaultLoginButton() } returns false
+        every { config.getSSOButtonTitle(any(), any()) } returns "SSO Login"
     }
 
     @After
@@ -109,7 +115,7 @@ class SignInViewModelTest {
     @Test
     fun `login empty credentials validation error`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns false
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -124,12 +130,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         viewModel.login("", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -137,9 +144,9 @@ class SignInViewModelTest {
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         val uiState = viewModel.uiState.value
-        assertEquals(invalidEmailOrUsername, message.message)
+        assertEquals(invalidEmailOrUsername, (message.await() as UIMessage.SnackBarMessage).message)
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
     }
@@ -147,7 +154,7 @@ class SignInViewModelTest {
     @Test
     fun `login invalid email validation error`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns false
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -162,20 +169,21 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         viewModel.login("acc@test.o", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         val uiState = viewModel.uiState.value
-        assertEquals(invalidEmailOrUsername, message.message)
+        assertEquals(invalidEmailOrUsername, (message.await() as UIMessage.SnackBarMessage).message)
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
     }
@@ -184,7 +192,7 @@ class SignInViewModelTest {
     fun `login empty password validation error`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns false
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -200,20 +208,21 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         viewModel.login("acc@test.org", "")
 
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
         val uiState = viewModel.uiState.value
-        assertEquals(invalidPassword, message.message)
+        assertEquals(invalidPassword, (message.await() as UIMessage.SnackBarMessage).message)
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
     }
@@ -222,7 +231,7 @@ class SignInViewModelTest {
     fun `login invalid password validation error`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns false
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -237,12 +246,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         viewModel.login("acc@test.org", "ed")
 
@@ -251,9 +261,9 @@ class SignInViewModelTest {
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
+        assertEquals(invalidPassword, (message.await() as? UIMessage.SnackBarMessage)?.message)
         val uiState = viewModel.uiState.value
-        assertEquals(invalidPassword, message.message)
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
     }
@@ -262,7 +272,7 @@ class SignInViewModelTest {
     fun `login success`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         coEvery { appNotifier.send(any<SignInEvent>()) } returns Unit
@@ -278,12 +288,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         coEvery { interactor.login("acc@test.org", "edx") } returns Unit
         viewModel.login("acc@test.org", "edx")
@@ -297,14 +308,15 @@ class SignInViewModelTest {
         val uiState = viewModel.uiState.value
         assertFalse(uiState.showProgress)
         assert(uiState.loginSuccess)
-        assertEquals(null, viewModel.uiMessage.value)
+        val message = captureUiMessage(viewModel)
+        assertEquals(null, message.await())
     }
 
     @Test
     fun `login network error`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -319,12 +331,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws UnknownHostException()
         viewModel.login("acc@test.org", "edx")
@@ -336,18 +349,18 @@ class SignInViewModelTest {
         verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
         verify(exactly = 1) { appNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
+        assertEquals(noInternet, (message.await() as? UIMessage.SnackBarMessage)?.message)
         val uiState = viewModel.uiState.value
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
-        assertEquals(noInternet, message?.message)
     }
 
     @Test
     fun `login invalid grant error`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -362,12 +375,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws EdxError.InvalidGrantException()
         viewModel.login("acc@test.org", "edx")
@@ -379,18 +393,18 @@ class SignInViewModelTest {
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
+        assertEquals(invalidCredential, (message.await() as? UIMessage.SnackBarMessage)?.message)
         val uiState = viewModel.uiState.value
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
-        assertEquals(invalidCredential, message.message)
     }
 
     @Test
     fun `login unknown exception`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
-        every { preferencesManager.user } returns user
+        every { preferencesManager.user } returns CoreMocks.mockUser
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -405,12 +419,13 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
-            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
+            authCode = "",
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
-            authCode = "",
+            configuration = config,
+            currentLang = "EN"
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws IllegalStateException()
         viewModel.login("acc@test.org", "edx")
@@ -422,10 +437,10 @@ class SignInViewModelTest {
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
 
-        val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val message = captureUiMessage(viewModel)
+        assertEquals(somethingWrong, (message.await() as? UIMessage.SnackBarMessage)?.message)
         val uiState = viewModel.uiState.value
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
-        assertEquals(somethingWrong, message.message)
     }
 }
