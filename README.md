@@ -20,6 +20,39 @@ Modern vision of the mobile application for the Open edX platform from Raccoon G
 
 6. Click the **Run** button.
 
+## Signing & CI/CD
+
+### Local Development (Debug/Develop builds)
+
+- The app uses the default debug keystore for local development.
+- No extra configuration is needed for debug builds. You may set up a custom debug keystore via Android Studio preferences if desired.
+
+### Release Signing (Production builds & CI/CD)
+
+- For release builds, **set signing credentials as environment variables** in your CI/CD system or your local environment:
+```
+ANDROID_STORE_FILE_PATH=</absolute/path/to/your_release.jks>
+ANDROID_STORE_PASSWORD=<your_keystore_password>
+ANDROID_KEY_ALIAS=<your_key_alias>
+ANDROID_KEY_PASSWORD=<your_key_password>
+```
+- Do NOT commit any keystore files or passwords to the repository.
+- The app/build.gradle is already set up to use these environment variables.
+
+#### Example (Local release build):
+```sh
+export ANDROID_STORE_FILE_PATH=~/keystores/release.jks
+export ANDROID_STORE_PASSWORD=yourpassword
+export ANDROID_KEY_ALIAS=youralias
+export ANDROID_KEY_PASSWORD=yourkeypassword
+./gradlew assembleRelease
+```
+
+#### In CI/CD:
+- Make sure these env vars are set in your CI system's secure variables/secrets settings.
+- Artifact signing will pick them up automatically in the build pipeline.
+
+
 ## Translations
 
 ### Getting Translations for the App
