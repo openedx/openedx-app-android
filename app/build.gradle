@@ -1,5 +1,13 @@
 def config = configHelper.fetchConfig()
 def appId = config.getOrDefault("APPLICATION_ID", "org.openedx.app")
+def appVersionCode = config.getOrDefault("VERSION_CODE", 1)?.toString()
+def appVersionName = config.getOrDefault("VERSION_NAME", "1.0.0")
+
+if (!(appVersionCode ==~ /[0-9]+/) || !appVersionCode.isInteger() ||
+        appVersionCode.toInteger() < 1 || appVersionCode.toInteger() > 2100000000) {
+    throw new GradleException("VERSION_CODE must be an integer between 1 and 2100000000 in the YAML config.")
+}
+
 def themeDirectory = config.getOrDefault("THEME_DIRECTORY", "openedx")
 def firebaseConfig = config.get('FIREBASE')
 def firebaseEnabled = firebaseConfig?.getOrDefault('ENABLED', false)
@@ -35,8 +43,8 @@ android {
         applicationId appId
         minSdk min_sdk_version
         targetSdk target_sdk_version
-        versionCode 1
-        versionName "1.0.0"
+        versionCode appVersionCode.toInteger()
+        versionName appVersionName
 
         resourceConfigurations += ["en", "uk"]
 
