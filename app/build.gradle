@@ -1,10 +1,9 @@
 def config = configHelper.fetchConfig()
 def appId = config.getOrDefault("APPLICATION_ID", "org.openedx.app")
-def appVersionCode = config.getOrDefault("VERSION_CODE", 1)?.toString()
+def appVersionCode = config.getOrDefault("VERSION_CODE", 1)
 def appVersionName = config.getOrDefault("VERSION_NAME", "1.0.0")
 
-if (!(appVersionCode ==~ /[0-9]+/) || !appVersionCode.isInteger() ||
-        appVersionCode.toInteger() < 1 || appVersionCode.toInteger() > 2100000000) {
+if (!appVersionCode.isInteger() || appVersionCode.toInteger() < 1 || appVersionCode.toInteger() > 2100000000) {
     throw new GradleException("VERSION_CODE must be an integer between 1 and 2100000000 in the YAML config.")
 }
 
@@ -43,7 +42,7 @@ android {
         applicationId appId
         minSdk min_sdk_version
         targetSdk target_sdk_version
-        versionCode appVersionCode.toInteger()
+        versionCode appVersionCode
         versionName appVersionName
 
         resourceConfigurations += ["en", "uk"]
