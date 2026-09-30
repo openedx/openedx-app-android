@@ -3,7 +3,7 @@ def appId = config.getOrDefault("APPLICATION_ID", "org.openedx.app")
 def appVersionCode = config.getOrDefault("VERSION_CODE", 1)
 def appVersionName = config.getOrDefault("VERSION_NAME", "1.0.0")
 
-if (appVersionCode.toInteger() < 1 || appVersionCode.toInteger() > 2100000000) {
+if (appVersionCode < 1 || appVersionCode > 2100000000) {
     throw new GradleException("VERSION_CODE must be an integer between 1 and 2100000000 in the YAML config.")
 }
 
