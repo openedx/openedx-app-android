@@ -83,7 +83,7 @@ VERSION_CODE: 2
 VERSION_NAME: '1.0.1'
 ```
 
-- `VERSION_CODE` sets Android's `versionCode`. It must be an integer from `1` to `2100000000`; invalid values fail during Gradle configuration. Integer values and quoted integer strings are supported.
+- `VERSION_CODE` sets Android's `versionCode`. It must be an integer from `1` to `2100000000`; invalid values fail during Gradle configuration.
 - `VERSION_NAME` sets the user-visible Android `versionName`; use a quoted string.
 - If omitted, the values default to `1` and `'1.0.0'`, respectively.
 
