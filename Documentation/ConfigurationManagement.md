@@ -74,6 +74,21 @@ android:
     - feature_flags.yaml
 ```
 
+## App Version
+
+Set these top-level keys in the selected environment's `config.yaml` (including your custom config directory, if used):
+
+```yaml
+VERSION_CODE: 2
+VERSION_NAME: '1.0.1'
+```
+
+- `VERSION_CODE` sets Android's `versionCode`. It must be an integer from `1` to `2100000000`; invalid values fail during Gradle configuration.
+- `VERSION_NAME` sets the user-visible Android `versionName`; use a quoted string.
+- If omitted, the values default to `1` and `'1.0.0'`, respectively.
+
+Increment `VERSION_CODE` for each Google Play upload, using a value higher than any previously uploaded version for the same application ID. Changing `VERSION_NAME` alone does not satisfy this requirement.
+
 ## Available Third-Party Services
 - **Firebase:** Analytics, Crashlytics, Cloud Messaging
 - **Google:** Sign in and Sign up via Google
