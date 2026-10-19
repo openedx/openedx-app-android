@@ -91,6 +91,8 @@ val screenModule = module {
             appNotifier = get(),
             preferencesManager = get(),
             sessionManager = get(),
+            instanceStore = get(),
+            pushRegistrations = get(),
             analytics = get(),
             deepLinkRouter = get(),
             fileUtil = get(),
@@ -101,7 +103,7 @@ val screenModule = module {
     }
     viewModel { MainViewModel(get(), get(), get(), get(), get()) }
 
-    factory { AuthRepository(get(), get(), get(), get()) }
+    factory { AuthRepository(get(), get(), get(), get(), get()) }
     factory { AuthInteractor(get()) }
     factory { Validator() }
 
@@ -203,7 +205,7 @@ val screenModule = module {
         )
     }
 
-    factory { ProfileRepository(get(), get(), get(), get(), get()) }
+    factory { ProfileRepository(get(), get(), get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }
     viewModel {
         ProfileViewModel(
@@ -238,7 +240,6 @@ val screenModule = module {
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
     viewModel {
         SettingsViewModel(
-            get(),
             get(),
             get(),
             get(),

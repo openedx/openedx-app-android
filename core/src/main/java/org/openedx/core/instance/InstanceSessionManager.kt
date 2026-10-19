@@ -7,9 +7,10 @@ import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.theme.InstanceTheme
 import org.openedx.core.ui.theme.InstanceThemeManager
 
-/** Unregisters this device's push token from the selected instance's backend. */
+/** Stops one site's backend from sending push notifications to this device. */
 interface PushTokenUnregistering {
-    suspend fun unregisterCurrentPushToken()
+    /** Needs the site's session, so it runs before the session is cleared. */
+    suspend fun unregisterPushToken(instanceKey: String?)
 }
 
 interface InstanceSessionManager {
@@ -28,15 +29,21 @@ interface InstanceSessionManager {
 
     /**
      * Signs out of [instance]. The selected site goes through [logoutCurrentInstance]; any other
-     * site only loses its stored session, and the active one is untouched.
+     * site has push unregistered and loses its stored session, and the active one is untouched.
      */
     suspend fun logout(instance: Instance)
 
     /**
-     * Records who signed in to the selected site. When it isn't the learner who used it last,
-     * that learner's cached course data is cleared first.
+     * [logout] by key, for a sign-out that started on one site and must finish there even if
+     * the learner switched in between. `null` is the no-instance (single-site) session.
      */
-    fun onSignedIn(username: String)
+    suspend fun logout(instanceKey: String?)
+
+    /**
+     * Records who signed in to [instanceKey]'s site. When it isn't the learner who used that site
+     * last, that learner's cached course data is cleared first.
+     */
+    fun onSignedIn(instanceKey: String?, username: String)
 
     /**
      * Applies the selected instance's branding, or the default theme when nothing is selected.
@@ -57,8 +64,8 @@ class DefaultInstanceSessionManager(
 
     override suspend fun switchActiveInstance(instance: Instance) {
         // Web content signs in with session cookies fetched for one site; the next page has to
-        // fetch the new site's.
-        cookieManager.clearWebViewCookie()
+        // fetch the new site's (refetching replaces the old ones).
+        cookieManager.invalidateSessionCookie()
         instanceStore.select(instance)
         applyThemeForCurrentInstance()
     }
@@ -66,7 +73,7 @@ class DefaultInstanceSessionManager(
     override suspend fun logoutCurrentInstance() {
         downloadWorkerController.cancelUnfinishedDownloads()
         // Before the tokens go: unregistering is an authenticated call.
-        pushTokenUnregistrar?.unregisterCurrentPushToken()
+        pushTokenUnregistrar?.unregisterPushToken(instanceStore.currentInstance?.key)
         preferences.clearCorePreferences()
         cookieManager.clearWebViewCookie()
         // Last, so nothing observes a half signed-out site.
@@ -74,20 +81,23 @@ class DefaultInstanceSessionManager(
         applyThemeForCurrentInstance()
     }
 
-    override suspend fun logout(instance: Instance) {
-        if (instanceStore.currentInstance?.key == instance.key) {
+    override suspend fun logout(instance: Instance) = logout(instance.key)
+
+    override suspend fun logout(instanceKey: String?) {
+        if (instanceStore.currentInstance?.key == instanceKey) {
             logoutCurrentInstance()
         } else {
-            preferences.clearSession(instance.key)
+            pushTokenUnregistrar?.unregisterPushToken(instanceKey)
+            preferences.clearSession(instanceKey)
         }
     }
 
-    override fun onSignedIn(username: String) {
-        val previous = preferences.lastSignedInUsername
+    override fun onSignedIn(instanceKey: String?, username: String) {
+        val previous = preferences.lastSignedInUsername(instanceKey)
         if (previous.isNotEmpty() && previous != username) {
-            databaseManager.clearTables()
+            databaseManager.clearTables(instanceKey)
         }
-        preferences.lastSignedInUsername = username
+        preferences.setLastSignedInUsername(instanceKey, username)
     }
 
     override fun applyThemeForCurrentInstance() {

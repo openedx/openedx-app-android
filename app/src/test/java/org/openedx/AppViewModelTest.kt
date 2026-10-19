@@ -27,10 +27,12 @@ import org.openedx.app.AppAnalytics
 import org.openedx.app.AppViewModel
 import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.app.deeplink.DeepLinkRouter
+import org.openedx.app.system.push.PushRegistrations
 import org.openedx.core.CoreMocks
 import org.openedx.core.config.Config
 import org.openedx.core.config.FirebaseConfig
 import org.openedx.core.instance.InstanceSessionManager
+import org.openedx.core.instance.InstanceStore
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
@@ -48,6 +50,8 @@ class AppViewModelTest {
     private val config = mockk<Config>()
     private val notifier = mockk<AppNotifier>()
     private val sessionManager = mockk<InstanceSessionManager>()
+    private val instanceStore = mockk<InstanceStore>(relaxed = true)
+    private val pushRegistrations = mockk<PushRegistrations>(relaxed = true)
     private val preferencesManager = mockk<PreferencesManager>()
     private val analytics = mockk<AppAnalytics>()
     private val fileUtil = mockk<FileUtil>()
@@ -80,6 +84,8 @@ class AppViewModelTest {
             notifier,
             preferencesManager,
             sessionManager,
+            instanceStore,
+            pushRegistrations,
             analytics,
             deepLinkRouter,
             fileUtil,
@@ -115,6 +121,8 @@ class AppViewModelTest {
             notifier,
             preferencesManager,
             sessionManager,
+            instanceStore,
+            pushRegistrations,
             analytics,
             deepLinkRouter,
             fileUtil,
@@ -152,6 +160,8 @@ class AppViewModelTest {
             notifier,
             preferencesManager,
             sessionManager,
+            instanceStore,
+            pushRegistrations,
             analytics,
             deepLinkRouter,
             fileUtil,

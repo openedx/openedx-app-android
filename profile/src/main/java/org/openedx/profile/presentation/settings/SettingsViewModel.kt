@@ -17,7 +17,6 @@ import org.openedx.core.AppUpdateState
 import org.openedx.core.CalendarRouter
 import org.openedx.core.R
 import org.openedx.core.config.Config
-import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.notifier.app.AppNotifier
@@ -40,7 +39,6 @@ class SettingsViewModel(
     private val resourceManager: ResourceManager,
     private val interactor: ProfileInteractor,
     private val cookieManager: AppCookieManager,
-    private val workerController: DownloadWorkerController,
     private val analytics: ProfileAnalytics,
     private val profileRouter: ProfileRouter,
     private val calendarRouter: CalendarRouter,
@@ -73,7 +71,6 @@ class SettingsViewModel(
         logProfileEvent(ProfileAnalyticsEvent.LOGOUT_CLICKED)
         viewModelScope.launch {
             try {
-                workerController.removeModels()
                 withContext(Dispatchers.IO) {
                     interactor.logout()
                 }

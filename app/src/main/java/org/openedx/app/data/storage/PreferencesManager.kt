@@ -72,7 +72,6 @@ class PreferencesManager(
     private object InstanceKeys {
         fun accessToken(ns: StorageNamespace) = stringPreferencesKey(ns.key("access_token"))
         fun refreshToken(ns: StorageNamespace) = stringPreferencesKey(ns.key("refresh_token"))
-        fun pushToken(ns: StorageNamespace) = stringPreferencesKey(ns.key("push_token"))
         fun expiresIn(ns: StorageNamespace) = longPreferencesKey(ns.key("expires_in"))
         fun user(ns: StorageNamespace) = stringPreferencesKey(ns.key("user"))
         fun account(ns: StorageNamespace) = stringPreferencesKey(ns.key("account"))
@@ -95,6 +94,7 @@ class PreferencesManager(
         get() = namespaces.current
 
     private object Keys {
+        val PUSH_TOKEN = stringPreferencesKey("push_token")
         val VIDEO_SETTINGS_WIFI_DOWNLOAD_ONLY =
             booleanPreferencesKey("video_settings_wifi_download_only")
         val VIDEO_SETTINGS_STREAMING_QUALITY =
@@ -155,7 +155,6 @@ class PreferencesManager(
         dataStore.edit { prefs ->
             prefs.remove(InstanceKeys.accessToken(namespace))
             prefs.remove(InstanceKeys.refreshToken(namespace))
-            prefs.remove(InstanceKeys.pushToken(namespace))
             prefs.remove(InstanceKeys.expiresIn(namespace))
             prefs.remove(InstanceKeys.user(namespace))
             prefs.remove(InstanceKeys.account(namespace))
@@ -177,6 +176,14 @@ class PreferencesManager(
         setValue(InstanceKeys.expiresIn(namespace), expiresAt)
     }
 
+    override fun saveAccessToken(instanceKey: String?, accessToken: String) {
+        setEncryptedString(InstanceKeys.accessToken(namespaces.namespaceFor(instanceKey)), accessToken)
+    }
+
+    override fun saveUser(instanceKey: String?, user: User?) {
+        setEncryptedString(InstanceKeys.user(namespaces.namespaceFor(instanceKey)), Gson().toJson(user))
+    }
+
     override suspend fun clearCalendarPreferences() {
         val namespace = ns
         dataStore.edit { prefs ->
@@ -196,8 +203,8 @@ class PreferencesManager(
         set(value) = setEncryptedString(InstanceKeys.refreshToken(ns), value)
 
     override var pushToken: String
-        get() = getEncryptedString(InstanceKeys.pushToken(ns), "")
-        set(value) = setEncryptedString(InstanceKeys.pushToken(ns), value)
+        get() = getEncryptedString(Keys.PUSH_TOKEN, "")
+        set(value) = setEncryptedString(Keys.PUSH_TOKEN, value)
 
     override var accessTokenExpiresAt: Long
         get() = getValue(InstanceKeys.expiresIn(ns), 0L)
@@ -248,9 +255,13 @@ class PreferencesManager(
         get() = getValue(InstanceKeys.isRelativeDatesEnabled(ns), true)
         set(value) = setValue(InstanceKeys.isRelativeDatesEnabled(ns), value)
 
-    override var lastSignedInUsername: String
-        get() = getValue(InstanceKeys.lastSignedInUsername(ns), "")
-        set(value) = setValue(InstanceKeys.lastSignedInUsername(ns), value)
+    override fun lastSignedInUsername(instanceKey: String?): String {
+        return getValue(InstanceKeys.lastSignedInUsername(namespaces.namespaceFor(instanceKey)), "")
+    }
+
+    override fun setLastSignedInUsername(instanceKey: String?, username: String) {
+        setValue(InstanceKeys.lastSignedInUsername(namespaces.namespaceFor(instanceKey)), username)
+    }
 
     override var profile: Account?
         get() {

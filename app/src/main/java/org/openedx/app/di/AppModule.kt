@@ -23,6 +23,7 @@ import org.openedx.app.room.InstanceScopedDashboardDao
 import org.openedx.app.room.InstanceScopedDatesDao
 import org.openedx.app.room.InstanceScopedDiscoveryDao
 import org.openedx.app.room.InstanceScopedDownloadDao
+import org.openedx.app.system.push.PushRegistrations
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
@@ -129,7 +130,17 @@ val appModule = module {
     single<InstanceCatalogCache> { SharedPrefsInstanceCatalogCache(get()) }
     single<InstanceApiService> { OkHttpInstanceApiService(get<Config>().getInstancesCatalogUrl()) }
     single { InstanceConfigLoader(get(), get(), { get<Config>().getInstancesConfig() }) }
-    single<InstanceSessionManager> { DefaultInstanceSessionManager(get(), get(), get(), get(), get()) }
+    single { PushRegistrations(get(), get(), get(), get()) }
+    single<InstanceSessionManager> {
+        DefaultInstanceSessionManager(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            pushTokenUnregistrar = get<PushRegistrations>()
+        )
+    }
     single { PreferencesManager(get(), get(), get()) }
     single<CorePreferences> { get<PreferencesManager>() }
     single<ProfilePreferences> { get<PreferencesManager>() }
@@ -143,7 +154,7 @@ val appModule = module {
     single { ReviewManagerFactory.create(get()) }
     single { CalendarManager(get(), get()) }
     single { DownloadDialogManager(get(), get(), get(), get()) }
-    single { DatabaseManager(get()) }
+    single { DatabaseManager(get(), get()) }
     single<IDatabaseManager> { get<DatabaseManager>() }
 
     single { ImageProcessor(get()) }

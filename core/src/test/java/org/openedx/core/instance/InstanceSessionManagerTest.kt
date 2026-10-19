@@ -57,7 +57,7 @@ class InstanceSessionManagerTest {
 
         assertEquals(beta, store.currentInstance)
         assertEquals("beta", InstanceThemeManager.theme.value?.key)
-        verify { cookies.clearWebViewCookie() }
+        verify { cookies.invalidateSessionCookie() }
         coVerify(exactly = 0) { preferences.clearCorePreferences() }
         coVerify(exactly = 0) { preferences.clearSession(any()) }
         coVerify(exactly = 0) { downloads.cancelUnfinishedDownloads() }
@@ -72,7 +72,7 @@ class InstanceSessionManagerTest {
 
         coVerifyOrder {
             downloads.cancelUnfinishedDownloads()
-            push.unregisterCurrentPushToken()
+            push.unregisterPushToken("alpha")
             preferences.clearCorePreferences()
         }
         assertNull(store.currentInstance)
@@ -108,6 +108,7 @@ class InstanceSessionManagerTest {
 
         manager().logout(beta)
 
+        coVerify { push.unregisterPushToken("beta") }
         coVerify { preferences.clearSession("beta") }
         coVerify(exactly = 0) { preferences.clearCorePreferences() }
         coVerify(exactly = 0) { downloads.cancelUnfinishedDownloads() }
@@ -125,24 +126,37 @@ class InstanceSessionManagerTest {
     }
 
     @Test
-    fun `a different learner signing in clears the previous learner's cache`() {
-        every { preferences.lastSignedInUsername } returns "first"
+    fun `a different learner signing in clears the previous learner's cache on that site`() {
+        every { preferences.lastSignedInUsername("beta") } returns "first"
 
-        manager().onSignedIn("second")
+        manager().onSignedIn("beta", "second")
 
-        verify { databaseManager.clearTables() }
-        verify { preferences.lastSignedInUsername = "second" }
+        verify { databaseManager.clearTables("beta") }
+        verify { preferences.setLastSignedInUsername("beta", "second") }
     }
 
     @Test
     fun `the same learner signing back in keeps the cache`() {
-        every { preferences.lastSignedInUsername } returns "first"
+        every { preferences.lastSignedInUsername("beta") } returns "first"
+        manager().onSignedIn("beta", "first")
+        every { preferences.lastSignedInUsername("alpha") } returns ""
+        manager().onSignedIn("alpha", "first")
 
-        manager().onSignedIn("first")
-        every { preferences.lastSignedInUsername } returns ""
-        manager().onSignedIn("first")
+        verify(exactly = 0) { databaseManager.clearTables(any<String>()) }
+    }
 
-        verify(exactly = 0) { databaseManager.clearTables() }
+    @Test
+    fun `a sign-out that started on another site finishes there only`() = runBlocking {
+        store.select(beta)
+
+        manager().logout("alpha")
+
+        coVerifyOrder {
+            push.unregisterPushToken("alpha")
+            preferences.clearSession("alpha")
+        }
+        coVerify(exactly = 0) { preferences.clearCorePreferences() }
+        assertEquals(beta, store.currentInstance)
     }
 
     @Test

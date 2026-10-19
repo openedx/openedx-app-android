@@ -8,52 +8,64 @@ import org.openedx.core.ApiConstants
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
+import org.openedx.core.instance.InstanceProvider
 import org.openedx.core.instance.InstanceSessionManager
+import org.openedx.core.instance.InstanceSwitchedException
+import org.openedx.core.instance.RequestInstance
 import org.openedx.core.system.EdxError
 
+/**
+ * Sign-in belongs to the site selected when it starts. Every request is pinned to that site,
+ * every credential is written to that site's storage, and if the learner selects another site
+ * before it finishes, it stops with [InstanceSwitchedException] instead of completing.
+ */
 class AuthRepository(
     private val config: Config,
     private val api: AuthApi,
     private val preferencesManager: CorePreferences,
     private val sessionManager: InstanceSessionManager,
+    private val instanceProvider: InstanceProvider,
 ) {
 
     suspend fun login(
         username: String,
         password: String,
     ) {
+        val site = currentSite()
         api.getAccessToken(
-            ApiConstants.GRANT_TYPE_PASSWORD,
-            config.getOAuthClientId(),
-            username,
-            password,
-            config.getAccessTokenType(),
+            grantType = ApiConstants.GRANT_TYPE_PASSWORD,
+            clientId = config.getOAuthClientId(),
+            username = username,
+            password = password,
+            tokenType = config.getAccessTokenType(),
+            instance = site,
         )
             .mapToDomain()
-            .processAuthResponse()
+            .processAuthResponse(site)
     }
 
     suspend fun ssoLogin(
         jwtToken: String
     ) {
-        if (preferencesManager.accessToken.isBlank()) {
-            preferencesManager.accessToken = jwtToken
+        val site = currentSite()
+        if (preferencesManager.accessToken(site.instanceKey).isBlank()) {
+            preferencesManager.saveAccessToken(site.instanceKey, jwtToken)
         }
-        val user = api.getProfile()
-        preferencesManager.user = user
-        user.username?.let(sessionManager::onSignedIn)
+        saveProfile(site)
     }
 
     suspend fun socialLogin(token: String?, authType: AuthType) {
         require(!token.isNullOrBlank()) { "Token is null" }
+        val site = currentSite()
         api.exchangeAccessToken(
             accessToken = token,
             clientId = config.getOAuthClientId(),
             tokenType = config.getAccessTokenType(),
-            authType = authType.postfix
+            authType = authType.postfix,
+            instance = site,
         )
             .mapToDomain()
-            .processAuthResponse()
+            .processAuthResponse(site)
     }
 
     suspend fun getRegistrationFields(): List<RegistrationField> {
@@ -72,15 +84,32 @@ class AuthRepository(
         return api.passwordReset(email).success
     }
 
-    private suspend fun AuthResponse.processAuthResponse() {
+    private fun currentSite() = RequestInstance(instanceProvider.currentInstance?.key)
+
+    private fun ensureStillSelected(site: RequestInstance) {
+        if (instanceProvider.currentInstance?.key != site.instanceKey) {
+            throw InstanceSwitchedException(site.instanceKey)
+        }
+    }
+
+    private suspend fun AuthResponse.processAuthResponse(site: RequestInstance) {
         if (error != null) {
             throw EdxError.UnknownException(error!!)
         }
-        preferencesManager.accessToken = accessToken ?: ""
-        preferencesManager.refreshToken = refreshToken ?: ""
-        preferencesManager.accessTokenExpiresAt = getTokenExpiryTime()
-        val user = api.getProfile()
-        preferencesManager.user = user
-        user.username?.let(sessionManager::onSignedIn)
+        ensureStillSelected(site)
+        preferencesManager.saveTokens(
+            site.instanceKey,
+            accessToken.orEmpty(),
+            refreshToken.orEmpty(),
+            getTokenExpiryTime(),
+        )
+        saveProfile(site)
+    }
+
+    private suspend fun saveProfile(site: RequestInstance) {
+        val user = api.getProfile(site)
+        ensureStillSelected(site)
+        preferencesManager.saveUser(site.instanceKey, user)
+        user.username?.let { sessionManager.onSignedIn(site.instanceKey, it) }
     }
 }

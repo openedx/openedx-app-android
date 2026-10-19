@@ -25,6 +25,7 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.instance.Instance
 import org.openedx.core.instance.InstanceProvider
+import org.openedx.core.instance.RequestInstance
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.core.utils.TimeUtils
