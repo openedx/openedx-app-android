@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -31,8 +32,10 @@ import org.openedx.app.system.push.PushRegistrations
 import org.openedx.core.CoreMocks
 import org.openedx.core.config.Config
 import org.openedx.core.config.FirebaseConfig
+import org.openedx.core.instance.InstanceConfigLoader
 import org.openedx.core.instance.InstanceSessionManager
 import org.openedx.core.instance.InstanceStore
+import org.openedx.core.instance.InstancesConfig
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
@@ -49,8 +52,9 @@ class AppViewModelTest {
 
     private val config = mockk<Config>()
     private val notifier = mockk<AppNotifier>()
-    private val sessionManager = mockk<InstanceSessionManager>()
+    private val sessionManager = mockk<InstanceSessionManager>(relaxed = true)
     private val instanceStore = mockk<InstanceStore>(relaxed = true)
+    private val instanceConfigLoader = mockk<InstanceConfigLoader>()
     private val pushRegistrations = mockk<PushRegistrations>(relaxed = true)
     private val preferencesManager = mockk<PreferencesManager>()
     private val analytics = mockk<AppAnalytics>()
@@ -64,6 +68,7 @@ class AppViewModelTest {
     fun before() {
         Dispatchers.setMain(dispatcher)
         every { downloadNotifier.notifier } returns flow { }
+        coEvery { instanceConfigLoader.load() } returns InstancesConfig()
     }
 
     @After
@@ -85,6 +90,7 @@ class AppViewModelTest {
             preferencesManager,
             sessionManager,
             instanceStore,
+            instanceConfigLoader,
             pushRegistrations,
             analytics,
             deepLinkRouter,
@@ -101,6 +107,41 @@ class AppViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
+    }
+
+    @Test
+    fun `routing waits for the instance catalog`() = runTest {
+        every { analytics.setUserIdForSession(any()) } returns Unit
+        every { preferencesManager.user } returns CoreMocks.mockUser
+        every { notifier.notifier } returns flow { }
+        every { preferencesManager.canResetAppDirectory } returns false
+        every { preferencesManager.pushToken } returns ""
+        val catalog = InstancesConfig()
+        coEvery { instanceConfigLoader.load() } returns catalog
+
+        val viewModel = AppViewModel(
+            config,
+            notifier,
+            preferencesManager,
+            sessionManager,
+            instanceStore,
+            instanceConfigLoader,
+            pushRegistrations,
+            analytics,
+            deepLinkRouter,
+            fileUtil,
+            downloadNotifier,
+            context,
+            resourceManager,
+        )
+        assert(!viewModel.isInstanceCatalogResolved.value)
+        advanceUntilIdle()
+
+        assert(viewModel.isInstanceCatalogResolved.value)
+        coVerifyOrder {
+            instanceStore.updateInstancesConfig(catalog)
+            sessionManager.applyThemeForCurrentInstance()
+        }
     }
 
     @Test
@@ -122,6 +163,7 @@ class AppViewModelTest {
             preferencesManager,
             sessionManager,
             instanceStore,
+            instanceConfigLoader,
             pushRegistrations,
             analytics,
             deepLinkRouter,
@@ -161,6 +203,7 @@ class AppViewModelTest {
             preferencesManager,
             sessionManager,
             instanceStore,
+            instanceConfigLoader,
             pushRegistrations,
             analytics,
             deepLinkRouter,

@@ -8,8 +8,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.app.deeplink.DeepLink
 import org.openedx.app.deeplink.DeepLinkRouter
@@ -19,6 +22,7 @@ import org.openedx.app.system.push.SyncFirebaseTokenWorker
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.instance.InstanceConfigLoader
 import org.openedx.core.instance.InstanceSessionManager
 import org.openedx.core.instance.InstanceStore
 import org.openedx.core.system.notifier.DownloadFailed
@@ -39,6 +43,7 @@ class AppViewModel(
     private val preferencesManager: CorePreferences,
     private val sessionManager: InstanceSessionManager,
     private val instanceStore: InstanceStore,
+    private val instanceConfigLoader: InstanceConfigLoader,
     private val pushRegistrations: PushRegistrations,
     private val analytics: AppAnalytics,
     private val deepLinkRouter: DeepLinkRouter,
@@ -56,7 +61,28 @@ class AppViewModel(
     val downloadFailedDialog: SharedFlow<DownloadFailed>
         get() = _downloadFailedDialog.asSharedFlow()
 
+    private val _isInstanceCatalogResolved = MutableStateFlow(false)
+
+    /**
+     * Whether the instance catalog for this launch is in place. The first screen depends on it
+     * (a site picker, or a site's own sign-in), so the activity routes only once it is.
+     */
+    val isInstanceCatalogResolved: StateFlow<Boolean> = _isInstanceCatalogResolved.asStateFlow()
+
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
+
+    init {
+        viewModelScope.launch { resolveInstanceCatalog() }
+    }
+
+    private suspend fun resolveInstanceCatalog() {
+        // Falls back to the cached or bundled catalog when the fetch fails or times out.
+        instanceStore.updateInstancesConfig(instanceConfigLoader.load())
+        // A selection restored from storage doesn't go through a switch, so nothing else
+        // applies its branding.
+        sessionManager.applyThemeForCurrentInstance()
+        _isInstanceCatalogResolved.value = true
+    }
 
     private var logoutHandledAt: Long = 0
 

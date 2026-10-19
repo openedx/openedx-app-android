@@ -2,6 +2,7 @@ package org.openedx.app.di
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.openedx.app.data.api.NotificationsApi
 import org.openedx.app.data.networking.AppUpgradeInterceptor
@@ -27,7 +28,9 @@ val networkingModule = module {
     single { OauthRefreshTokenAuthenticator(get(), get(), get(), get()) }
     single {
         val store = get<InstanceStore>()
-        InstanceHostInterceptor(get<Config>().getApiHostURL(), store) { store.instance(it) }
+        InstanceHostInterceptor(get<Config>(named(APP_LEVEL_CONFIG)).getAppLevelApiHostURL(), store) {
+            store.instance(it)
+        }
     }
 
     single {
@@ -47,9 +50,11 @@ val networkingModule = module {
     }
 
     single<Retrofit> {
-        val config = this.get<Config>()
+        // Built once, against the app-level host; InstanceHostInterceptor re-targets each
+        // request at the selected instance.
+        val config = this.get<Config>(named(APP_LEVEL_CONFIG))
         Retrofit.Builder()
-            .baseUrl(config.getApiHostURL())
+            .baseUrl(config.getAppLevelApiHostURL())
             .client(get())
             .addConverterFactory(GsonConverterFactory.create(get()))
             .build()

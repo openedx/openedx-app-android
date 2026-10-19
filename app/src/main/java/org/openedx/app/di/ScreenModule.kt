@@ -92,6 +92,7 @@ val screenModule = module {
             preferencesManager = get(),
             sessionManager = get(),
             instanceStore = get(),
+            instanceConfigLoader = get(),
             pushRegistrations = get(),
             analytics = get(),
             deepLinkRouter = get(),

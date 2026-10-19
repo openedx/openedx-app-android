@@ -40,8 +40,16 @@ class InstanceConfigLoader(
     private val logger: (String) -> Unit = { Log.w(TAG, it) },
 ) {
 
+    /**
+     * The catalog to run with until [load] finishes: the cached one, else the bundled one.
+     * Read synchronously at startup, so a selection restored after process death resolves
+     * against the catalog the learner actually picked it from.
+     */
+    fun baseline(): InstancesConfig =
+        loadCached() ?: bundledConfig().takeIf { it.instances.isNotEmpty() } ?: InstancesConfig()
+
     suspend fun load(): InstancesConfig {
-        val baseline = loadCached() ?: bundledConfig().takeIf { it.instances.isNotEmpty() } ?: InstancesConfig()
+        val baseline = baseline()
         return try {
             val json = apiService.fetchCatalog()
             val fetched = InstancesConfig.fromRemoteJson(json)

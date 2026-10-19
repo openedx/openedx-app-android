@@ -1,5 +1,6 @@
 package org.openedx.app.di
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.gson.Gson
@@ -34,6 +35,7 @@ import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.CalendarRouter
 import org.openedx.core.R
 import org.openedx.core.config.Config
+import org.openedx.core.config.InstanceAwareConfig
 import org.openedx.core.data.model.CourseEnrollments
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
@@ -108,28 +110,39 @@ import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 import org.openedx.whatsnew.presentation.WhatsNewAnalytics
 import org.openedx.core.DatabaseManager as IDatabaseManager
 
+const val APP_LEVEL_CONFIG = "appLevelConfig"
+
 val appModule = module {
 
-    single { Config(get()) }
+    // The bundled config as shipped. Everything else injects Config, which layers the selected
+    // instance over it; this one is for what must not move with the selection.
+    single(named(APP_LEVEL_CONFIG)) { Config(get<Context>()) }
+    single<Config> { InstanceAwareConfig(get<Context>(), get()) }
     single { SharedPrefsInstanceSelectionStorage(get()) }
     single<InstanceSelectionStorage> { get<SharedPrefsInstanceSelectionStorage>() }
     single<StorageNamespaceProvider> {
-        val config = get<Config>()
+        val appConfig = get<Config>(named(APP_LEVEL_CONFIG))
         InstanceStorageNamespaces(
             instanceStore = get(),
             ownerStorage = get<SharedPrefsInstanceSelectionStorage>(),
-            appApiHostUrl = config.getApiHostURL(),
-            appOAuthClientId = config.getOAuthClientId(),
+            appApiHostUrl = appConfig.getAppLevelApiHostURL(),
+            appOAuthClientId = appConfig.getAppLevelOAuthClientId(),
         )
     }
     single {
-        val bundledInstances by lazy { get<Config>().getInstancesConfig() }
-        InstanceStore(get()) { bundledInstances }
+        val loader by lazy { get<InstanceConfigLoader>() }
+        InstanceStore(get()) { loader.baseline() }
     }
     single<InstanceProvider> { get<InstanceStore>() }
     single<InstanceCatalogCache> { SharedPrefsInstanceCatalogCache(get()) }
-    single<InstanceApiService> { OkHttpInstanceApiService(get<Config>().getInstancesCatalogUrl()) }
-    single { InstanceConfigLoader(get(), get(), { get<Config>().getInstancesConfig() }) }
+    single<InstanceApiService> {
+        OkHttpInstanceApiService(get<Config>(named(APP_LEVEL_CONFIG)).getInstancesCatalogUrl())
+    }
+    single {
+        val appConfig = get<Config>(named(APP_LEVEL_CONFIG))
+        val bundledInstances by lazy { appConfig.getInstancesConfig() }
+        InstanceConfigLoader(get(), get(), { bundledInstances })
+    }
     single { PushRegistrations(get(), get(), get(), get()) }
     single<InstanceSessionManager> {
         DefaultInstanceSessionManager(

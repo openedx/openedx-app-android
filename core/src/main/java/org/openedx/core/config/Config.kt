@@ -10,16 +10,9 @@ import org.openedx.core.instance.InstancesConfig
 import java.io.InputStreamReader
 
 @Suppress("TooManyFunctions")
-class Config(context: Context) {
+open class Config(private val configProperties: JsonObject) {
 
-    private var configProperties: JsonObject = try {
-        val inputStream = context.assets.open("config/config.json")
-        val config = JsonParser.parseReader(InputStreamReader(inputStream))
-        config.asJsonObject
-    } catch (e: Exception) {
-        e.printStackTrace()
-        JsonObject()
-    }
+    constructor(context: Context) : this(loadBundled(context))
 
     fun getAppId(): String {
         return getString(APPLICATION_ID, "")
@@ -193,42 +186,57 @@ class Config(context: Context) {
 
     class ConfigParsingException(cause: Throwable) : Exception(cause)
 
-    private fun getObject(key: String): JsonElement? {
+    /** Looks a key up; [InstanceAwareConfig] layers the selected instance over this. */
+    protected open fun getObject(key: String): JsonElement? {
         return configProperties.get(key)
     }
 
+    /** The app-level `API_HOST_URL`, whichever instance is selected. */
+    fun getAppLevelApiHostURL(): String = configProperties.get(API_HOST_URL)?.asString.orEmpty()
+
+    /** The app-level `OAUTH_CLIENT_ID`, whichever instance is selected. */
+    fun getAppLevelOAuthClientId(): String = configProperties.get(OAUTH_CLIENT_ID)?.asString.orEmpty()
+
     companion object {
-        private const val APPLICATION_ID = "APPLICATION_ID"
-        private const val API_HOST_URL = "API_HOST_URL"
-        private const val SSO_URL = "SSO_URL"
-        private const val SSO_FINISHED_URL = "SSO_FINISHED_URL"
-        private const val SSO_BUTTON_TITLE = "SSO_BUTTON_TITLE"
-        private const val SAML_SSO_LOGIN_ENABLED = "SAML_SSO_LOGIN_ENABLED"
-        private const val SAML_SSO_DEFAULT_LOGIN_BUTTON = "SAML_SSO_DEFAULT_LOGIN_BUTTON"
-        private const val LOGIN_REGISTRATION_ENABLED = "LOGIN_REGISTRATION_ENABLED"
-        private const val URI_SCHEME = "URI_SCHEME"
-        private const val OAUTH_CLIENT_ID = "OAUTH_CLIENT_ID"
-        private const val TOKEN_TYPE = "TOKEN_TYPE"
-        private const val FAQ_URL = "FAQ_URL"
-        private const val FEEDBACK_EMAIL_ADDRESS = "FEEDBACK_EMAIL_ADDRESS"
-        private const val AGREEMENT_URLS = "AGREEMENT_URLS"
-        private const val WHATS_NEW_ENABLED = "WHATS_NEW_ENABLED"
-        private const val SOCIAL_AUTH_ENABLED = "SOCIAL_AUTH_ENABLED"
-        private const val FIREBASE = "FIREBASE"
-        private const val BRAZE = "BRAZE"
-        private const val FACEBOOK = "FACEBOOK"
-        private const val GOOGLE = "GOOGLE"
-        private const val MICROSOFT = "MICROSOFT"
-        private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
-        private const val REGISTRATION_ENABLED = "REGISTRATION_ENABLED"
-        private const val DISCOVERY = "DISCOVERY"
-        private const val PROGRAM = "PROGRAM"
-        private const val DASHBOARD = "DASHBOARD"
-        private const val EXPERIMENTAL_FEATURES = "EXPERIMENTAL_FEATURES"
-        private const val BRANCH = "BRANCH"
-        private const val UI_COMPONENTS = "UI_COMPONENTS"
-        private const val PLATFORM_NAME = "PLATFORM_NAME"
-        private const val INSTANCES_CATALOG_URL = "INSTANCES_CATALOG_URL"
+        internal fun loadBundled(context: Context): JsonObject = try {
+            val inputStream = context.assets.open("config/config.json")
+            JsonParser.parseReader(InputStreamReader(inputStream)).asJsonObject
+        } catch (e: Exception) {
+            e.printStackTrace()
+            JsonObject()
+        }
+
+        internal const val APPLICATION_ID = "APPLICATION_ID"
+        internal const val API_HOST_URL = "API_HOST_URL"
+        internal const val SSO_URL = "SSO_URL"
+        internal const val SSO_FINISHED_URL = "SSO_FINISHED_URL"
+        internal const val SSO_BUTTON_TITLE = "SSO_BUTTON_TITLE"
+        internal const val SAML_SSO_LOGIN_ENABLED = "SAML_SSO_LOGIN_ENABLED"
+        internal const val SAML_SSO_DEFAULT_LOGIN_BUTTON = "SAML_SSO_DEFAULT_LOGIN_BUTTON"
+        internal const val LOGIN_REGISTRATION_ENABLED = "LOGIN_REGISTRATION_ENABLED"
+        internal const val URI_SCHEME = "URI_SCHEME"
+        internal const val OAUTH_CLIENT_ID = "OAUTH_CLIENT_ID"
+        internal const val TOKEN_TYPE = "TOKEN_TYPE"
+        internal const val FAQ_URL = "FAQ_URL"
+        internal const val FEEDBACK_EMAIL_ADDRESS = "FEEDBACK_EMAIL_ADDRESS"
+        internal const val AGREEMENT_URLS = "AGREEMENT_URLS"
+        internal const val WHATS_NEW_ENABLED = "WHATS_NEW_ENABLED"
+        internal const val SOCIAL_AUTH_ENABLED = "SOCIAL_AUTH_ENABLED"
+        internal const val FIREBASE = "FIREBASE"
+        internal const val BRAZE = "BRAZE"
+        internal const val FACEBOOK = "FACEBOOK"
+        internal const val GOOGLE = "GOOGLE"
+        internal const val MICROSOFT = "MICROSOFT"
+        internal const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
+        internal const val REGISTRATION_ENABLED = "REGISTRATION_ENABLED"
+        internal const val DISCOVERY = "DISCOVERY"
+        internal const val PROGRAM = "PROGRAM"
+        internal const val DASHBOARD = "DASHBOARD"
+        internal const val EXPERIMENTAL_FEATURES = "EXPERIMENTAL_FEATURES"
+        internal const val BRANCH = "BRANCH"
+        internal const val UI_COMPONENTS = "UI_COMPONENTS"
+        internal const val PLATFORM_NAME = "PLATFORM_NAME"
+        internal const val INSTANCES_CATALOG_URL = "INSTANCES_CATALOG_URL"
     }
 
     enum class ViewType {
