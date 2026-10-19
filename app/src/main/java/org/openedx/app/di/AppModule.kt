@@ -1,7 +1,6 @@
 package org.openedx.app.di
 
 import androidx.appcompat.app.AppCompatActivity
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.gson.Gson
@@ -18,8 +17,14 @@ import org.openedx.app.PluginManager
 import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.room.AppDatabase
-import org.openedx.app.room.DATABASE_NAME
 import org.openedx.app.room.DatabaseManager
+import org.openedx.app.room.InstanceDatabaseProvider
+import org.openedx.app.room.InstanceScopedCalendarDao
+import org.openedx.app.room.InstanceScopedCourseDao
+import org.openedx.app.room.InstanceScopedDashboardDao
+import org.openedx.app.room.InstanceScopedDatesDao
+import org.openedx.app.room.InstanceScopedDiscoveryDao
+import org.openedx.app.room.InstanceScopedDownloadDao
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
@@ -33,10 +38,25 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.model.CourseEnrollments
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.data.storage.CourseDao
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.domain.helper.VideoPreviewHelper
+import org.openedx.core.instance.InstanceApiService
+import org.openedx.core.instance.InstanceCatalogCache
+import org.openedx.core.instance.InstanceConfigLoader
+import org.openedx.core.instance.InstanceDatabases
+import org.openedx.core.instance.InstanceProvider
+import org.openedx.core.instance.InstanceSelectionStorage
+import org.openedx.core.instance.InstanceStorageNamespaces
+import org.openedx.core.instance.InstanceStore
+import org.openedx.core.instance.OkHttpInstanceApiService
+import org.openedx.core.instance.SharedPrefsInstanceCatalogCache
+import org.openedx.core.instance.SharedPrefsInstanceSelectionStorage
+import org.openedx.core.instance.StorageNamespaceProvider
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
+import org.openedx.core.module.db.CalendarDao
+import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.module.download.FileDownloader
 import org.openedx.core.presentation.CoreAnalytics
@@ -62,10 +82,13 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.utils.ImageProcessor
 import org.openedx.course.worker.OfflineProgressSyncScheduler
+import org.openedx.dashboard.data.DashboardDao
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.dates.data.storage.DatesDao
 import org.openedx.dates.presentation.DatesAnalytics
 import org.openedx.dates.presentation.DatesRouter
+import org.openedx.discovery.data.storage.DiscoveryDao
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discussion.presentation.DiscussionAnalytics
@@ -87,7 +110,26 @@ import org.openedx.core.DatabaseManager as IDatabaseManager
 val appModule = module {
 
     single { Config(get()) }
-    single { PreferencesManager(get(), get()) }
+    single { SharedPrefsInstanceSelectionStorage(get()) }
+    single<InstanceSelectionStorage> { get<SharedPrefsInstanceSelectionStorage>() }
+    single<StorageNamespaceProvider> {
+        val config = get<Config>()
+        InstanceStorageNamespaces(
+            instanceStore = get(),
+            ownerStorage = get<SharedPrefsInstanceSelectionStorage>(),
+            appApiHostUrl = config.getApiHostURL(),
+            appOAuthClientId = config.getOAuthClientId(),
+        )
+    }
+    single {
+        val bundledInstances by lazy { get<Config>().getInstancesConfig() }
+        InstanceStore(get()) { bundledInstances }
+    }
+    single<InstanceProvider> { get<InstanceStore>() }
+    single<InstanceCatalogCache> { SharedPrefsInstanceCatalogCache(get()) }
+    single<InstanceApiService> { OkHttpInstanceApiService(get<Config>().getInstancesCatalogUrl()) }
+    single { InstanceConfigLoader(get(), get(), { get<Config>().getInstancesConfig() }) }
+    single { PreferencesManager(get(), get(), get()) }
     single<CorePreferences> { get<PreferencesManager>() }
     single<ProfilePreferences> { get<PreferencesManager>() }
     single<WhatsNewPreferences> { get<PreferencesManager>() }
@@ -140,56 +182,25 @@ val appModule = module {
         Dispatchers.IO
     }
 
-    single {
-        Room.databaseBuilder(
-            androidApplication(),
-            AppDatabase::class.java,
-            DATABASE_NAME
-        ).fallbackToDestructiveMigration()
-            .fallbackToDestructiveMigrationOnDowngrade()
-            .build()
-    }
+    single { InstanceDatabaseProvider(androidApplication(), get(), get()) }
+    single<InstanceDatabases> { get<InstanceDatabaseProvider>() }
+    // Resolved on every injection: the database belongs to whichever instance is selected.
+    factory<AppDatabase> { get<InstanceDatabaseProvider>().current }
+    factory<RoomDatabase> { get<AppDatabase>() }
 
-    single<RoomDatabase> {
-        get<AppDatabase>()
-    }
-
-    single {
-        val room = get<AppDatabase>()
-        room.discoveryDao()
-    }
-
-    single {
-        val room = get<AppDatabase>()
-        room.courseDao()
-    }
-
-    single {
-        val room = get<AppDatabase>()
-        room.dashboardDao()
-    }
-
-    single {
-        val room = get<AppDatabase>()
-        room.downloadDao()
-    }
-
-    single {
-        val room = get<AppDatabase>()
-        room.calendarDao()
-    }
-
-    single {
-        val room = get<AppDatabase>()
-        room.datesDao()
-    }
+    single<DiscoveryDao> { InstanceScopedDiscoveryDao(get()) }
+    single<CourseDao> { InstanceScopedCourseDao(get()) }
+    single<DashboardDao> { InstanceScopedDashboardDao(get()) }
+    single<DownloadDao> { InstanceScopedDownloadDao(get()) }
+    single<CalendarDao> { InstanceScopedCalendarDao(get()) }
+    single<DatesDao> { InstanceScopedDatesDao(get()) }
 
     single {
         FileDownloader()
     }
 
     single {
-        DownloadWorkerController(get(), get(), get())
+        DownloadWorkerController(get(), get(), get(), get())
     }
 
     single {
@@ -227,7 +238,7 @@ val appModule = module {
     factory { VideoPreviewHelper(get(), get()) }
 
     factory { FileUtil(get(), get<ResourceManager>().getString(R.string.app_name)) }
-    single { DownloadHelper(get(), get()) }
+    single { DownloadHelper(get(), get(), get()) }
 
     factory { OfflineProgressSyncScheduler(get()) }
 

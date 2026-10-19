@@ -150,6 +150,8 @@ dependencies {
     testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation "io.mockk:mockk-android:$mockk_version"
     testImplementation "androidx.arch.core:core-testing:$android_arch_version"
+    // The Android stub of org.json returns defaults; the token authenticator parses error bodies with it.
+    testImplementation "org.json:json:20240303"
 }
 
 private def setupBranchConfigFields(buildType) {
