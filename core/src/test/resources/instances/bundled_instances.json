@@ -1,0 +1,45 @@
+{
+  "API_HOST_URL": "https://example-instance.example.com",
+  "OAUTH_CLIENT_ID": "example-oauth-client-id",
+  "INSTANCES": [
+    {
+      "KEY": "example-instance",
+      "NAME": "Example Instance",
+      "INSTANCE_NAME": {
+        "ar": "اسم المُزود",
+        "en": "Example Instance"
+      },
+      "ENVIRONMENT_DISPLAY_NAME": "Example Instance",
+      "OAUTH_CLIENT_ID": "example-oauth-client-id",
+      "API_HOST_URL": "https://example-instance.example.com",
+      "SSO_URL": "https://example-instance.example.com/auth/login/tpa-saml/?auth_entry=login",
+      "SSO_URL_SUCCESSFUL_LOGIN": "https://example-instance.example.com/auth/login/tpa-saml/auth/complete/tpa-saml",
+      "IS_SWITCH_INSTANCE_LOGIN_ENABLED": true,
+      "THEME": {
+        "LIGHT": {
+          "accent_color": "#3C68FF"
+        },
+        "DARK": {
+          "accent_color": "#1C355E"
+        },
+        "LOGO_URL": "exampleInstanceAppLogo"
+      },
+      "UI_COMPONENTS": {
+        "COURSE_UNIT_PROGRESS_ENABLED": false,
+        "LOGIN_REGISTRATION_ENABLED": true,
+        "SAML_SSO_LOGIN_ENABLED": false,
+        "SAML_SSO_DEFAULT_LOGIN_BUTTON": false
+      }
+    },
+    {
+      "NAME": "Second Université",
+      "OAUTH_CLIENT_ID": "second-client-id",
+      "API_HOST_URL": "https://second.example.com:8443"
+    },
+    {
+      "KEY": "missing-client",
+      "NAME": "Missing Client",
+      "API_HOST_URL": "https://missing-client.example.com"
+    }
+  ]
+}
