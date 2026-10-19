@@ -35,9 +35,14 @@ import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.domain.helper.VideoPreviewHelper
+import org.openedx.core.instance.InstanceApiService
+import org.openedx.core.instance.InstanceCatalogCache
+import org.openedx.core.instance.InstanceConfigLoader
 import org.openedx.core.instance.InstanceProvider
 import org.openedx.core.instance.InstanceSelectionStorage
 import org.openedx.core.instance.InstanceStore
+import org.openedx.core.instance.OkHttpInstanceApiService
+import org.openedx.core.instance.SharedPrefsInstanceCatalogCache
 import org.openedx.core.instance.SharedPrefsInstanceSelectionStorage
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
@@ -97,6 +102,9 @@ val appModule = module {
         InstanceStore(get()) { bundledInstances }
     }
     single<InstanceProvider> { get<InstanceStore>() }
+    single<InstanceCatalogCache> { SharedPrefsInstanceCatalogCache(get()) }
+    single<InstanceApiService> { OkHttpInstanceApiService(get<Config>().getInstancesCatalogUrl()) }
+    single { InstanceConfigLoader(get(), get(), { get<Config>().getInstancesConfig() }) }
     single { PreferencesManager(get(), get()) }
     single<CorePreferences> { get<PreferencesManager>() }
     single<ProfilePreferences> { get<PreferencesManager>() }

@@ -5,6 +5,8 @@ URI_SCHEME: ''
 FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
 FAQ_URL: ''
 OAUTH_CLIENT_ID: 'OAUTH_CLIENT_ID'
+# URL of the remote learning site catalog. Leave empty to use only the bundled INSTANCES list.
+INSTANCES_CATALOG_URL: ''
 
 # Keep empty to hide setting
 AGREEMENT_URLS:
