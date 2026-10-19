@@ -3,9 +3,9 @@ package org.openedx.profile.data.repository
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
 import org.openedx.core.ApiConstants
-import org.openedx.core.DatabaseManager
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.instance.InstanceSessionManager
 import org.openedx.profile.data.api.ProfileApi
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.domain.model.Account
@@ -16,7 +16,7 @@ class ProfileRepository(
     private val api: ProfileApi,
     private val profilePreferences: ProfilePreferences,
     private val corePreferences: CorePreferences,
-    private val databaseManager: DatabaseManager
+    private val sessionManager: InstanceSessionManager,
 ) {
 
     suspend fun getAccount(): Account {
@@ -61,8 +61,7 @@ class ProfileRepository(
                 ApiConstants.TOKEN_TYPE_REFRESH
             )
         } finally {
-            corePreferences.clearCorePreferences()
-            databaseManager.clearTables()
+            sessionManager.logoutCurrentInstance()
         }
     }
 }

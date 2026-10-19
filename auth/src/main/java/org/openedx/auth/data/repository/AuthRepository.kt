@@ -8,12 +8,14 @@ import org.openedx.core.ApiConstants
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
+import org.openedx.core.instance.InstanceSessionManager
 import org.openedx.core.system.EdxError
 
 class AuthRepository(
     private val config: Config,
     private val api: AuthApi,
     private val preferencesManager: CorePreferences,
+    private val sessionManager: InstanceSessionManager,
 ) {
 
     suspend fun login(
@@ -39,6 +41,7 @@ class AuthRepository(
         }
         val user = api.getProfile()
         preferencesManager.user = user
+        user.username?.let(sessionManager::onSignedIn)
     }
 
     suspend fun socialLogin(token: String?, authType: AuthType) {
@@ -78,5 +81,6 @@ class AuthRepository(
         preferencesManager.accessTokenExpiresAt = getTokenExpiryTime()
         val user = api.getProfile()
         preferencesManager.user = user
+        user.username?.let(sessionManager::onSignedIn)
     }
 }

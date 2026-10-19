@@ -2,7 +2,6 @@ package org.openedx.app.di
 
 import android.content.res.Resources
 import org.koin.core.module.dsl.viewModel
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.openedx.app.AppViewModel
 import org.openedx.app.MainViewModel
@@ -90,9 +89,8 @@ val screenModule = module {
         AppViewModel(
             config = get(),
             appNotifier = get(),
-            room = get(),
             preferencesManager = get(),
-            dispatcher = get(named("IODispatcher")),
+            sessionManager = get(),
             analytics = get(),
             deepLinkRouter = get(),
             fileUtil = get(),
@@ -103,7 +101,7 @@ val screenModule = module {
     }
     viewModel { MainViewModel(get(), get(), get(), get(), get()) }
 
-    factory { AuthRepository(get(), get(), get()) }
+    factory { AuthRepository(get(), get(), get(), get()) }
     factory { AuthInteractor(get()) }
     factory { Validator() }
 

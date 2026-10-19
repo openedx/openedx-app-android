@@ -1,7 +1,6 @@
 package org.openedx.app.di
 
 import androidx.appcompat.app.AppCompatActivity
-import androidx.room.RoomDatabase
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -16,7 +15,6 @@ import org.openedx.app.BuildConfig
 import org.openedx.app.PluginManager
 import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.app.deeplink.DeepLinkRouter
-import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DatabaseManager
 import org.openedx.app.room.InstanceDatabaseProvider
 import org.openedx.app.room.InstanceScopedCalendarDao
@@ -41,12 +39,14 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.CourseDao
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.domain.helper.VideoPreviewHelper
+import org.openedx.core.instance.DefaultInstanceSessionManager
 import org.openedx.core.instance.InstanceApiService
 import org.openedx.core.instance.InstanceCatalogCache
 import org.openedx.core.instance.InstanceConfigLoader
 import org.openedx.core.instance.InstanceDatabases
 import org.openedx.core.instance.InstanceProvider
 import org.openedx.core.instance.InstanceSelectionStorage
+import org.openedx.core.instance.InstanceSessionManager
 import org.openedx.core.instance.InstanceStorageNamespaces
 import org.openedx.core.instance.InstanceStore
 import org.openedx.core.instance.OkHttpInstanceApiService
@@ -129,6 +129,7 @@ val appModule = module {
     single<InstanceCatalogCache> { SharedPrefsInstanceCatalogCache(get()) }
     single<InstanceApiService> { OkHttpInstanceApiService(get<Config>().getInstancesCatalogUrl()) }
     single { InstanceConfigLoader(get(), get(), { get<Config>().getInstancesConfig() }) }
+    single<InstanceSessionManager> { DefaultInstanceSessionManager(get(), get(), get(), get()) }
     single { PreferencesManager(get(), get(), get()) }
     single<CorePreferences> { get<PreferencesManager>() }
     single<ProfilePreferences> { get<PreferencesManager>() }
@@ -142,7 +143,7 @@ val appModule = module {
     single { ReviewManagerFactory.create(get()) }
     single { CalendarManager(get(), get()) }
     single { DownloadDialogManager(get(), get(), get(), get()) }
-    single { DatabaseManager(get(), get(), get(), get()) }
+    single { DatabaseManager(get()) }
     single<IDatabaseManager> { get<DatabaseManager>() }
 
     single { ImageProcessor(get()) }
@@ -184,9 +185,6 @@ val appModule = module {
 
     single { InstanceDatabaseProvider(androidApplication(), get(), get()) }
     single<InstanceDatabases> { get<InstanceDatabaseProvider>() }
-    // Resolved on every injection: the database belongs to whichever instance is selected.
-    factory<AppDatabase> { get<InstanceDatabaseProvider>().current }
-    factory<RoomDatabase> { get<AppDatabase>() }
 
     single<DiscoveryDao> { InstanceScopedDiscoveryDao(get()) }
     single<CourseDao> { InstanceScopedCourseDao(get()) }

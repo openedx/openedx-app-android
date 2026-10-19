@@ -77,6 +77,7 @@ class PreferencesManager(
         fun user(ns: StorageNamespace) = stringPreferencesKey(ns.key("user"))
         fun account(ns: StorageNamespace) = stringPreferencesKey(ns.key("account"))
         fun appConfig(ns: StorageNamespace) = stringPreferencesKey(ns.key("app_config"))
+        fun lastSignedInUsername(ns: StorageNamespace) = stringPreferencesKey(ns.key("last_signed_in_username"))
         fun isRelativeDatesEnabled(ns: StorageNamespace) =
             booleanPreferencesKey(ns.key("is_relative_dates_enabled"))
         fun calendarId(ns: StorageNamespace) = longPreferencesKey(ns.key("calendar_id"))
@@ -246,6 +247,10 @@ class PreferencesManager(
     override var isRelativeDatesEnabled: Boolean
         get() = getValue(InstanceKeys.isRelativeDatesEnabled(ns), true)
         set(value) = setValue(InstanceKeys.isRelativeDatesEnabled(ns), value)
+
+    override var lastSignedInUsername: String
+        get() = getValue(InstanceKeys.lastSignedInUsername(ns), "")
+        set(value) = setValue(InstanceKeys.lastSignedInUsername(ns), value)
 
     override var profile: Account?
         get() {

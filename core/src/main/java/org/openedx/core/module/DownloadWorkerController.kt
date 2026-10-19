@@ -89,6 +89,20 @@ class DownloadWorkerController(
         }
     }
 
+    /**
+     * Cancels every download the selected site hasn't finished: the active one and the queue.
+     * Finished files stay.
+     */
+    suspend fun cancelUnfinishedDownloads() {
+        val unfinished = downloadDao.readAllData()
+            .map { it.mapToDomain() }
+            .filter {
+                it.downloadedState == DownloadedState.WAITING || it.downloadedState == DownloadedState.DOWNLOADING
+            }
+            .map { it.id }
+        if (unfinished.isEmpty()) removeModels() else removeModels(unfinished)
+    }
+
     suspend fun removeModels() {
         fileDownloader.cancelDownloading()
         workManager.cancelAllWorkByTag(DownloadWorker.WORKER_TAG)

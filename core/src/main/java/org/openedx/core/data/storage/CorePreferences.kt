@@ -15,6 +15,9 @@ interface CorePreferences {
     var canResetAppDirectory: Boolean
     var isRelativeDatesEnabled: Boolean
 
+    /** Who signed in to the selected site last. Survives logout, unlike [user]. */
+    var lastSignedInUsername: String
+
     /** Clears the selected instance's session: tokens, user and profile. */
     suspend fun clearCorePreferences()
 
