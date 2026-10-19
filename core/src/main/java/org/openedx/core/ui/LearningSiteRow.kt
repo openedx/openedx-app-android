@@ -35,13 +35,13 @@ import java.util.Locale
 fun LearningSiteRow(
     instance: Instance,
     modifier: Modifier = Modifier,
-    logoSize: Int = 48,
+    logoSize: Int = 50,
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 64.dp),
+            .heightIn(min = 60.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -55,7 +55,7 @@ fun LearningSiteRow(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = instance.instanceName,
+                text = instance.name,
                 style = MaterialTheme.appTypography.titleSmall,
                 color = MaterialTheme.appColors.textPrimary,
                 maxLines = 2,
@@ -81,7 +81,7 @@ fun LearningSiteLogo(instance: Instance, size: Int) {
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = instance.instanceName.firstOrNull { it.isLetterOrDigit() }
+            text = instance.name.firstOrNull { it.isLetterOrDigit() }
                 ?.uppercase(Locale.getDefault())
                 .orEmpty(),
             style = MaterialTheme.appTypography.titleMedium,
@@ -97,9 +97,6 @@ fun LearningSiteLogo(instance: Instance, size: Int) {
     }
 }
 
-/** `lms.example.com`, with the port when it isn't the default; the configured URL if unparsable. */
+/** `lms.example.com`, without scheme or port; the configured URL if unparsable. */
 val Instance.host: String
-    get() = runCatching {
-        val uri = URI(apiHostUrl)
-        if (uri.port == -1) uri.host else "${uri.host}:${uri.port}"
-    }.getOrNull() ?: apiHostUrl
+    get() = runCatching { URI(apiHostUrl).host }.getOrNull() ?: apiHostUrl

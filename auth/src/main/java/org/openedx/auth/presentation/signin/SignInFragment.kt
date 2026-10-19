@@ -80,6 +80,8 @@ class SignInFragment : Fragment() {
                                 )
                             }
                         },
+                        isBackToSitesShown = state.selectedSite != null &&
+                            requireActivity().supportFragmentManager.backStackEntryCount > 0,
                     )
                     LaunchedEffect(state.loginSuccess) {
                         viewModel.proceedWhatsNew(parentFragmentManager)

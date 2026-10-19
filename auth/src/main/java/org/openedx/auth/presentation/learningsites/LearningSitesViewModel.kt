@@ -60,7 +60,7 @@ class LearningSitesViewModel(
         isNavigating = false
         viewModelScope.launch {
             val sites = instanceStore.instancesConfig.instances
-                .sortedBy { it.instanceName.lowercase(Locale.getDefault()) }
+                .sortedBy { it.name.lowercase(Locale.getDefault()) }
             signedInKeys = withContext(dispatcher) {
                 sites.filter { preferences.hasSession(it.key) }.map { it.key }.toSet()
             }

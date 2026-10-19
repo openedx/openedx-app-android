@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -73,6 +74,7 @@ import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.HorizontalLine
 import org.openedx.core.ui.HyperlinkText
 import org.openedx.core.ui.InstanceHeaderImage
+import org.openedx.core.ui.InstanceThemedImage
 import org.openedx.core.ui.LearningSiteLogo
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
@@ -96,6 +98,7 @@ internal fun LoginScreen(
     state: SignInUIState,
     uiMessage: UIMessage?,
     onEvent: (AuthEvent) -> Unit,
+    isBackToSitesShown: Boolean = false,
 ) {
     val scrollState = rememberScrollState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -145,7 +148,8 @@ internal fun LoginScreen(
                     .fillMaxHeight(fraction = 0.3f),
         )
         HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
-        if (state.isLogistrationEnabled) {
+        // As on iOS, a site picked on Learning Sites can be put back from here.
+        if (state.isLogistrationEnabled || isBackToSitesShown) {
             Box(
                 modifier =
                     Modifier
@@ -165,7 +169,12 @@ internal fun LoginScreen(
             Modifier.padding(it),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            SignInLogoView()
+            val siteLogoUrl = state.selectedSite?.logoUrl
+            if (siteLogoUrl != null) {
+                SiteLogoView(siteLogoUrl)
+            } else {
+                SignInLogoView()
+            }
             Surface(
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.screenBackgroundShape,
@@ -235,6 +244,26 @@ internal fun LoginScreen(
     }
 }
 
+/** The selected site's logo in place of the app's, sized like the app logo it replaces. */
+@Composable
+private fun SiteLogoView(logoUrl: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(fraction = 0.2f),
+        contentAlignment = Alignment.Center,
+    ) {
+        InstanceThemedImage(
+            source = logoUrl,
+            fallback = painterResource(id = coreR.drawable.core_ic_logo),
+            modifier = Modifier
+                .padding(top = 20.dp)
+                .widthIn(max = 189.dp)
+                .heightIn(max = 89.dp),
+        )
+    }
+}
+
 @Composable
 private fun SelectedSiteCard(
     site: Instance,
@@ -258,7 +287,7 @@ private fun SelectedSiteCard(
             )
             Text(
                 modifier = Modifier.testTag("txt_selected_site_name"),
-                text = site.instanceName,
+                text = site.name,
                 color = MaterialTheme.appColors.textPrimary,
                 style = MaterialTheme.appTypography.bodyLarge,
             )

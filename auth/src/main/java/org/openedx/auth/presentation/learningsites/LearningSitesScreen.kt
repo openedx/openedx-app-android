@@ -1,15 +1,19 @@
 package org.openedx.auth.presentation.learningsites
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,7 +21,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,7 +28,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -43,6 +46,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -50,8 +54,9 @@ import com.google.gson.JsonObject
 import org.openedx.auth.R
 import org.openedx.core.instance.Instance
 import org.openedx.core.ui.BackBtn
-import org.openedx.core.ui.InstanceHeaderImage
+import org.openedx.core.ui.InstanceThemedImage
 import org.openedx.core.ui.LearningSiteRow
+import org.openedx.core.ui.LogoutDialog
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -93,8 +98,11 @@ internal fun LearningSitesScreen(
         containerColor = MaterialTheme.appColors.background,
         contentWindowInsets = WindowInsets(),
     ) { paddings ->
-        InstanceHeaderImage(
-            fallback = painterResource(id = coreR.drawable.core_top_header),
+        // The app's own header, as on iOS: a site's branding belongs to its own screens.
+        Image(
+            painter = painterResource(id = coreR.drawable.core_top_header),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.3f),
@@ -113,7 +121,12 @@ internal fun LearningSitesScreen(
             modifier = Modifier.padding(paddings),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            SignInLogoView()
+            val switchingFrom = state.currentSite
+            if (isSwitching && switchingFrom != null) {
+                CurrentSiteHeader(switchingFrom)
+            } else {
+                SignInLogoView()
+            }
             Surface(
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.screenBackgroundShape,
@@ -156,14 +169,48 @@ internal fun LearningSitesScreen(
     }
 
     siteToLogOut?.let { site ->
-        LogOutDialog(
-            site = site,
-            onDismiss = { siteToLogOut = null },
-            onConfirm = {
+        LogoutDialog(
+            message = stringResource(R.string.auth_learning_sites_log_out_message, site.name),
+            actionText = stringResource(R.string.auth_learning_sites_log_out_action),
+            onDismissRequest = { siteToLogOut = null },
+            onLogoutClick = {
                 siteToLogOut = null
                 onLogOutClick(site)
             },
         )
+    }
+}
+
+/** The site being switched from: its logo, or the app logo when it has none, and its name. */
+@Composable
+private fun CurrentSiteHeader(site: Instance) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(fraction = 0.2f)
+            .testTag("current_site_header"),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(
+            // Below the back button rather than beside it, as on iOS.
+            modifier = Modifier.padding(top = 56.dp, start = 24.dp, end = 24.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            InstanceThemedImage(
+                source = site.logoUrl,
+                fallback = painterResource(id = coreR.drawable.core_ic_logo),
+                modifier = Modifier.size(56.dp),
+            )
+            Text(
+                modifier = Modifier.testTag("txt_current_site_header_name"),
+                text = site.name,
+                color = Color.White,
+                style = MaterialTheme.appTypography.titleLarge,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }
 
@@ -189,7 +236,7 @@ private fun Heading(isSwitching: Boolean) {
                     R.string.auth_learning_sites_welcome_subtitle
                 }
             ),
-            color = MaterialTheme.appColors.textPrimary,
+            color = if (isSwitching) MaterialTheme.appColors.textSecondary else MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.titleSmall,
         )
     }
@@ -222,7 +269,7 @@ private fun LazyListScope.siteSection(
                     imageVector = Icons.Filled.Cancel,
                     contentDescription = stringResource(
                         R.string.auth_learning_sites_accessibility_log_out,
-                        site.instanceName
+                        site.name
                     ),
                     tint = MaterialTheme.appColors.textSecondary,
                 )
@@ -249,7 +296,7 @@ private fun LazyListScope.addSiteSection(
             onClearValue = { onSearchQueryChanged("") },
         )
     }
-    if (state.addableSites.isEmpty() && state.searchQuery.isNotBlank()) {
+    if (state.addableSites.isEmpty()) {
         item(key = "empty") {
             Text(
                 modifier = Modifier
@@ -283,51 +330,6 @@ private fun SiteItem(
         )
         HorizontalDivider(color = MaterialTheme.appColors.divider)
     }
-}
-
-@Composable
-private fun LogOutDialog(
-    site: Instance,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.appColors.background,
-        shape = MaterialTheme.appShapes.cardShape,
-        title = {
-            Text(
-                text = stringResource(R.string.auth_learning_sites_log_out_title),
-                color = MaterialTheme.appColors.textPrimary,
-                style = MaterialTheme.appTypography.titleLarge,
-            )
-        },
-        text = {
-            Text(
-                text = stringResource(R.string.auth_learning_sites_log_out_message, site.instanceName),
-                color = MaterialTheme.appColors.textPrimary,
-                style = MaterialTheme.appTypography.bodyMedium,
-            )
-        },
-        confirmButton = {
-            TextButton(modifier = Modifier.testTag("btn_confirm_log_out"), onClick = onConfirm) {
-                Text(
-                    text = stringResource(R.string.auth_learning_sites_log_out_action),
-                    color = MaterialTheme.appColors.error,
-                    style = MaterialTheme.appTypography.labelLarge,
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(
-                    text = stringResource(coreR.string.core_cancel),
-                    color = MaterialTheme.appColors.primary,
-                    style = MaterialTheme.appTypography.labelLarge,
-                )
-            }
-        },
-    )
 }
 
 private fun previewSite(key: String, name: String) = requireNotNull(

@@ -15,6 +15,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.mapSaver
@@ -39,6 +41,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.openedx.core.R
 import org.openedx.core.presentation.global.InsetHolder
+import org.openedx.core.ui.theme.InstanceThemeManager
 
 const val KEYBOARD_VISIBILITY_THRESHOLD = 0.15f
 
@@ -171,10 +174,16 @@ fun PagerState.calculateCurrentOffsetForPage(page: Int): Float {
     return (currentPage - page) + currentPageOffsetFraction
 }
 
+/** The header behind Settings and its sub-screens: the selected site's, else the app's. */
 fun Modifier.settingsHeaderBackground(): Modifier = composed {
+    val theme by InstanceThemeManager.theme.collectAsState()
+    val painter = rememberInstanceImagePainter(
+        source = theme?.headerBackgroundUrl,
+        fallback = painterResource(id = R.drawable.core_top_header),
+    )
     return@composed this
         .paint(
-            painter = painterResource(id = R.drawable.core_top_header),
+            painter = painter,
             contentScale = ContentScale.FillWidth,
             alignment = Alignment.TopCenter
         )

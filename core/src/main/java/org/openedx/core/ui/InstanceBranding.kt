@@ -12,6 +12,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import org.openedx.core.ui.theme.InstanceThemeManager
 
 /**
@@ -52,6 +53,19 @@ fun InstanceThemedImage(
             modifier = modifier,
             contentScale = contentScale,
         )
+    }
+}
+
+/** A painter for an image an instance may brand; see [InstanceThemedImage]. */
+@Composable
+fun rememberInstanceImagePainter(source: String?, fallback: Painter): Painter {
+    val bundledId = rememberBundledDrawable(source)
+    return when {
+        source != null && (source.startsWith("https://") || source.startsWith("http://")) ->
+            rememberAsyncImagePainter(model = source, placeholder = fallback, error = fallback, fallback = fallback)
+
+        bundledId != 0 -> painterResource(bundledId)
+        else -> fallback
     }
 }
 
