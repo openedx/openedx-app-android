@@ -15,6 +15,7 @@ import org.junit.Test
 import org.openedx.core.DatabaseManager
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.module.DownloadWorkerController
+import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.theme.InstanceThemeManager
 
 class InstanceSessionManagerTest {
@@ -40,9 +41,10 @@ class InstanceSessionManagerTest {
     private val downloads = mockk<DownloadWorkerController>(relaxed = true)
     private val databaseManager = mockk<DatabaseManager>(relaxed = true)
     private val push = mockk<PushTokenUnregistering>(relaxed = true)
+    private val cookies = mockk<AppCookieManager>(relaxed = true)
 
     private fun manager(pushTokenUnregistrar: PushTokenUnregistering? = push) =
-        DefaultInstanceSessionManager(store, preferences, downloads, databaseManager, pushTokenUnregistrar)
+        DefaultInstanceSessionManager(store, preferences, downloads, databaseManager, cookies, pushTokenUnregistrar)
 
     @After
     fun tearDown() {
@@ -55,6 +57,7 @@ class InstanceSessionManagerTest {
 
         assertEquals(beta, store.currentInstance)
         assertEquals("beta", InstanceThemeManager.theme.value?.key)
+        verify { cookies.clearWebViewCookie() }
         coVerify(exactly = 0) { preferences.clearCorePreferences() }
         coVerify(exactly = 0) { preferences.clearSession(any()) }
         coVerify(exactly = 0) { downloads.cancelUnfinishedDownloads() }
@@ -74,6 +77,7 @@ class InstanceSessionManagerTest {
         }
         assertNull(store.currentInstance)
         assertNull(InstanceThemeManager.theme.value)
+        verify { cookies.clearWebViewCookie() }
         verify(exactly = 0) { databaseManager.clearTables() }
     }
 

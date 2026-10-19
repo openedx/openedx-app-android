@@ -84,7 +84,9 @@ class DownloadWorkerController(
 
         updateList()
 
-        if (downloadTaskList.isEmpty()) {
+        // Only when the worker was on one of these: it may be busy with another site's queue,
+        // which this site has no say over.
+        if (hasDownloading && downloadTaskList.isEmpty()) {
             workManager.cancelAllWorkByTag(DownloadWorker.WORKER_TAG)
         }
     }
@@ -100,7 +102,7 @@ class DownloadWorkerController(
                 it.downloadedState == DownloadedState.WAITING || it.downloadedState == DownloadedState.DOWNLOADING
             }
             .map { it.id }
-        if (unfinished.isEmpty()) removeModels() else removeModels(unfinished)
+        if (unfinished.isNotEmpty()) removeModels(unfinished)
     }
 
     suspend fun removeModels() {

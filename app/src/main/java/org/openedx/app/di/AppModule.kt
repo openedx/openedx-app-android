@@ -129,7 +129,7 @@ val appModule = module {
     single<InstanceCatalogCache> { SharedPrefsInstanceCatalogCache(get()) }
     single<InstanceApiService> { OkHttpInstanceApiService(get<Config>().getInstancesCatalogUrl()) }
     single { InstanceConfigLoader(get(), get(), { get<Config>().getInstancesConfig() }) }
-    single<InstanceSessionManager> { DefaultInstanceSessionManager(get(), get(), get(), get()) }
+    single<InstanceSessionManager> { DefaultInstanceSessionManager(get(), get(), get(), get(), get()) }
     single { PreferencesManager(get(), get(), get()) }
     single<CorePreferences> { get<PreferencesManager>() }
     single<ProfilePreferences> { get<PreferencesManager>() }

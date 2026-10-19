@@ -3,6 +3,7 @@ package org.openedx.core.instance
 import org.openedx.core.DatabaseManager
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.module.DownloadWorkerController
+import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.theme.InstanceTheme
 import org.openedx.core.ui.theme.InstanceThemeManager
 
@@ -50,10 +51,14 @@ class DefaultInstanceSessionManager(
     private val preferences: CorePreferences,
     private val downloadWorkerController: DownloadWorkerController,
     private val databaseManager: DatabaseManager,
+    private val cookieManager: AppCookieManager,
     private val pushTokenUnregistrar: PushTokenUnregistering? = null,
 ) : InstanceSessionManager {
 
     override suspend fun switchActiveInstance(instance: Instance) {
+        // Web content signs in with session cookies fetched for one site; the next page has to
+        // fetch the new site's.
+        cookieManager.clearWebViewCookie()
         instanceStore.select(instance)
         applyThemeForCurrentInstance()
     }
@@ -63,6 +68,7 @@ class DefaultInstanceSessionManager(
         // Before the tokens go: unregistering is an authenticated call.
         pushTokenUnregistrar?.unregisterCurrentPushToken()
         preferences.clearCorePreferences()
+        cookieManager.clearWebViewCookie()
         // Last, so nothing observes a half signed-out site.
         instanceStore.select(null)
         applyThemeForCurrentInstance()
