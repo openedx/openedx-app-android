@@ -24,6 +24,8 @@ interface CorePreferences {
     /** Clears one instance's session without touching the selected one. */
     suspend fun clearSession(instanceKey: String?)
 
+    fun accessToken(instanceKey: String?): String
+
     fun refreshToken(instanceKey: String?): String
 
     /** Stores refreshed tokens for the site that issued them, whichever site is selected now. */

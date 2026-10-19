@@ -166,6 +166,10 @@ class InstanceAwareNetworkingTest {
         override var accessTokenExpiresAt: Long = Long.MAX_VALUE
         val savedTokens = mutableMapOf<String?, String>()
 
+        override fun accessToken(instanceKey: String?) = savedTokens[instanceKey] ?: accessToken
+
+        override fun refreshToken(instanceKey: String?) = refreshToken
+
         override fun saveTokens(instanceKey: String?, accessToken: String, refreshToken: String, expiresAt: Long) {
             savedTokens[instanceKey] = accessToken
         }
@@ -214,6 +218,29 @@ class InstanceAwareNetworkingTest {
         assertTrue(form, form.contains("client_id=beta-client"))
         assertEquals("JWT new-access", retry?.header("Authorization"))
         assertEquals(mapOf("beta" to "new-access"), prefs.savedTokens)
+    }
+
+    @Test
+    fun `a refresh on one site does not hold back the other site's refresh`() {
+        val provider = FakeInstanceProvider(alpha)
+        val tokenHosts = mutableListOf<String>()
+        val refreshClient = OkHttpClient.Builder().addInterceptor { chain ->
+            tokenHosts += chain.request().url.host
+            ok(chain.request(), """{"access_token": "new", "refresh_token": "rotated", "expires_in": 3600}""")
+        }.build()
+        val authenticator = OauthRefreshTokenAuthenticator(
+            mockk(relaxed = true) { every { getAccessTokenType() } returns "JWT" },
+            Prefs(),
+            mockk(relaxed = true),
+            provider,
+            refreshClient
+        )
+
+        authenticator.authenticate(null, unauthorized(taggedRequest("https://alpha.example.com/api/x", "alpha")))
+        provider.select(beta)
+        authenticator.authenticate(null, unauthorized(taggedRequest("http://beta.example.com:8080/api/x", "beta")))
+
+        assertEquals(listOf("alpha.example.com", "beta.example.com"), tokenHosts)
     }
 
     @Test

@@ -161,6 +161,10 @@ class PreferencesManager(
         }
     }
 
+    override fun accessToken(instanceKey: String?): String {
+        return getEncryptedString(InstanceKeys.accessToken(namespaces.namespaceFor(instanceKey)), "")
+    }
+
     override fun refreshToken(instanceKey: String?): String {
         return getEncryptedString(InstanceKeys.refreshToken(namespaces.namespaceFor(instanceKey)), "")
     }
