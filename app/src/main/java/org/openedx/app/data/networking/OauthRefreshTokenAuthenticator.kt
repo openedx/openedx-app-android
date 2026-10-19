@@ -23,25 +23,29 @@ import org.openedx.core.ApiConstants.TOKEN_TYPE_JWT
 import org.openedx.core.BuildConfig
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.instance.InstanceProvider
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.core.utils.TimeUtils
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 class OauthRefreshTokenAuthenticator(
     private val config: Config,
     private val preferencesManager: CorePreferences,
     private val appNotifier: AppNotifier,
+    private val instanceProvider: InstanceProvider,
+    private val okHttpClient: OkHttpClient = defaultRefreshClient(),
 ) : Authenticator, Interceptor {
 
-    private val authApi: AuthApi
+    private val authApis = ConcurrentHashMap<String, AuthApi>()
     private var lastTokenRefreshRequestTime = 0L
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        if (isTokenExpired()) {
+        if (isTokenExpired() && isForActiveInstance(chain.request())) {
             val response = createUnauthorizedResponse(chain)
             val request = authenticate(chain.connection()?.route(), response)
 
@@ -50,25 +54,33 @@ class OauthRefreshTokenAuthenticator(
         return chain.proceed(chain.request())
     }
 
-    init {
-        val okHttpClient = OkHttpClient.Builder().apply {
-            writeTimeout(timeout = 60, TimeUnit.SECONDS)
-            readTimeout(timeout = 60, TimeUnit.SECONDS)
-            if (BuildConfig.DEBUG) {
-                addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-            }
-        }.build()
-        authApi = Retrofit.Builder()
-            .baseUrl(config.getApiHostURL())
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create(Gson()))
-            .build()
-            .create(AuthApi::class.java)
+    /** Token endpoint of the selected instance, or of the app-level host when none is selected. */
+    private fun authApi(): AuthApi {
+        val baseUrl = instanceProvider.currentInstance?.apiHostUrl ?: config.getApiHostURL()
+        return authApis.getOrPut(baseUrl) {
+            Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .client(okHttpClient)
+                .addConverterFactory(GsonConverterFactory.create(Gson()))
+                .build()
+                .create(AuthApi::class.java)
+        }
+    }
+
+    /**
+     * A 401 for a request sent before the learner switched sites says nothing about the site
+     * that is selected now: refreshing it, or logging out, would act on the wrong session.
+     */
+    private fun isForActiveInstance(request: Request): Boolean {
+        val sentFor = request.tag(RequestInstance::class.java) ?: return true
+        return sentFor.instanceKey == instanceProvider.currentInstance?.key
     }
 
     @Suppress("ReturnCount")
     @Synchronized
     override fun authenticate(route: Route?, response: Response): Request? {
+        if (!isForActiveInstance(response.request)) return null
+
         val accessToken = preferencesManager.accessToken
         val refreshToken = preferencesManager.refreshToken
 
@@ -76,7 +88,7 @@ class OauthRefreshTokenAuthenticator(
 
         val errorCode = getErrorCode(response.peekBody(Long.MAX_VALUE).string()) ?: return null
 
-        return when (errorCode) {
+        val retry = when (errorCode) {
             TOKEN_EXPIRED_ERROR_MESSAGE, JWT_TOKEN_EXPIRED -> {
                 handleTokenExpired(response, refreshToken, accessToken)
             }
@@ -91,6 +103,9 @@ class OauthRefreshTokenAuthenticator(
 
             else -> null
         }
+        // Re-checked after the refresh: a switch during it must not retry this request with the
+        // new site's token.
+        return retry?.takeIf { isForActiveInstance(response.request) }
     }
 
     private fun handleDisabledUser(): Request? {
@@ -159,13 +174,17 @@ class OauthRefreshTokenAuthenticator(
     private fun refreshAccessToken(refreshToken: String): AuthResponse? {
         var authResponse: AuthResponse? = null
         if (canRequestTokenRefresh()) {
-            val response = authApi.refreshAccessToken(
+            val instance = instanceProvider.currentInstance
+            val response = authApi().refreshAccessToken(
                 ApiConstants.TOKEN_TYPE_REFRESH,
-                config.getOAuthClientId(),
+                instance?.oAuthClientId ?: config.getOAuthClientId(),
                 refreshToken,
                 config.getAccessTokenType()
             ).execute()
             authResponse = response.body()?.mapToDomain()
+            // The learner may have switched sites while the refresh was in flight; these tokens
+            // belong to the site that issued them, not to the one selected now.
+            if (instance?.key != instanceProvider.currentInstance?.key) return null
             if (response.isSuccessful && authResponse != null) {
                 val newAccessToken = authResponse.accessToken ?: ""
                 val newRefreshToken = authResponse.refreshToken ?: ""
@@ -243,6 +262,14 @@ class OauthRefreshTokenAuthenticator(
 
     companion object {
         private const val HEADER_AUTHORIZATION = "Authorization"
+
+        private fun defaultRefreshClient(): OkHttpClient = OkHttpClient.Builder().apply {
+            writeTimeout(timeout = 60, TimeUnit.SECONDS)
+            readTimeout(timeout = 60, TimeUnit.SECONDS)
+            if (BuildConfig.DEBUG) {
+                addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+            }
+        }.build()
 
         private const val TOKEN_EXPIRED_ERROR_MESSAGE = "token_expired"
         private const val TOKEN_NONEXISTENT_ERROR_MESSAGE = "token_nonexistent"
