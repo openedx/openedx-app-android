@@ -2,8 +2,9 @@ package org.openedx.auth.presentation.signin.compose
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
@@ -66,10 +67,13 @@ import org.openedx.auth.presentation.ui.LoginTextField
 import org.openedx.auth.presentation.ui.PasswordVisibilityIcon
 import org.openedx.auth.presentation.ui.SocialAuthView
 import org.openedx.core.extension.TextConverter
+import org.openedx.core.instance.Instance
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.HorizontalLine
 import org.openedx.core.ui.HyperlinkText
+import org.openedx.core.ui.InstanceHeaderImage
+import org.openedx.core.ui.LearningSiteLogo
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -133,14 +137,12 @@ internal fun LoginScreen(
             )
         }
 
-        Image(
+        InstanceHeaderImage(
+            fallback = painterResource(id = coreR.drawable.core_top_header),
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(fraction = 0.3f),
-            painter = painterResource(id = coreR.drawable.core_top_header),
-            contentScale = ContentScale.FillBounds,
-            contentDescription = null,
         )
         HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
         if (state.isLogistrationEnabled) {
@@ -180,6 +182,13 @@ internal fun LoginScreen(
                                 .displayCutoutForLandscape()
                                 .then(contentPaddings),
                     ) {
+                        state.selectedSite?.let { site ->
+                            SelectedSiteCard(
+                                site = site,
+                                onChangeClick = { onEvent(AuthEvent.ChangeSiteClick) },
+                            )
+                            Spacer(modifier = Modifier.height(20.dp))
+                        }
                         if (state.isLoginRegistrationFormEnabled) {
                             Text(
                                 modifier = Modifier.testTag("txt_sign_in_title"),
@@ -222,6 +231,47 @@ internal fun LoginScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SelectedSiteCard(
+    site: Instance,
+    onChangeClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .testTag("selected_site_section")
+            .fillMaxWidth()
+            .border(1.dp, MaterialTheme.appColors.textFieldBorder, MaterialTheme.appShapes.textFieldShape)
+            .padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        LearningSiteLogo(instance = site, size = 32)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(id = R.string.auth_selected_site),
+                color = MaterialTheme.appColors.textSecondary,
+                style = MaterialTheme.appTypography.labelSmall,
+            )
+            Text(
+                modifier = Modifier.testTag("txt_selected_site_name"),
+                text = site.instanceName,
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.bodyLarge,
+            )
+        }
+        TextButton(
+            modifier = Modifier.testTag("btn_change_site"),
+            onClick = onChangeClick,
+        ) {
+            Text(
+                text = stringResource(id = R.string.auth_change_site),
+                color = MaterialTheme.appColors.primary,
+                style = MaterialTheme.appTypography.labelLarge,
+            )
         }
     }
 }

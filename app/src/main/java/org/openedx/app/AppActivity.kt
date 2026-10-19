@@ -23,6 +23,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
 import org.openedx.app.deeplink.DeepLink
+import org.openedx.auth.presentation.learningsites.LearningSitesFragment
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.data.storage.CorePreferences
@@ -167,6 +168,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
     private fun showInitialFragment() {
         when {
+            viewModel.startsWithSiteSelection -> addFragment(LearningSitesFragment.newInstance(isSwitching = false))
+
             corePreferencesManager.user == null -> {
                 val fragment = if (viewModel.isLogistrationEnabled && authCode == null) {
                     LogistrationFragment()

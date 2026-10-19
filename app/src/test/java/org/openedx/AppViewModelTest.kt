@@ -5,6 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import com.google.gson.JsonObject
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
@@ -32,10 +33,15 @@ import org.openedx.app.system.push.PushRegistrations
 import org.openedx.core.CoreMocks
 import org.openedx.core.config.Config
 import org.openedx.core.config.FirebaseConfig
+import org.openedx.core.instance.Instance
 import org.openedx.core.instance.InstanceConfigLoader
+import org.openedx.core.instance.InstanceSelectionStorage
 import org.openedx.core.instance.InstanceSessionManager
 import org.openedx.core.instance.InstanceStore
 import org.openedx.core.instance.InstancesConfig
+import org.openedx.core.instance.LegacySessionAdoptionStorage
+import org.openedx.core.instance.StorageNamespace
+import org.openedx.core.instance.StorageNamespaceProvider
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
@@ -56,6 +62,10 @@ class AppViewModelTest {
     private val instanceStore = mockk<InstanceStore>(relaxed = true)
     private val instanceConfigLoader = mockk<InstanceConfigLoader>()
     private val pushRegistrations = mockk<PushRegistrations>(relaxed = true)
+    private val namespaces = mockk<StorageNamespaceProvider>(relaxed = true)
+    private val legacySessionAdoption = object : LegacySessionAdoptionStorage {
+        override var hasCheckedLegacySession = false
+    }
     private val preferencesManager = mockk<PreferencesManager>()
     private val analytics = mockk<AppAnalytics>()
     private val fileUtil = mockk<FileUtil>()
@@ -92,6 +102,8 @@ class AppViewModelTest {
             instanceStore,
             instanceConfigLoader,
             pushRegistrations,
+            namespaces,
+            legacySessionAdoption,
             analytics,
             deepLinkRouter,
             fileUtil,
@@ -127,6 +139,8 @@ class AppViewModelTest {
             instanceStore,
             instanceConfigLoader,
             pushRegistrations,
+            namespaces,
+            legacySessionAdoption,
             analytics,
             deepLinkRouter,
             fileUtil,
@@ -142,6 +156,75 @@ class AppViewModelTest {
             instanceStore.updateInstancesConfig(catalog)
             sessionManager.applyThemeForCurrentInstance()
         }
+    }
+
+    private fun site(key: String) = requireNotNull(
+        Instance.fromJson(
+            JsonObject().apply {
+                addProperty("KEY", key)
+                addProperty("NAME", key)
+                addProperty("OAUTH_CLIENT_ID", "$key-client")
+                addProperty("API_HOST_URL", "https://$key.example.com")
+            }
+        )
+    )
+
+    private fun launch(store: InstanceStore): AppViewModel {
+        every { notifier.notifier } returns flow { }
+        every { namespaces.namespaceFor(any<Instance>()) } answers {
+            val instance = firstArg<Instance>()
+            if (instance.key == "legacy") StorageNamespace.LEGACY else StorageNamespace(instance.key)
+        }
+        coEvery { instanceConfigLoader.load() } returns store.instancesConfig
+        return AppViewModel(
+            config, notifier, preferencesManager, sessionManager, store, instanceConfigLoader, pushRegistrations,
+            namespaces, legacySessionAdoption, analytics, deepLinkRouter, fileUtil, downloadNotifier,
+            context, resourceManager,
+        )
+    }
+
+    private fun storeOf(vararg sites: Instance) = InstanceStore(
+        object : InstanceSelectionStorage {
+            override var selectedInstanceKey: String? = null
+        }
+    ) { InstancesConfig(sites.toList()) }
+
+    @Test
+    fun `first multi-site launch opens the site an upgraded learner was signed in to`() = runTest {
+        val legacy = site("legacy")
+        val store = storeOf(site("other"), legacy)
+        every { preferencesManager.hasSession(any()) } answers { firstArg<String>() == "legacy" }
+
+        launch(store)
+        advanceUntilIdle()
+
+        assert(store.currentInstance == legacy)
+        assert(legacySessionAdoption.hasCheckedLegacySession)
+    }
+
+    @Test
+    fun `the legacy session is adopted only on the first launch`() = runTest {
+        val store = storeOf(site("other"), site("legacy"))
+        every { preferencesManager.hasSession(any()) } returns true
+        legacySessionAdoption.hasCheckedLegacySession = true
+
+        launch(store)
+        advanceUntilIdle()
+
+        assert(store.currentInstance == null)
+    }
+
+    @Test
+    fun `a saved site without a session is cleared so launch starts at site selection`() = runTest {
+        val other = site("other")
+        val store = storeOf(other, site("legacy"))
+        store.select(other)
+        every { preferencesManager.hasSession(any()) } returns false
+
+        launch(store)
+        advanceUntilIdle()
+
+        assert(store.currentInstance == null)
     }
 
     @Test
@@ -165,6 +248,8 @@ class AppViewModelTest {
             instanceStore,
             instanceConfigLoader,
             pushRegistrations,
+            namespaces,
+            legacySessionAdoption,
             analytics,
             deepLinkRouter,
             fileUtil,
@@ -205,6 +290,8 @@ class AppViewModelTest {
             instanceStore,
             instanceConfigLoader,
             pushRegistrations,
+            namespaces,
+            legacySessionAdoption,
             analytics,
             deepLinkRouter,
             fileUtil,

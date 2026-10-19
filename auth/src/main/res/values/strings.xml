@@ -44,4 +44,19 @@
     <string name="auth_cdata_template" translatable="false"><![CDATA[<a href="%1$s">%2$s</a>]]></string>
     <string name="auth_accessibility_show_password">Show password</string>
     <string name="auth_accessibility_hide_password">Hide password</string>
+    <string name="auth_learning_sites_title">Learning Sites</string>
+    <string name="auth_learning_sites_subtitle">Select or add a learning site</string>
+    <string name="auth_learning_sites_get_started">Get Started</string>
+    <string name="auth_learning_sites_welcome_subtitle">Welcome! Select your learning site</string>
+    <string name="auth_learning_sites_current_site">Current Learning Site</string>
+    <string name="auth_learning_sites_more_sites">More Learning Sites</string>
+    <string name="auth_learning_sites_add_site">Add a Learning Site</string>
+    <string name="auth_learning_sites_search_placeholder">Search learning sites</string>
+    <string name="auth_learning_sites_empty_search">No learning sites match your search</string>
+    <string name="auth_learning_sites_log_out_title">Log Out</string>
+    <string name="auth_learning_sites_log_out_message">Are you sure you want to log out of %s?</string>
+    <string name="auth_learning_sites_log_out_action">Log Out</string>
+    <string name="auth_learning_sites_accessibility_log_out">Log out of %s</string>
+    <string name="auth_selected_site">Selected Site</string>
+    <string name="auth_change_site">Change</string>
 </resources>

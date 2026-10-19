@@ -2,11 +2,13 @@ package org.openedx.app.di
 
 import android.content.res.Resources
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.openedx.app.AppViewModel
 import org.openedx.app.MainViewModel
 import org.openedx.auth.data.repository.AuthRepository
 import org.openedx.auth.domain.interactor.AuthInteractor
+import org.openedx.auth.presentation.learningsites.LearningSitesViewModel
 import org.openedx.auth.presentation.logistration.LogistrationViewModel
 import org.openedx.auth.presentation.restore.RestorePasswordViewModel
 import org.openedx.auth.presentation.signin.SignInViewModel
@@ -94,6 +96,8 @@ val screenModule = module {
             instanceStore = get(),
             instanceConfigLoader = get(),
             pushRegistrations = get(),
+            namespaces = get(),
+            legacySessionAdoption = get(),
             analytics = get(),
             deepLinkRouter = get(),
             fileUtil = get(),
@@ -138,7 +142,20 @@ val screenModule = module {
             courseId,
             infoType,
             lang,
-            get()
+            get(),
+            get(),
+        )
+    }
+
+    viewModel { (isSwitching: Boolean) ->
+        LearningSitesViewModel(
+            isSwitching = isSwitching,
+            instanceStore = get(),
+            preferences = get(),
+            sessionManager = get(),
+            router = get(),
+            config = get(),
+            dispatcher = get(named("IODispatcher")),
         )
     }
 
@@ -241,6 +258,7 @@ val screenModule = module {
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
     viewModel {
         SettingsViewModel(
+            get(),
             get(),
             get(),
             get(),

@@ -56,7 +56,7 @@ class InstanceSessionManagerTest {
     }
 
     @Test
-    fun `switching selects the site and tears nothing down`() = runBlocking {
+    fun `switching selects the site and tears nothing down`() {
         manager().switchActiveInstance(beta)
 
         assertEquals(beta, store.currentInstance)

@@ -30,8 +30,7 @@ data class InstanceTheme(
      * back to the light one for the same field.
      */
     fun applyTo(base: AppColors, isDark: Boolean): AppColors {
-        val modeAccent = if (isDark) dark[ACCENT_COLOR] ?: light[ACCENT_COLOR] else light[ACCENT_COLOR]
-        var colors = (modeAccent ?: accentColorHex)?.toColorOrNull()?.let(base::withAccent) ?: base
+        var colors = accentColor(isDark)?.let(base::withAccent) ?: base
         light.forEach { (field, lightHex) ->
             if (field == ACCENT_COLOR) return@forEach
             val hex = if (isDark) dark[field] ?: lightHex else lightHex
@@ -39,6 +38,12 @@ data class InstanceTheme(
             colors = paletteFields[field]?.invoke(colors, color) ?: colors
         }
         return colors
+    }
+
+    /** The accent for one mode, for views outside Compose: the dark value falls back to the light one. */
+    fun accentColor(isDark: Boolean): Color? {
+        val modeAccent = if (isDark) dark[ACCENT_COLOR] ?: light[ACCENT_COLOR] else light[ACCENT_COLOR]
+        return (modeAccent ?: accentColorHex)?.toColorOrNull()
     }
 
     companion object {

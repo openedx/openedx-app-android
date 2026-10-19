@@ -52,6 +52,7 @@ import org.openedx.core.instance.InstanceSelectionStorage
 import org.openedx.core.instance.InstanceSessionManager
 import org.openedx.core.instance.InstanceStorageNamespaces
 import org.openedx.core.instance.InstanceStore
+import org.openedx.core.instance.LegacySessionAdoptionStorage
 import org.openedx.core.instance.OkHttpInstanceApiService
 import org.openedx.core.instance.SharedPrefsInstanceCatalogCache
 import org.openedx.core.instance.SharedPrefsInstanceSelectionStorage
@@ -120,6 +121,7 @@ val appModule = module {
     single<Config> { InstanceAwareConfig(get<Context>(), get()) }
     single { SharedPrefsInstanceSelectionStorage(get()) }
     single<InstanceSelectionStorage> { get<SharedPrefsInstanceSelectionStorage>() }
+    single<LegacySessionAdoptionStorage> { get<SharedPrefsInstanceSelectionStorage>() }
     single<StorageNamespaceProvider> {
         val appConfig = get<Config>(named(APP_LEVEL_CONFIG))
         InstanceStorageNamespaces(
@@ -187,7 +189,7 @@ val appModule = module {
     single { DiscoveryNotifier() }
     single { CalendarNotifier() }
 
-    single { AppRouter() }
+    single { AppRouter(get()) }
     single<AuthRouter> { get<AppRouter>() }
     single<DiscoveryRouter> { get<AppRouter>() }
     single<DashboardRouter> { get<AppRouter>() }

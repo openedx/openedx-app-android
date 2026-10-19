@@ -1,5 +1,7 @@
 package org.openedx.app
 
+import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
@@ -8,6 +10,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
@@ -27,12 +31,14 @@ import org.openedx.core.presentation.global.appupgrade.AppUpgradeRecommendedBox
 import org.openedx.core.presentation.global.appupgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
+import org.openedx.core.ui.theme.InstanceThemeManager
 import org.openedx.dates.presentation.dates.DatesFragment
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.downloads.presentation.download.DownloadsFragment
 import org.openedx.learn.presentation.LearnFragment
 import org.openedx.learn.presentation.LearnTab
 import org.openedx.profile.presentation.profile.ProfileFragment
+import org.openedx.core.R as CoreR
 
 class MainFragment : Fragment(R.layout.fragment_main) {
 
@@ -73,7 +79,21 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
+    /** The tab bar is a view, outside Compose; the selected tab takes the site's accent too. */
+    private fun applyInstanceAccent() {
+        val isDark = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+            Configuration.UI_MODE_NIGHT_YES
+        val accent = InstanceThemeManager.theme.value?.accentColor(isDark) ?: return
+        val tint = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(accent.toArgb(), ContextCompat.getColor(requireContext(), CoreR.color.unchecked_tab_item)),
+        )
+        binding.bottomNavView.itemIconTintList = tint
+        binding.bottomNavView.itemTextColor = tint
+    }
+
     private fun setupBottomNavigation() {
+        applyInstanceAccent()
         val openTabArg = requireArguments().getString(ARG_OPEN_TAB, HomeTab.LEARN.name)
         val initialMenuId = getInitialMenuId(openTabArg)
         binding.bottomNavView.selectedItemId = initialMenuId

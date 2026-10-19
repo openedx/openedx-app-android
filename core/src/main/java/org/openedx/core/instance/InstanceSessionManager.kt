@@ -18,7 +18,7 @@ interface InstanceSessionManager {
      * Makes [instance] the active site. Nothing is torn down: the outgoing site keeps its
      * session, cached content and downloads for when the learner comes back.
      */
-    suspend fun switchActiveInstance(instance: Instance)
+    fun switchActiveInstance(instance: Instance)
 
     /**
      * Signs out of the site selected when it is called: cancels downloads, unregisters push,
@@ -63,7 +63,7 @@ class DefaultInstanceSessionManager(
     private val pushTokenUnregistrar: PushTokenUnregistering? = null,
 ) : InstanceSessionManager {
 
-    override suspend fun switchActiveInstance(instance: Instance) {
+    override fun switchActiveInstance(instance: Instance) {
         // Web content signs in with session cookies fetched for one site; the next page has to
         // fetch the new site's (refetching replaces the old ones).
         cookieManager.invalidateSessionCookie()

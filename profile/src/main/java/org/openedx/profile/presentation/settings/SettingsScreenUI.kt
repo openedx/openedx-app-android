@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,7 +54,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import org.openedx.core.AppUpdateState
 import org.openedx.core.R
+import org.openedx.core.instance.Instance
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
+import org.openedx.core.ui.LearningSiteRow
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -168,6 +171,15 @@ internal fun SettingsScreen(
                                 ) {
                                     Spacer(Modifier.height(30.dp))
 
+                                    uiState.learningSite?.let { site ->
+                                        LearningSiteSection(
+                                            site = site,
+                                            onSiteClick = { onAction(SettingsScreenAction.LearningSitesClick) },
+                                            onLogoutClick = { showLogoutDialog = true },
+                                        )
+                                        Spacer(modifier = Modifier.height(24.dp))
+                                    }
+
                                     ManageAccountSection(onManageAccountClick = {
                                         onAction(SettingsScreenAction.ManageAccountClick)
                                     })
@@ -192,15 +204,77 @@ internal fun SettingsScreen(
 
                                     Spacer(modifier = Modifier.height(24.dp))
 
-                                    LogoutButton(
-                                        onClick = { showLogoutDialog = true }
-                                    )
+                                    // With several sites, log out lives in the site card above.
+                                    if (uiState.learningSite == null) {
+                                        LogoutButton(
+                                            onClick = { showLogoutDialog = true }
+                                        )
+                                    }
 
                                     Spacer(Modifier.height(30.dp))
                                 }
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LearningSiteSection(
+    site: Instance,
+    onSiteClick: () -> Unit,
+    onLogoutClick: () -> Unit,
+) {
+    Column {
+        Text(
+            modifier = Modifier.testTag("txt_current_learning_site"),
+            text = stringResource(id = profileR.string.profile_current_learning_site),
+            style = MaterialTheme.appTypography.labelLarge,
+            color = MaterialTheme.appColors.textSecondary
+        )
+        Spacer(modifier = Modifier.height(14.dp))
+        Card(
+            shape = MaterialTheme.appShapes.cardShape,
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground)
+        ) {
+            Column(Modifier.fillMaxWidth()) {
+                LearningSiteRow(
+                    instance = site,
+                    modifier = Modifier
+                        .testTag("btn_current_learning_site")
+                        .clickable(onClick = onSiteClick)
+                        .padding(horizontal = 20.dp, vertical = 8.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.onSurface
+                    )
+                }
+                SettingsDivider()
+                Row(
+                    modifier = Modifier
+                        .testTag("btn_logout")
+                        .fillMaxWidth()
+                        .clickable(onClick = onLogoutClick)
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        modifier = Modifier.testTag("txt_logout"),
+                        text = stringResource(id = profileR.string.profile_logout),
+                        style = MaterialTheme.appTypography.titleMedium,
+                        color = MaterialTheme.appColors.error
+                    )
+                    Icon(
+                        painterResource(id = profileR.drawable.profile_ic_logout),
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.error
+                    )
                 }
             }
         }

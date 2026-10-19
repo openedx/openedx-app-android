@@ -37,6 +37,7 @@ import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.domain.model.CalendarType
+import org.openedx.core.instance.InstanceProvider
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.notifier.app.AppNotifier
@@ -69,6 +70,7 @@ class SignInViewModelTest {
     private val whatsNewGlobalManager = mockk<WhatsNewGlobalManager>()
     private val calendarInteractor = mockk<CalendarInteractor>()
     private val calendarPreferences = mockk<CalendarPreferences>()
+    private val instanceProvider = mockk<InstanceProvider>(relaxed = true)
 
     private val invalidCredential = "Invalid credentials"
     private val noInternet = "Slow or no internet connection"
@@ -136,7 +138,8 @@ class SignInViewModelTest {
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
             configuration = config,
-            currentLang = "EN"
+            currentLang = "EN",
+            instanceProvider = instanceProvider,
         )
         viewModel.login("", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -175,7 +178,8 @@ class SignInViewModelTest {
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
             configuration = config,
-            currentLang = "EN"
+            currentLang = "EN",
+            instanceProvider = instanceProvider,
         )
         viewModel.login("acc@test.o", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -214,7 +218,8 @@ class SignInViewModelTest {
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
             configuration = config,
-            currentLang = "EN"
+            currentLang = "EN",
+            instanceProvider = instanceProvider,
         )
         viewModel.login("acc@test.org", "")
 
@@ -252,7 +257,8 @@ class SignInViewModelTest {
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
             configuration = config,
-            currentLang = "EN"
+            currentLang = "EN",
+            instanceProvider = instanceProvider,
         )
         viewModel.login("acc@test.org", "ed")
 
@@ -294,7 +300,8 @@ class SignInViewModelTest {
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
             configuration = config,
-            currentLang = "EN"
+            currentLang = "EN",
+            instanceProvider = instanceProvider,
         )
         coEvery { interactor.login("acc@test.org", "edx") } returns Unit
         viewModel.login("acc@test.org", "edx")
@@ -337,7 +344,8 @@ class SignInViewModelTest {
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
             configuration = config,
-            currentLang = "EN"
+            currentLang = "EN",
+            instanceProvider = instanceProvider,
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws UnknownHostException()
         viewModel.login("acc@test.org", "edx")
@@ -381,7 +389,8 @@ class SignInViewModelTest {
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
             configuration = config,
-            currentLang = "EN"
+            currentLang = "EN",
+            instanceProvider = instanceProvider,
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws EdxError.InvalidGrantException()
         viewModel.login("acc@test.org", "edx")
@@ -425,7 +434,8 @@ class SignInViewModelTest {
             calendarInteractor = calendarInteractor,
             calendarPreferences = calendarPreferences,
             configuration = config,
-            currentLang = "EN"
+            currentLang = "EN",
+            instanceProvider = instanceProvider,
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws IllegalStateException()
         viewModel.login("acc@test.org", "edx")

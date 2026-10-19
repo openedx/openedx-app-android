@@ -25,6 +25,8 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.instance.InstanceConfigLoader
 import org.openedx.core.instance.InstanceSessionManager
 import org.openedx.core.instance.InstanceStore
+import org.openedx.core.instance.LegacySessionAdoptionStorage
+import org.openedx.core.instance.StorageNamespaceProvider
 import org.openedx.core.system.notifier.DownloadFailed
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
@@ -45,6 +47,8 @@ class AppViewModel(
     private val instanceStore: InstanceStore,
     private val instanceConfigLoader: InstanceConfigLoader,
     private val pushRegistrations: PushRegistrations,
+    private val namespaces: StorageNamespaceProvider,
+    private val legacySessionAdoption: LegacySessionAdoptionStorage,
     private val analytics: AppAnalytics,
     private val deepLinkRouter: DeepLinkRouter,
     private val fileUtil: FileUtil,
@@ -71,13 +75,39 @@ class AppViewModel(
 
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
+    /** With several sites and none selected, the first screen is site selection. */
+    val startsWithSiteSelection get() = instanceStore.hasMultipleInstances && instanceStore.currentInstance == null
+
     init {
         viewModelScope.launch { resolveInstanceCatalog() }
+    }
+
+    /**
+     * The first launch after upgrading from a single-site build: the learner was signed in to
+     * the site the app-level configuration points at, and that session now belongs to the
+     * matching instance. Open it, instead of asking which site to use. Checked once, so signing
+     * out later still leads to site selection.
+     */
+    private fun adoptLegacySession() {
+        if (legacySessionAdoption.hasCheckedLegacySession) return
+        legacySessionAdoption.hasCheckedLegacySession = true
+        if (!instanceStore.hasMultipleInstances || instanceStore.currentInstance != null) return
+        instanceStore.instancesConfig.instances
+            .firstOrNull { namespaces.namespaceFor(it).isLegacy && preferencesManager.hasSession(it.key) }
+            ?.let(instanceStore::select)
     }
 
     private suspend fun resolveInstanceCatalog() {
         // Falls back to the cached or bundled catalog when the fetch fails or times out.
         instanceStore.updateInstancesConfig(instanceConfigLoader.load())
+        // A saved selection whose session is gone (signed out right before the process died,
+        // or storage restored from a backup without its keys) would open a site nobody is signed
+        // in to. With several sites, start over at site selection instead.
+        val current = instanceStore.currentInstance
+        if (instanceStore.hasMultipleInstances && current != null && !preferencesManager.hasSession(current.key)) {
+            instanceStore.select(null)
+        }
+        adoptLegacySession()
         // A selection restored from storage doesn't go through a switch, so nothing else
         // applies its branding.
         sessionManager.applyThemeForCurrentInstance()

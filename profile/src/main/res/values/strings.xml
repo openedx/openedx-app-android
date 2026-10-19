@@ -79,5 +79,6 @@
     <string name="profile_no_google_calendars">No Google calendars available</string>
     <string name="profile_select_calendar">Select calendar</string>
     <string name="profile_local_calendar_option">Local calendar</string>
+    <string name="profile_current_learning_site">Current Learning Site</string>
 
 </resources>

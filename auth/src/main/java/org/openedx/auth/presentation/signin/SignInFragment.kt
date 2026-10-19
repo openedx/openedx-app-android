@@ -67,6 +67,8 @@ class SignInFragment : Fragment() {
                                     viewModel.navigateToSignUp(parentFragmentManager)
                                 }
 
+                                AuthEvent.ChangeSiteClick -> viewModel.changeSite(parentFragmentManager)
+
                                 AuthEvent.BackClick -> {
                                     requireActivity().supportFragmentManager.popBackStackImmediate()
                                 }
@@ -124,4 +126,5 @@ internal sealed interface AuthEvent {
     object RegisterClick : AuthEvent
     object ForgotPasswordClick : AuthEvent
     object BackClick : AuthEvent
+    object ChangeSiteClick : AuthEvent
 }
