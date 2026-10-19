@@ -15,7 +15,6 @@ import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.Buffer
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
@@ -165,6 +164,11 @@ class InstanceAwareNetworkingTest {
         override var accessToken: String = "old-access"
         override var refreshToken: String = "old-refresh"
         override var accessTokenExpiresAt: Long = Long.MAX_VALUE
+        val savedTokens = mutableMapOf<String?, String>()
+
+        override fun saveTokens(instanceKey: String?, accessToken: String, refreshToken: String, expiresAt: Long) {
+            savedTokens[instanceKey] = accessToken
+        }
     }
 
     private fun unauthorized(request: Request) = ok(request, """{"detail": "Token has expired."}""", code = 401)
@@ -209,7 +213,7 @@ class InstanceAwareNetworkingTest {
         val form = Buffer().also { tokenRequest.body!!.writeTo(it) }.readUtf8()
         assertTrue(form, form.contains("client_id=beta-client"))
         assertEquals("JWT new-access", retry?.header("Authorization"))
-        assertEquals("new-access", prefs.accessToken)
+        assertEquals(mapOf("beta" to "new-access"), prefs.savedTokens)
     }
 
     @Test
@@ -238,7 +242,7 @@ class InstanceAwareNetworkingTest {
     }
 
     @Test
-    fun `tokens refreshed while the learner switched sites are discarded`() {
+    fun `tokens refreshed while the learner switched sites are kept for the site that issued them`() {
         val provider = FakeInstanceProvider(alpha)
         val refreshClient = OkHttpClient.Builder().addInterceptor { chain ->
             provider.select(beta)
@@ -262,8 +266,8 @@ class InstanceAwareNetworkingTest {
         )
 
         assertNull(retry)
-        assertEquals("old-access", prefs.accessToken)
-        assertNotNull(provider.currentInstance)
+        assertEquals(mapOf("alpha" to "alpha-new"), prefs.savedTokens)
+        assertEquals("beta", provider.currentInstance?.key)
     }
 
     // endregion

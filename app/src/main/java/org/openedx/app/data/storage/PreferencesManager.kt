@@ -24,6 +24,8 @@ import org.openedx.core.domain.model.AppConfig
 import org.openedx.core.domain.model.CalendarType
 import org.openedx.core.domain.model.VideoQuality
 import org.openedx.core.domain.model.VideoSettings
+import org.openedx.core.instance.StorageNamespace
+import org.openedx.core.instance.StorageNamespaceProvider
 import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
@@ -43,6 +45,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
 class PreferencesManager(
     private val context: Context,
     private val appNotifier: AppNotifier,
+    private val namespaces: StorageNamespaceProvider,
 ) :
     CorePreferences,
     ProfilePreferences,
@@ -61,33 +64,46 @@ class PreferencesManager(
     @Volatile
     private var isKeyInvalidated = false
 
+    /**
+     * Keys tied to a learner on one site: they are namespaced per instance, so each site keeps
+     * its own session, profile and calendar state. Everything in [Keys] is device-wide.
+     */
+    @Suppress("TooManyFunctions")
+    private object InstanceKeys {
+        fun accessToken(ns: StorageNamespace) = stringPreferencesKey(ns.key("access_token"))
+        fun refreshToken(ns: StorageNamespace) = stringPreferencesKey(ns.key("refresh_token"))
+        fun pushToken(ns: StorageNamespace) = stringPreferencesKey(ns.key("push_token"))
+        fun expiresIn(ns: StorageNamespace) = longPreferencesKey(ns.key("expires_in"))
+        fun user(ns: StorageNamespace) = stringPreferencesKey(ns.key("user"))
+        fun account(ns: StorageNamespace) = stringPreferencesKey(ns.key("account"))
+        fun appConfig(ns: StorageNamespace) = stringPreferencesKey(ns.key("app_config"))
+        fun isRelativeDatesEnabled(ns: StorageNamespace) =
+            booleanPreferencesKey(ns.key("is_relative_dates_enabled"))
+        fun calendarId(ns: StorageNamespace) = longPreferencesKey(ns.key("calendar_id"))
+        fun calendarUser(ns: StorageNamespace) = stringPreferencesKey(ns.key("calendar_user"))
+        fun calendarType(ns: StorageNamespace) = stringPreferencesKey(ns.key("calendar_type"))
+        fun isCalendarSyncEnabled(ns: StorageNamespace) =
+            booleanPreferencesKey(ns.key("is_calendar_sync_enabled"))
+        fun isHideInactiveCourses(ns: StorageNamespace) =
+            booleanPreferencesKey(ns.key("hide_inactive_courses"))
+        fun calendarSyncDialogShown(ns: StorageNamespace, courseName: String) =
+            booleanPreferencesKey(ns.key("calendar_sync_dialog_${courseName.replaceSpace("_")}"))
+    }
+
+    private val ns: StorageNamespace
+        get() = namespaces.current
+
     private object Keys {
-        val ACCESS_TOKEN = stringPreferencesKey("access_token")
-        val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
-        val PUSH_TOKEN = stringPreferencesKey("push_token")
-        val EXPIRES_IN = longPreferencesKey("expires_in")
-        val USER = stringPreferencesKey("user")
-        val ACCOUNT = stringPreferencesKey("account")
         val VIDEO_SETTINGS_WIFI_DOWNLOAD_ONLY =
             booleanPreferencesKey("video_settings_wifi_download_only")
         val VIDEO_SETTINGS_STREAMING_QUALITY =
             stringPreferencesKey("video_settings_streaming_quality")
         val VIDEO_SETTINGS_DOWNLOAD_QUALITY =
             stringPreferencesKey("video_settings_download_quality")
-        val APP_CONFIG = stringPreferencesKey("app_config")
         val CAN_RESET_APP_DIRECTORY = booleanPreferencesKey("reset_app_directory")
-        val IS_RELATIVE_DATES_ENABLED = booleanPreferencesKey("is_relative_dates_enabled")
-        val CALENDAR_ID = longPreferencesKey("calendar_id")
-        val CALENDAR_USER = stringPreferencesKey("calendar_user")
-        val CALENDAR_TYPE = stringPreferencesKey("calendar_type")
-        val IS_CALENDAR_SYNC_ENABLED = booleanPreferencesKey("is_calendar_sync_enabled")
-        val IS_HIDE_INACTIVE_COURSES = booleanPreferencesKey("hide_inactive_courses")
         val LAST_WHATS_NEW_VERSION = stringPreferencesKey("last_whats_new_version")
         val LAST_REVIEW_VERSION = stringPreferencesKey("last_review_version")
         val WAS_POSITIVE_RATED = booleanPreferencesKey("app_was_positive_rated")
-
-        fun calendarSyncDialogShown(courseName: String) =
-            booleanPreferencesKey("calendar_sync_dialog_${courseName.replaceSpace("_")}")
     }
 
     private fun <T> getValue(key: Preferences.Key<T>, defaultValue: T): T =
@@ -121,47 +137,73 @@ class PreferencesManager(
     }
 
     override suspend fun clearCorePreferences() {
+        clearSession(namespaces.current)
+    }
+
+    override fun hasSession(instanceKey: String?): Boolean {
+        val namespace = namespaces.namespaceFor(instanceKey)
+        return getValue(InstanceKeys.accessToken(namespace), "").isNotEmpty() &&
+            getValue(InstanceKeys.user(namespace), "").isNotEmpty()
+    }
+
+    override suspend fun clearSession(instanceKey: String?) {
+        clearSession(namespaces.namespaceFor(instanceKey))
+    }
+
+    private suspend fun clearSession(namespace: StorageNamespace) {
         dataStore.edit { prefs ->
-            prefs.remove(Keys.ACCESS_TOKEN)
-            prefs.remove(Keys.REFRESH_TOKEN)
-            prefs.remove(Keys.PUSH_TOKEN)
-            prefs.remove(Keys.EXPIRES_IN)
-            prefs.remove(Keys.USER)
-            prefs.remove(Keys.ACCOUNT)
+            prefs.remove(InstanceKeys.accessToken(namespace))
+            prefs.remove(InstanceKeys.refreshToken(namespace))
+            prefs.remove(InstanceKeys.pushToken(namespace))
+            prefs.remove(InstanceKeys.expiresIn(namespace))
+            prefs.remove(InstanceKeys.user(namespace))
+            prefs.remove(InstanceKeys.account(namespace))
         }
     }
 
+    override fun refreshToken(instanceKey: String?): String {
+        return getEncryptedString(InstanceKeys.refreshToken(namespaces.namespaceFor(instanceKey)), "")
+    }
+
+    override fun saveTokens(instanceKey: String?, accessToken: String, refreshToken: String, expiresAt: Long) {
+        val namespace = namespaces.namespaceFor(instanceKey)
+        setEncryptedString(InstanceKeys.accessToken(namespace), accessToken)
+        setEncryptedString(InstanceKeys.refreshToken(namespace), refreshToken)
+        setValue(InstanceKeys.expiresIn(namespace), expiresAt)
+    }
+
     override suspend fun clearCalendarPreferences() {
+        val namespace = ns
         dataStore.edit { prefs ->
-            prefs.remove(Keys.CALENDAR_ID)
-            prefs.remove(Keys.CALENDAR_TYPE)
-            prefs.remove(Keys.IS_CALENDAR_SYNC_ENABLED)
-            prefs.remove(Keys.IS_HIDE_INACTIVE_COURSES)
+            prefs.remove(InstanceKeys.calendarId(namespace))
+            prefs.remove(InstanceKeys.calendarType(namespace))
+            prefs.remove(InstanceKeys.isCalendarSyncEnabled(namespace))
+            prefs.remove(InstanceKeys.isHideInactiveCourses(namespace))
         }
     }
 
     override var accessToken: String
-        get() = getEncryptedString(Keys.ACCESS_TOKEN, "")
-        set(value) = setEncryptedString(Keys.ACCESS_TOKEN, value)
+        get() = getEncryptedString(InstanceKeys.accessToken(ns), "")
+        set(value) = setEncryptedString(InstanceKeys.accessToken(ns), value)
 
     override var refreshToken: String
-        get() = getEncryptedString(Keys.REFRESH_TOKEN, "")
-        set(value) = setEncryptedString(Keys.REFRESH_TOKEN, value)
+        get() = getEncryptedString(InstanceKeys.refreshToken(ns), "")
+        set(value) = setEncryptedString(InstanceKeys.refreshToken(ns), value)
 
     override var pushToken: String
-        get() = getEncryptedString(Keys.PUSH_TOKEN, "")
-        set(value) = setEncryptedString(Keys.PUSH_TOKEN, value)
+        get() = getEncryptedString(InstanceKeys.pushToken(ns), "")
+        set(value) = setEncryptedString(InstanceKeys.pushToken(ns), value)
 
     override var accessTokenExpiresAt: Long
-        get() = getValue(Keys.EXPIRES_IN, 0L)
-        set(value) = setValue(Keys.EXPIRES_IN, value)
+        get() = getValue(InstanceKeys.expiresIn(ns), 0L)
+        set(value) = setValue(InstanceKeys.expiresIn(ns), value)
 
     override var user: User?
         get() {
-            val json = getEncryptedString(Keys.USER, "")
+            val json = getEncryptedString(InstanceKeys.user(ns), "")
             return if (json.isEmpty()) null else Gson().fromJson(json, User::class.java)
         }
-        set(value) = setEncryptedString(Keys.USER, Gson().toJson(value))
+        set(value) = setEncryptedString(InstanceKeys.user(ns), Gson().toJson(value))
 
     override var videoSettings: VideoSettings
         get() {
@@ -188,25 +230,25 @@ class PreferencesManager(
 
     override var appConfig: AppConfig
         get() {
-            val json = getValue(Keys.APP_CONFIG, Gson().toJson(AppConfig()))
+            val json = getValue(InstanceKeys.appConfig(ns), Gson().toJson(AppConfig()))
             return Gson().fromJson(json, AppConfig::class.java)
         }
-        set(value) = setValue(Keys.APP_CONFIG, Gson().toJson(value))
+        set(value) = setValue(InstanceKeys.appConfig(ns), Gson().toJson(value))
 
     override var canResetAppDirectory: Boolean
         get() = getValue(Keys.CAN_RESET_APP_DIRECTORY, true)
         set(value) = setValue(Keys.CAN_RESET_APP_DIRECTORY, value)
 
     override var isRelativeDatesEnabled: Boolean
-        get() = getValue(Keys.IS_RELATIVE_DATES_ENABLED, true)
-        set(value) = setValue(Keys.IS_RELATIVE_DATES_ENABLED, value)
+        get() = getValue(InstanceKeys.isRelativeDatesEnabled(ns), true)
+        set(value) = setValue(InstanceKeys.isRelativeDatesEnabled(ns), value)
 
     override var profile: Account?
         get() {
-            val json = getEncryptedString(Keys.ACCOUNT, "")
+            val json = getEncryptedString(InstanceKeys.account(ns), "")
             return if (json.isEmpty()) null else Gson().fromJson(json, Account::class.java)
         }
-        set(value) = setEncryptedString(Keys.ACCOUNT, Gson().toJson(value))
+        set(value) = setEncryptedString(InstanceKeys.account(ns), Gson().toJson(value))
 
     override var lastWhatsNewVersion: String
         get() = getValue(Keys.LAST_WHATS_NEW_VERSION, "")
@@ -229,33 +271,33 @@ class PreferencesManager(
         set(value) = setValue(Keys.WAS_POSITIVE_RATED, value)
 
     override var calendarId: Long
-        get() = getValue(Keys.CALENDAR_ID, CalendarManager.CALENDAR_DOES_NOT_EXIST)
-        set(value) = setValue(Keys.CALENDAR_ID, value)
+        get() = getValue(InstanceKeys.calendarId(ns), CalendarManager.CALENDAR_DOES_NOT_EXIST)
+        set(value) = setValue(InstanceKeys.calendarId(ns), value)
 
     override var calendarUser: String
-        get() = getValue(Keys.CALENDAR_USER, "")
-        set(value) = setValue(Keys.CALENDAR_USER, value)
+        get() = getValue(InstanceKeys.calendarUser(ns), "")
+        set(value) = setValue(InstanceKeys.calendarUser(ns), value)
 
     override var calendarType: CalendarType
         get() {
-            val stored = getValue(Keys.CALENDAR_TYPE, CalendarType.LOCAL.name)
+            val stored = getValue(InstanceKeys.calendarType(ns), CalendarType.LOCAL.name)
             return runCatching { CalendarType.valueOf(stored) }.getOrDefault(CalendarType.LOCAL)
         }
-        set(value) = setValue(Keys.CALENDAR_TYPE, value.name)
+        set(value) = setValue(InstanceKeys.calendarType(ns), value.name)
 
     override var isCalendarSyncEnabled: Boolean
-        get() = getValue(Keys.IS_CALENDAR_SYNC_ENABLED, true)
-        set(value) = setValue(Keys.IS_CALENDAR_SYNC_ENABLED, value)
+        get() = getValue(InstanceKeys.isCalendarSyncEnabled(ns), true)
+        set(value) = setValue(InstanceKeys.isCalendarSyncEnabled(ns), value)
 
     override var isHideInactiveCourses: Boolean
-        get() = getValue(Keys.IS_HIDE_INACTIVE_COURSES, true)
-        set(value) = setValue(Keys.IS_HIDE_INACTIVE_COURSES, value)
+        get() = getValue(InstanceKeys.isHideInactiveCourses(ns), true)
+        set(value) = setValue(InstanceKeys.isHideInactiveCourses(ns), value)
 
     override fun setCalendarSyncEventsDialogShown(courseName: String) {
-        setValue(Keys.calendarSyncDialogShown(courseName), true)
+        setValue(InstanceKeys.calendarSyncDialogShown(ns, courseName), true)
     }
 
     override fun isCalendarSyncEventsDialogShown(courseName: String): Boolean {
-        return getValue(Keys.calendarSyncDialogShown(courseName), false)
+        return getValue(InstanceKeys.calendarSyncDialogShown(ns, courseName), false)
     }
 }

@@ -40,10 +40,12 @@ import org.openedx.core.instance.InstanceCatalogCache
 import org.openedx.core.instance.InstanceConfigLoader
 import org.openedx.core.instance.InstanceProvider
 import org.openedx.core.instance.InstanceSelectionStorage
+import org.openedx.core.instance.InstanceStorageNamespaces
 import org.openedx.core.instance.InstanceStore
 import org.openedx.core.instance.OkHttpInstanceApiService
 import org.openedx.core.instance.SharedPrefsInstanceCatalogCache
 import org.openedx.core.instance.SharedPrefsInstanceSelectionStorage
+import org.openedx.core.instance.StorageNamespaceProvider
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
 import org.openedx.core.module.download.DownloadHelper
@@ -96,7 +98,17 @@ import org.openedx.core.DatabaseManager as IDatabaseManager
 val appModule = module {
 
     single { Config(get()) }
-    single<InstanceSelectionStorage> { SharedPrefsInstanceSelectionStorage(get()) }
+    single { SharedPrefsInstanceSelectionStorage(get()) }
+    single<InstanceSelectionStorage> { get<SharedPrefsInstanceSelectionStorage>() }
+    single<StorageNamespaceProvider> {
+        val config = get<Config>()
+        InstanceStorageNamespaces(
+            instanceStore = get(),
+            ownerStorage = get<SharedPrefsInstanceSelectionStorage>(),
+            appApiHostUrl = config.getApiHostURL(),
+            appOAuthClientId = config.getOAuthClientId(),
+        )
+    }
     single {
         val bundledInstances by lazy { get<Config>().getInstancesConfig() }
         InstanceStore(get()) { bundledInstances }
@@ -105,7 +117,7 @@ val appModule = module {
     single<InstanceCatalogCache> { SharedPrefsInstanceCatalogCache(get()) }
     single<InstanceApiService> { OkHttpInstanceApiService(get<Config>().getInstancesCatalogUrl()) }
     single { InstanceConfigLoader(get(), get(), { get<Config>().getInstancesConfig() }) }
-    single { PreferencesManager(get(), get()) }
+    single { PreferencesManager(get(), get(), get()) }
     single<CorePreferences> { get<PreferencesManager>() }
     single<ProfilePreferences> { get<PreferencesManager>() }
     single<WhatsNewPreferences> { get<PreferencesManager>() }

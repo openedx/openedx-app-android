@@ -182,20 +182,19 @@ class OauthRefreshTokenAuthenticator(
                 config.getAccessTokenType()
             ).execute()
             authResponse = response.body()?.mapToDomain()
-            // The learner may have switched sites while the refresh was in flight; these tokens
-            // belong to the site that issued them, not to the one selected now.
-            if (instance?.key != instanceProvider.currentInstance?.key) return null
             if (response.isSuccessful && authResponse != null) {
                 val newAccessToken = authResponse.accessToken ?: ""
                 val newRefreshToken = authResponse.refreshToken ?: ""
                 val newExpireTime = authResponse.getTokenExpiryTime()
 
                 if (newAccessToken.isNotEmpty() && newRefreshToken.isNotEmpty()) {
-                    preferencesManager.accessToken = newAccessToken
-                    preferencesManager.refreshToken = newRefreshToken
-                    preferencesManager.accessTokenExpiresAt = newExpireTime
+                    // Saved for the site that issued them even if the learner switched away while
+                    // the refresh was in flight: the server has already rotated the refresh token,
+                    // so dropping these would sign that site out.
+                    preferencesManager.saveTokens(instance?.key, newAccessToken, newRefreshToken, newExpireTime)
                     lastTokenRefreshRequestTime = TimeUtils.getCurrentTime()
                 }
+                if (instance?.key != instanceProvider.currentInstance?.key) return null
             } else if (response.code() == 400) {
                 // another refresh already in progress
                 Thread.sleep(REFRESH_TOKEN_THREAD_SLEEP)
