@@ -8,13 +8,18 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
+import androidx.work.Data
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
 import org.openedx.core.R
+import org.openedx.core.instance.InstanceDatabases
+import org.openedx.core.instance.StorageNamespace
+import org.openedx.core.instance.StorageNamespaceProvider
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
@@ -30,6 +35,7 @@ import org.openedx.core.system.notifier.DownloadFailed
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.DownloadProgressChanged
 import org.openedx.foundation.utils.FileUtil
+import java.io.File
 
 class DownloadWorker(
     val context: Context,
@@ -41,7 +47,8 @@ class DownloadWorker(
     private val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
 
     private val notifier by inject<DownloadNotifier>(DownloadNotifier::class.java)
-    private val downloadDao: DownloadDao by inject(DownloadDao::class.java)
+    private val databases: InstanceDatabases by inject(InstanceDatabases::class.java)
+    private val namespaces: StorageNamespaceProvider by inject(StorageNamespaceProvider::class.java)
     private val downloadHelper: DownloadHelper by inject(DownloadHelper::class.java)
     private val analytics: DownloadsAnalytics by inject(DownloadsAnalytics::class.java)
 
@@ -52,6 +59,13 @@ class DownloadWorker(
     private val folder = fileUtil.getExternalAppDir()
 
     private var currentDownload: DownloadModel? = null
+
+    /** The site whose queue is being worked through, starting with the one that enqueued us. */
+    private var namespace = StorageNamespace(inputData.getString(KEY_INSTANCE_KEY))
+    private val downloadDao: DownloadDao
+        get() = databases.downloadDao(namespace)
+    private val isForSelectedSite: Boolean
+        get() = namespace == namespaces.current
     private var lastUpdateTime = 0L
 
     private val fileDownloader by inject<FileDownloader>(FileDownloader::class.java)
@@ -99,8 +113,11 @@ class DownloadWorker(
                     lastUpdateTime = System.currentTimeMillis()
 
                     currentDownload?.let {
-                        launch {
-                            notifier.send(DownloadProgressChanged(it.id, value, size))
+                        // Another site can use the same block IDs; only its own screens may see this.
+                        if (isForSelectedSite) {
+                            launch {
+                                notifier.send(DownloadProgressChanged(it.id, value, size))
+                            }
                         }
 
                         notificationManager.notify(
@@ -140,6 +157,7 @@ class DownloadWorker(
                 )
             )
             logEvent(DownloadsAnalyticsEvent.DOWNLOAD_STARTED)
+            File(downloadTask.path).parentFile?.mkdirs()
             val downloadResult = fileDownloader.download(downloadTask.url, downloadTask.path)
             when (downloadResult) {
                 DownloadResult.SUCCESS -> {
@@ -168,10 +186,16 @@ class DownloadWorker(
             }
             newDownload()
         } else {
-            if (downloadError.isNotEmpty()) {
+            if (downloadError.isNotEmpty() && isForSelectedSite) {
                 notifier.send(DownloadFailed(downloadError))
             }
-            return
+            downloadError.clear()
+            // Files queued on the site the learner switched to while this queue was running
+            // would otherwise wait for the next change to their queue.
+            if (!isForSelectedSite) {
+                namespace = namespaces.current
+                newDownload()
+            }
         }
     }
 
@@ -193,6 +217,9 @@ class DownloadWorker(
 
     companion object {
         const val WORKER_TAG = "downloadWorker"
+        private const val KEY_INSTANCE_KEY = "instance_key"
+
+        fun inputData(namespace: StorageNamespace): Data = workDataOf(KEY_INSTANCE_KEY to namespace.instanceKey)
 
         private const val CHANNEL_ID = "download_channel_ID"
         private const val CHANNEL_NAME = "download_channel_name"
