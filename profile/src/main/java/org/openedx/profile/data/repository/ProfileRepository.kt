@@ -3,9 +3,11 @@ package org.openedx.profile.data.repository
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
 import org.openedx.core.ApiConstants
-import org.openedx.core.DatabaseManager
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.instance.InstanceProvider
+import org.openedx.core.instance.InstanceSessionManager
+import org.openedx.core.instance.RequestInstance
 import org.openedx.profile.data.api.ProfileApi
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.domain.model.Account
@@ -16,7 +18,8 @@ class ProfileRepository(
     private val api: ProfileApi,
     private val profilePreferences: ProfilePreferences,
     private val corePreferences: CorePreferences,
-    private val databaseManager: DatabaseManager
+    private val sessionManager: InstanceSessionManager,
+    private val instanceProvider: InstanceProvider,
 ) {
 
     suspend fun getAccount(): Account {
@@ -53,16 +56,24 @@ class ProfileRepository(
 
     suspend fun deactivateAccount(password: String) = api.deactivateAccount(password)
 
+    /**
+     * Signs out of the site selected when it starts. The revoke request is pinned to that site,
+     * and if the learner selects another site while it is in flight, only the original site is
+     * signed out: the new selection and its session stay.
+     */
     suspend fun logout() {
+        val siteKey = instanceProvider.currentInstance?.key
+        val clientId = config.getOAuthClientId()
+        val refreshToken = corePreferences.refreshToken(siteKey)
         try {
             api.revokeAccessToken(
-                config.getOAuthClientId(),
-                corePreferences.refreshToken,
-                ApiConstants.TOKEN_TYPE_REFRESH
+                clientId,
+                refreshToken,
+                ApiConstants.TOKEN_TYPE_REFRESH,
+                RequestInstance(siteKey),
             )
         } finally {
-            corePreferences.clearCorePreferences()
-            databaseManager.clearTables()
+            sessionManager.logout(siteKey)
         }
     }
 }

@@ -7,20 +7,20 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
-import androidx.room.RoomDatabase
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.openedx.app.deeplink.DeepLink
 import org.openedx.app.deeplink.DeepLinkRouter
+import org.openedx.app.system.push.PushRegistrations
 import org.openedx.app.system.push.RefreshFirebaseTokenWorker
 import org.openedx.app.system.push.SyncFirebaseTokenWorker
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.instance.InstanceSessionManager
+import org.openedx.core.instance.InstanceStore
 import org.openedx.core.system.notifier.DownloadFailed
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
@@ -36,9 +36,10 @@ import org.openedx.foundation.utils.FileUtil
 class AppViewModel(
     private val config: Config,
     private val appNotifier: AppNotifier,
-    private val room: RoomDatabase,
     private val preferencesManager: CorePreferences,
-    private val dispatcher: CoroutineDispatcher,
+    private val sessionManager: InstanceSessionManager,
+    private val instanceStore: InstanceStore,
+    private val pushRegistrations: PushRegistrations,
     private val analytics: AppAnalytics,
     private val deepLinkRouter: DeepLinkRouter,
     private val fileUtil: FileUtil,
@@ -69,8 +70,8 @@ class AppViewModel(
 
         setUserId(user)
 
-        if (user != null && preferencesManager.pushToken.isNotEmpty()) {
-            SyncFirebaseTokenWorker.schedule(context)
+        if (preferencesManager.pushToken.isNotEmpty()) {
+            SyncFirebaseTokenWorker.scheduleForSignedInSites(context, pushRegistrations)
         }
 
         if (canResetAppDirectory) {
@@ -80,7 +81,8 @@ class AppViewModel(
         viewModelScope.launch {
             appNotifier.notifier.collect { event ->
                 if (event is SignInEvent && config.getFirebaseConfig().isCloudMessagingEnabled) {
-                    SyncFirebaseTokenWorker.schedule(context)
+                    // Sign-in completes only on the site that is still selected.
+                    SyncFirebaseTokenWorker.schedule(context, instanceStore.currentInstance?.key)
                 } else if (event is LogoutEvent) {
                     handleLogoutEvent(event)
                 }
@@ -123,10 +125,8 @@ class AppViewModel(
         if (System.currentTimeMillis() - logoutHandledAt > LOGOUT_EVENT_THRESHOLD) {
             if (event.isForced) {
                 logoutHandledAt = System.currentTimeMillis()
-                preferencesManager.clearCorePreferences()
-                withContext(dispatcher) {
-                    room.clearAllTables()
-                }
+                // Signs out of the selected site only; other sites keep their sessions.
+                sessionManager.logoutCurrentInstance()
                 analytics.logoutEvent(true)
                 _logoutUser.value = Unit
             }

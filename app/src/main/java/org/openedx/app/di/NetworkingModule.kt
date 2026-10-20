@@ -7,12 +7,14 @@ import org.openedx.app.data.api.NotificationsApi
 import org.openedx.app.data.networking.AppUpgradeInterceptor
 import org.openedx.app.data.networking.HandleErrorInterceptor
 import org.openedx.app.data.networking.HeadersInterceptor
+import org.openedx.app.data.networking.InstanceHostInterceptor
 import org.openedx.app.data.networking.OauthRefreshTokenAuthenticator
 import org.openedx.auth.data.api.AuthApi
 import org.openedx.core.BuildConfig
 import org.openedx.core.config.Config
 import org.openedx.core.data.api.CookiesApi
 import org.openedx.core.data.api.CourseApi
+import org.openedx.core.instance.InstanceStore
 import org.openedx.discovery.data.api.DiscoveryApi
 import org.openedx.discussion.data.api.DiscussionApi
 import org.openedx.profile.data.api.ProfileApi
@@ -22,13 +24,18 @@ import java.util.concurrent.TimeUnit
 
 val networkingModule = module {
 
-    single { OauthRefreshTokenAuthenticator(get(), get(), get()) }
+    single { OauthRefreshTokenAuthenticator(get(), get(), get(), get()) }
+    single {
+        val store = get<InstanceStore>()
+        InstanceHostInterceptor(get<Config>().getApiHostURL(), store) { store.instance(it) }
+    }
 
     single {
         OkHttpClient.Builder().apply {
             writeTimeout(60, TimeUnit.SECONDS)
             readTimeout(60, TimeUnit.SECONDS)
-            addInterceptor(HeadersInterceptor(get(), get(), get()))
+            addInterceptor(get<InstanceHostInterceptor>())
+            addInterceptor(HeadersInterceptor(get(), get(), get(), get()) { get<InstanceStore>().instance(it) })
             if (BuildConfig.DEBUG) {
                 addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             }
