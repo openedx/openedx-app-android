@@ -7,6 +7,7 @@ import androidx.work.WorkManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.openedx.core.instance.StorageNamespaceProvider
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
@@ -17,7 +18,8 @@ import java.io.File
 class DownloadWorkerController(
     context: Context,
     private val downloadDao: DownloadDao,
-    private val fileDownloader: FileDownloader
+    private val fileDownloader: FileDownloader,
+    private val namespaces: StorageNamespaceProvider,
 ) {
 
     private val workManager = WorkManager.getInstance(context)
@@ -34,6 +36,7 @@ class DownloadWorkerController(
                     if (!isWorkScheduled(DownloadWorker.WORKER_TAG)) {
                         val request = OneTimeWorkRequestBuilder<DownloadWorker>()
                             .addTag(DownloadWorker.WORKER_TAG)
+                            .setInputData(DownloadWorker.inputData(namespaces.current))
                             .build()
                         workManager.enqueue(request)
                     }
@@ -81,9 +84,25 @@ class DownloadWorkerController(
 
         updateList()
 
-        if (downloadTaskList.isEmpty()) {
+        // Only when the worker was on one of these: it may be busy with another site's queue,
+        // which this site has no say over.
+        if (hasDownloading && downloadTaskList.isEmpty()) {
             workManager.cancelAllWorkByTag(DownloadWorker.WORKER_TAG)
         }
+    }
+
+    /**
+     * Cancels every download the selected site hasn't finished: the active one and the queue.
+     * Finished files stay.
+     */
+    suspend fun cancelUnfinishedDownloads() {
+        val unfinished = downloadDao.readAllData()
+            .map { it.mapToDomain() }
+            .filter {
+                it.downloadedState == DownloadedState.WAITING || it.downloadedState == DownloadedState.DOWNLOADING
+            }
+            .map { it.id }
+        if (unfinished.isNotEmpty()) removeModels(unfinished)
     }
 
     suspend fun removeModels() {

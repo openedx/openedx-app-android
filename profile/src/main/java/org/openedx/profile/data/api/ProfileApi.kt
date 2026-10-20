@@ -3,6 +3,7 @@ package org.openedx.profile.data.api
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import org.openedx.core.ApiConstants
+import org.openedx.core.instance.RequestInstance
 import org.openedx.profile.data.model.Account
 import retrofit2.Response
 import retrofit2.http.Body
@@ -16,6 +17,7 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Tag
 
 interface ProfileApi {
 
@@ -24,7 +26,8 @@ interface ProfileApi {
     suspend fun revokeAccessToken(
         @Field("client_id") clientId: String?,
         @Field("token") token: String?,
-        @Field("token_type_hint") tokenTypeHint: String?
+        @Field("token_type_hint") tokenTypeHint: String?,
+        @Tag instance: RequestInstance,
     ): ResponseBody
 
     @GET("/api/user/v1/accounts/{username}")
