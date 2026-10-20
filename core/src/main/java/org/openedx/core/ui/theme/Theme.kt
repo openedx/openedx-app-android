@@ -9,13 +9,16 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 
 internal val LocalAppColors = staticCompositionLocalOf<AppColors> {
     error("No AppColors provided")
 }
 
-private val DarkColorPalette = AppColors(
+internal val DarkColorPalette = AppColors(
     material3 = darkColorScheme(
         primary = dark_primary,
         onPrimary = dark_onPrimary,
@@ -115,7 +118,7 @@ private val DarkColorPalette = AppColors(
     assignmentCardBorder = dark_assignment_card_border,
 )
 
-private val LightColorPalette = AppColors(
+internal val LightColorPalette = AppColors(
     material3 = lightColorScheme(
         primary = light_primary,
         onPrimary = light_onPrimary,
@@ -223,10 +226,10 @@ val MaterialTheme.appColors: AppColors
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OpenEdXTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
+    val instanceTheme by InstanceThemeManager.theme.collectAsState()
+    val colors = remember(darkTheme, instanceTheme) {
+        val base = if (darkTheme) DarkColorPalette else LightColorPalette
+        instanceTheme?.applyTo(base, isDark = darkTheme) ?: base
     }
 
     MaterialTheme(

@@ -12,15 +12,18 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withStarted
 import androidx.window.layout.WindowMetricsCalculator
 import com.braze.support.toStringMap
 import io.branch.referral.Branch
 import io.branch.referral.Branch.BranchUniversalReferralInitListener
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
 import org.openedx.app.deeplink.DeepLink
+import org.openedx.auth.presentation.learningsites.LearningSitesFragment
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.data.storage.CorePreferences
@@ -92,7 +95,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen()
+        installSplashScreen().setKeepOnScreenCondition { !viewModel.isInstanceCatalogResolved.value }
         binding = ActivityAppBinding.inflate(layoutInflater)
         lifecycle.addObserver(viewModel)
         viewModel.logAppLaunchEvent()
@@ -155,24 +158,33 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     }
 
     private fun setupInitialFragment(savedInstanceState: Bundle?) {
-        if (savedInstanceState == null) {
-            when {
-                corePreferencesManager.user == null -> {
-                    val fragment = if (viewModel.isLogistrationEnabled && authCode == null) {
-                        LogistrationFragment()
-                    } else {
-                        SignInFragment.newInstance(null, null)
-                    }
-                    addFragment(fragment)
+        // A recreated activity gets its screens back from the fragment manager.
+        if (savedInstanceState != null) return
+        lifecycleScope.launch {
+            viewModel.isInstanceCatalogResolved.first { it }
+            lifecycle.withStarted { showInitialFragment() }
+        }
+    }
+
+    private fun showInitialFragment() {
+        when {
+            viewModel.startsWithSiteSelection -> addFragment(LearningSitesFragment.newInstance(isSwitching = false))
+
+            corePreferencesManager.user == null -> {
+                val fragment = if (viewModel.isLogistrationEnabled && authCode == null) {
+                    LogistrationFragment()
+                } else {
+                    SignInFragment.newInstance(null, null)
                 }
-
-                whatsNewManager.shouldShowWhatsNew() -> addFragment(WhatsNewFragment.newInstance())
-                else -> addFragment(MainFragment.newInstance())
+                addFragment(fragment)
             }
 
-            intent.extras?.takeIf { it.containsKey(DeepLink.Keys.NOTIFICATION_TYPE.value) }?.let {
-                handlePushNotification(it)
-            }
+            whatsNewManager.shouldShowWhatsNew() -> addFragment(WhatsNewFragment.newInstance())
+            else -> addFragment(MainFragment.newInstance())
+        }
+
+        intent.extras?.takeIf { it.containsKey(DeepLink.Keys.NOTIFICATION_TYPE.value) }?.let {
+            handlePushNotification(it)
         }
     }
 

@@ -23,4 +23,7 @@ interface ProfileRouter {
     fun navigateToManageAccount(fm: FragmentManager)
 
     fun navigateToCoursesToSync(fm: FragmentManager)
+
+    /** Opens Learning Sites over Settings, to switch sites or sign out of one. */
+    fun navigateToLearningSites(fm: FragmentManager, isSwitching: Boolean)
 }

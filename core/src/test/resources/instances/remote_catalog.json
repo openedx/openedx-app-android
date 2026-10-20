@@ -1,0 +1,34 @@
+{
+  "instances": [
+    {
+      "key": "niepd",
+      "name": "NIEPD",
+      "instance_name": { "en": "National Institute", "ar": "المعهد الوطني" },
+      "color": "#1C355E",
+      "oauth_client_id": "niepd-client",
+      "api_host_url": "https://lms.niepd.example.com",
+      "sso_url": "https://lms.niepd.example.com/auth/login/tpa-saml/?auth_entry=login",
+      "sso_url_successful_login": "https://lms.niepd.example.com/auth/complete/tpa-saml",
+      "environment_display_name": "NIEPD",
+      "is_switch_instance_login_enabled": true,
+      "ui_components": {
+        "course_unit_progress_enabled": true,
+        "login_registration_enabled": false,
+        "saml_sso_login_enabled": true
+      },
+      "theme": {
+        "light": { "accent_color": "#3C68FF", "text_primary": "#18202E" },
+        "dark": { "accent_color": "#1C355E" },
+        "logo_url": "https://cdn.example.com/niepd/logo.png",
+        "header_background_url": "https://cdn.example.com/niepd/header.png"
+      },
+      "FEEDBACK_EMAIL_ADDRESS": "help@niepd.example.com",
+      "feedback_email_address": "ignored-because-unmapped@example.com"
+    },
+    {
+      "key": "broken",
+      "name": "Broken entry without a client",
+      "api_host_url": "https://broken.example.com"
+    }
+  ]
+}

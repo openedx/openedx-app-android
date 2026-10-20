@@ -27,6 +27,7 @@ import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.domain.model.createHonorCodeField
+import org.openedx.core.instance.InstanceProvider
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.notifier.app.AppNotifier
@@ -57,6 +58,7 @@ class SignInViewModel(
     val infoType: String?,
     val authCode: String,
     currentLang: String,
+    instanceProvider: InstanceProvider,
 ) : BaseViewModel(resourceManager) {
 
     private val logger = Logger("SignInViewModel")
@@ -74,6 +76,7 @@ class SignInViewModel(
             isLogistrationEnabled = config.isPreLoginExperienceEnabled(),
             isRegistrationEnabled = config.isRegistrationEnabled(),
             agreement = agreementProvider.getAgreement(isSignIn = true)?.createHonorCodeField(),
+            selectedSite = instanceProvider.currentInstance?.takeIf { instanceProvider.hasMultipleInstances },
         )
     )
     internal val uiState: StateFlow<SignInUIState> = _uiState
@@ -85,6 +88,10 @@ class SignInViewModel(
     init {
         collectAppUpgradeEvent()
         logSignInScreenEvent()
+    }
+
+    fun changeSite(fragmentManager: FragmentManager) {
+        router.navigateToLearningSites(fragmentManager, isSwitching = false)
     }
 
     fun login(username: String, password: String) {

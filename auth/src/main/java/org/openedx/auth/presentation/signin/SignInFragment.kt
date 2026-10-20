@@ -67,6 +67,8 @@ class SignInFragment : Fragment() {
                                     viewModel.navigateToSignUp(parentFragmentManager)
                                 }
 
+                                AuthEvent.ChangeSiteClick -> viewModel.changeSite(parentFragmentManager)
+
                                 AuthEvent.BackClick -> {
                                     requireActivity().supportFragmentManager.popBackStackImmediate()
                                 }
@@ -78,6 +80,8 @@ class SignInFragment : Fragment() {
                                 )
                             }
                         },
+                        isBackToSitesShown = state.selectedSite != null &&
+                            requireActivity().supportFragmentManager.backStackEntryCount > 0,
                     )
                     LaunchedEffect(state.loginSuccess) {
                         viewModel.proceedWhatsNew(parentFragmentManager)
@@ -124,4 +128,5 @@ internal sealed interface AuthEvent {
     object RegisterClick : AuthEvent
     object ForgotPasswordClick : AuthEvent
     object BackClick : AuthEvent
+    object ChangeSiteClick : AuthEvent
 }

@@ -17,7 +17,7 @@ import org.openedx.core.AppUpdateState
 import org.openedx.core.CalendarRouter
 import org.openedx.core.R
 import org.openedx.core.config.Config
-import org.openedx.core.module.DownloadWorkerController
+import org.openedx.core.instance.InstanceProvider
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.notifier.app.AppNotifier
@@ -40,15 +40,20 @@ class SettingsViewModel(
     private val resourceManager: ResourceManager,
     private val interactor: ProfileInteractor,
     private val cookieManager: AppCookieManager,
-    private val workerController: DownloadWorkerController,
     private val analytics: ProfileAnalytics,
     private val profileRouter: ProfileRouter,
     private val calendarRouter: CalendarRouter,
     private val appNotifier: AppNotifier,
     private val profileNotifier: ProfileNotifier,
+    private val instanceProvider: InstanceProvider,
 ) : BaseViewModel(resourceManager) {
 
-    private val _uiState: MutableStateFlow<SettingsUIState> = MutableStateFlow(SettingsUIState.Data(configuration))
+    private val _uiState: MutableStateFlow<SettingsUIState> = MutableStateFlow(
+        SettingsUIState.Data(
+            configuration = configuration,
+            learningSite = instanceProvider.currentInstance?.takeIf { instanceProvider.hasMultipleInstances },
+        )
+    )
     internal val uiState: StateFlow<SettingsUIState> = _uiState.asStateFlow()
 
     private val _successLogout = MutableSharedFlow<Boolean>()
@@ -73,7 +78,6 @@ class SettingsViewModel(
         logProfileEvent(ProfileAnalyticsEvent.LOGOUT_CLICKED)
         viewModelScope.launch {
             try {
-                workerController.removeModels()
                 withContext(Dispatchers.IO) {
                     interactor.logout()
                 }
@@ -103,6 +107,10 @@ class SettingsViewModel(
                 }
             }
         }
+    }
+
+    fun learningSitesClicked(fragmentManager: FragmentManager) {
+        profileRouter.navigateToLearningSites(fragmentManager, isSwitching = true)
     }
 
     fun videoSettingsClicked(fragmentManager: FragmentManager) {

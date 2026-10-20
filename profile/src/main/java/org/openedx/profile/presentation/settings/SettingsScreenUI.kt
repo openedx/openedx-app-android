@@ -2,7 +2,6 @@ package org.openedx.profile.presentation.settings
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,17 +14,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,25 +33,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import org.openedx.core.AppUpdateState
 import org.openedx.core.R
+import org.openedx.core.instance.Instance
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
-import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.LearningSiteRow
+import org.openedx.core.ui.LogoutDialog
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.settingsHeaderBackground
@@ -120,6 +112,8 @@ internal fun SettingsScreen(
 
         if (showLogoutDialog) {
             LogoutDialog(
+                message = stringResource(id = profileR.string.profile_logout_dialog_body),
+                actionText = stringResource(id = profileR.string.profile_logout),
                 onDismissRequest = {
                     showLogoutDialog = false
                 },
@@ -192,15 +186,84 @@ internal fun SettingsScreen(
 
                                     Spacer(modifier = Modifier.height(24.dp))
 
-                                    LogoutButton(
-                                        onClick = { showLogoutDialog = true }
-                                    )
+                                    // With several sites, log out is folded into the current site's card.
+                                    val learningSite = uiState.learningSite
+                                    if (learningSite != null) {
+                                        LearningSiteSection(
+                                            site = learningSite,
+                                            onSiteClick = { onAction(SettingsScreenAction.LearningSitesClick) },
+                                            onLogoutClick = { showLogoutDialog = true },
+                                        )
+                                    } else {
+                                        LogoutButton(
+                                            onClick = { showLogoutDialog = true }
+                                        )
+                                    }
 
                                     Spacer(Modifier.height(30.dp))
                                 }
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LearningSiteSection(
+    site: Instance,
+    onSiteClick: () -> Unit,
+    onLogoutClick: () -> Unit,
+) {
+    Column {
+        Text(
+            modifier = Modifier.testTag("txt_current_learning_site"),
+            text = stringResource(id = profileR.string.profile_current_learning_site),
+            style = MaterialTheme.appTypography.labelLarge,
+            color = MaterialTheme.appColors.textSecondary
+        )
+        Spacer(modifier = Modifier.height(14.dp))
+        Card(
+            shape = MaterialTheme.appShapes.cardShape,
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.appColors.cardViewBackground)
+        ) {
+            Column(Modifier.fillMaxWidth()) {
+                LearningSiteRow(
+                    instance = site,
+                    modifier = Modifier
+                        .testTag("btn_current_learning_site")
+                        .clickable(onClick = onSiteClick)
+                        .padding(horizontal = 20.dp, vertical = 8.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.onSurface
+                    )
+                }
+                SettingsDivider()
+                Row(
+                    modifier = Modifier
+                        .testTag("btn_logout")
+                        .fillMaxWidth()
+                        .clickable(onClick = onLogoutClick)
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        modifier = Modifier.testTag("txt_logout"),
+                        text = stringResource(id = profileR.string.profile_logout),
+                        style = MaterialTheme.appTypography.titleMedium,
+                        color = MaterialTheme.appColors.error
+                    )
+                    Icon(
+                        painterResource(id = R.drawable.core_ic_logout),
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.error
+                    )
                 }
             }
         }
@@ -357,108 +420,12 @@ private fun LogoutButton(onClick: () -> Unit) {
                 color = MaterialTheme.appColors.error
             )
             Icon(
-                painterResource(id = profileR.drawable.profile_ic_logout),
+                painterResource(id = R.drawable.core_ic_logout),
                 contentDescription = null,
                 tint = MaterialTheme.appColors.error
             )
         }
     }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-private fun LogoutDialog(
-    onDismissRequest: () -> Unit,
-    onLogoutClick: () -> Unit,
-) {
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        content = {
-            Column(
-                Modifier
-                    .verticalScroll(rememberScrollState())
-                    .fillMaxWidth()
-                    .background(
-                        MaterialTheme.appColors.background,
-                        MaterialTheme.appShapes.cardShape
-                    )
-                    .clip(MaterialTheme.appShapes.cardShape)
-                    .border(
-                        1.dp,
-                        MaterialTheme.appColors.cardViewBorder,
-                        MaterialTheme.appShapes.cardShape
-                    )
-                    .padding(horizontal = 40.dp, vertical = 36.dp)
-                    .semantics { testTagsAsResourceId = true },
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    IconButton(
-                        modifier = Modifier
-                            .testTag("ib_close")
-                            .size(24.dp),
-                        onClick = onDismissRequest
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = stringResource(id = R.string.core_cancel),
-                            tint = MaterialTheme.appColors.primary
-                        )
-                    }
-                }
-                Icon(
-                    modifier = Modifier
-                        .width(88.dp)
-                        .height(85.dp),
-                    painter = painterResource(profileR.drawable.profile_ic_exit),
-                    contentDescription = null,
-                    tint = MaterialTheme.appColors.onBackground
-                )
-                Spacer(Modifier.size(36.dp))
-                Text(
-                    modifier = Modifier.testTag("txt_logout_dialog_title"),
-                    text = stringResource(id = profileR.string.profile_logout_dialog_body),
-                    color = MaterialTheme.appColors.textPrimary,
-                    style = MaterialTheme.appTypography.titleLarge,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.size(36.dp))
-                OpenEdXButton(
-                    text = stringResource(id = profileR.string.profile_logout),
-                    backgroundColor = MaterialTheme.appColors.warning,
-                    onClick = onLogoutClick,
-                    content = {
-                        Box(
-                            Modifier
-                                .testTag("btn_logout")
-                                .fillMaxWidth(),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Text(
-                                modifier = Modifier
-                                    .testTag("txt_logout")
-                                    .fillMaxWidth(),
-                                text = stringResource(id = profileR.string.profile_logout),
-                                color = MaterialTheme.appColors.textWarning,
-                                style = MaterialTheme.appTypography.labelLarge,
-                                textAlign = TextAlign.Center
-                            )
-                            Icon(
-                                modifier = Modifier
-                                    .testTag("ic_logout"),
-                                painter = painterResource(id = profileR.drawable.profile_ic_logout),
-                                contentDescription = null,
-                                tint = Color.Black
-                            )
-                        }
-                    }
-                )
-            }
-        }
-    )
 }
 
 @Composable
@@ -656,12 +623,6 @@ private fun AppVersionItemUpgradeRequiredPreview() {
             onClick = {}
         )
     }
-}
-
-@Preview
-@Composable
-private fun LogoutDialogPreview() {
-    LogoutDialog({}, {})
 }
 
 @Preview

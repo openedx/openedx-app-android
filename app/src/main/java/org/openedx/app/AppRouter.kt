@@ -5,12 +5,14 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import org.openedx.app.deeplink.HomeTab
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.auth.presentation.learningsites.LearningSitesFragment
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
 import org.openedx.core.CalendarRouter
 import org.openedx.core.FragmentViewType
+import org.openedx.core.instance.InstanceProvider
 import org.openedx.core.presentation.global.appupgrade.AppUpgradeRouter
 import org.openedx.core.presentation.global.appupgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.webview.SSOWebContentFragment
@@ -61,7 +63,9 @@ import org.openedx.profile.presentation.video.VideoSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
-class AppRouter :
+class AppRouter(
+    private val instanceProvider: InstanceProvider,
+) :
     AuthRouter,
     DiscoveryRouter,
     DashboardRouter,
@@ -403,10 +407,22 @@ class AppRouter :
         )
     }
 
+    override fun navigateToLearningSites(fm: FragmentManager, isSwitching: Boolean) {
+        if (isSwitching) {
+            replaceFragmentWithBackStack(fm, LearningSitesFragment.newInstance(isSwitching = true))
+        } else {
+            clearBackStack(fm)
+            replaceFragment(fm, LearningSitesFragment.newInstance(isSwitching = false))
+        }
+    }
+
     override fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean) {
         fm.apply {
             clearBackStack(this)
-            if (isLogistrationEnabled) {
+            // A multi-site build always starts over at site selection: sign-in belongs to a site.
+            if (instanceProvider.hasMultipleInstances) {
+                replaceFragment(fm, LearningSitesFragment.newInstance(isSwitching = false))
+            } else if (isLogistrationEnabled) {
                 replaceFragment(fm, LogistrationFragment())
             } else {
                 replaceFragment(fm, SignInFragment.newInstance(null, null))

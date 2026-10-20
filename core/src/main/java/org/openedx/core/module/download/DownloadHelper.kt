@@ -2,6 +2,7 @@ package org.openedx.core.module.download
 
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
+import org.openedx.core.instance.StorageNamespaceProvider
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
@@ -13,13 +14,27 @@ import java.io.File
 class DownloadHelper(
     private val preferencesManager: CorePreferences,
     private val fileUtil: FileUtil,
+    private val namespaces: StorageNamespaceProvider,
 ) {
 
+    /**
+     * Files are named after their URL, and two sites can serve the same URL (a shared CDN, the
+     * same video). Each instance therefore downloads into a folder of its own; the legacy
+     * namespace keeps using [baseFolder] itself, where existing downloads already are.
+     */
+    internal fun instanceFolder(baseFolder: String): String {
+        val segment = namespaces.current.fileSegment ?: return baseFolder
+        val folder = File(File(baseFolder, INSTANCES_FOLDER), segment)
+        folder.mkdirs()
+        return folder.path
+    }
+
     fun generateDownloadModelFromBlock(
-        folder: String,
+        baseFolder: String,
         block: Block,
         courseId: String
     ): DownloadModel? {
+        val folder = instanceFolder(baseFolder)
         return when (val downloadableType = block.downloadableType) {
             FileType.VIDEO -> {
                 val videoInfo =
@@ -90,6 +105,10 @@ class DownloadHelper(
                 )
             }
         }
+    }
+
+    private companion object {
+        const val INSTANCES_FOLDER = "instances"
     }
 
     private fun calculateDirectorySize(directory: File): Long {
