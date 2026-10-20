@@ -30,4 +30,10 @@ interface AuthRouter {
     fun navigateToSSOWebContent(fm: FragmentManager, title: String, url: String)
 
     fun clearBackStack(fm: FragmentManager)
+
+    /**
+     * Opens Learning Sites. [isSwitching] pushes it over the current screens, from Settings;
+     * otherwise it replaces everything and becomes the first screen.
+     */
+    fun navigateToLearningSites(fm: FragmentManager, isSwitching: Boolean)
 }

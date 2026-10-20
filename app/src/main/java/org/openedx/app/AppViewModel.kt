@@ -7,20 +7,26 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
-import androidx.room.RoomDatabase
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.openedx.app.deeplink.DeepLink
 import org.openedx.app.deeplink.DeepLinkRouter
+import org.openedx.app.system.push.PushRegistrations
 import org.openedx.app.system.push.RefreshFirebaseTokenWorker
 import org.openedx.app.system.push.SyncFirebaseTokenWorker
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.instance.InstanceConfigLoader
+import org.openedx.core.instance.InstanceSessionManager
+import org.openedx.core.instance.InstanceStore
+import org.openedx.core.instance.LegacySessionAdoptionStorage
+import org.openedx.core.instance.StorageNamespaceProvider
 import org.openedx.core.system.notifier.DownloadFailed
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
@@ -36,9 +42,13 @@ import org.openedx.foundation.utils.FileUtil
 class AppViewModel(
     private val config: Config,
     private val appNotifier: AppNotifier,
-    private val room: RoomDatabase,
     private val preferencesManager: CorePreferences,
-    private val dispatcher: CoroutineDispatcher,
+    private val sessionManager: InstanceSessionManager,
+    private val instanceStore: InstanceStore,
+    private val instanceConfigLoader: InstanceConfigLoader,
+    private val pushRegistrations: PushRegistrations,
+    private val namespaces: StorageNamespaceProvider,
+    private val legacySessionAdoption: LegacySessionAdoptionStorage,
     private val analytics: AppAnalytics,
     private val deepLinkRouter: DeepLinkRouter,
     private val fileUtil: FileUtil,
@@ -55,7 +65,54 @@ class AppViewModel(
     val downloadFailedDialog: SharedFlow<DownloadFailed>
         get() = _downloadFailedDialog.asSharedFlow()
 
+    private val _isInstanceCatalogResolved = MutableStateFlow(false)
+
+    /**
+     * Whether the instance catalog for this launch is in place. The first screen depends on it
+     * (a site picker, or a site's own sign-in), so the activity routes only once it is.
+     */
+    val isInstanceCatalogResolved: StateFlow<Boolean> = _isInstanceCatalogResolved.asStateFlow()
+
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
+
+    /** With several sites and none selected, the first screen is site selection. */
+    val startsWithSiteSelection get() = instanceStore.hasMultipleInstances && instanceStore.currentInstance == null
+
+    init {
+        viewModelScope.launch { resolveInstanceCatalog() }
+    }
+
+    /**
+     * The first launch after upgrading from a single-site build: the learner was signed in to
+     * the site the app-level configuration points at, and that session now belongs to the
+     * matching instance. Open it, instead of asking which site to use. Checked once, so signing
+     * out later still leads to site selection.
+     */
+    private fun adoptLegacySession() {
+        if (legacySessionAdoption.hasCheckedLegacySession) return
+        legacySessionAdoption.hasCheckedLegacySession = true
+        if (!instanceStore.hasMultipleInstances || instanceStore.currentInstance != null) return
+        instanceStore.instancesConfig.instances
+            .firstOrNull { namespaces.namespaceFor(it).isLegacy && preferencesManager.hasSession(it.key) }
+            ?.let(instanceStore::select)
+    }
+
+    private suspend fun resolveInstanceCatalog() {
+        // Falls back to the cached or bundled catalog when the fetch fails or times out.
+        instanceStore.updateInstancesConfig(instanceConfigLoader.load())
+        // A saved selection whose session is gone (signed out right before the process died,
+        // or storage restored from a backup without its keys) would open a site nobody is signed
+        // in to. With several sites, start over at site selection instead.
+        val current = instanceStore.currentInstance
+        if (instanceStore.hasMultipleInstances && current != null && !preferencesManager.hasSession(current.key)) {
+            instanceStore.select(null)
+        }
+        adoptLegacySession()
+        // A selection restored from storage doesn't go through a switch, so nothing else
+        // applies its branding.
+        sessionManager.applyThemeForCurrentInstance()
+        _isInstanceCatalogResolved.value = true
+    }
 
     private var logoutHandledAt: Long = 0
 
@@ -69,8 +126,8 @@ class AppViewModel(
 
         setUserId(user)
 
-        if (user != null && preferencesManager.pushToken.isNotEmpty()) {
-            SyncFirebaseTokenWorker.schedule(context)
+        if (preferencesManager.pushToken.isNotEmpty()) {
+            SyncFirebaseTokenWorker.scheduleForSignedInSites(context, pushRegistrations)
         }
 
         if (canResetAppDirectory) {
@@ -80,7 +137,8 @@ class AppViewModel(
         viewModelScope.launch {
             appNotifier.notifier.collect { event ->
                 if (event is SignInEvent && config.getFirebaseConfig().isCloudMessagingEnabled) {
-                    SyncFirebaseTokenWorker.schedule(context)
+                    // Sign-in completes only on the site that is still selected.
+                    SyncFirebaseTokenWorker.schedule(context, instanceStore.currentInstance?.key)
                 } else if (event is LogoutEvent) {
                     handleLogoutEvent(event)
                 }
@@ -123,10 +181,8 @@ class AppViewModel(
         if (System.currentTimeMillis() - logoutHandledAt > LOGOUT_EVENT_THRESHOLD) {
             if (event.isForced) {
                 logoutHandledAt = System.currentTimeMillis()
-                preferencesManager.clearCorePreferences()
-                withContext(dispatcher) {
-                    room.clearAllTables()
-                }
+                // Signs out of the selected site only; other sites keep their sessions.
+                sessionManager.logoutCurrentInstance()
                 analytics.logoutEvent(true)
                 _logoutUser.value = Unit
             }

@@ -20,6 +20,7 @@ import org.openedx.core.data.storage.CorePreferences
 class OpenEdXFirebaseMessagingService : FirebaseMessagingService() {
 
     private val preferences: CorePreferences by inject()
+    private val registrations: PushRegistrations by inject()
     private val config: Config by inject()
 
     override fun onMessageReceived(message: RemoteMessage) {
@@ -37,9 +38,8 @@ class OpenEdXFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         preferences.pushToken = token
-        if (preferences.user != null) {
-            SyncFirebaseTokenWorker.schedule(this)
-        }
+        // The device token changed: every signed-in site needs the new one.
+        SyncFirebaseTokenWorker.scheduleForSignedInSites(this, registrations)
     }
 
     private fun handlePushNotification(message: RemoteMessage) {

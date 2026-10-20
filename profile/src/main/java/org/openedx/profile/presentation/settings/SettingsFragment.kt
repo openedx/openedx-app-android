@@ -35,65 +35,7 @@ class SettingsFragment : Fragment() {
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
                     },
-                    onAction = { action ->
-                        when (action) {
-                            SettingsScreenAction.AppVersionClick -> {
-                                viewModel.appVersionClickedEvent(requireContext())
-                            }
-
-                            SettingsScreenAction.LogoutClick -> {
-                                viewModel.logout()
-                            }
-
-                            SettingsScreenAction.PrivacyPolicyClick -> {
-                                viewModel.privacyPolicyClicked(
-                                    requireActivity().supportFragmentManager
-                                )
-                            }
-
-                            SettingsScreenAction.CookiePolicyClick -> {
-                                viewModel.cookiePolicyClicked(
-                                    requireActivity().supportFragmentManager
-                                )
-                            }
-
-                            SettingsScreenAction.DataSellClick -> {
-                                viewModel.dataSellClicked(
-                                    requireActivity().supportFragmentManager
-                                )
-                            }
-
-                            SettingsScreenAction.FaqClick -> viewModel.faqClicked()
-
-                            SettingsScreenAction.SupportClick -> {
-                                viewModel.emailSupportClicked(requireContext())
-                            }
-
-                            SettingsScreenAction.TermsClick -> {
-                                viewModel.termsOfUseClicked(
-                                    requireActivity().supportFragmentManager
-                                )
-                            }
-
-                            SettingsScreenAction.VideoSettingsClick -> {
-                                viewModel.videoSettingsClicked(
-                                    requireActivity().supportFragmentManager
-                                )
-                            }
-
-                            SettingsScreenAction.ManageAccountClick -> {
-                                viewModel.manageAccountClicked(
-                                    requireActivity().supportFragmentManager
-                                )
-                            }
-
-                            SettingsScreenAction.CalendarSettingsClick -> {
-                                viewModel.calendarSettingsClicked(
-                                    requireActivity().supportFragmentManager
-                                )
-                            }
-                        }
-                    }
+                    onAction = ::onAction
                 )
 
                 LaunchedEffect(logoutSuccess) {
@@ -103,6 +45,70 @@ class SettingsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun onAction(action: SettingsScreenAction) {
+        when (action) {
+                SettingsScreenAction.AppVersionClick -> {
+                    viewModel.appVersionClickedEvent(requireContext())
+                }
+
+                SettingsScreenAction.LogoutClick -> {
+                    viewModel.logout()
+                }
+
+                SettingsScreenAction.PrivacyPolicyClick -> {
+                    viewModel.privacyPolicyClicked(
+                        requireActivity().supportFragmentManager
+                    )
+                }
+
+                SettingsScreenAction.CookiePolicyClick -> {
+                    viewModel.cookiePolicyClicked(
+                        requireActivity().supportFragmentManager
+                    )
+                }
+
+                SettingsScreenAction.DataSellClick -> {
+                    viewModel.dataSellClicked(
+                        requireActivity().supportFragmentManager
+                    )
+                }
+
+                SettingsScreenAction.FaqClick -> viewModel.faqClicked()
+
+                SettingsScreenAction.SupportClick -> {
+                    viewModel.emailSupportClicked(requireContext())
+                }
+
+                SettingsScreenAction.TermsClick -> {
+                    viewModel.termsOfUseClicked(
+                        requireActivity().supportFragmentManager
+                    )
+                }
+
+                SettingsScreenAction.VideoSettingsClick -> {
+                    viewModel.videoSettingsClicked(
+                        requireActivity().supportFragmentManager
+                    )
+                }
+
+                SettingsScreenAction.ManageAccountClick -> {
+                    viewModel.manageAccountClicked(
+                        requireActivity().supportFragmentManager
+                    )
+                }
+
+                SettingsScreenAction.LearningSitesClick -> {
+                    viewModel.learningSitesClicked(requireActivity().supportFragmentManager)
+                }
+
+                SettingsScreenAction.CalendarSettingsClick -> {
+                    viewModel.calendarSettingsClicked(
+                        requireActivity().supportFragmentManager
+                    )
+                }
+            }
     }
 }
 
@@ -116,6 +122,7 @@ internal interface SettingsScreenAction {
     object TermsClick : SettingsScreenAction
     object SupportClick : SettingsScreenAction
     object VideoSettingsClick : SettingsScreenAction
+    object LearningSitesClick : SettingsScreenAction
     object ManageAccountClick : SettingsScreenAction
     object CalendarSettingsClick : SettingsScreenAction
 }

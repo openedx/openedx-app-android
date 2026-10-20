@@ -1,6 +1,7 @@
 package org.openedx.auth.presentation.signin
 
 import org.openedx.core.domain.model.RegistrationField
+import org.openedx.core.instance.Instance
 
 /**
  * Data class to store UI state of the SignIn screen
@@ -26,4 +27,6 @@ internal data class SignInUIState(
     val showProgress: Boolean = false,
     val loginSuccess: Boolean = false,
     val agreement: RegistrationField? = null,
+    /** The site being signed in to, when the learner chose it among several. */
+    val selectedSite: Instance? = null,
 )

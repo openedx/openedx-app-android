@@ -19,6 +19,8 @@ import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.exception.NoCachedDataException
+import org.openedx.core.instance.InstanceDatabases
+import org.openedx.core.instance.StorageNamespaceProvider
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.system.connection.NetworkConnection
 import java.net.URLDecoder
@@ -38,6 +40,8 @@ class CourseRepository(
     private val downloadDao: DownloadDao,
     private val preferencesManager: CorePreferences,
     private val networkConnection: NetworkConnection,
+    private val namespaces: StorageNamespaceProvider,
+    private val databases: InstanceDatabases,
 ) {
     // Session tracking - when entering a course, mark that data needs refresh
     private val needsRefresh = ConcurrentHashMap.newKeySet<String>()
@@ -276,10 +280,17 @@ class CourseRepository(
 
     suspend fun getXBlockProgress(blockId: String) = downloadDao.getOfflineXBlockProgress(blockId)
 
+    /**
+     * Runs in the background and can outlive a site switch, so it stays with the site it started
+     * on: progress is read from and cleared in that site's database, and it stops before sending
+     * anything once another site is selected, since requests go to the selected site.
+     */
     suspend fun submitAllOfflineXBlockProgress() {
-        val allOfflineXBlockProgress = downloadDao.getAllOfflineXBlockProgress()
-        allOfflineXBlockProgress.forEach {
-            submitOfflineXBlockProgress(it.blockId, it.courseId, it.jsonProgress.data)
+        val namespace = namespaces.current
+        val siteDao = databases.downloadDao(namespace)
+        for (progress in siteDao.getAllOfflineXBlockProgress()) {
+            if (namespaces.current != namespace) return
+            submitOfflineXBlockProgress(progress.blockId, progress.courseId, progress.jsonProgress.data, siteDao)
         }
     }
 
@@ -291,7 +302,8 @@ class CourseRepository(
     private suspend fun submitOfflineXBlockProgress(
         blockId: String,
         courseId: String,
-        jsonProgressData: String?
+        jsonProgressData: String?,
+        siteDao: DownloadDao = downloadDao,
     ) {
         if (!jsonProgressData.isNullOrEmpty()) {
             val parts = mutableListOf<MultipartBody.Part>()
@@ -302,7 +314,7 @@ class CourseRepository(
                 parts.add(MultipartBody.Part.createFormData(key, value))
             }
             api.submitOfflineXBlockProgress(courseId, blockId, parts)
-            downloadDao.removeOfflineXBlockProgress(listOf(blockId))
+            siteDao.removeOfflineXBlockProgress(listOf(blockId))
         }
     }
 

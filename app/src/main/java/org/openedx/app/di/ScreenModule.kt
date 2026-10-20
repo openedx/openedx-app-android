@@ -8,6 +8,7 @@ import org.openedx.app.AppViewModel
 import org.openedx.app.MainViewModel
 import org.openedx.auth.data.repository.AuthRepository
 import org.openedx.auth.domain.interactor.AuthInteractor
+import org.openedx.auth.presentation.learningsites.LearningSitesViewModel
 import org.openedx.auth.presentation.logistration.LogistrationViewModel
 import org.openedx.auth.presentation.restore.RestorePasswordViewModel
 import org.openedx.auth.presentation.signin.SignInViewModel
@@ -90,9 +91,13 @@ val screenModule = module {
         AppViewModel(
             config = get(),
             appNotifier = get(),
-            room = get(),
             preferencesManager = get(),
-            dispatcher = get(named("IODispatcher")),
+            sessionManager = get(),
+            instanceStore = get(),
+            instanceConfigLoader = get(),
+            pushRegistrations = get(),
+            namespaces = get(),
+            legacySessionAdoption = get(),
             analytics = get(),
             deepLinkRouter = get(),
             fileUtil = get(),
@@ -103,7 +108,7 @@ val screenModule = module {
     }
     viewModel { MainViewModel(get(), get(), get(), get(), get()) }
 
-    factory { AuthRepository(get(), get(), get()) }
+    factory { AuthRepository(get(), get(), get(), get(), get()) }
     factory { AuthInteractor(get()) }
     factory { Validator() }
 
@@ -137,7 +142,20 @@ val screenModule = module {
             courseId,
             infoType,
             lang,
-            get()
+            get(),
+            get(),
+        )
+    }
+
+    viewModel { (isSwitching: Boolean) ->
+        LearningSitesViewModel(
+            isSwitching = isSwitching,
+            instanceStore = get(),
+            preferences = get(),
+            sessionManager = get(),
+            router = get(),
+            config = get(),
+            dispatcher = get(named("IODispatcher")),
         )
     }
 
@@ -205,7 +223,7 @@ val screenModule = module {
         )
     }
 
-    factory { ProfileRepository(get(), get(), get(), get(), get()) }
+    factory { ProfileRepository(get(), get(), get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }
     viewModel {
         ProfileViewModel(
@@ -269,7 +287,7 @@ val screenModule = module {
     factory { CalendarRepository(get(), get(), get()) }
     factory { CalendarInteractor(get()) }
 
-    single { CourseRepository(get(), get(), get(), get(), get()) }
+    single { CourseRepository(get(), get(), get(), get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
     single<org.openedx.core.domain.interactor.CourseInteractor> { get<CourseInteractor>() }
 
