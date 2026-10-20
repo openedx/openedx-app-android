@@ -21,9 +21,10 @@ interface InstanceSessionManager {
     suspend fun switchActiveInstance(instance: Instance)
 
     /**
-     * Signs out of the selected site: cancels downloads, unregisters push, clears its tokens
-     * and user, then clears the selection. Cached courses and downloaded files stay, so signing
-     * back in to the same site is fast.
+     * Signs out of the site selected when it is called: cancels downloads, unregisters push,
+     * clears its tokens and user, then clears the selection unless the learner has switched to
+     * another site in the meantime. Cached courses and downloaded files stay, so signing back in
+     * to the same site is fast.
      */
     suspend fun logoutCurrentInstance()
 
@@ -71,24 +72,30 @@ class DefaultInstanceSessionManager(
     }
 
     override suspend fun logoutCurrentInstance() {
-        downloadWorkerController.cancelUnfinishedDownloads()
-        // Before the tokens go: unregistering is an authenticated call.
-        pushTokenUnregistrar?.unregisterPushToken(instanceStore.currentInstance?.key)
-        preferences.clearCorePreferences()
-        cookieManager.clearWebViewCookie()
-        // Last, so nothing observes a half signed-out site.
-        instanceStore.select(null)
-        applyThemeForCurrentInstance()
+        signOut(instanceStore.currentInstance?.key, isSelected = true)
     }
 
     override suspend fun logout(instance: Instance) = logout(instance.key)
 
     override suspend fun logout(instanceKey: String?) {
-        if (instanceStore.currentInstance?.key == instanceKey) {
-            logoutCurrentInstance()
-        } else {
-            pushTokenUnregistrar?.unregisterPushToken(instanceKey)
-            preferences.clearSession(instanceKey)
+        signOut(instanceKey, isSelected = instanceStore.currentInstance?.key == instanceKey)
+    }
+
+    /**
+     * The site is fixed when the sign-out starts: unregistering push waits on the network, and the
+     * learner can switch sites meanwhile. Only that site's session is cleared, and the selection,
+     * web cookies and theme are reset only while it is still the selected site.
+     */
+    private suspend fun signOut(instanceKey: String?, isSelected: Boolean) {
+        if (isSelected) downloadWorkerController.cancelUnfinishedDownloads()
+        // Before the tokens go: unregistering is an authenticated call.
+        pushTokenUnregistrar?.unregisterPushToken(instanceKey)
+        preferences.clearSession(instanceKey)
+        if (isSelected && instanceStore.currentInstance?.key == instanceKey) {
+            cookieManager.clearWebViewCookie()
+            // Last, so nothing observes a half signed-out site.
+            instanceStore.select(null)
+            applyThemeForCurrentInstance()
         }
     }
 

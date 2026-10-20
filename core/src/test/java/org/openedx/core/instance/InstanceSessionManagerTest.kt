@@ -7,10 +7,14 @@ import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.openedx.core.DatabaseManager
 import org.openedx.core.data.storage.CorePreferences
@@ -73,7 +77,7 @@ class InstanceSessionManagerTest {
         coVerifyOrder {
             downloads.cancelUnfinishedDownloads()
             push.unregisterPushToken("alpha")
-            preferences.clearCorePreferences()
+            preferences.clearSession("alpha")
         }
         assertNull(store.currentInstance)
         assertNull(InstanceThemeManager.theme.value)
@@ -87,7 +91,7 @@ class InstanceSessionManagerTest {
 
         manager(pushTokenUnregistrar = null).logoutCurrentInstance()
 
-        coVerify { preferences.clearCorePreferences() }
+        coVerify { preferences.clearSession("alpha") }
         assertNull(store.currentInstance)
     }
 
@@ -95,7 +99,7 @@ class InstanceSessionManagerTest {
     fun `clearing the selection happens after the session is cleared`() = runBlocking {
         store.select(alpha)
         var selectedWhileClearing: Instance? = null
-        coEvery { preferences.clearCorePreferences() } answers { selectedWhileClearing = store.currentInstance }
+        coEvery { preferences.clearSession("alpha") } answers { selectedWhileClearing = store.currentInstance }
 
         manager().logoutCurrentInstance()
 
@@ -121,8 +125,60 @@ class InstanceSessionManagerTest {
 
         manager().logout(beta)
 
-        coVerify { preferences.clearCorePreferences() }
+        coVerify { preferences.clearSession("beta") }
         assertNull(store.currentInstance)
+    }
+
+    @Test
+    fun `switching sites while push unregisters signs out only the site that started it`() = runBlocking {
+        val sessions = mutableSetOf("alpha", "beta")
+        every { preferences.hasSession(any()) } answers { firstArg<String?>() in sessions }
+        coEvery { preferences.clearSession(any()) } answers { sessions.remove(firstArg<String?>()) }
+        val unregisterStarted = CompletableDeferred<Unit>()
+        val unregisterDone = CompletableDeferred<Unit>()
+        coEvery { push.unregisterPushToken("alpha") } coAnswers {
+            unregisterStarted.complete(Unit)
+            unregisterDone.await()
+        }
+        val manager = manager()
+        manager.switchActiveInstance(alpha)
+
+        val logout = launch { manager.logoutCurrentInstance() }
+        unregisterStarted.await()
+        manager.switchActiveInstance(beta)
+        unregisterDone.complete(Unit)
+        logout.join()
+
+        assertFalse(preferences.hasSession("alpha"))
+        assertTrue(preferences.hasSession("beta"))
+        coVerify(exactly = 0) { preferences.clearSession("beta") }
+        coVerify(exactly = 0) { preferences.clearCorePreferences() }
+        assertEquals(beta, store.currentInstance)
+        assertEquals("beta", InstanceThemeManager.theme.value?.key)
+        verify(exactly = 0) { cookies.clearWebViewCookie() }
+    }
+
+    @Test
+    fun `signing out of another site while it becomes selected leaves the selection alone`() = runBlocking {
+        val unregisterStarted = CompletableDeferred<Unit>()
+        val unregisterDone = CompletableDeferred<Unit>()
+        coEvery { push.unregisterPushToken("beta") } coAnswers {
+            unregisterStarted.complete(Unit)
+            unregisterDone.await()
+        }
+        val manager = manager()
+        manager.switchActiveInstance(alpha)
+
+        val logout = launch { manager.logout(beta) }
+        unregisterStarted.await()
+        manager.switchActiveInstance(beta)
+        unregisterDone.complete(Unit)
+        logout.join()
+
+        coVerify { preferences.clearSession("beta") }
+        coVerify(exactly = 0) { downloads.cancelUnfinishedDownloads() }
+        assertEquals(beta, store.currentInstance)
+        verify(exactly = 0) { cookies.clearWebViewCookie() }
     }
 
     @Test
