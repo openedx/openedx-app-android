@@ -8,6 +8,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -191,5 +192,46 @@ class LearningSitesViewModelTest {
 
         coVerify { sessionManager.logout(beta) }
         verify { router.navigateToLearningSites(fragmentManager, isSwitching = false) }
+    }
+
+    @Test
+    fun `no site can be picked while a sign-out is still in progress`() = runTest {
+        signedIn = setOf("alpha", "beta")
+        store.select(alpha)
+        val signOutDone = CompletableDeferred<Unit>()
+        coEvery { sessionManager.logout(alpha) } coAnswers {
+            signOutDone.await()
+            signedIn = setOf("beta")
+        }
+        val viewModel = viewModel(isSwitching = true)
+
+        viewModel.logOut(fragmentManager, alpha)
+        viewModel.select(fragmentManager, beta)
+        viewModel.logOut(fragmentManager, beta)
+
+        verify(exactly = 0) { sessionManager.switchActiveInstance(any()) }
+        coVerify(exactly = 0) { sessionManager.logout(beta) }
+
+        signOutDone.complete(Unit)
+
+        verify { router.navigateToLearningSites(fragmentManager, isSwitching = false) }
+    }
+
+    @Test
+    fun `sites can be picked again once a sign-out of another site finishes`() = runTest {
+        signedIn = setOf("alpha", "beta")
+        store.select(beta)
+        val signOutDone = CompletableDeferred<Unit>()
+        coEvery { sessionManager.logout(alpha) } coAnswers {
+            signOutDone.await()
+            signedIn = setOf("beta")
+        }
+        val viewModel = viewModel(isSwitching = true)
+
+        viewModel.logOut(fragmentManager, alpha)
+        signOutDone.complete(Unit)
+        viewModel.select(fragmentManager, beta)
+
+        verify(exactly = 1) { sessionManager.switchActiveInstance(beta) }
     }
 }

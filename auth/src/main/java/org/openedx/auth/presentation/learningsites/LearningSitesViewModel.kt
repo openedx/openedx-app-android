@@ -51,6 +51,9 @@ class LearningSitesViewModel(
     /** Set while a selection navigates away, so a second tap can't start another one. */
     private var isNavigating = false
 
+    /** Set while a sign-out waits on the network: switching sites then would race it. */
+    private var isSigningOut = false
+
     init {
         refresh()
     }
@@ -80,7 +83,7 @@ class LearningSitesViewModel(
      * still running on them can act on the new site.
      */
     fun select(fragmentManager: FragmentManager, instance: Instance) {
-        if (isNavigating) return
+        if (isNavigating || isSigningOut) return
         isNavigating = true
         val isSignedIn = instance.key in signedInKeys
         if (isSwitching) {
@@ -107,10 +110,15 @@ class LearningSitesViewModel(
      * signed-in sites.
      */
     fun logOut(fragmentManager: FragmentManager, instance: Instance) {
-        if (isNavigating) return
+        if (isNavigating || isSigningOut) return
+        isSigningOut = true
         viewModelScope.launch {
             val wasCurrent = instance.key == _uiState.value.currentSite?.key
-            sessionManager.logout(instance)
+            try {
+                sessionManager.logout(instance)
+            } finally {
+                isSigningOut = false
+            }
             if (wasCurrent && isSwitching) {
                 isNavigating = true
                 router.navigateToLearningSites(fragmentManager, isSwitching = false)
