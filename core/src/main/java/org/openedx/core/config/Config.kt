@@ -6,6 +6,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.openedx.core.domain.model.AgreementUrls
+import org.openedx.core.instance.InstancesConfig
 import java.io.InputStreamReader
 
 @Suppress("TooManyFunctions")
@@ -144,6 +145,11 @@ class Config(context: Context) {
 
     fun isRegistrationEnabled(): Boolean {
         return getBoolean(REGISTRATION_ENABLED, true)
+    }
+
+    /** The bundled `INSTANCES` catalog, before any remote catalog replaces it. */
+    fun getInstancesConfig(): InstancesConfig {
+        return InstancesConfig.fromAppConfig(configProperties)
     }
 
     private fun getExperimentalFeaturesConfig(): ExperimentalFeaturesConfig {
