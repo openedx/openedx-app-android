@@ -94,3 +94,52 @@ UI_COMPONENTS:
   COURSE_DROPDOWN_NAVIGATION_ENABLED: false
   COURSE_UNIT_PROGRESS_ENABLED: false
   COURSE_DOWNLOAD_QUEUE_SCREEN: false
+
+# Learning sites ("instances") this build can sign in to. One entry: the app behaves like a
+# single-site build, with no site picker. Several entries: the learner picks a site and can stay
+# signed in to more than one. NAME, API_HOST_URL and OAUTH_CLIENT_ID are required; every other key
+# is optional and falls back to the app-level value above.
+INSTANCES:
+  - KEY: 'localhost'
+    NAME: 'Localhost'
+    INSTANCE_NAME:
+      en: 'Localhost'
+    ENVIRONMENT_DISPLAY_NAME: 'Localhost'
+    API_HOST_URL: 'http://localhost:8000'
+    OAUTH_CLIENT_ID: 'OAUTH_CLIENT_ID'
+    SSO_URL: ''
+    SSO_URL_SUCCESSFUL_LOGIN: ''
+    IS_SWITCH_INSTANCE_LOGIN_ENABLED: false
+    FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
+    FAQ_URL: ''
+    PLATFORM_NAME: 'OpenEdX'
+    TOKEN_TYPE: 'JWT'
+    THEME:
+      LIGHT:
+        accent_color: '#3C68FF'
+      DARK:
+        accent_color: '#3C68FF'
+      LOGO_URL: ''
+      HEADER_BACKGROUND_URL: ''
+    UI_COMPONENTS:
+      COURSE_DROPDOWN_NAVIGATION_ENABLED: false
+      COURSE_UNIT_PROGRESS_ENABLED: false
+      COURSE_DOWNLOAD_QUEUE_SCREEN: false
+    AGREEMENT_URLS:
+      PRIVACY_POLICY_URL: ''
+      COOKIE_POLICY_URL: ''
+      DATA_SELL_CONSENT_URL: ''
+      TOS_URL: ''
+      EULA_URL: ''
+      SUPPORTED_LANGUAGES: [ ]
+    DISCOVERY:
+      TYPE: 'native'
+    PROGRAM:
+      TYPE: 'native'
+    DASHBOARD:
+      TYPE: 'gallery'
+    EXPERIMENTAL_FEATURES:
+      APP_LEVEL_DOWNLOADS:
+        ENABLED: false
+      APP_LEVEL_DATES:
+        ENABLED: false
