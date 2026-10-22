@@ -396,7 +396,7 @@ private fun CourseItem(
                 Text(
                     modifier = Modifier.testTag("txt_course_org"),
                     text = enrolledCourse.course.org,
-                    color = MaterialTheme.appColors.textFieldHint,
+                    color = MaterialTheme.appColors.textSecondary,
                     style = MaterialTheme.appTypography.labelMedium
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -432,7 +432,7 @@ private fun CourseItem(
                                 enrolledCourse.course.startType,
                                 enrolledCourse.course.startDisplay
                             ),
-                            color = MaterialTheme.appColors.textFieldHint,
+                            color = MaterialTheme.appColors.textSecondary,
                             style = MaterialTheme.appTypography.labelMedium
                         )
                         Box(
@@ -475,7 +475,7 @@ private fun EmptyState() {
             Icon(
                 painter = painterResource(id = R.drawable.dashboard_ic_empty),
                 contentDescription = null,
-                tint = MaterialTheme.appColors.textFieldBorder
+                tint = MaterialTheme.appColors.emptyStateIconColor
             )
             Spacer(Modifier.height(16.dp))
             Text(

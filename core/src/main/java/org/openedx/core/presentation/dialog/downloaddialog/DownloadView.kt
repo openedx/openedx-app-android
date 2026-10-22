@@ -53,7 +53,7 @@ fun DownloadDialogItem(
         Text(
             text = downloadDialogItem.size.toFileSize(1, false),
             style = MaterialTheme.appTypography.bodySmall,
-            color = MaterialTheme.appColors.textFieldHint
+            color = MaterialTheme.appColors.textSecondary
         )
     }
 }

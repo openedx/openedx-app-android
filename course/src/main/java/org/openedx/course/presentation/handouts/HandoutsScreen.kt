@@ -135,7 +135,7 @@ private fun HandoutsItem(
                 Text(
                     text = description,
                     style = MaterialTheme.appTypography.labelSmall,
-                    color = MaterialTheme.appColors.textFieldHint
+                    color = MaterialTheme.appColors.textSecondary
                 )
             }
         }

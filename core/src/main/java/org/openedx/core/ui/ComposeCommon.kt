@@ -275,7 +275,7 @@ fun SearchBar(
                     .testTag("txt_search_placeholder")
                     .fillMaxWidth(),
                 text = label,
-                color = MaterialTheme.appColors.textSecondary,
+                color = MaterialTheme.appColors.textFieldHint,
                 style = MaterialTheme.appTypography.bodyMedium
             )
         },
@@ -367,7 +367,7 @@ fun SearchBarStateless(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = label,
-                color = MaterialTheme.appColors.textSecondary,
+                color = MaterialTheme.appColors.textFieldHint,
                 style = MaterialTheme.appTypography.bodyMedium
             )
         },
@@ -1126,7 +1126,7 @@ fun NoContentScreen(message: String, icon: Painter) {
                 ),
             painter = icon,
             contentDescription = null,
-            tint = MaterialTheme.appColors.progressBarBackgroundColor,
+            tint = MaterialTheme.appColors.emptyStateIconColor,
         )
         Spacer(Modifier.height(24.dp))
         Text(

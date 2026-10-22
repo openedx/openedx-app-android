@@ -11,6 +11,8 @@ data class AppColors(
     val textPrimaryLight: Color,
     val textHyperLink: Color,
     val textSecondary: Color,
+    val emptyStateIconColor: Color,
+    val secondaryContentColor: Color,
     val textDark: Color,
     val textAccent: Color,
     val textWarning: Color,

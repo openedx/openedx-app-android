@@ -442,7 +442,7 @@ fun CourseItem(
                         .padding(horizontal = 8.dp)
                         .padding(top = 4.dp),
                     style = MaterialTheme.appTypography.labelMedium,
-                    color = MaterialTheme.appColors.textFieldHint,
+                    color = MaterialTheme.appColors.textSecondary,
                     overflow = TextOverflow.Ellipsis,
                     minLines = 1,
                     maxLines = 2,
@@ -519,7 +519,7 @@ fun EmptyState(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.core_ic_book),
-                tint = MaterialTheme.appColors.textFieldBorder,
+                tint = MaterialTheme.appColors.emptyStateIconColor,
                 contentDescription = null
             )
             Spacer(Modifier.height(4.dp))
