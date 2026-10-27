@@ -147,6 +147,11 @@ class Config(context: Context) {
         return getBoolean(REGISTRATION_ENABLED, true)
     }
 
+    /** Where the remote instance catalog is fetched from; empty means bundled catalog only. */
+    fun getInstancesCatalogUrl(): String {
+        return getString(INSTANCES_CATALOG_URL, "")
+    }
+
     /** The bundled `INSTANCES` catalog, before any remote catalog replaces it. */
     fun getInstancesConfig(): InstancesConfig {
         return InstancesConfig.fromAppConfig(configProperties)
@@ -223,6 +228,7 @@ class Config(context: Context) {
         private const val BRANCH = "BRANCH"
         private const val UI_COMPONENTS = "UI_COMPONENTS"
         private const val PLATFORM_NAME = "PLATFORM_NAME"
+        private const val INSTANCES_CATALOG_URL = "INSTANCES_CATALOG_URL"
     }
 
     enum class ViewType {
