@@ -62,6 +62,15 @@ class InstanceThemeTest {
     }
 
     @Test
+    fun `a dark-only value applies in dark mode and leaves light mode alone`() {
+        val theme = InstanceTheme(key = "acme", dark = mapOf("background" to "#0A0A0A", "text_primary" to "#F5F5F5"))
+
+        assertEquals(Color(0xFF0A0A0A), theme.applyTo(dark, isDark = true).background)
+        assertEquals(Color(0xFFF5F5F5), theme.applyTo(dark, isDark = true).textPrimary)
+        assertEquals(light, theme.applyTo(light, isDark = false))
+    }
+
+    @Test
     fun `light and dark values resolve independently`() {
         val theme = InstanceTheme(
             key = "acme",
