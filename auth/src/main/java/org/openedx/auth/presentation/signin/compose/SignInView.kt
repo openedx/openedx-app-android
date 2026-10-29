@@ -458,7 +458,7 @@ private fun PasswordTextField(
         trailingIcon = {
             PasswordVisibilityIcon(
                 isPasswordVisible = isPasswordVisible,
-                onClick = { isPasswordVisible = !isPasswordVisible },
+                onCheckedChange = { isPasswordVisible = it },
             )
         },
         keyboardOptions =

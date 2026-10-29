@@ -22,7 +22,7 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -43,6 +43,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -348,7 +350,7 @@ fun InputRegistrationField(
             {
                 PasswordVisibilityIcon(
                     isPasswordVisible = isPasswordVisible,
-                    onClick = { isPasswordVisible = !isPasswordVisible }
+                    onCheckedChange = { isPasswordVisible = it }
                 )
             }
         } else {
@@ -558,18 +560,25 @@ fun ExpandableText(
 @Composable
 internal fun PasswordVisibilityIcon(
     isPasswordVisible: Boolean,
-    onClick: () -> Unit,
+    onCheckedChange: (Boolean) -> Unit,
 ) {
-    val (image, description) = if (isPasswordVisible) {
-        Icons.Filled.VisibilityOff to stringResource(R.string.auth_accessibility_hide_password)
+    val image = if (isPasswordVisible) {
+        Icons.Filled.VisibilityOff
     } else {
-        Icons.Filled.Visibility to stringResource(R.string.auth_accessibility_show_password)
+        Icons.Filled.Visibility
     }
 
-    IconButton(onClick = onClick) {
+    val description = stringResource(R.string.auth_accessibility_show_password)
+
+    // Set the name on the toggle itself, so TalkBack reads the name, role and checked state together.
+    IconToggleButton(
+        checked = isPasswordVisible,
+        onCheckedChange = onCheckedChange,
+        modifier = Modifier.semantics { contentDescription = description },
+    ) {
         Icon(
             imageVector = image,
-            contentDescription = description,
+            contentDescription = null,
             tint = MaterialTheme.appColors.onSurface
         )
     }
