@@ -1,5 +1,7 @@
 API_HOST_URL: 'http://localhost:8000'
 APPLICATION_ID: 'org.openedx.app'
+VERSION_CODE: 1
+VERSION_NAME: '1.0.0'
 ENVIRONMENT_DISPLAY_NAME: 'Localhost'
 URI_SCHEME: ''
 FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
