@@ -6,6 +6,7 @@ import org.openedx.auth.data.model.RegistrationFields
 import org.openedx.auth.data.model.ValidationFields
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.model.User
+import org.openedx.core.instance.RequestInstance
 import retrofit2.Call
 import retrofit2.http.Field
 import retrofit2.http.FieldMap
@@ -13,6 +14,7 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Tag
 
 interface AuthApi {
 
@@ -24,6 +26,7 @@ interface AuthApi {
         @Field("token_type") tokenType: String,
         @Field("asymmetric_jwt") isAsymmetricJwt: Boolean = true,
         @Path("auth_type") authType: String,
+        @Tag instance: RequestInstance,
     ): AuthResponse
 
     @FormUrlEncoded
@@ -35,6 +38,7 @@ interface AuthApi {
         @Field("password") password: String,
         @Field("token_type") tokenType: String,
         @Field("asymmetric_jwt") isAsymmetricJwt: Boolean = true,
+        @Tag instance: RequestInstance,
     ): AuthResponse
 
     @FormUrlEncoded
@@ -59,7 +63,7 @@ interface AuthApi {
     suspend fun validateRegistrationFields(@FieldMap fields: Map<String, String>): ValidationFields
 
     @GET(ApiConstants.GET_USER_PROFILE)
-    suspend fun getProfile(): User
+    suspend fun getProfile(@Tag instance: RequestInstance): User
 
     @FormUrlEncoded
     @POST(ApiConstants.URL_PASSWORD_RESET)

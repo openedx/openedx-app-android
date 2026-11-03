@@ -23,6 +23,7 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.instance.Instance
 import org.openedx.core.instance.InstanceProvider
+import org.openedx.core.instance.RequestInstance
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
@@ -126,14 +127,18 @@ class InstanceAwareNetworkingTest {
 
     // region HeadersInterceptor
 
+    private val catalog = listOf(alpha, beta).associateBy { it.key }
+
     private fun headersInterceptor(provider: InstanceProvider): HeadersInterceptor {
         val config = mockk<Config> {
             every { getAccessTokenType() } returns "JWT"
             every { getApiHostURL() } returns appBase
         }
-        val preferences = mockk<CorePreferences> { every { accessToken } returns "token-a" }
+        val preferences = mockk<CorePreferences> {
+            every { accessToken(any()) } answers { "token-${firstArg<String?>() ?: "app"}" }
+        }
         val appData = AppData(appName = "app", versionName = "1", applicationId = "org.openedx.app")
-        return HeadersInterceptor(appData, config, preferences, provider)
+        return HeadersInterceptor(appData, config, preferences, provider) { catalog[it] }
     }
 
     @Test
@@ -143,7 +148,7 @@ class InstanceAwareNetworkingTest {
         val toSite = forward(interceptor, Request.Builder().url("https://alpha.example.com/api/x").build())
         val elsewhere = forward(interceptor, Request.Builder().url("https://beta.example.com/api/x").build())
 
-        assertEquals("JWT token-a", toSite.header("Authorization"))
+        assertEquals("JWT token-alpha", toSite.header("Authorization"))
         assertNull(elsewhere.header("Authorization"))
     }
 
@@ -153,7 +158,41 @@ class InstanceAwareNetworkingTest {
 
         val forwarded = forward(interceptor, Request.Builder().url("https://app.example.com/api/x").build())
 
-        assertEquals("JWT token-a", forwarded.header("Authorization"))
+        assertEquals("JWT token-app", forwarded.header("Authorization"))
+    }
+
+    @Test
+    fun `a request pinned to a site goes there with that site's token whichever site is selected`() {
+        val provider = FakeInstanceProvider(beta)
+        val chain = OkHttpClient.Builder()
+            .addInterceptor(InstanceHostInterceptor(appBase, provider) { catalog[it] })
+            .addInterceptor(headersInterceptor(provider))
+        var forwarded: Request? = null
+        chain.addInterceptor {
+            forwarded = it.request()
+            ok(it.request(), "{}")
+        }
+        val request = Request.Builder()
+            .url("https://app.example.com/api/mobile/v4/notifications/create-token/")
+            .tag(RequestInstance::class.java, RequestInstance("alpha"))
+            .build()
+
+        chain.build().newCall(request).execute().close()
+
+        assertEquals("alpha.example.com", forwarded?.url?.host)
+        assertEquals("JWT token-alpha", forwarded?.header("Authorization"))
+        assertEquals(RequestInstance("alpha"), forwarded?.tag(RequestInstance::class.java))
+    }
+
+    @Test
+    fun `a request pinned to a site no longer in the catalog carries no token`() {
+        val interceptor = headersInterceptor(FakeInstanceProvider(beta))
+        val request = Request.Builder()
+            .url("https://app.example.com/api/x")
+            .tag(RequestInstance::class.java, RequestInstance("gone"))
+            .build()
+
+        assertNull(forward(interceptor, request).header("Authorization"))
     }
 
     // endregion

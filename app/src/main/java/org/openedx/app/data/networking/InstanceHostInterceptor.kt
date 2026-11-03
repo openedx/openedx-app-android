@@ -5,14 +5,9 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
+import org.openedx.core.instance.Instance
 import org.openedx.core.instance.InstanceProvider
-
-/**
- * Which instance a request was sent for, attached as an OkHttp tag when the request starts.
- * Token refresh reads it, so a response that arrives after a switch is still handled for the
- * site that sent it.
- */
-data class RequestInstance(val instanceKey: String?)
+import org.openedx.core.instance.RequestInstance
 
 /**
  * Re-targets requests built against the app's base URL at the selected instance: scheme, host
@@ -22,16 +17,19 @@ data class RequestInstance(val instanceKey: String?)
 class InstanceHostInterceptor(
     appBaseUrl: String,
     private val instanceProvider: InstanceProvider,
+    private val instanceByKey: (String) -> Instance? = { null },
 ) : Interceptor {
 
     private val appBase: HttpUrl? = appBaseUrl.toHttpUrlOrNull()
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        val instance = instanceProvider.currentInstance
         val request = chain.request()
-        val rewritten = rewriteHostIfNeeded(request, instance?.apiHostUrl)
+        // A request pinned to a site by its caller goes there; any other goes to the selected one.
+        val pinned = request.tag(RequestInstance::class.java)
+        val target = if (pinned != null) pinned.instanceKey?.let(instanceByKey) else instanceProvider.currentInstance
+        val rewritten = rewriteHostIfNeeded(request, target?.apiHostUrl)
             .newBuilder()
-            .tag(RequestInstance::class.java, RequestInstance(instance?.key))
+            .tag(RequestInstance::class.java, pinned ?: RequestInstance(target?.key))
             .build()
         return chain.proceed(rewritten)
     }

@@ -7,6 +7,8 @@ import org.openedx.core.domain.model.VideoSettings
 interface CorePreferences {
     var accessToken: String
     var refreshToken: String
+
+    /** This device's push token. Device-wide: each signed-in site registers the same token. */
     var pushToken: String
     var accessTokenExpiresAt: Long
     var user: User?
@@ -30,4 +32,13 @@ interface CorePreferences {
 
     /** Stores refreshed tokens for the site that issued them, whichever site is selected now. */
     fun saveTokens(instanceKey: String?, accessToken: String, refreshToken: String, expiresAt: Long)
+
+    fun saveAccessToken(instanceKey: String?, accessToken: String)
+
+    fun saveUser(instanceKey: String?, user: User?)
+
+    /** Who signed in to [instanceKey]'s site last. Survives logout, unlike [user]. */
+    fun lastSignedInUsername(instanceKey: String?): String
+
+    fun setLastSignedInUsername(instanceKey: String?, username: String)
 }

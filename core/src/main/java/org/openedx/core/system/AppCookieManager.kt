@@ -36,6 +36,14 @@ class AppCookieManager(private val config: Config, private val api: CookiesApi) 
         authSessionCookieExpiration = -1
     }
 
+    /**
+     * Forgets that the session cookies are fresh, so the next web page fetches them again, for
+     * the site selected then. Cheap enough for the main thread: it doesn't touch the WebView.
+     */
+    fun invalidateSessionCookie() {
+        authSessionCookieExpiration = -1
+    }
+
     fun isSessionCookieMissingOrExpired(): Boolean {
         return authSessionCookieExpiration < System.currentTimeMillis()
     }
