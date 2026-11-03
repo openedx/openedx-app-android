@@ -254,7 +254,7 @@ private fun StorageBar(
                     freeSpace.toFileSize(1, false)
                 ),
                 style = MaterialTheme.appTypography.labelSmall,
-                color = MaterialTheme.appColors.textFieldHint,
+                color = MaterialTheme.appColors.textSecondary,
                 modifier = Modifier.weight(1f)
             )
             Text(

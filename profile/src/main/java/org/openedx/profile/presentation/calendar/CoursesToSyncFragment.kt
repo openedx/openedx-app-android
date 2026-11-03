@@ -366,7 +366,7 @@ private fun EmptyListState(
         Icon(
             modifier = Modifier.size(96.dp),
             painter = painterResource(id = coreR.drawable.core_ic_book),
-            tint = MaterialTheme.appColors.divider,
+            tint = MaterialTheme.appColors.emptyStateIconColor,
             contentDescription = null
         )
         Text(

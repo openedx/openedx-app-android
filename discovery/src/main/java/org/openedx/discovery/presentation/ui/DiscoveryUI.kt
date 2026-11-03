@@ -139,7 +139,7 @@ fun DiscoveryCourseItem(
                         .testTag("txt_course_org")
                         .padding(top = 12.dp),
                     text = course.org,
-                    color = MaterialTheme.appColors.textFieldHint,
+                    color = MaterialTheme.appColors.textSecondary,
                     style = MaterialTheme.appTypography.labelMedium
                 )
                 Text(

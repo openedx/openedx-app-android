@@ -276,7 +276,7 @@ private fun EmptyState(
             Icon(
                 modifier = Modifier.size(100.dp),
                 imageVector = Icons.Outlined.CalendarMonth,
-                tint = MaterialTheme.appColors.textFieldBorder,
+                tint = MaterialTheme.appColors.emptyStateIconColor,
                 contentDescription = null
             )
             Spacer(Modifier.height(4.dp))

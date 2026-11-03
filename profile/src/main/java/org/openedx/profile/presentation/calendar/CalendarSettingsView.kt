@@ -206,7 +206,7 @@ fun CalendarSyncSection(
                 Text(
                     text = stringResource(id = calendarSyncState.title),
                     style = MaterialTheme.appTypography.labelSmall,
-                    color = MaterialTheme.appColors.textFieldHint
+                    color = MaterialTheme.appColors.textSecondary
                 )
             }
             if (calendarSyncState == CalendarSyncState.SYNCHRONIZATION) {

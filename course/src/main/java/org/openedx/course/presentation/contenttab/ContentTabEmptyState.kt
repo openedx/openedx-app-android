@@ -51,7 +51,7 @@ fun ContentTabEmptyState(
                     .size(120.dp),
                 painter = painterResource(R.drawable.course_ic_warning),
                 contentDescription = null,
-                tint = MaterialTheme.appColors.textFieldHint
+                tint = MaterialTheme.appColors.emptyStateIconColor
             )
             Spacer(Modifier.height(24.dp))
         }
