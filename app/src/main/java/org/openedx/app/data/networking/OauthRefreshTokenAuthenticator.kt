@@ -23,6 +23,7 @@ import org.openedx.core.ApiConstants.TOKEN_TYPE_JWT
 import org.openedx.core.BuildConfig
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.instance.Instance
 import org.openedx.core.instance.InstanceProvider
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
@@ -42,7 +43,9 @@ class OauthRefreshTokenAuthenticator(
 ) : Authenticator, Interceptor {
 
     private val authApis = ConcurrentHashMap<String, AuthApi>()
-    private var lastTokenRefreshRequestTime = 0L
+
+    /** Per instance key ("" for none): one site's refresh mustn't hold back another's. */
+    private val lastTokenRefreshRequestTimes = ConcurrentHashMap<String, Long>()
 
     override fun intercept(chain: Interceptor.Chain): Response {
         if (isTokenExpired() && isForActiveInstance(chain.request())) {
@@ -54,9 +57,9 @@ class OauthRefreshTokenAuthenticator(
         return chain.proceed(chain.request())
     }
 
-    /** Token endpoint of the selected instance, or of the app-level host when none is selected. */
-    private fun authApi(): AuthApi {
-        val baseUrl = instanceProvider.currentInstance?.apiHostUrl ?: config.getApiHostURL()
+    /** Token endpoint of [instance], or of the app-level host when there is none. */
+    private fun authApi(instance: Instance?): AuthApi {
+        val baseUrl = instance?.apiHostUrl ?: config.getApiHostURL()
         return authApis.getOrPut(baseUrl) {
             Retrofit.Builder()
                 .baseUrl(baseUrl)
@@ -71,18 +74,23 @@ class OauthRefreshTokenAuthenticator(
      * A 401 for a request sent before the learner switched sites says nothing about the site
      * that is selected now: refreshing it, or logging out, would act on the wrong session.
      */
-    private fun isForActiveInstance(request: Request): Boolean {
+    private fun isForActiveInstance(request: Request): Boolean = isFor(request, instanceProvider.currentInstance)
+
+    private fun isFor(request: Request, instance: Instance?): Boolean {
         val sentFor = request.tag(RequestInstance::class.java) ?: return true
-        return sentFor.instanceKey == instanceProvider.currentInstance?.key
+        return sentFor.instanceKey == instance?.key
     }
 
     @Suppress("ReturnCount")
     @Synchronized
     override fun authenticate(route: Route?, response: Response): Request? {
-        if (!isForActiveInstance(response.request)) return null
+        // Resolved once: the tokens read, the endpoint called and the place the result is saved
+        // all belong to this site, even if the learner switches while the refresh is in flight.
+        val instance = instanceProvider.currentInstance
+        if (!isFor(response.request, instance)) return null
 
-        val accessToken = preferencesManager.accessToken
-        val refreshToken = preferencesManager.refreshToken
+        val accessToken = preferencesManager.accessToken(instance?.key)
+        val refreshToken = preferencesManager.refreshToken(instance?.key)
 
         if (refreshToken.isEmpty()) return null
 
@@ -90,7 +98,7 @@ class OauthRefreshTokenAuthenticator(
 
         val retry = when (errorCode) {
             TOKEN_EXPIRED_ERROR_MESSAGE, JWT_TOKEN_EXPIRED -> {
-                handleTokenExpired(response, refreshToken, accessToken)
+                handleTokenExpired(response, refreshToken, accessToken, instance)
             }
 
             TOKEN_NONEXISTENT_ERROR_MESSAGE, TOKEN_INVALID_GRANT_ERROR_MESSAGE, JWT_INVALID_TOKEN -> {
@@ -114,9 +122,14 @@ class OauthRefreshTokenAuthenticator(
     }
 
     // Helper function for handling token expiration logic
-    private fun handleTokenExpired(response: Response, refreshToken: String, accessToken: String): Request? {
+    private fun handleTokenExpired(
+        response: Response,
+        refreshToken: String,
+        accessToken: String,
+        instance: Instance?,
+    ): Request? {
         return try {
-            val newAuth = refreshAccessToken(refreshToken)
+            val newAuth = refreshAccessToken(refreshToken, instance)
             if (newAuth != null) {
                 response.request.newBuilder()
                     .header(
@@ -125,7 +138,7 @@ class OauthRefreshTokenAuthenticator(
                     )
                     .build()
             } else {
-                val actualToken = preferencesManager.accessToken
+                val actualToken = preferencesManager.accessToken(instance?.key)
                 if (actualToken != accessToken) {
                     response.request.newBuilder()
                         .header(
@@ -165,37 +178,35 @@ class OauthRefreshTokenAuthenticator(
         return time >= preferencesManager.accessTokenExpiresAt
     }
 
-    private fun canRequestTokenRefresh(): Boolean {
-        return TimeUtils.getCurrentTime() - lastTokenRefreshRequestTime >
-                REFRESH_TOKEN_INTERVAL_MINIMUM
+    private fun canRequestTokenRefresh(instance: Instance?): Boolean {
+        val last = lastTokenRefreshRequestTimes[instance?.key.orEmpty()] ?: 0L
+        return TimeUtils.getCurrentTime() - last > REFRESH_TOKEN_INTERVAL_MINIMUM
     }
 
     @Throws(IOException::class)
-    private fun refreshAccessToken(refreshToken: String): AuthResponse? {
+    private fun refreshAccessToken(refreshToken: String, instance: Instance?): AuthResponse? {
         var authResponse: AuthResponse? = null
-        if (canRequestTokenRefresh()) {
-            val instance = instanceProvider.currentInstance
-            val response = authApi().refreshAccessToken(
+        if (canRequestTokenRefresh(instance)) {
+            val response = authApi(instance).refreshAccessToken(
                 ApiConstants.TOKEN_TYPE_REFRESH,
                 instance?.oAuthClientId ?: config.getOAuthClientId(),
                 refreshToken,
                 config.getAccessTokenType()
             ).execute()
             authResponse = response.body()?.mapToDomain()
-            // The learner may have switched sites while the refresh was in flight; these tokens
-            // belong to the site that issued them, not to the one selected now.
-            if (instance?.key != instanceProvider.currentInstance?.key) return null
             if (response.isSuccessful && authResponse != null) {
                 val newAccessToken = authResponse.accessToken ?: ""
                 val newRefreshToken = authResponse.refreshToken ?: ""
                 val newExpireTime = authResponse.getTokenExpiryTime()
 
                 if (newAccessToken.isNotEmpty() && newRefreshToken.isNotEmpty()) {
-                    preferencesManager.accessToken = newAccessToken
-                    preferencesManager.refreshToken = newRefreshToken
-                    preferencesManager.accessTokenExpiresAt = newExpireTime
-                    lastTokenRefreshRequestTime = TimeUtils.getCurrentTime()
+                    // Saved for the site that issued them even if the learner switched away while
+                    // the refresh was in flight: the server has already rotated the refresh token,
+                    // so dropping these would sign that site out.
+                    preferencesManager.saveTokens(instance?.key, newAccessToken, newRefreshToken, newExpireTime)
+                    lastTokenRefreshRequestTimes[instance?.key.orEmpty()] = TimeUtils.getCurrentTime()
                 }
+                if (instance?.key != instanceProvider.currentInstance?.key) return null
             } else if (response.code() == 400) {
                 // another refresh already in progress
                 Thread.sleep(REFRESH_TOKEN_THREAD_SLEEP)

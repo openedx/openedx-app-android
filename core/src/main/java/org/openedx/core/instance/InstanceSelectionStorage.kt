@@ -10,7 +10,9 @@ interface InstanceSelectionStorage {
     var selectedInstanceKey: String?
 }
 
-class SharedPrefsInstanceSelectionStorage(context: Context) : InstanceSelectionStorage {
+class SharedPrefsInstanceSelectionStorage(context: Context) :
+    InstanceSelectionStorage,
+    LegacyNamespaceOwnerStorage {
 
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -22,8 +24,15 @@ class SharedPrefsInstanceSelectionStorage(context: Context) : InstanceSelectionS
             if (value == null) remove(KEY_SELECTED_INSTANCE) else putString(KEY_SELECTED_INSTANCE, value)
         }
 
+    override var legacyOwnerInstanceKey: String?
+        get() = prefs.getString(KEY_LEGACY_OWNER, null)
+        set(value) = prefs.edit(commit = true) {
+            if (value == null) remove(KEY_LEGACY_OWNER) else putString(KEY_LEGACY_OWNER, value)
+        }
+
     private companion object {
         const val PREFS_NAME = "openedx_instance_store"
         const val KEY_SELECTED_INSTANCE = "selected_instance_key"
+        const val KEY_LEGACY_OWNER = "legacy_storage_owner_instance_key"
     }
 }
