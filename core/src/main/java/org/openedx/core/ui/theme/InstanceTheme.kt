@@ -27,14 +27,15 @@ data class InstanceTheme(
     /**
      * The default palette with this instance's colors layered on top. Only the fields the
      * instance sets change; everything else keeps the compiled value. A dark override falls
-     * back to the light one for the same field.
+     * back to the light one for the same field. A field set only for dark mode changes dark
+     * mode alone: light mode keeps the compiled value.
      */
     fun applyTo(base: AppColors, isDark: Boolean): AppColors {
         val modeAccent = if (isDark) dark[ACCENT_COLOR] ?: light[ACCENT_COLOR] else light[ACCENT_COLOR]
         var colors = (modeAccent ?: accentColorHex)?.toColorOrNull()?.let(base::withAccent) ?: base
-        light.forEach { (field, lightHex) ->
+        (light.keys + dark.keys).forEach { field ->
             if (field == ACCENT_COLOR) return@forEach
-            val hex = if (isDark) dark[field] ?: lightHex else lightHex
+            val hex = (if (isDark) dark[field] ?: light[field] else light[field]) ?: return@forEach
             val color = hex.toColorOrNull() ?: return@forEach
             colors = paletteFields[field]?.invoke(colors, color) ?: colors
         }
