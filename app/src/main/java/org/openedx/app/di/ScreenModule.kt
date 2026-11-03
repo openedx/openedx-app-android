@@ -269,7 +269,7 @@ val screenModule = module {
     factory { CalendarRepository(get(), get(), get()) }
     factory { CalendarInteractor(get()) }
 
-    single { CourseRepository(get(), get(), get(), get(), get()) }
+    single { CourseRepository(get(), get(), get(), get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
     single<org.openedx.core.domain.interactor.CourseInteractor> { get<CourseInteractor>() }
 

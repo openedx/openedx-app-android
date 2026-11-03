@@ -7,6 +7,7 @@ import androidx.work.WorkManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.openedx.core.instance.StorageNamespaceProvider
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
@@ -17,7 +18,8 @@ import java.io.File
 class DownloadWorkerController(
     context: Context,
     private val downloadDao: DownloadDao,
-    private val fileDownloader: FileDownloader
+    private val fileDownloader: FileDownloader,
+    private val namespaces: StorageNamespaceProvider,
 ) {
 
     private val workManager = WorkManager.getInstance(context)
@@ -34,6 +36,7 @@ class DownloadWorkerController(
                     if (!isWorkScheduled(DownloadWorker.WORKER_TAG)) {
                         val request = OneTimeWorkRequestBuilder<DownloadWorker>()
                             .addTag(DownloadWorker.WORKER_TAG)
+                            .setInputData(DownloadWorker.inputData(namespaces.current))
                             .build()
                         workManager.enqueue(request)
                     }
