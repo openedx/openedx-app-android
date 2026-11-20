@@ -188,9 +188,8 @@ fun OptionalFields(
                         hyperLinks = linkedText.links,
                         linkTextColor = MaterialTheme.appColors.textHyperLink,
                         linkTextDecoration = TextDecoration.Underline,
-                        action = {
-                            hyperLinkAction?.invoke(linkedText.links, it)
-                        },
+                        // Without a caller action, links open through the default URI handler.
+                        action = hyperLinkAction?.let { onLink -> { link -> onLink(linkedText.links, link) } },
                     )
                 }
 
