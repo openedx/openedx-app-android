@@ -2,10 +2,12 @@ package org.openedx.auth.presentation.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,8 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
-import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
@@ -26,23 +28,28 @@ internal fun CheckboxField(
     onValueChanged: (Boolean) -> Unit
 ) {
     var checkedState by remember { mutableStateOf(defaultValue) }
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    // The whole row is one checkbox control, so TalkBack reads the label with the checked state.
+    Row(
+        modifier = Modifier.toggleable(
+            value = checkedState,
+            role = Role.Checkbox,
+            onValueChange = {
+                checkedState = it
+                onValueChanged(it)
+            }
+        ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Checkbox(
+            modifier = Modifier.minimumInteractiveComponentSize(),
             checked = checkedState,
             colors = CheckboxDefaults.colors(
                 checkedColor = MaterialTheme.appColors.primary,
                 uncheckedColor = MaterialTheme.appColors.textFieldText
             ),
-            onCheckedChange = {
-                checkedState = it
-                onValueChanged(it)
-            }
+            onCheckedChange = null
         )
         Text(
-            modifier = Modifier.noRippleClickable {
-                checkedState = !checkedState
-                onValueChanged(checkedState)
-            },
             text = text,
             style = MaterialTheme.appTypography.bodySmall,
         )
