@@ -47,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.collapse
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -352,6 +353,8 @@ fun InputRegistrationField(
     } else {
         registrationField.instructions
     }
+    // The same condition that shows the error text also marks the field itself as invalid.
+    val isInvalid = isErrorShown && registrationField.errorInstructions.isNotEmpty()
     val trailingIcon: @Composable (() -> Unit)? =
         if (registrationField.type == RegistrationFieldType.PASSWORD) {
             {
@@ -392,7 +395,12 @@ fun InputRegistrationField(
                 focusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                 cursorColor = MaterialTheme.appColors.textFieldText,
+                errorTextColor = MaterialTheme.appColors.textFieldText,
+                errorContainerColor = MaterialTheme.appColors.textFieldBackground,
+                errorBorderColor = MaterialTheme.appColors.error,
+                errorCursorColor = MaterialTheme.appColors.textFieldText,
             ),
+            isError = isInvalid,
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
@@ -415,7 +423,10 @@ fun InputRegistrationField(
             singleLine = isSingleLine,
             modifier = modifier
                 .testTag("tf_${registrationField.name.tagId()}")
-                .semantics { contentDescription = registrationField.label }
+                .semantics {
+                    contentDescription = registrationField.label
+                    if (isInvalid) error(registrationField.errorInstructions)
+                }
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
