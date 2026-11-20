@@ -289,7 +289,9 @@ fun LoginTextField(
         },
         textStyle = MaterialTheme.appTypography.bodyMedium,
         singleLine = true,
-        modifier = modifier.testTag("tf_email"),
+        modifier = modifier
+            .testTag("tf_email")
+            .semantics { contentDescription = title },
         isError = isError
     )
     if (isError) {
@@ -406,7 +408,9 @@ fun InputRegistrationField(
             trailingIcon = trailingIcon,
             textStyle = MaterialTheme.appTypography.bodyMedium,
             singleLine = isSingleLine,
-            modifier = modifier.testTag("tf_${registrationField.name.tagId()}")
+            modifier = modifier
+                .testTag("tf_${registrationField.name.tagId()}")
+                .semantics { contentDescription = registrationField.label }
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
