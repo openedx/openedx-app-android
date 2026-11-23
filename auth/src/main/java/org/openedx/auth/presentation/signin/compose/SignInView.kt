@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.ImeAction
@@ -418,13 +419,14 @@ private fun PasswordTextField(
     }
     var isPasswordVisible by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+    val passwordLabel = stringResource(id = coreR.string.core_password)
 
     Text(
         modifier =
             Modifier
                 .testTag("txt_password_label")
                 .fillMaxWidth(),
-        text = stringResource(id = coreR.string.core_password),
+        text = passwordLabel,
         color = MaterialTheme.appColors.textPrimary,
         style = MaterialTheme.appTypography.labelLarge,
     )
@@ -432,7 +434,9 @@ private fun PasswordTextField(
     Spacer(modifier = Modifier.height(8.dp))
 
     OutlinedTextField(
-        modifier = modifier.testTag("tf_password"),
+        modifier = modifier
+            .testTag("tf_password")
+            .semantics { contentDescription = passwordLabel },
         value = passwordTextFieldValue,
         onValueChange = {
             passwordTextFieldValue = it
@@ -458,7 +462,7 @@ private fun PasswordTextField(
         trailingIcon = {
             PasswordVisibilityIcon(
                 isPasswordVisible = isPasswordVisible,
-                onClick = { isPasswordVisible = !isPasswordVisible },
+                onCheckedChange = { isPasswordVisible = it },
             )
         },
         keyboardOptions =

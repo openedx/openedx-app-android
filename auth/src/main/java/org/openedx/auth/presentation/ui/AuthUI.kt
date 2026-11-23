@@ -12,17 +12,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusDirection
@@ -43,6 +44,13 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.collapse
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.error
+import androidx.compose.ui.semantics.expand
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -180,9 +188,8 @@ fun OptionalFields(
                         hyperLinks = linkedText.links,
                         linkTextColor = MaterialTheme.appColors.textHyperLink,
                         linkTextDecoration = TextDecoration.Underline,
-                        action = {
-                            hyperLinkAction?.invoke(linkedText.links, it)
-                        },
+                        // Without a caller action, links open through the default URI handler.
+                        action = hyperLinkAction?.let { onLink -> { link -> onLink(linkedText.links, link) } },
                     )
                 }
 
@@ -287,7 +294,9 @@ fun LoginTextField(
         },
         textStyle = MaterialTheme.appTypography.bodyMedium,
         singleLine = true,
-        modifier = modifier.testTag("tf_email"),
+        modifier = modifier
+            .testTag("tf_email")
+            .semantics { contentDescription = title },
         isError = isError
     )
     if (isError) {
@@ -343,12 +352,14 @@ fun InputRegistrationField(
     } else {
         registrationField.instructions
     }
+    // The same condition that shows the error text also marks the field itself as invalid.
+    val isInvalid = isErrorShown && registrationField.errorInstructions.isNotEmpty()
     val trailingIcon: @Composable (() -> Unit)? =
         if (registrationField.type == RegistrationFieldType.PASSWORD) {
             {
                 PasswordVisibilityIcon(
                     isPasswordVisible = isPasswordVisible,
-                    onClick = { isPasswordVisible = !isPasswordVisible }
+                    onCheckedChange = { isPasswordVisible = it }
                 )
             }
         } else {
@@ -383,7 +394,12 @@ fun InputRegistrationField(
                 focusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                 cursorColor = MaterialTheme.appColors.textFieldText,
+                errorTextColor = MaterialTheme.appColors.textFieldText,
+                errorContainerColor = MaterialTheme.appColors.textFieldBackground,
+                errorBorderColor = MaterialTheme.appColors.error,
+                errorCursorColor = MaterialTheme.appColors.textFieldText,
             ),
+            isError = isInvalid,
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
@@ -404,7 +420,12 @@ fun InputRegistrationField(
             trailingIcon = trailingIcon,
             textStyle = MaterialTheme.appTypography.bodyMedium,
             singleLine = isSingleLine,
-            modifier = modifier.testTag("tf_${registrationField.name.tagId()}")
+            modifier = modifier
+                .testTag("tf_${registrationField.name.tagId()}")
+                .semantics {
+                    contentDescription = registrationField.label
+                    if (isInvalid) error(registrationField.errorInstructions)
+                }
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
@@ -523,22 +544,39 @@ fun ExpandableText(
         tween(durationMillis = 300)
     }, label = "") {
         it
-        if (!isExpanded) 0f else 90f
+        if (!isExpanded) 0f else 180f
     }
     val text = if (isExpanded) {
         stringResource(id = R.string.auth_hide_optional_fields)
     } else {
         stringResource(id = R.string.auth_show_optional_fields)
     }
-    val icon = Icons.AutoMirrored.Filled.KeyboardArrowRight
 
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .heightIn(min = 48.dp)
             .noRippleClickable {
                 onClick(isExpanded)
+            }
+            // Present the row to TalkBack as one button that announces whether the optional fields
+            // are collapsed or expanded, and toggles them.
+            .semantics(mergeDescendants = true) {
+                role = Role.Button
+                if (isExpanded) {
+                    collapse {
+                        onClick(isExpanded)
+                        true
+                    }
+                } else {
+                    expand {
+                        onClick(isExpanded)
+                        true
+                    }
+                }
             },
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             modifier = Modifier,
@@ -546,11 +584,12 @@ fun ExpandableText(
             style = MaterialTheme.appTypography.bodyLarge,
             color = MaterialTheme.appColors.primary
         )
+        // Points down when collapsed and up when expanded.
         Icon(
             modifier = Modifier.rotate(arrowRotationDegree),
-            imageVector = icon,
+            imageVector = Icons.Filled.ExpandMore,
             contentDescription = null,
-            tint = MaterialTheme.appColors.background
+            tint = MaterialTheme.appColors.primary
         )
     }
 }
@@ -558,18 +597,25 @@ fun ExpandableText(
 @Composable
 internal fun PasswordVisibilityIcon(
     isPasswordVisible: Boolean,
-    onClick: () -> Unit,
+    onCheckedChange: (Boolean) -> Unit,
 ) {
-    val (image, description) = if (isPasswordVisible) {
-        Icons.Filled.VisibilityOff to stringResource(R.string.auth_accessibility_hide_password)
+    val image = if (isPasswordVisible) {
+        Icons.Filled.VisibilityOff
     } else {
-        Icons.Filled.Visibility to stringResource(R.string.auth_accessibility_show_password)
+        Icons.Filled.Visibility
     }
 
-    IconButton(onClick = onClick) {
+    val description = stringResource(R.string.auth_accessibility_show_password)
+
+    // Set the name on the toggle itself, so TalkBack reads the name, role and checked state together.
+    IconToggleButton(
+        checked = isPasswordVisible,
+        onCheckedChange = onCheckedChange,
+        modifier = Modifier.semantics { contentDescription = description },
+    ) {
         Icon(
             imageVector = image,
-            contentDescription = description,
+            contentDescription = null,
             tint = MaterialTheme.appColors.onSurface
         )
     }

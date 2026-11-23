@@ -5,7 +5,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -78,15 +77,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -453,23 +452,33 @@ fun HyperlinkText(
 
         for ((key, value) in hyperLinks) {
             val startIndex = fullText.indexOf(key)
+            if (startIndex < 0) continue
             val endIndex = startIndex + key.length
-            addStyle(
+            val linkStyles = TextLinkStyles(
                 style = SpanStyle(
                     color = linkTextColor,
                     fontSize = fontSize,
                     fontWeight = linkTextFontWeight,
                     textDecoration = linkTextDecoration,
                 ),
-                start = startIndex,
-                end = endIndex
+                // Show which link has keyboard focus by reversing its colors.
+                focusedStyle = SpanStyle(
+                    color = MaterialTheme.appColors.background,
+                    background = linkTextColor,
+                    textDecoration = TextDecoration.Underline,
+                ),
             )
-            addStringAnnotation(
-                tag = "URL",
-                annotation = value,
-                start = startIndex,
-                end = endIndex
-            )
+            // Compose link annotations make each link reachable by keyboard and by accessibility
+            // services, and a tap opens the link under the tapped character, including on wrapped lines.
+            if (action != null) {
+                addLink(
+                    LinkAnnotation.Clickable(tag = value, styles = linkStyles) { action(value) },
+                    startIndex,
+                    endIndex
+                )
+            } else {
+                addLink(LinkAnnotation.Url(url = value, styles = linkStyles), startIndex, endIndex)
+            }
         }
         addStyle(
             style = SpanStyle(
@@ -480,20 +489,9 @@ fun HyperlinkText(
         )
     }
 
-    val uriHandler = LocalUriHandler.current
-
     BasicText(
         text = annotatedString,
-        modifier = modifier.pointerInput(Unit) {
-            detectTapGestures { offset ->
-                val position = offset.x.toInt()
-                annotatedString.getStringAnnotations("URL", position, position)
-                    .firstOrNull()?.let { stringAnnotation ->
-                        action?.invoke(stringAnnotation.item)
-                            ?: uriHandler.openUri(stringAnnotation.item)
-                    }
-            }
-        },
+        modifier = modifier,
         style = textStyle
     )
 }
